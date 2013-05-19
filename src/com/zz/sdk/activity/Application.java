@@ -46,8 +46,10 @@ public class Application {
 	protected static void autoLoginUser(Context ctx) {
 		SdkUserTable t = SdkUserTable.getInstance(ctx);
 		SdkUser sdkUser = t.getSdkUserByAutoLogin();
-		loginName = sdkUser.loginName;
-		password = sdkUser.password;
+		if (sdkUser != null) {
+			loginName = sdkUser.loginName;
+			password = sdkUser.password;
+		}
 		if (loginName == null || "".equals(loginName)) {
 			SdkUser[] sdkUsers = t.getAllSdkUsers();
 			if (sdkUsers != null && sdkUsers.length > 0) {
