@@ -14,6 +14,9 @@ import org.json.JSONObject;
  */
 public class PayChannel implements JsonParseInterface {
 
+	/** 默认：价格列表，以「分」为单位 */
+	private static final String DEF_PRICE_LIST = "5000,10000,50000,500000";
+
 	public String channelId; // 支付渠道ID
 	public String channelName;// 支付渠道名称
 	public String desc; // 支付渠道描述
@@ -21,8 +24,8 @@ public class PayChannel implements JsonParseInterface {
 	public int type;// 渠道类型 0支付宝|1银联|2财付通|3移动 |4联通|5话费
 	public String priceList; // 面额列表,逗号隔开
 
-	private final String CHANNEL_NAME[] = new String[] { "支付宝", "银联", "财付通",
-			"移动", "联通", "话费", };
+	private final String CHANNEL_NAME[] = new String[] { "支付宝", "银联卡", "财付通",
+			"移动充值卡", "联通充值卡", "话费", };
 
 	// 支付方式
 	public static Set<Integer> getPayType() {
@@ -67,9 +70,12 @@ public class PayChannel implements JsonParseInterface {
 			type = json.isNull("type") ? -1 : json.getInt("type");
 			priceList = json.isNull("priceList") ? null : json
 					.getString("priceList");
-			
+
 			if (channelName == null && (type >= 0 && type < 6)) {
 				channelName = CHANNEL_NAME[type];
+			}
+			if (priceList == null) {
+				priceList = DEF_PRICE_LIST;
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();

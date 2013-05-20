@@ -236,7 +236,7 @@ public class ChargeDetailLayoutForCard extends ChargeAbstractLayout {
 		TextView dec = new TextView(activity);
 		lp = new LayoutParams(-2,-2);
 		lp.topMargin = DimensionUtil.dip2px(activity, 10);
-		dec.setText(mPayChannel.desc);
+		dec.setText(Html.fromHtml(mPayChannel.desc));
 		dec.setTextColor(0xffcba16f);
 		dec.setTextSize(14);
 		accountLayout.addView(dec, lp);
