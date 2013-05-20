@@ -66,7 +66,7 @@ public class MainActivity extends Activity implements OnClickListener {
 					SDKManager.WHAT_LOGIN_CALLBACK_DEFAULT);
 			break;
 		case 2:
-			mSDKManager.showPaymentView("1", "douwan001", "007",
+			mSDKManager.showPaymentView("M1001", "乐活测试服务器", "007",
 					"战士001","厂商自定义参数（长度限制250个字符）");
 			break;
 		}

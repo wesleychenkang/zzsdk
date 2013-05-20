@@ -53,6 +53,14 @@
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             android:windowSoftInputMode="adjustPan" >
         </activity>
+        <activity
+            android:name="com.zz.sdk.activity.ChargeActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" >
+        </activity>
 
         <meta-data
             android:name="PROJECT_ID"

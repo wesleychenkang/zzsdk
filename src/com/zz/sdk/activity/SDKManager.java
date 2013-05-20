@@ -136,7 +136,7 @@ public class SDKManager {
 			return;
 		}
 
-		//ChargeActivity.start(mContext, gameServerID, serverName, roleId,
-		//		gameRole, callBackInfo);
+		ChargeActivity.start(mContext, gameServerID, serverName, roleId,
+				gameRole, callBackInfo);
 	}
 }

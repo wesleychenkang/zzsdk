@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Pair;
 
 
+import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.SdkUser;
 import com.zz.sdk.entity.SdkUserTable;
 import com.zz.sdk.util.Utils;
@@ -23,7 +24,7 @@ public class Application {
 	/**
 	 * 支付渠道信息
 	 */
-	//public static ChannelMessage[] mChannelMessages;
+	public static PayChannel[] mPayChannels;
 	
 	/**
 	 * 是否登录

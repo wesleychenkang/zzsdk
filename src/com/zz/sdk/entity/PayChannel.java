@@ -13,7 +13,7 @@ import org.json.JSONObject;
  */
 public class PayChannel implements JsonParseInterface {
 
-	public int channelId; //支付渠道ID
+	public String channelId; //支付渠道ID
 	public String channelName;//支付渠道名称
 	public String desc; //支付渠道描述
 	public String notifyUrl;
@@ -53,7 +53,7 @@ public class PayChannel implements JsonParseInterface {
 		if (json == null)
 			return;
 		try {
-			channelId = json.isNull("channelId") ? -1 : json.getInt("channelId");
+			channelId = json.isNull("channelId") ? "-1" : json.getString("channelId");
 			channelName = json.isNull("channelName") ? null : json.getString("channelName");
 			desc = json.isNull("desc") ? null : json.getString("desc");
 			notifyUrl = json.isNull("notifyUrl") ? null : json.getString("notifyUrl");
