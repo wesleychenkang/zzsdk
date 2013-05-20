@@ -36,5 +36,6 @@ public final class Constants {
 	
 	public static final String LOG_REQ = "http://iosrs.tisgame.com/srv/log.lg";
 	
-	
+	/** 获取支付列表 */
+	public static final String GPL_REQ = "http://iosrs.tisgame.com/srv/gpl.do";
 }

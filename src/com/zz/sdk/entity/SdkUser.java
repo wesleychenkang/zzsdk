@@ -96,5 +96,12 @@ public class SdkUser implements Serializable, JsonParseInterface {
 		}
 		
 	}
+
+
+	@Override
+	public String getShortName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }

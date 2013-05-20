@@ -51,4 +51,10 @@ public class PayResult implements JsonParseInterface {
 				+ ", statusCode=" + statusCode + ", resultCode=" +resultCode + ", desc=" + desc + ", attach="
 				+ attach + "]";
 	}
+
+	@Override
+	public String getShortName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

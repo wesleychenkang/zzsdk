@@ -82,8 +82,31 @@ public class JsonUtil {
 			String jsonString) {
 		if (jsonString == null)
 			return null;
-		
+		try {
+			JSONObject jo = new JSONObject(jsonString);
+			JsonParseInterface ji = (JsonParseInterface) clz.newInstance();
+			if (!jo.isNull(ji.getShortName())) {
+				JSONArray ja = jo.getJSONArray(ji.getShortName());
+				if (ja != null) {
+					JsonParseInterface[] interfaces = (JsonParseInterface[]) Array
+							.newInstance(clz, ja.length());
+					for (int i = 0; i < ja.length(); i++) {
+						ji = (JsonParseInterface) clz.newInstance();
+						ji.parseJson(ja.getJSONObject(i));
+						interfaces[i] = ji;
+					}
+					return interfaces;
+				}
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
+
 
 }

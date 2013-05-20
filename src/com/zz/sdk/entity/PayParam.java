@@ -82,4 +82,9 @@ public class PayParam implements Serializable, JsonParseInterface {
 			e.printStackTrace();
 		}
 	}
+
+	@Override
+	public String getShortName() {
+		return "c";
+	}
 }

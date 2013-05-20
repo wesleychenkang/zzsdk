@@ -11,4 +11,5 @@ import org.json.JSONObject;
 public interface JsonParseInterface {
 	JSONObject buildJson();
 	void parseJson(JSONObject json);
+	String getShortName();
 }

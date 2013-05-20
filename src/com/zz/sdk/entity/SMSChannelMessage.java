@@ -83,4 +83,10 @@ public class SMSChannelMessage implements JsonParseInterface{
 		}
 		
 	}
+
+	@Override
+	public String getShortName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

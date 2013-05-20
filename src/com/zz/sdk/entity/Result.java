@@ -25,6 +25,10 @@ public class Result implements JsonParseInterface {
 	public String smsChannels; //通道列表
 	
 	public String smsMoGap; //上行间隔
+
+	/** 支付服务描述／帮助 */
+	public String payServerDesc;
+	
 	@Override
 	public String toString() {
 		return "Result [codes=" + codes + "&username=" +username + 
@@ -60,9 +64,15 @@ public class Result implements JsonParseInterface {
 			orderNumber = json.isNull("orderNumber") ? null : json.getString("orderNumber");
 			smsChannels = json.isNull("smsChannels") ? null : json.getString("smsChannels");
 			smsMoGap = json.isNull("smsMoGap") ? null : json.getString("smsMoGap");
+			payServerDesc=json.isNull("payServerDesc")?null:json.getString("payServerDesc");
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+	}
+	@Override
+	public String getShortName() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

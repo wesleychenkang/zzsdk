@@ -258,4 +258,9 @@ public class DeviceProperties implements Serializable, JsonParseInterface {
 			e.printStackTrace();
 		}
 	}
+
+	@Override
+	public String getShortName() {
+		return "a";
+	}
 }

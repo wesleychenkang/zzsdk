@@ -822,9 +822,8 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		protected PayChannel[] doInBackground(Void... params) {
 
 			Logger.d("获取列表Task！");
-			return null;
-			//return GetDataImpl.getInstance(ChargeActivity.this).getPaymentList(
-			//		payParam);
+			return GetDataImpl.getInstance(ChargeActivity.this).getPaymentList(
+					payParam);
 		}
 
 		@Override

@@ -8,18 +8,23 @@ import org.json.JSONObject;
 
 /**
  * 支付渠道
+ * 
  * @author roger
- *
+ * 
  */
 public class PayChannel implements JsonParseInterface {
 
-	public String channelId; //支付渠道ID
-	public String channelName;//支付渠道名称
-	public String desc; //支付渠道描述
+	public String channelId; // 支付渠道ID
+	public String channelName;// 支付渠道名称
+	public String desc; // 支付渠道描述
 	public String notifyUrl;
-	public int type;//渠道类型  0支付宝|1银联|2财付通|3移动 |4联通|5话费
-	public String priceList; //面额列表,逗号隔开
-	//支付方式
+	public int type;// 渠道类型 0支付宝|1银联|2财付通|3移动 |4联通|5话费
+	public String priceList; // 面额列表,逗号隔开
+
+	private final String CHANNEL_NAME[] = new String[] { "支付宝", "银联", "财付通",
+			"移动", "联通", "话费", };
+
+	// 支付方式
 	public static Set<Integer> getPayType() {
 		Set<Integer> payTypes = new HashSet<Integer>();
 		payTypes.add(0); // 支付宝
@@ -53,12 +58,19 @@ public class PayChannel implements JsonParseInterface {
 		if (json == null)
 			return;
 		try {
-			channelId = json.isNull("channelId") ? "-1" : json.getString("channelId");
-			channelName = json.isNull("channelName") ? null : json.getString("channelName");
+			channelId = json.isNull("id") ? "-1" : json.getString("id");
+			channelName = json.isNull("channelName") ? null : json
+					.getString("channelName");
 			desc = json.isNull("desc") ? null : json.getString("desc");
-			notifyUrl = json.isNull("notifyUrl") ? null : json.getString("notifyUrl");
+			notifyUrl = json.isNull("notifyUrl") ? null : json
+					.getString("notifyUrl");
 			type = json.isNull("type") ? -1 : json.getInt("type");
-			priceList = json.isNull("priceList") ? null : json.getString("priceList");
+			priceList = json.isNull("priceList") ? null : json
+					.getString("priceList");
+			
+			if (channelName == null && (type >= 0 && type < 6)) {
+				channelName = CHANNEL_NAME[type];
+			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -66,11 +78,13 @@ public class PayChannel implements JsonParseInterface {
 
 	@Override
 	public String toString() {
-		return "PayChannel [" +  "channelName="
-				+ channelName + ", desc=" + desc + ", notifyUrl=" + notifyUrl
-				+ ", type="+ type + "]";
+		return "PayChannel [" + "channelName=" + channelName + ", desc=" + desc
+				+ ", notifyUrl=" + notifyUrl + ", type=" + type + "]";
 	}
 
-	
+	@Override
+	public String getShortName() {
+		return "paies";
+	}
 
 }

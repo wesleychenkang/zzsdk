@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -18,13 +19,16 @@ import org.apache.http.client.methods.HttpPost;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.Manifest.permission;
 import android.content.Context;
+import android.content.pm.PackageManager;
 
 import com.zz.sdk.activity.Application;
 import com.zz.sdk.activity.Constants;
+import com.zz.sdk.entity.DeviceProperties;
+import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.Result;
-import com.zz.sdk.entity.DeviceProperties;
 import com.zz.sdk.entity.SdkUser;
 import com.zz.sdk.entity.SdkUserTable;
 
@@ -466,6 +470,100 @@ public class GetDataImpl {
 			return null;
 		Result result = (Result) JsonUtil.parseJSonObject(Result.class, json);
 		return result;
+	}
+	
+	
+
+	/**
+	 * 获取支付列表
+	 * 
+	 * @return
+	 */
+	public PayChannel[] getPaymentList(PayParam charge) {
+		
+		HashMap<String, String> params = new HashMap<String, String>();
+		params.put("requestId", ""/* + RequestId.ID_PAYMENT_LIST*/);
+		params.put("serverId", charge.serverId);
+		String url = Constants.GPL_REQ + appendUrl(params);
+
+//		JSONObject jsonObject = getSessionAndDevicesPropertiesJson();
+//		try {
+//			jsonObject.put(charge.getShortName(), charge.buildJson());
+//		} catch (JSONException e) {
+//			e.printStackTrace();
+//		}
+
+		InputStream in = doRequest(url, "");
+		if (in == null)
+			return null;
+
+		String json = parseJsonData(in);
+		Logger.d("payment list josn ----> " + json);
+		if (json == null)
+			return null;
+		Result result = (Result) JsonUtil.parseJSonObject(Result.class, json);
+		PayChannel[] channelMessages = (PayChannel[]) JsonUtil
+				.parseJSonArray(PayChannel.class, json);
+
+		if (null == result || !"0".equals(result.codes) || channelMessages == null) {
+			return null;
+		}
+
+//		parseTelAndQQ(result.attach1);
+
+		parseTopic(result.payServerDesc);
+
+		Set<Integer> payTypes = PayChannel.getPayType();
+
+		ArrayList<PayChannel> payLists = new ArrayList<PayChannel>();
+		boolean hasSmsPermission = false;
+
+		if (payTypes.contains(6)) {
+			Logger.d("有短信充值方式");
+
+			try {
+				if (PackageManager.PERMISSION_GRANTED == mContext
+						.getPackageManager().checkPermission(
+								permission.SEND_SMS, mContext.getPackageName())) {
+					hasSmsPermission = true;
+				} else {
+					hasSmsPermission = false;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		for (PayChannel cm : channelMessages) {
+			if (payTypes.contains(cm.type)) {
+
+				if (cm.type == 6 && !hasSmsPermission) {
+					continue;
+				}
+				payLists.add(cm);
+			}
+		}
+
+		channelMessages = payLists.toArray(new PayChannel[payLists.size()]);
+		// 设置全局静态数据
+		Application.mPayChannels = channelMessages;
+		return channelMessages;
+	}
+
+	// 充值/活动说明
+	private static void parseTopic(String str) {
+
+		if (null != str && !"".equals(str)) {
+//			try {
+//				JSONObject json = new JSONObject(str);
+//				Application.topicTitle = json.isNull("a") ? null : json
+//						.getString("a").trim();
+//				Application.topicDes = json.isNull("b") ? null : json
+//						.getString("b").trim();
+//			} catch (JSONException e) {
+//			}
+			Application.topicDes = str;
+		}
 	}
 
 }
