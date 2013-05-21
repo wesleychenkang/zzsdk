@@ -56,16 +56,16 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 
 	// 预定义充值方式的编号
 	// 卡类
-	public static final int INDEX_CHARGE_CARD = 1;
-	// 支付宝
-	public static final int INDEX_CHARGE_ZHIFUBAO = 2;
-	// 财付通
-	public static final int INDEX_CHARGE_CAIFUTONG = 3;
-	// 银联
-	public static final int INDEX_CHARGE_UNIONPAY = 4;
-
-	// 短信
-	private static final int INDEX_CHARGE_SMS_GET_CHENNEL = 6;
+//	public static final int INDEX_CHARGE_CARD = 1;
+//	// 支付宝
+//	public static final int INDEX_CHARGE_ZHIFUBAO = 2;
+//	// 财付通
+//	public static final int INDEX_CHARGE_CAIFUTONG = 3;
+//	// 银联
+//	public static final int INDEX_CHARGE_UNIONPAY = 4;
+//
+//	// 短信
+//	private static final int INDEX_CHARGE_SMS_GET_CHENNEL = 6;
 	// 短信第二步请求
 	private static final int INDEX_CHARGE_SMSCHARGE_FEEDBACK = 100;
 
@@ -155,9 +155,13 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 					+ mPayChannel.channelName);
 			switch (mPayChannel.type) {
 			// 支付宝 / 财付通/ 银联 /手游币
-			case INDEX_CHARGE_ZHIFUBAO:
-			case INDEX_CHARGE_CAIFUTONG:
-			case INDEX_CHARGE_UNIONPAY:
+			case PayChannel.PAY_TYPE_ALIPAY:
+			case PayChannel.PAY_TYPE_TENPAY:
+				// TODO: 这两个需要转 web 
+			case PayChannel.PAY_TYPE_UNMPAY:
+//			case INDEX_CHARGE_ZHIFUBAO:
+//			case INDEX_CHARGE_CAIFUTONG:
+//			case INDEX_CHARGE_UNIONPAY:
 				// case 21:
 				mDetailChargeLayout = new ChargeDetailLayout(
 						ChargeActivity.this, mPayChannel, mPayParam);
@@ -168,7 +172,9 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 
 			// case INDEX_CHARGE_MOBILE:
 			// 卡类
-			case INDEX_CHARGE_CARD:
+			case PayChannel.PAY_TYPE_YEEPAY_LT:
+			case PayChannel.PAY_TYPE_YEEPAY_YD:
+//			case INDEX_CHARGE_CARD:
 
 				mCardChargeLayout = new ChargeDetailLayoutForCard(
 						ChargeActivity.this, mPayChannel, mPayParam);
@@ -177,7 +183,8 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 				break;
 
 			// 短信
-			case INDEX_CHARGE_SMS_GET_CHENNEL:
+			case PayChannel.PAY_TYPE_KKFUNPAY:
+//			case INDEX_CHARGE_SMS_GET_CHENNEL:
 
 				TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
 				imsi = tm.getSubscriberId();
@@ -251,30 +258,32 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 
 			switch (msg.what) {
 			// 支付宝
-			case INDEX_CHARGE_ZHIFUBAO:
+			case PayChannel.PAY_TYPE_ALIPAY:
 			//	new AlipayImpl(ChargeActivity.this, mResult,
 			//			mPayChannel.channelId).pay();
 				break;
 			// 财付通
-			case INDEX_CHARGE_CAIFUTONG:
+			case PayChannel.PAY_TYPE_TENPAY:
 			//	TenpayImpl tenpay = new TenpayImpl(ChargeActivity.this,
 			//			mPayChannel.channelId, mResult);
 			//	tenpay.pay();
 				break;
 			// 卡类
-			case INDEX_CHARGE_CARD:
+			case PayChannel.PAY_TYPE_YEEPAY_LT:
+			case PayChannel.PAY_TYPE_YEEPAY_YD:
+//			case INDEX_CHARGE_CARD:
 				new CarThread(mResult, mPayChannel.channelId).start();
 				if (null != dialog)
 					dialog.setCancelable(false);
 				break;
 			// 银联
-			case INDEX_CHARGE_UNIONPAY:
+			case PayChannel.PAY_TYPE_UNMPAY:
 				isRetUnionpay = true;
 			//	new UnionpayImpl(ChargeActivity.this, mResult).pay();
 				break;
 			}
 
-			if (msg.what != INDEX_CHARGE_CARD) {
+			if (msg.what != /*INDEX_CHARGE_CARD*/PayChannel.PAY_TYPE_YEEPAY_YD && msg.what!=PayChannel.PAY_TYPE_YEEPAY_LT) {
 				hideDialog();
 			}
 
@@ -469,6 +478,8 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		mPayParam = new PayParam();
 		// 游戏服务器
 		mPayParam.serverId = intent.getStringExtra(EXTRA_SERVERID);
+		mPayParam.loginName = Application.loginName;
+		mPayParam.projectId =  Utils.getProjectId(getBaseContext());
 		// 游戏角色
 		mPayParam.gameRole = intent.getStringExtra(EXTRA_ROLEID);
 		mPayParam.callBackInfo = intent.getStringExtra(EXTRA_CALLBACKINFO);
@@ -618,7 +629,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		//	if (!isMobile_spExist) {
 		//		return;
 		//	}
-			type = INDEX_CHARGE_ZHIFUBAO;
+			type = PayChannel.PAY_TYPE_ALIPAY;
 			break;
 		// 财付通
 		case ChargeDetailLayout.ID_TENPAY:
@@ -642,7 +653,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 						}, "/sdcard/test");
 				return;
 			}*/
-			type = INDEX_CHARGE_CAIFUTONG;
+			type = PayChannel.PAY_TYPE_TENPAY;
 
 			break;
 
@@ -650,7 +661,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		case ChargeDetailLayoutForCard.ID_BTNSUBMIT:
 			if (!mCardChargeLayout.checkNum())
 				return;
-			type = INDEX_CHARGE_CARD;
+			type = /*INDEX_CHARGE_CARD*/PayChannel.PAY_TYPE_YEEPAY_YD;
 			break;
 		// 银联
 		case ChargeDetailLayout.ID_UNICOMPAY:
@@ -658,7 +669,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 				Utils.toastInfo(instance, TOAST_TEXT);
 				return;
 			}
-			type = INDEX_CHARGE_UNIONPAY;
+			type = PayChannel.PAY_TYPE_UNMPAY;
 			break;
 
 		}
@@ -703,7 +714,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			Message message = new Message();
 			message.what = type;
 			message.obj = GetDataImpl.getInstance(ChargeActivity.this).charge(
-					charge);
+					type, charge);
 			handler.sendMessage(message);
 		}
 	}

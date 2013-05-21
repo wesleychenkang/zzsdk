@@ -26,6 +26,7 @@ import android.widget.TextView;
 
 import com.zz.sdk.activity.Constants;
 import com.zz.sdk.activity.SmsSendReceiver;
+import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.Result;
 import com.zz.sdk.entity.SMSChannelMessage;
@@ -156,7 +157,7 @@ public class SMSUtil {
 		new Thread() {
 			public void run() {
 				GetDataImpl instance = GetDataImpl.getInstance(ctx);
-				Result result = instance.charge(payParam);
+				Result result = instance.charge(PayChannel.PAY_TYPE_KKFUNPAY, payParam);
 				Message msg = handler.obtainMessage(what);
 				msg.obj = result;
 				msg.sendToTarget();
@@ -254,7 +255,7 @@ public class SMSUtil {
 		public void run() {
 			GetDataImpl getDataImpl = GetDataImpl.getInstance(ctx);
 			Message msg = handler.obtainMessage(what);
-			Result result = getDataImpl.charge(payParam);
+			Result result = getDataImpl.charge(PayChannel.PAY_TYPE_KKFUNPAY, payParam);
 			Logger.d("result -> " + result);
 			msg.obj = result;
 			msg.sendToTarget();

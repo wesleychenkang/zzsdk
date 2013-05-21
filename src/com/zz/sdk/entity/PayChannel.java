@@ -48,7 +48,7 @@ public class PayChannel implements JsonParseInterface {
 		CHANNEL_NAME[PAY_TYPE_YEEPAY_YD] = "移动充值卡";
 		CHANNEL_NAME[PAY_TYPE_KKFUNPAY] = "话费";
 	};
-
+	
 	/** 支付渠道ID */
 	public String channelId;
 	/** 支付渠道名称，见 {@link #CHANNEL_NAME} */
@@ -107,11 +107,14 @@ public class PayChannel implements JsonParseInterface {
 			priceList = json.isNull("priceList") ? null : json
 					.getString("priceList");
 
-			if (channelName == null && (type >= 0 && type < 6)) {
-				channelName = CHANNEL_NAME[type];
-			}
-			if (priceList == null) {
-				priceList = DEF_PRICE_LIST;
+			// ---- 本地化调整
+			if (type >= 0 && type < _PAY_TYPE_MAX_) {
+				if (channelName == null) {
+					channelName = CHANNEL_NAME[type];
+				}
+				if (priceList == null) {
+					priceList = DEF_PRICE_LIST;
+				}
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();

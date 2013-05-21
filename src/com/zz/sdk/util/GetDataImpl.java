@@ -22,6 +22,7 @@ import org.json.JSONObject;
 import android.Manifest.permission;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Debug;
 
 import com.zz.sdk.activity.Application;
 import com.zz.sdk.activity.Constants;
@@ -443,14 +444,23 @@ public class GetDataImpl {
 	
 	/**
 	 * 
+	 * @param type 
 	 * @param payParam
 	 * @return
 	 */
-	public Result charge(PayParam payParam) {
+	public Result charge(int type, PayParam payParam) {		
+		String action = payParam.getUrl_PayAction(type);
+
+		if (action == null) {
+			Result result1 = new Result();
+			result1.codes = "-1";
+			// 无效支付方式
+			return result1;
+		}
 
 		HashMap<String, String> params = new HashMap<String, String>();
 		params.put("requestId", "");
-		String url = appendUrl(params);
+		String url = /* appendUrl(params) */Constants.URL_SERVER_SRV + action;
 
 		if (Application.loginName == null || !Application.isLogin) {
 			Result result1 = new Result();
