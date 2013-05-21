@@ -518,7 +518,7 @@ public class GetDataImpl {
 		ArrayList<PayChannel> payLists = new ArrayList<PayChannel>();
 		boolean hasSmsPermission = false;
 
-		if (payTypes.contains(6)) {
+		if (payTypes.contains(PayChannel.PAY_TYPE_KKFUNPAY)) {
 			Logger.d("有短信充值方式");
 
 			try {
@@ -537,7 +537,7 @@ public class GetDataImpl {
 		for (PayChannel cm : channelMessages) {
 			if (payTypes.contains(cm.type)) {
 
-				if (cm.type == 6 && !hasSmsPermission) {
+				if (cm.type == PayChannel.PAY_TYPE_KKFUNPAY && !hasSmsPermission) {
 					continue;
 				}
 				payLists.add(cm);
