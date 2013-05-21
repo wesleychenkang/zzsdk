@@ -4,13 +4,17 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import com.zz.sdk.entity.PayChannel;
+import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.Result;
+import com.zz.sdk.layout.ChargeAbstractLayout;
 import com.zz.sdk.util.Logger;
 
 /***
@@ -21,10 +25,10 @@ import com.zz.sdk.util.Logger;
  * @see Constants#GUARD_Alipay_callback
  * @see Constants#GUARD_Tenpay_callback
  */
-public class PayOnlineActivity extends Activity {
+public class PayOnlineActivity extends Activity implements OnClickListener {
 
+	static final int K_ID_WEBVIEW = 20130521;
 	static final String K_URL = "url";
-
 	static final String K_URL_GUARD = "guard";
 
 	ChargeActivity mChargeActivity;
@@ -41,13 +45,11 @@ public class PayOnlineActivity extends Activity {
 		if (mChargeActivity == null) {
 			finish();
 		}
-
-		WebView v = new WebView(getBaseContext());
-		v.setId(20130521);
-		mWebView = v;
+		MyLayout v = new MyLayout(this);
 		setContentView(v);
 
 		setupView(v);
+		v.setButtonClickListener(this);
 	}
 
 	public static void start(Context context, int type, Result result,
@@ -68,11 +70,12 @@ public class PayOnlineActivity extends Activity {
 		context.startActivity(intent);
 	}
 
-	private void setupView(WebView v) {
+	private void setupView(View v) {
+		mWebView = (WebView) v.findViewById(K_ID_WEBVIEW);
 		Intent intent = getIntent();
 		mUrlGuard = intent.getStringExtra(K_URL_GUARD);
-		v.loadUrl(intent.getStringExtra(K_URL));
-		v.setWebViewClient(new WebViewClient() {
+		mWebView.loadUrl(intent.getStringExtra(K_URL));
+		mWebView.setWebViewClient(new WebViewClient() {
 			@Override
 			public boolean shouldOverrideUrlLoading(WebView view, String url) {
 				if (mUrlGuard != null && mUrlGuard.equals(url)) {
@@ -83,7 +86,7 @@ public class PayOnlineActivity extends Activity {
 				return true;
 			}
 		});
-		WebSettings s = v.getSettings();
+		WebSettings s = mWebView.getSettings();
 		s.setJavaScriptEnabled(true);
 	}
 
@@ -93,5 +96,44 @@ public class PayOnlineActivity extends Activity {
 					.show();
 		}
 		finish();
+	}
+
+	static class MyLayout extends ChargeAbstractLayout {
+
+		public MyLayout(Activity activity) {
+			super(activity);
+			initUI(activity);
+		}
+
+		@Override
+		public PayParam getPayParam() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		protected void initUI(Activity activity) {
+			super.initUI(activity);
+
+			WebView v = new WebView(activity.getBaseContext());
+			v.setId(K_ID_WEBVIEW);
+			LayoutParams lp = new LayoutParams(-1, -1);
+			mSubject.addView(v, lp);
+		}
+	}
+
+	@Override
+	public void onClick(View v) {
+		final int id = v.getId();
+		switch (id) {
+		// 取消按键 退出按钮
+		case ChargeAbstractLayout.ID_CANCEL:
+		case ChargeAbstractLayout.ID_EXIT:
+			finish();
+			break;
+
+		default:
+			break;
+		}
 	}
 }
