@@ -42,4 +42,11 @@ public final class Constants {
 
 	/** 获取支付列表 */
 	public static final String GPL_REQ = URL_SERVER_SRV + "gpl.do";
+	
+	/** web 版本「支付宝」交易成功后的url */
+	public static final String GUARD_Alipay_callback = URL_SERVER_SRV
+			+ "palicb.lg";
+	/** web 版本「财富通」交易成功后的url */
+	public static final String GUARD_Tenpay_callback = URL_SERVER_SRV
+			+ "ptencb.lg";
 }

@@ -4,7 +4,7 @@ import java.lang.reflect.Array;
 
 public class Logger {
 
-	public static final boolean DEBUG = false;
+	public static final boolean DEBUG = true;
 
 	private static final String TAG = "zz_sdk";
 

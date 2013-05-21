@@ -248,7 +248,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 
 			Logger.d("订单号------>" + mResult.orderNumber);
 
-			if (!"0".equals(mResult)) {
+			if (!"0".equals(mResult.codes)) {
 				Utils.toastInfo(ChargeActivity.this, mResult.codes);
 				hideDialog();
 				return;
@@ -259,14 +259,17 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			switch (msg.what) {
 			// 支付宝
 			case PayChannel.PAY_TYPE_ALIPAY:
-			//	new AlipayImpl(ChargeActivity.this, mResult,
-			//			mPayChannel.channelId).pay();
-				break;
+				// new AlipayImpl(ChargeActivity.this, mResult,
+				// mPayChannel.channelId).pay();
+				// break;
 			// 财付通
 			case PayChannel.PAY_TYPE_TENPAY:
 			//	TenpayImpl tenpay = new TenpayImpl(ChargeActivity.this,
 			//			mPayChannel.channelId, mResult);
 			//	tenpay.pay();
+			{
+				PayOnlineActivity.start(ChargeActivity.this, msg.what, mResult, mPayChannel.channelId);
+			}
 				break;
 			// 卡类
 			case PayChannel.PAY_TYPE_YEEPAY_LT:

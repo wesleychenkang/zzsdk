@@ -28,6 +28,8 @@ public class Result implements JsonParseInterface {
 
 	/** 支付服务描述／帮助 */
 	public String payServerDesc;
+
+	public String url;
 	
 	@Override
 	public String toString() {
@@ -42,7 +44,7 @@ public class Result implements JsonParseInterface {
 			json.put("codes", codes);
 			json.put("username", username);
 			json.put("password", password);
-			json.put("orderNumber", orderNumber);
+			json.put(K_ORDERNUMBER, orderNumber);
 			json.put("smsChannels", smsChannels);
 			json.put("smsMoGap", smsMoGap);
 			return json;
@@ -61,10 +63,12 @@ public class Result implements JsonParseInterface {
 			codes = json.isNull("codes") ? null : json.getJSONArray("codes").getString(0);
 			username = json.isNull("username") ? null : json.getString("username");
 			password = json.isNull("password") ? null : json.getString("password");
-			orderNumber = json.isNull("orderNumber") ? null : json.getString("orderNumber");
+			orderNumber = json.isNull(K_ORDERNUMBER) ? null : json.getString(K_ORDERNUMBER);
 			smsChannels = json.isNull("smsChannels") ? null : json.getString("smsChannels");
 			smsMoGap = json.isNull("smsMoGap") ? null : json.getString("smsMoGap");
 			payServerDesc=json.isNull("payServerDesc")?null:json.getString("payServerDesc");
+			
+			url = json.isNull(K_URL)?null:json.getString(K_URL);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -75,4 +79,6 @@ public class Result implements JsonParseInterface {
 		return null;
 	}
 
+	public static final String K_ORDERNUMBER = "cmgeOrderNum";
+	public static final String K_URL = "url";
 }
