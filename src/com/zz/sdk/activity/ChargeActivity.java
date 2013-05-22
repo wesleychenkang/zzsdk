@@ -22,11 +22,13 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 
+import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.PayResult;
 import com.zz.sdk.entity.Result;
 import com.zz.sdk.entity.SMSChannelMessage;
+import com.zz.sdk.entity.UnionpayImpl;
 import com.zz.sdk.layout.ChargeAbstractLayout;
 import com.zz.sdk.layout.ChargeDetailLayout;
 import com.zz.sdk.layout.ChargeDetailLayoutForCard;
@@ -48,11 +50,25 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 	private static final String EXTRA_ROLEID = "roleID";
 	private static final String EXTRA_ROLE = "role";
 	private static final String EXTRA_CALLBACKINFO = "callBackInfo";
+	
+	/** 银联的 request_code 被固定成了[10] */
+	public static final int ACTIVITY_REQUEST_CODE_UNIONPAY = 10;
+	/** web在线支付 */
+	public static final int ACTIVITY_REQUEST_CODE_WEBPAY = 20;
+	private static final String PAY_RESULT_SUCCESS = "success";
+	private static final String PAY_RESULT_FAIL = "fail";
+	private static final String PAY_RESULT_CANCEL = "cancel";
 
 	public static ChargeActivity instance;
+	
+	/* 第三方回调(可选) */
+	private static Handler mCallbackHandler;
+	private static int mCallbackWhat;
 
 	private String imsi;
 	private boolean isCancelDialog = false;
+	
+	
 
 	// 预定义充值方式的编号
 	// 卡类
@@ -144,8 +160,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
-			mPayChannel = (PayChannel) parent.getAdapter().getItem(
-					position);
+			mPayChannel = (PayChannel) parent.getAdapter().getItem(position);
 
 			if (mPayChannel == null)
 				return;
@@ -282,7 +297,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			// 银联
 			case PayChannel.PAY_TYPE_UNMPAY:
 				isRetUnionpay = true;
-			//	new UnionpayImpl(ChargeActivity.this, mResult).pay();
+				new UnionpayImpl(ChargeActivity.this, mResult).pay();
 				break;
 			}
 
@@ -450,9 +465,12 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		}
 	};
 
-	public static void start(Context context, String gameServerID,
+	public static void start(Handler callbackHandler, int what, Context context, String gameServerID,
 			String serverName, String roleId, String gameRole,
 			String callBackInfo) {
+		mCallbackHandler = callbackHandler;
+		mCallbackWhat = what;
+		
 		Intent intent = new Intent();
 		intent.putExtra(EXTRA_SERVERID, gameServerID);
 		intent.putExtra(EXTRA_SERVERNAME, serverName);
@@ -905,6 +923,43 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 				INDEX_CHARGE_SMS_GET_COMMAND);
 		SMSUtil.showDialog(ChargeActivity.this, type);
 
+	}
+
+	private void postPayResult(boolean success) {
+		if (mCallbackHandler != null) {
+			PaymentCallbackInfo info = new PaymentCallbackInfo();
+			info.statusCode = success ? PaymentCallbackInfo.STATUS_SUCCESS
+					: PaymentCallbackInfo.STATUS_FAILURE;
+			info.amount = 0;
+			Message msg = Message.obtain(mCallbackHandler, mCallbackWhat, info);
+			mCallbackHandler.sendMessage(msg);
+		}
+	}
+	
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (data == null) {
+			return;
+		}
+		
+		if (requestCode == ACTIVITY_REQUEST_CODE_UNIONPAY) {
+			if (isRetUnionpay) {
+				// 银联的支付结果
+				// requestCode =10;
+				// resultCode = -1;
+				String str = data.getExtras().getString("pay_result");
+				if (str.equalsIgnoreCase(PAY_RESULT_SUCCESS)) {
+					// showResultDialog(" 支付成功! ");
+					DialogUtil.showPayResultDialog(this, true);
+					postPayResult(true);
+				} else if (str.equalsIgnoreCase(PAY_RESULT_FAIL)) {
+					// showResultDialog(" 支付失败! ");
+					DialogUtil.showPayResultDialog(this, false);
+				} else if (str.equalsIgnoreCase(PAY_RESULT_CANCEL)) {
+					// showResultDialog(" 你已取消了本次订单的支付! ");
+					DialogUtil.showDialogErr(this, "你已取消了本次订单的支付! ");
+				}
+			}
+		}
 	}
 
 }

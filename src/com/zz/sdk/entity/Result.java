@@ -31,6 +31,9 @@ public class Result implements JsonParseInterface {
 
 	public String url;
 	
+	/** 用于[银联] */
+	public String tn;
+	
 	@Override
 	public String toString() {
 		return "Result [codes=" + codes + "&username=" +username + 
@@ -69,6 +72,7 @@ public class Result implements JsonParseInterface {
 			payServerDesc=json.isNull("payServerDesc")?null:json.getString("payServerDesc");
 			
 			url = json.isNull(K_URL)?null:json.getString(K_URL);
+			tn = json.isNull(K_TN)?null:json.getString(K_TN);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -81,4 +85,5 @@ public class Result implements JsonParseInterface {
 
 	public static final String K_ORDERNUMBER = "cmgeOrderNum";
 	public static final String K_URL = "url";
+	public static final String K_TN = "tn";
 }

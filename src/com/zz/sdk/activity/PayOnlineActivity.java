@@ -112,6 +112,9 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 			Toast.makeText(getBaseContext(), "充值成功！", Toast.LENGTH_SHORT)
 					.show();
 		}
+		Intent intent = new Intent();
+		intent.putExtra("pay_result", "success");
+		setResult(RESULT_OK, intent);
 		finish();
 	}
 
