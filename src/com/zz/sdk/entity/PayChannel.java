@@ -15,7 +15,7 @@ import org.json.JSONObject;
 public class PayChannel implements JsonParseInterface {
 
 	/** 默认：价格列表，以「分」为单位 */
-	private static final String DEF_PRICE_LIST = "5000,10000,50000,500000";
+	private static final String DEF_PRICE_LIST = "1000,3000,5000,10000,50000,500000";
 
 	// ALIPAY,
 	// UNMPAY,
@@ -39,7 +39,7 @@ public class PayChannel implements JsonParseInterface {
 	public static final int _PAY_TYPE_MAX_ = 6;
 
 	/** 标准的「充值」方式名称 */
-	private static final String CHANNEL_NAME[] = new String[_PAY_TYPE_MAX_];
+	public static final String CHANNEL_NAME[] = new String[_PAY_TYPE_MAX_];
 	static {
 		CHANNEL_NAME[PAY_TYPE_ALIPAY] = "支付宝";
 		CHANNEL_NAME[PAY_TYPE_UNMPAY] = "银联卡";

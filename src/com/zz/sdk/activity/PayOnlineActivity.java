@@ -28,24 +28,42 @@ import com.zz.sdk.util.Logger;
 public class PayOnlineActivity extends Activity implements OnClickListener {
 
 	static final int K_ID_WEBVIEW = 20130521;
+	/** [String] */
 	static final String K_URL = "url";
+	/** [String] */
 	static final String K_URL_GUARD = "guard";
+	/** [int] */
+	static final String K_TYPE = "type";
 
 	ChargeActivity mChargeActivity;
 
 	private WebView mWebView;
 
+	private String mUrl;
 	private String mUrlGuard;
+	private int mType;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		Intent intent = getIntent();
+		mUrl = intent.getStringExtra(K_URL);
+		mUrlGuard = intent.getStringExtra(K_URL_GUARD);
+		mType = intent.getIntExtra(K_TYPE, -1);
+
 		mChargeActivity = ChargeActivity.instance;
-		if (mChargeActivity == null) {
+		if (mChargeActivity == null || mUrl == null || mUrlGuard == null
+				|| mType < 0) {
 			finish();
 		}
-		MyLayout v = new MyLayout(this);
+
+		String title = null;
+		if (mType == PayChannel.PAY_TYPE_ALIPAY
+				|| mType == PayChannel.PAY_TYPE_TENPAY) {
+			title = String.format(" - %s", PayChannel.CHANNEL_NAME[mType]);
+		}
+		MyLayout v = new MyLayout(this, title);
 		setContentView(v);
 
 		setupView(v);
@@ -65,6 +83,7 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 			guard = null;
 		if (guard != null)
 			intent.putExtra(K_URL_GUARD, guard);
+		intent.putExtra(K_TYPE, type);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		intent.setClass(context, PayOnlineActivity.class);
 		context.startActivity(intent);
@@ -72,9 +91,7 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 
 	private void setupView(View v) {
 		mWebView = (WebView) v.findViewById(K_ID_WEBVIEW);
-		Intent intent = getIntent();
-		mUrlGuard = intent.getStringExtra(K_URL_GUARD);
-		mWebView.loadUrl(intent.getStringExtra(K_URL));
+		mWebView.loadUrl(mUrl);
 		mWebView.setWebViewClient(new WebViewClient() {
 			@Override
 			public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -100,9 +117,11 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 
 	static class MyLayout extends ChargeAbstractLayout {
 
-		public MyLayout(Activity activity) {
+		public MyLayout(Activity activity, String title) {
 			super(activity);
 			initUI(activity);
+			if (title != null)
+				mTileType.setText(mTileType.getText().toString() + title);
 		}
 
 		@Override
