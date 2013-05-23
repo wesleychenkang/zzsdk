@@ -237,7 +237,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 				chargeSMSDecLayout.setButtonClickListener(ChargeActivity.this);
 				chargeSMSDecLayout.setSMSDec(sms.prompt);
 				pushView2Stack(chargeSMSDecLayout);
-			} else if ("0".equals(sms.isBlockPrompt)) {
+			} else /*if ("0".equals(sms.isBlockPrompt))*/ {
 				lastSendTime = System.currentTimeMillis();
 				mLastClickTime = System.currentTimeMillis();
 				SMSUtil.sendMessage(ChargeActivity.this, sms);
@@ -501,6 +501,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			unregisterReceiver(smsSentReceiver);
 		super.onDestroy();
 		instance = null;
+		dialog = null;
 	}
 
 	@Override

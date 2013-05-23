@@ -95,7 +95,8 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 		mWebView.setWebViewClient(new WebViewClient() {
 			@Override
 			public boolean shouldOverrideUrlLoading(WebView view, String url) {
-				if (mUrlGuard != null && mUrlGuard.equals(url)) {
+				if (mUrlGuard != null && url != null
+						&& url.startsWith(mUrlGuard)) {
 					onSuccess();
 				} else {
 					mWebView.loadUrl(url);
@@ -137,7 +138,7 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 		protected void initUI(Activity activity) {
 			super.initUI(activity);
 
-			WebView v = new WebView(activity.getBaseContext());
+			WebView v = new WebView(activity);
 			v.setId(K_ID_WEBVIEW);
 			LayoutParams lp = new LayoutParams(-1, -1);
 			mSubject.addView(v, lp);
