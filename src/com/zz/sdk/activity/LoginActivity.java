@@ -27,7 +27,6 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 
-import com.zz.sdk.R;
 import com.zz.sdk.entity.Result;
 import com.zz.sdk.layout.LoginLayout;
 import com.zz.sdk.layout.RegisterLayout;
@@ -87,7 +86,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.login, menu);
+		//getMenuInflater().inflate(R.menu.login, menu);
 		return true;
 	}
 

@@ -194,6 +194,8 @@ public class GetDataImpl {
 		mSdkUser.newPassword = Utils.md5Encode(newPassword);
 		mSdkUser.password = Utils.md5Encode(oldPassword);
 		HashMap<String, String> params = new HashMap<String, String>();
+		params.put("loginName", Application.loginName);
+		params.put("password", oldPassword);
 		params.put("newPassword", newPassword);
 		String url = Constants.MODIFY_PWD + appendUrl(params);
 
