@@ -255,7 +255,7 @@ public class SMSUtil {
 		public void run() {
 			GetDataImpl getDataImpl = GetDataImpl.getInstance(ctx);
 			Message msg = handler.obtainMessage(what);
-			Result result = getDataImpl.charge(PayChannel.PAY_TYPE_KKFUNPAY, payParam);
+			Result result = getDataImpl.charge(PayChannel.PAY_TYPE_KKFUNPAY_EX, payParam);
 			Logger.d("result -> " + result);
 			msg.obj = result;
 			msg.sendToTarget();

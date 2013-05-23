@@ -29,7 +29,7 @@ public class SMSChannelMessage implements JsonParseInterface{
 	/**
 	 * d :单条上行价格 服务器返回单位为元
 	 */
-	public String price;
+	public double price;
 
 	/**
 	 * e : 提示数据内容
@@ -69,15 +69,20 @@ public class SMSChannelMessage implements JsonParseInterface{
 		if (json == null)     	
 			return;
 		try {
-			serviceType = json.isNull("a") ? null : json.getString("a");
-			sendToAddress = json.isNull("b") ? null : json.getString("b");
-			command = json.isNull("c") ? null:json.getString("c");
-			price = json.isNull("d") ? "-1" : json.getString("d");
-			prompt = json.isNull("e") ? null : json.getString("e");
-			isBlockPrompt = json.isNull("f") ? null : json.getString("f");
-			isBlockSMS = json.isNull("g") ? null : json.getString("g");
-			ereg = json.isNull("h") ? null : json.getString("h");
-		
+//			serviceType = json.isNull("a") ? null : json.getString("a");
+//			sendToAddress = json.isNull("b") ? null : json.getString("b");
+//			command = json.isNull("c") ? null:json.getString("c");
+//			price = json.isNull("d") ? "-1" : json.getString("d");
+//			prompt = json.isNull("e") ? null : json.getString("e");
+//			isBlockPrompt = json.isNull("f") ? null : json.getString("f");
+//			isBlockSMS = json.isNull("g") ? null : json.getString("g");
+//			ereg = json.isNull("h") ? null : json.getString("h");
+			
+			command = json.isNull(K_COMMAND) ? null : json.getString(K_COMMAND);           
+			prompt = json.isNull(K_PAYCONFIRMTEXT) ? null : json.getString(K_PAYCONFIRMTEXT);                                                                     
+			price = json.isNull(K_PRICE) ? -1 : json.getDouble(K_PRICE);                 
+			serviceType = json.isNull(K_SERVICETYPE) ? null : json.getString(K_SERVICETYPE); 
+			sendToAddress = json.isNull(K_SPCODE) ? null : json.getString(K_SPCODE);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -86,7 +91,12 @@ public class SMSChannelMessage implements JsonParseInterface{
 
 	@Override
 	public String getShortName() {
-		// TODO Auto-generated method stub
-		return null;
+		return "channels";
 	}
+	
+	public static final String K_COMMAND = "command";                              
+	public static final String K_PAYCONFIRMTEXT = "payConfirmText";                
+	public static final String K_PRICE = "price";                                  
+	public static final String K_SERVICETYPE = "serviceType";                      
+	public static final String K_SPCODE = "spCode"; 
 }

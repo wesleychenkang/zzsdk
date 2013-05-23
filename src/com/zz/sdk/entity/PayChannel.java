@@ -34,9 +34,12 @@ public class PayChannel implements JsonParseInterface {
 	public static final int PAY_TYPE_YEEPAY_LT = 3;
 	/** 移动卡 */
 	public static final int PAY_TYPE_YEEPAY_YD = 4;
-	/** 话费 */
+	/** 话费[短信请求] */
 	public static final int PAY_TYPE_KKFUNPAY = 5;
 	public static final int _PAY_TYPE_MAX_ = 6;
+
+	/** 话费[短信通知] */
+	public static final int PAY_TYPE_KKFUNPAY_EX = _PAY_TYPE_MAX_ + 1;
 
 	/** 标准的「充值」方式名称 */
 	public static final String CHANNEL_NAME[] = new String[_PAY_TYPE_MAX_];

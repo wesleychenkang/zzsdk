@@ -34,6 +34,10 @@ public class Result implements JsonParseInterface {
 	/** 用于[银联] */
 	public String tn;
 	
+	public String attach2;
+	
+	public boolean enablePayConfirm;
+	
 	@Override
 	public String toString() {
 		return "Result [codes=" + codes + "&username=" +username + 
@@ -73,6 +77,9 @@ public class Result implements JsonParseInterface {
 			
 			url = json.isNull(K_URL)?null:json.getString(K_URL);
 			tn = json.isNull(K_TN)?null:json.getString(K_TN);
+
+			enablePayConfirm = json.isNull(K_enablePayConfirm) ? false : json
+					.getBoolean(K_enablePayConfirm);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -86,4 +93,5 @@ public class Result implements JsonParseInterface {
 	public static final String K_ORDERNUMBER = "cmgeOrderNum";
 	public static final String K_URL = "url";
 	public static final String K_TN = "tn";
+	public static final String K_enablePayConfirm = "enablePayConfirm";
 }

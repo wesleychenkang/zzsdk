@@ -186,7 +186,7 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 				holder.setTextColor(0xff3c2110);
 			}
 
-			String price = mSmsMsg[position].price;
+			double price = mSmsMsg[position].price;
 			DecimalFormat fmt = new DecimalFormat("##.#");
 			String s = fmt.format(price);
 

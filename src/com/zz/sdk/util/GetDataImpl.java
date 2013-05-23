@@ -60,12 +60,14 @@ public class GetDataImpl {
 		}
 		return mInstance;
 	}
+
 	/**
 	 * 用户登录
 	 * 
 	 * @return true表示登录成功 false表示登录失败
 	 */
-	public Result login(String loginName, String password, int autoLogin, Context ctx) {
+	public Result login(String loginName, String password, int autoLogin,
+			Context ctx) {
 		Application.isLogin = false;
 
 		mSdkUser = new SdkUser();
@@ -77,9 +79,9 @@ public class GetDataImpl {
 		params.put("loginName", "" + loginName);
 		params.put("password", "" + password);
 		params.put("projectId", "" + Utils.getProjectId(ctx));
-		
+
 		String url = Constants.LOGIN_REQ + appendUrl(params);
-		InputStream in = doRequest(url,"");
+		InputStream in = doRequest(url, "");
 		String json = parseJsonData(in);
 		Logger.d("login json -> " + json);
 		if (json == null) {
@@ -90,7 +92,7 @@ public class GetDataImpl {
 		if (result == null) {
 			return null;
 		}
-		if ( "0".equals(result.codes)) {
+		if ("0".equals(result.codes)) {
 			Logger.d("LoginName ---------------- " + loginName);
 			Application.loginName = loginName;
 			Application.isLogin = true;
@@ -100,6 +102,7 @@ public class GetDataImpl {
 		}
 		return result;
 	}
+
 	/**
 	 * 快速登录
 	 * 
@@ -115,7 +118,7 @@ public class GetDataImpl {
 		params.put("imsi", Utils.getIMSI(ctx));
 		String url = Constants.QUICK_LOGIN_REQ + appendUrl(params);
 		try {
-			InputStream in = doRequest(url,"");
+			InputStream in = doRequest(url, "");
 			if (in == null)
 				return null;
 
@@ -125,7 +128,7 @@ public class GetDataImpl {
 				return null;
 			Result result = (Result) JsonUtil.parseJSonObject(Result.class,
 					json);
-			if (result != null &&  "0".equals(result.codes)) {
+			if (result != null && "0".equals(result.codes)) {
 				Application.loginName = result.username;
 				Application.isLogin = true;
 				mSdkUser = new SdkUser();
@@ -146,7 +149,7 @@ public class GetDataImpl {
 	 * 
 	 * @return 注册
 	 */
-	public Result register(String loginName, String password,Context ctx) {
+	public Result register(String loginName, String password, Context ctx) {
 		mSdkUser = new SdkUser();
 		mSdkUser.loginName = loginName;
 		mSdkUser.password = Utils.md5Encode(password);
@@ -156,9 +159,9 @@ public class GetDataImpl {
 		params.put("password", password);
 		params.put("projectId", Utils.getProjectId(ctx));
 		params.put("imsi", Utils.getIMSI(ctx));
-		
+
 		String url = Constants.REG_REQ + appendUrl(params);
-		InputStream in = doRequest(url,"");
+		InputStream in = doRequest(url, "");
 		String json = parseJsonData(in);
 		Logger.d("register json -> " + json);
 		if (json == null) {
@@ -172,12 +175,13 @@ public class GetDataImpl {
 		if ("0".equals(result.codes)) {
 			Application.loginName = loginName;
 			Application.isLogin = true;
-			mSdkUser.autoLogin = 1; 
+			mSdkUser.autoLogin = 1;
 			mSdkUser.password = password;
 			syncSdkUser();
 		}
 		return result;
 	}
+
 	/**
 	 * 修改密码
 	 * 
@@ -190,7 +194,7 @@ public class GetDataImpl {
 		mSdkUser.newPassword = Utils.md5Encode(newPassword);
 		mSdkUser.password = Utils.md5Encode(oldPassword);
 		HashMap<String, String> params = new HashMap<String, String>();
-		params.put("newPassword",newPassword);
+		params.put("newPassword", newPassword);
 		String url = Constants.MODIFY_PWD + appendUrl(params);
 
 		InputStream in = doRequest(url, "");
@@ -208,7 +212,7 @@ public class GetDataImpl {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * 同步用户基本信息到数据库中
 	 * 
@@ -220,6 +224,7 @@ public class GetDataImpl {
 		Utils.writeAccount2SDcard(mSdkUser.loginName, mSdkUser.password);
 		return t.update(mSdkUser);
 	}
+
 	/**
 	 * 请求c/s数据
 	 * 
@@ -237,11 +242,11 @@ public class GetDataImpl {
 		}
 
 		HttpPost httpPost = new HttpPost(url);
-//		if (str != null) {
-//			HttpEntity entity = new ByteArrayEntity(Utils.encode(str)
-//					.getBytes());
-//			httpPost.setEntity(entity);
-//		}
+		// if (str != null) {
+		// HttpEntity entity = new ByteArrayEntity(Utils.encode(str)
+		// .getBytes());
+		// httpPost.setEntity(entity);
+		// }
 
 		HttpResponse response = null;
 		int reconnectCount = 0;
@@ -278,7 +283,7 @@ public class GetDataImpl {
 				sb.append(tmp);
 			}
 			// System.out.println("解析后的信息---》" + Encrypt.decode(sb.toString()));
-			return sb.toString();//Utils.decode(sb.toString());
+			return sb.toString();// Utils.decode(sb.toString());
 		} catch (Exception e) {
 		} finally {
 			if (reader != null) {
@@ -298,7 +303,6 @@ public class GetDataImpl {
 		}
 		return null;
 	}
-
 
 	private String appendUrl(HashMap<String, String> params) {
 		String url = "";
@@ -405,7 +409,7 @@ public class GetDataImpl {
 		HashMap<String, String> params = new HashMap<String, String>();
 		params.put("projectId", Utils.getProjectId(ctx));
 		params.put("imsi", Utils.getIMSI(ctx));
-		params.put("actionType", ""+Constants.ACTIONTYPE.INSTALL);
+		params.put("actionType", "" + Constants.ACTIONTYPE.INSTALL);
 		String url = Constants.LOG_REQ + appendUrl(params);
 
 		InputStream in = doRequest(url, "");
@@ -429,7 +433,7 @@ public class GetDataImpl {
 		HashMap<String, String> params = new HashMap<String, String>();
 		params.put("projectId", Utils.getProjectId(ctx));
 		params.put("imsi", Utils.getIMSI(ctx));
-		params.put("actionType", ""+Constants.ACTIONTYPE.INSTALL);
+		params.put("actionType", "" + Constants.ACTIONTYPE.INSTALL);
 		String url = Constants.LOG_REQ + appendUrl(params);
 
 		InputStream in = doRequest(url, "");
@@ -441,14 +445,14 @@ public class GetDataImpl {
 		Result result = (Result) JsonUtil.parseJSonObject(Result.class, json);
 		return result;
 	}
-	
+
 	/**
 	 * 
-	 * @param type 
+	 * @param type
 	 * @param payParam
 	 * @return
 	 */
-	public Result charge(int type, PayParam payParam) {		
+	public Result charge(int type, PayParam payParam) {
 		String action = payParam.getUrl_PayAction(type);
 
 		if (action == null) {
@@ -469,7 +473,7 @@ public class GetDataImpl {
 		}
 
 		mSdkUser = new SdkUser();
-		mSdkUser.loginName  = Application.loginName;
+		mSdkUser.loginName = Application.loginName;
 		InputStream in = doRequest(url, "");
 		if (in == null)
 			return null;
@@ -479,10 +483,41 @@ public class GetDataImpl {
 		if (json == null)
 			return null;
 		Result result = (Result) JsonUtil.parseJSonObject(Result.class, json);
+		result.attach2 = json;
 		return result;
 	}
-	
-	
+
+	/**
+	 * 获取「短信」支付的通道表
+	 * 
+	 * @param payParam
+	 */
+	// public void getSMSChannelList(PayParam payParam) {
+	// if (Application.loginName == null || !Application.isLogin) {
+	// Result result1 = new Result();
+	// result1.codes = "-1";
+	// return /* result1 */;
+	// }
+	//
+	// String action = payParam.getUrl_PayAction(PayChannel.PAY_TYPE_KKFUNPAY);
+	// String url = Constants.URL_SERVER_SRV + action;
+	//
+	// mSdkUser = new SdkUser();
+	// mSdkUser.loginName = Application.loginName;
+	// InputStream in = doRequest(url, "");
+	// if (in != null) {
+	//
+	// String json = parseJsonData(in);
+	// Logger.d("charge json -> " + json);
+	// if (json != null) {
+	// Result result = (Result) JsonUtil.parseJSonObject(Result.class,
+	// json);
+	//
+	// PayChannel[] channelMessages = (PayChannel[]) JsonUtil
+	// .parseJSonArray(PayChannel.class, json);
+	// }
+	// }
+	// }
 
 	/**
 	 * 获取支付列表
@@ -490,18 +525,18 @@ public class GetDataImpl {
 	 * @return
 	 */
 	public PayChannel[] getPaymentList(PayParam charge) {
-		
+
 		HashMap<String, String> params = new HashMap<String, String>();
-		params.put("requestId", ""/* + RequestId.ID_PAYMENT_LIST*/);
+		params.put("requestId", ""/* + RequestId.ID_PAYMENT_LIST */);
 		params.put("serverId", charge.serverId);
 		String url = Constants.GPL_REQ + appendUrl(params);
 
-//		JSONObject jsonObject = getSessionAndDevicesPropertiesJson();
-//		try {
-//			jsonObject.put(charge.getShortName(), charge.buildJson());
-//		} catch (JSONException e) {
-//			e.printStackTrace();
-//		}
+		// JSONObject jsonObject = getSessionAndDevicesPropertiesJson();
+		// try {
+		// jsonObject.put(charge.getShortName(), charge.buildJson());
+		// } catch (JSONException e) {
+		// e.printStackTrace();
+		// }
 
 		InputStream in = doRequest(url, "");
 		if (in == null)
@@ -512,14 +547,15 @@ public class GetDataImpl {
 		if (json == null)
 			return null;
 		Result result = (Result) JsonUtil.parseJSonObject(Result.class, json);
-		PayChannel[] channelMessages = (PayChannel[]) JsonUtil
-				.parseJSonArray(PayChannel.class, json);
+		PayChannel[] channelMessages = (PayChannel[]) JsonUtil.parseJSonArray(
+				PayChannel.class, json);
 
-		if (null == result || !"0".equals(result.codes) || channelMessages == null) {
+		if (null == result || !"0".equals(result.codes)
+				|| channelMessages == null) {
 			return null;
 		}
 
-//		parseTelAndQQ(result.attach1);
+		// parseTelAndQQ(result.attach1);
 
 		parseTopic(result.payServerDesc);
 
@@ -547,7 +583,8 @@ public class GetDataImpl {
 		for (PayChannel cm : channelMessages) {
 			if (payTypes.contains(cm.type)) {
 
-				if (cm.type == PayChannel.PAY_TYPE_KKFUNPAY && !hasSmsPermission) {
+				if (cm.type == PayChannel.PAY_TYPE_KKFUNPAY
+						&& !hasSmsPermission) {
 					continue;
 				}
 				payLists.add(cm);
@@ -564,14 +601,14 @@ public class GetDataImpl {
 	private static void parseTopic(String str) {
 
 		if (null != str && !"".equals(str)) {
-//			try {
-//				JSONObject json = new JSONObject(str);
-//				Application.topicTitle = json.isNull("a") ? null : json
-//						.getString("a").trim();
-//				Application.topicDes = json.isNull("b") ? null : json
-//						.getString("b").trim();
-//			} catch (JSONException e) {
-//			}
+			// try {
+			// JSONObject json = new JSONObject(str);
+			// Application.topicTitle = json.isNull("a") ? null : json
+			// .getString("a").trim();
+			// Application.topicDes = json.isNull("b") ? null : json
+			// .getString("b").trim();
+			// } catch (JSONException e) {
+			// }
 			Application.topicDes = str;
 		}
 	}
