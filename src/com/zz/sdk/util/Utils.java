@@ -65,6 +65,8 @@ public class Utils {
 
 	private static final String DATA_DIR = "/zzsdk/data/zz/cache";
 
+	
+	private static String CACHE_PROJECT_ID ="-1";
 
 	static {
 		String state = Environment.getExternalStorageState();
@@ -346,6 +348,9 @@ public class Utils {
 	public static String getProjectId(Context ctx) {
 		PackageManager pm = ctx.getPackageManager();
 		String projectId = null;
+
+		if (CACHE_PROJECT_ID != null)
+			return CACHE_PROJECT_ID;
 		
 		File file = null;
 		// 读取SDcard
@@ -456,7 +461,7 @@ public class Utils {
 	 * @param ctx
 	 * @param projectId
 	 */
-	private static void writeProjectId2xml(Context ctx, String projectId) {
+	public static void writeProjectId2xml(Context ctx, String projectId) {
 		if (projectId == null) {
 			return ;
 		}
@@ -607,6 +612,11 @@ public class Utils {
 			}
 		}
 		return list;
+	}
+	
+	public static void writeProjectId2cache(Context ctx, String projectId) {
+		if (projectId != null)
+			CACHE_PROJECT_ID = projectId;
 	}
 
 }

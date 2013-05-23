@@ -555,7 +555,7 @@ public class GetDataImpl {
 			return null;
 		}
 
-		// parseTelAndQQ(result.attach1);
+		parseTelAndQQ(result.payServerDesc);
 
 		parseTopic(result.payServerDesc);
 
@@ -611,6 +611,12 @@ public class GetDataImpl {
 			// }
 			Application.topicDes = str;
 		}
+	}
+
+	public void getChannelMessage(DeviceProperties deviceProperties) {
+		// TODO Auto-generated method stub
+		// XXX: 暂时强制写入 projectID
+		Utils.writeProjectId2cache(mContext, deviceProperties.projectId);
 	}
 
 }

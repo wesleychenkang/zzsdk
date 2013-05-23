@@ -2,6 +2,7 @@ package com.zz.sdk.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Handler;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -11,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.zz.sdk.PaymentCallbackInfo;
+import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.Logger;
 
 public class MainActivity extends Activity implements OnClickListener {
@@ -78,11 +80,14 @@ public class MainActivity extends Activity implements OnClickListener {
 					SDKManager.WHAT_LOGIN_CALLBACK_DEFAULT);
 			break;
 		case 2: {
-			Handler handler =null;
+			Handler handler = null;
 			if (mLoginCallbackInfo == null) {
 				Toast.makeText(getBaseContext(), "使用单机充值方式", Toast.LENGTH_LONG)
 						.show();
 				handler = mHandler;
+				Application.loginName = DebugFlags.DEF_LOGIN_NAME;
+				Application.isLogin = true;
+				pushLog("「单机模式」 用户名:" + Application.loginName);
 			}
 			mSDKManager.showPaymentView(handler,
 					SDKManager.WHAT_PAYMENT_CALLBACK_DEFAULT, "M1001",
@@ -90,6 +95,10 @@ public class MainActivity extends Activity implements OnClickListener {
 		}
 			break;
 		}
+	}
+
+	private void pushLog(String txt) {
+		mTvTip.setText(mTvTip.getText() + "\n" + txt);
 	}
 
 	private Handler mHandler = new Handler() {
@@ -102,7 +111,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				if (mLoginCallbackInfo == null) {
 					mTvTip.setText(info.toString());
 				} else {
-					mTvTip.setText(mTvTip.getText() + "\n" + info.toString());
+					pushLog(info.toString());
 				}
 				mLoginCallbackInfo = info;
 			}
@@ -111,7 +120,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				PaymentCallbackInfo info = (PaymentCallbackInfo) msg.obj;
 				Logger.d("info----- : " + info.toString());
 				Logger.d("---------充值-------");
-				mTvTip.setText(mTvTip.getText() + "\n" + info.toString());
+				pushLog(info.toString());
 			}
 				break;
 			}

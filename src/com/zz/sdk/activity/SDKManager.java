@@ -59,10 +59,10 @@ public class SDKManager {
 				return;
 			}
 			Bundle metaData = appInfo.metaData;
-			deviceProperties.projectId = "" + metaData.getInt("PROJECT_ID");
+			deviceProperties.projectId = metaData.getString("PROJECT_ID");
 			new Thread() {
 				public void run() {
-					// GetDataImpl.getInstance(mContext).getChannelMessage(deviceProperties);
+					 GetDataImpl.getInstance(mContext).getChannelMessage(deviceProperties);
 				}
 			}.start();
 		}
