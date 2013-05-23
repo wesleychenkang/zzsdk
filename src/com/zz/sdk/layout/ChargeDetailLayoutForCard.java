@@ -151,7 +151,7 @@ public class ChargeDetailLayoutForCard extends ChargeAbstractLayout {
 				Constants.ASSETS_RES_PATH + "input_card.png"));
 		password.addView(etPassword, lp);
 		
-		if (mPayChannel.type == 4) { //联通充值卡
+		if (mPayChannel.type == PayChannel.PAY_TYPE_YEEPAY_LT) { //联通充值卡
 			etNumber.setHint("请输入卡号（15位）");
 			etNumber.setFilters(new InputFilter[] { new InputFilter.LengthFilter(
 					15) });
@@ -161,7 +161,7 @@ public class ChargeDetailLayoutForCard extends ChargeAbstractLayout {
 					.setFilters(new InputFilter[] { new InputFilter.LengthFilter(
 							19) });
 
-		} else if (mPayChannel.type == 3) {//移动充值卡
+		} else if (mPayChannel.type == PayChannel.PAY_TYPE_YEEPAY_YD) {// 移动充值卡
 			etNumber.setHint("请输入卡号（17位）");
 			etNumber.setFilters(new InputFilter[] { new InputFilter.LengthFilter(
 					17) });
