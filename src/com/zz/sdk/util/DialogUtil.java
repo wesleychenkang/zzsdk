@@ -18,6 +18,9 @@ import com.zz.sdk.activity.Constants;
 
 public class DialogUtil {
 
+	public static final int ID_PAY_SUCCESS = 0x80001;
+	public static final int ID_PAY_FAILED =  0x80002;
+
 	/**
 	 * 
 	 * @param context
@@ -41,8 +44,8 @@ public class DialogUtil {
 		return dialog;
 	}
 
-	public static void showPayResultDialog(Activity activity, boolean isSucc) {
-		MyDialog dialog = new MyDialog(activity, isSucc);
+	public static void showPayResultDialog(Activity activity, boolean isSucc, View.OnClickListener listener) {
+		MyDialog dialog = new MyDialog(activity, isSucc, listener);
 		dialog.setCancelable(false);
 		dialog.setCanceledOnTouchOutside(false);
 		dialog.show();
@@ -58,7 +61,7 @@ class MyDialog extends Dialog {
 	private Activity mActivity;
 	TextView textView;
 
-	public MyDialog(Activity activity, boolean isSucc) {
+	public MyDialog(Activity activity, boolean isSucc, android.view.View.OnClickListener listener) {
 		super(activity);
 		mActivity = activity;
 		getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -95,7 +98,9 @@ class MyDialog extends Dialog {
 		lp = new LinearLayout.LayoutParams(-2, -2);
 		lp.topMargin = DimensionUtil.dip2px(activity, 25);
 		lp.topMargin = DimensionUtil.dip2px(activity, 25);
-		imageButton.setOnClickListener(new CloseListener());
+		imageButton.setId(isSucc ? DialogUtil.ID_PAY_SUCCESS
+				: DialogUtil.ID_PAY_FAILED);
+		imageButton.setOnClickListener(listener);
 		ll.addView(imageButton, lp);
 		setContentView(ll);
 	}

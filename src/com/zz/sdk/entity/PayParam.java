@@ -180,7 +180,8 @@ public class PayParam implements Serializable, JsonParseInterface {
 
 		case PayChannel.PAY_TYPE_KKFUNPAY_EX:
 			b.append("pkkfunnt.lg");
-			b.append("?").append(K_IMSI).append("=").append(smsImsi);
+			b.append("?").append(K_LOGINNAME).append("=").append(loginName)
+					.append(K_IMSI).append("=").append(smsImsi);
 			break;
 
 		default:
