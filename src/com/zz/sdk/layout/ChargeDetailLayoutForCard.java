@@ -345,13 +345,13 @@ public class ChargeDetailLayoutForCard extends ChargeAbstractLayout {
 		} else {
 			int length = getInputCardNum().toString().length();
 			switch (mPayChannel.type) {
-			case 4: // 联通
+			case PayChannel.PAY_TYPE_YEEPAY_LT: // 联通
 				if (length != 15) {
 					Utils.toastInfo(mActivity, "请输入15位卡号!");
 					return false;
 				}
 				break;
-			case 3:// 移动
+			case PayChannel.PAY_TYPE_YEEPAY_YD:// 移动
 				if (length != 17) {
 					Utils.toastInfo(mActivity, "请输入17位卡号!");
 					return false;
@@ -367,13 +367,13 @@ public class ChargeDetailLayoutForCard extends ChargeAbstractLayout {
 		} else {
 			int length = getInputCardPassward().toString().length();
 			switch (mPayChannel.type) {
-			case 4: // 联通
+			case PayChannel.PAY_TYPE_YEEPAY_LT: // 联通
 				if (length != 19) {
 					Utils.toastInfo(mActivity, "请输入19位密码!");
 					return false;
 				}
 				break;
-			case 3:// 移动
+			case PayChannel.PAY_TYPE_YEEPAY_YD:// 移动
 				if (length != 18) {
 					Utils.toastInfo(mActivity, "请输入18位密码!");
 					return false;

@@ -72,9 +72,6 @@
             android:value="P10009" />
         <activity android:name=".activity.PayOnlineActivity"
             android:exported="false"
-            android:configChanges="keyboardHidden|orientation"
-            android:excludeFromRecents="true"
-            android:launchMode="singleTask"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"></activity>
     </application>

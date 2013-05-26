@@ -253,6 +253,16 @@ public class SMSUtil {
 
 		@Override
 		public void run() {
+			/*
+			 * loginName
+cmgeOrderNum
+imsi
+serviceType
+status
+dueFee
+/pkkfunnt.lg
+
+			 */
 			GetDataImpl getDataImpl = GetDataImpl.getInstance(ctx);
 			Message msg = handler.obtainMessage(what);
 			Result result = getDataImpl.charge(PayChannel.PAY_TYPE_KKFUNPAY_EX, payParam);

@@ -29,8 +29,7 @@ public class UnionpayImpl {
 		if (validateInput()) {
 			int ret = UPPayAssistEx.startPay(mActivity, null, null, mTN,
 					serverMode);
-			if (ret == UPPayAssistEx.PLUGIN_VALID
-					|| ret == UPPayAssistEx.PLUGIN_NOT_FOUND) {
+			if (ret == UPPayAssistEx.PLUGIN_NOT_FOUND) {
 				// 安装Asset中提供的UPPayPlugin.apk
 				AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
 				builder.setTitle("提示");

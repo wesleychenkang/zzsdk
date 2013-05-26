@@ -1,6 +1,7 @@
 package com.zz.sdk.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
@@ -21,6 +22,8 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	private LoginCallbackInfo mLoginCallbackInfo;
 	private TextView mTvTip;
+	
+	private final static int RC_PAYMENT = 2;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -131,5 +134,20 @@ public class MainActivity extends Activity implements OnClickListener {
 	protected void onDestroy() {
 		super.onDestroy();
 		mSDKManager.recycle();
+	}
+
+	@Override 
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+		case RC_PAYMENT: {
+			if (resultCode == RESULT_OK) {
+				
+			}
+		}
+			break;
+
+		default:
+			break;
+		}
 	}
 }

@@ -1,6 +1,9 @@
 package com.zz.sdk.entity;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,6 +31,9 @@ public class PayParam implements Serializable, JsonParseInterface {
 
 	public String smsActionType; // 短信请求类型 1获取通道 2提交订单
 	public String smsImsi;
+	
+	/** 附加参数，直接使用 */
+	public HashMap<String, String> attachParam;
 
 	@Override
 	public String toString() {
@@ -172,11 +178,25 @@ public class PayParam implements Serializable, JsonParseInterface {
 					.append(smsImsi);
 			break;
 
+		case PayChannel.PAY_TYPE_KKFUNPAY_EX:
+			b.append("pkkfunnt.lg");
+			b.append("?").append(K_IMSI).append("=").append(smsImsi);
+			break;
+
 		default:
 			break;
 		}
 		if (b.length() < 1)
 			return null;
+		
+		if (attachParam != null) {
+			Set<Entry<String, String>> s = attachParam.entrySet();
+			for (Entry<String, String> e : s) {
+				b.append("&").append(e.getKey()).append("=")
+						.append(e.getValue());
+			}
+		}
+		
 		return b.toString();
 	}
 }

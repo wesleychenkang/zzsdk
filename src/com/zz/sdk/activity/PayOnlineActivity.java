@@ -1,7 +1,6 @@
 package com.zz.sdk.activity;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -15,6 +14,7 @@ import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.Result;
 import com.zz.sdk.layout.ChargeAbstractLayout;
+import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.Logger;
 
 /***
@@ -35,8 +35,6 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 	/** [int] */
 	static final String K_TYPE = "type";
 
-	ChargeActivity mChargeActivity;
-
 	private WebView mWebView;
 
 	private String mUrl;
@@ -52,9 +50,7 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 		mUrlGuard = intent.getStringExtra(K_URL_GUARD);
 		mType = intent.getIntExtra(K_TYPE, -1);
 
-		mChargeActivity = ChargeActivity.instance;
-		if (mChargeActivity == null || mUrl == null || mUrlGuard == null
-				|| mType < 0) {
+		if (mUrl == null || mUrlGuard == null || mType < 0) {
 			finish();
 		}
 
@@ -70,9 +66,23 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 		v.setButtonClickListener(this);
 	}
 
-	public static void start(Context context, int type, Result result,
-			String channelId) {
-		Intent intent = new Intent();
+	/**
+	 * 启动在线支付界面。
+	 * 
+	 * @param host
+	 *            宿主窗体
+	 * @param requestCode
+	 *            返回数据的标记
+	 * @param type
+	 *            类别，取 {@link PayChannel#PAY_TYPE_ALIPAY} 或
+	 *            {@link PayChannel#PAY_TYPE_TENPAY}
+	 * @param result
+	 * @param channelId
+	 * @see Activity#startActivityForResult(Intent, int)
+	 */
+	public static void start(Activity host, int requestCode, int type,
+			Result result, String channelId) {
+		Intent intent = new Intent(host, PayOnlineActivity.class);
 		intent.putExtra(K_URL, result.url);
 		String guard;
 		if (type == PayChannel.PAY_TYPE_TENPAY)
@@ -84,9 +94,7 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 		if (guard != null)
 			intent.putExtra(K_URL_GUARD, guard);
 		intent.putExtra(K_TYPE, type);
-		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		intent.setClass(context, PayOnlineActivity.class);
-		context.startActivity(intent);
+		host.startActivityForResult(intent, requestCode);
 	}
 
 	private void setupView(View v) {
@@ -108,14 +116,43 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 		s.setJavaScriptEnabled(true);
 	}
 
+	private void clean() {
+		mUrl = null;
+		mUrlGuard = null;
+		mType = -1;
+		if (mWebView != null) {
+			mWebView.destroy();
+			mWebView = null;
+		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		clean();
+	}
+
 	private void onSuccess() {
 		if (Logger.DEBUG) {
-			Toast.makeText(getBaseContext(), "充值成功！", Toast.LENGTH_SHORT)
+			Toast.makeText(getBaseContext(), "[调试]充值成功！", Toast.LENGTH_SHORT)
 					.show();
 		}
 		Intent intent = new Intent();
-		intent.putExtra("pay_result", "success");
+		intent.putExtra(ChargeActivity.PAY_RESULT,
+				ChargeActivity.PAY_RESULT_SUCCESS);
+		intent.putExtra(K_TYPE, mType);
 		setResult(RESULT_OK, intent);
+		finish();
+	}
+
+	public void onBackPressed() {
+		onCancel();
+	}
+
+	private void onCancel() {
+		if (DebugFlags.DEBUG_PAY_CANCEL_AS_SUCCESS) {
+			onSuccess();
+		}
 		finish();
 	}
 
@@ -130,7 +167,6 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 
 		@Override
 		public PayParam getPayParam() {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
@@ -152,7 +188,7 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 		// 取消按键 退出按钮
 		case ChargeAbstractLayout.ID_CANCEL:
 		case ChargeAbstractLayout.ID_EXIT:
-			finish();
+			onCancel();
 			break;
 
 		default:

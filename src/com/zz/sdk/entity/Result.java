@@ -89,6 +89,14 @@ public class Result implements JsonParseInterface {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	public boolean isSuccess() {
+		return "0".equals(codes);
+	}
+	
+	public String getDescription() {
+		return "支付失败！错误号：" + codes;
+	}
 
 	public static final String K_ORDERNUMBER = "cmgeOrderNum";
 	public static final String K_URL = "url";

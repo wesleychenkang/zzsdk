@@ -13,7 +13,8 @@ public class PaymentCallbackInfo {
 
 	/** 状态 */
 	public int statusCode;
-	/** 金额 */
+	
+	/** 金额，单位：元 */
 	public int amount;
 
 	@Override
