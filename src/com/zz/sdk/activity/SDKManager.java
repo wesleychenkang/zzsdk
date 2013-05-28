@@ -32,10 +32,11 @@ public class SDKManager {
 
 	private SDKManager(Context ctx) {
 		mContext = ctx.getApplicationContext();
-		HandlerThread handlerThread = new HandlerThread("cmgesdk", android.os.Process.THREAD_PRIORITY_BACKGROUND);
+		HandlerThread handlerThread = new HandlerThread("cmgesdk",
+				android.os.Process.THREAD_PRIORITY_BACKGROUND);
 		handlerThread.start();
 		new Handler(handlerThread.getLooper()).post(new Runnable() {
-			
+
 			public void run() {
 				init();
 				savaChannalMessage();
@@ -44,21 +45,24 @@ public class SDKManager {
 	}
 
 	private void savaChannalMessage() {
-		
-		if (!Utils.isChannelMessageExist(mContext) ) {
-			
-			final DeviceProperties deviceProperties = new DeviceProperties(mContext);
-			ApplicationInfo appInfo =null;
+
+		if (!Utils.isChannelMessageExist(mContext)) {
+
+			final DeviceProperties deviceProperties = new DeviceProperties(
+					mContext);
+			ApplicationInfo appInfo = null;
 			try {
-				appInfo = mContext.getPackageManager().getApplicationInfo(mContext.getPackageName(), PackageManager.GET_META_DATA);
+				appInfo = mContext.getPackageManager()
+						.getApplicationInfo(mContext.getPackageName(),
+								PackageManager.GET_META_DATA);
 			} catch (NameNotFoundException e) {
 				return;
-			}			
+			}
 			Bundle metaData = appInfo.metaData;
-			deviceProperties.projectId = "" + metaData.getInt("PROJECT_ID");
-			new Thread(){
+			deviceProperties.projectId = metaData.getString("PROJECT_ID");
+			new Thread() {
 				public void run() {
-				//	GetDataImpl.getInstance(mContext).getChannelMessage(deviceProperties);
+					 GetDataImpl.getInstance(mContext).getChannelMessage(deviceProperties);
 				}
 			}.start();
 		}
@@ -92,9 +96,9 @@ public class SDKManager {
 	 */
 	public void showLoginView(Handler callbackHandler, int what) {
 		Application.autoLoginUser(mContext);
-//		init(); //统计登录
+		// init(); //统计登录
 		LoginActivity.start(mContext, callbackHandler, what);
-//		savaChannalMessage();
+		// savaChannalMessage();
 	}
 
 	/**
@@ -136,7 +140,36 @@ public class SDKManager {
 			return;
 		}
 
-		//ChargeActivity.start(mContext, gameServerID, serverName, roleId,
-		//		gameRole, callBackInfo);
+		ChargeActivity.start(null, 0, mContext, gameServerID, serverName,
+				roleId, gameRole, callBackInfo);
+	}
+
+	/**
+	 * 调用支付功能.
+	 * <p>
+	 * 说明: 如果支付成功则必定会有通知,否则不一定有通知.
+	 * 
+	 * @param callbackHandler
+	 *            支付结果通知　Handle
+	 * @param what
+	 *            支付结果消息号
+	 * @param gameServerID
+	 *            游戏服务器ID
+	 * @param serverName
+	 *            游戏服务器名称
+	 * @param roleId
+	 *            角色ID
+	 * @param gameRole
+	 *            角色名称
+	 * @param callBackInfo
+	 *            厂家自定义参数
+	 */
+	public void showPaymentView(Handler callbackHandler, int what,
+			final String gameServerID, final String serverName,
+			final String roleId, final String gameRole,
+			final String callBackInfo) {
+
+		ChargeActivity.start(callbackHandler, what, mContext, gameServerID,
+				serverName, roleId, gameRole, callBackInfo);
 	}
 }

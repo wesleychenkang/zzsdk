@@ -4,7 +4,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class PayResult implements JsonParseInterface {
-	public int paymentId;
+	public String channelId;
 	public String orderId;
 	public String statusCode;
 	public String resultCode;
@@ -15,7 +15,7 @@ public class PayResult implements JsonParseInterface {
 	public JSONObject buildJson() {
 		try {
 			JSONObject json = new JSONObject();
-			json.put("a", paymentId);
+			json.put("a", channelId);
 			json.put("b", orderId);
 			json.put("c", statusCode);
 			json.put("d", resultCode);
@@ -34,7 +34,7 @@ public class PayResult implements JsonParseInterface {
 		if (json == null)
 			return ;
 		try {
-			paymentId = json.isNull("a") ? -1 : json.getInt("a");
+			channelId = json.isNull("a") ? "-1" : json.getString("a");
 			orderId = json.isNull("b") ? null : json.getString("b");
 			statusCode = json.isNull("c") ? null : json.getString("c");
 			resultCode = json.isNull("d") ? null : json.getString("d");
@@ -47,8 +47,14 @@ public class PayResult implements JsonParseInterface {
 
 	@Override
 	public String toString() {
-		return "PayResult [paymentId=" + paymentId + ", orderId=" + orderId
+		return "PayResult [paymentId=" + channelId + ", orderId=" + orderId
 				+ ", statusCode=" + statusCode + ", resultCode=" +resultCode + ", desc=" + desc + ", attach="
 				+ attach + "]";
+	}
+
+	@Override
+	public String getShortName() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

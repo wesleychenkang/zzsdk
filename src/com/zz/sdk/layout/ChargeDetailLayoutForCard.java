@@ -151,7 +151,7 @@ public class ChargeDetailLayoutForCard extends ChargeAbstractLayout {
 				Constants.ASSETS_RES_PATH + "input_card.png"));
 		password.addView(etPassword, lp);
 		
-		if (mPayChannel.type == 4) { //联通充值卡
+		if (mPayChannel.type == PayChannel.PAY_TYPE_YEEPAY_LT) { //联通充值卡
 			etNumber.setHint("请输入卡号（15位）");
 			etNumber.setFilters(new InputFilter[] { new InputFilter.LengthFilter(
 					15) });
@@ -161,7 +161,7 @@ public class ChargeDetailLayoutForCard extends ChargeAbstractLayout {
 					.setFilters(new InputFilter[] { new InputFilter.LengthFilter(
 							19) });
 
-		} else if (mPayChannel.type == 3) {//移动充值卡
+		} else if (mPayChannel.type == PayChannel.PAY_TYPE_YEEPAY_YD) {// 移动充值卡
 			etNumber.setHint("请输入卡号（17位）");
 			etNumber.setFilters(new InputFilter[] { new InputFilter.LengthFilter(
 					17) });
@@ -236,7 +236,7 @@ public class ChargeDetailLayoutForCard extends ChargeAbstractLayout {
 		TextView dec = new TextView(activity);
 		lp = new LayoutParams(-2,-2);
 		lp.topMargin = DimensionUtil.dip2px(activity, 10);
-		dec.setText(mPayChannel.desc);
+		dec.setText(Html.fromHtml(mPayChannel.desc));
 		dec.setTextColor(0xffcba16f);
 		dec.setTextSize(14);
 		accountLayout.addView(dec, lp);
@@ -345,13 +345,13 @@ public class ChargeDetailLayoutForCard extends ChargeAbstractLayout {
 		} else {
 			int length = getInputCardNum().toString().length();
 			switch (mPayChannel.type) {
-			case 4: // 联通
+			case PayChannel.PAY_TYPE_YEEPAY_LT: // 联通
 				if (length != 15) {
 					Utils.toastInfo(mActivity, "请输入15位卡号!");
 					return false;
 				}
 				break;
-			case 3:// 移动
+			case PayChannel.PAY_TYPE_YEEPAY_YD:// 移动
 				if (length != 17) {
 					Utils.toastInfo(mActivity, "请输入17位卡号!");
 					return false;
@@ -367,13 +367,13 @@ public class ChargeDetailLayoutForCard extends ChargeAbstractLayout {
 		} else {
 			int length = getInputCardPassward().toString().length();
 			switch (mPayChannel.type) {
-			case 4: // 联通
+			case PayChannel.PAY_TYPE_YEEPAY_LT: // 联通
 				if (length != 19) {
 					Utils.toastInfo(mActivity, "请输入19位密码!");
 					return false;
 				}
 				break;
-			case 3:// 移动
+			case PayChannel.PAY_TYPE_YEEPAY_YD:// 移动
 				if (length != 18) {
 					Utils.toastInfo(mActivity, "请输入18位密码!");
 					return false;
