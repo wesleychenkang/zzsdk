@@ -29,6 +29,12 @@
 -keep class com.unionpay.**{*;}
 
 
+-keep public class com.zz.sdk.activity.SDKManager {
+   public *;
+}
+-keep public class com.zz.sdk.activity.Application {
+   public *;
+}
 -keep public class com.zz.sdk.util.Logger {
    public *;
 }
