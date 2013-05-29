@@ -18,3 +18,26 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+-libraryjars libs/android-support-v4.jar
+-keep class android.support.**{*;}
+
+-libraryjars libs/commons-codec-1.6.jar
+-keep class org.apache.**{*;}
+
+-libraryjars libs/UPPayAssistEx.jar
+-keep class com.unionpay.**{*;}
+
+
+-keep public class com.zz.sdk.util.Logger {
+   public *;
+}
+-keep public class com.zz.sdk.util.DebugFlags {
+   public *;
+}
+-keep public class com.zz.sdk.PaymentCallbackInfo {
+   public *;
+}
+-keep public class com.zz.sdk.activity.LoginCallbackInfo {
+   public *;
+}
