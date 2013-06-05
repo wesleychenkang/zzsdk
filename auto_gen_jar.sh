@@ -13,11 +13,12 @@
 s=classes
 t=zzsdk-lib.jar
 j=${s}_dex2jar.jar
+D2J=dex2jar.sh
 
 ant clean
 ant release
 cd bin
-dex2jar.sh ${s}.dex
+${D2J} ${s}.dex
 zip -d ${j} "*" -x "com/zz/sdk*" -x "META-INF/*"
 zip -d ${j} "com/zz/sdk/activity/MainActivity.class"
 cd ..

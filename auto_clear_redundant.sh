@@ -9,9 +9,16 @@
 #
 ###########################################
 
+lib=zzsdk-lib.jar
+
+if [ ! -e ${lib} ]; then
+ echo "\n\t必须先编译生成${lib}\n"; 
+ exit -1;
+fi
+
 rm assets/* src/* -rf 
 
-cp zzsdk-lib.jar libs/
+cp ${lib} libs/
 
 git checkout src/com/zz/sdk/activity/MainActivity.java
 
@@ -19,16 +26,17 @@ ant clean
 
 ant debug
 
-cp bin/*-debug.apk .
+cp bin/*-debug.apk .  # 生成demo应用
 
-p="zzsdk-demo.`date +'%Y%m%H'`/"
+p="zzsdk-demo.`date +'%Y%m%d'`/"
 l="AndroidManifest.xml libs src project.properties res assets .classpath .project"
 t=zzsdk-demo.tar.gz
 
+# 打包库
 tar -czvf ${t} --transform='s,^,'"${p}"',' --show-transformed ${l} 
 
 # resume
-rm libs/zzsdk-lib.jar
+rm libs/${lib}
 
 git checkout assets src 
 
