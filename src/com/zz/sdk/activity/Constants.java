@@ -10,8 +10,8 @@ public final class Constants {
 
 	/** 服务器 */
 	//public static final String URL_SERVER = "http://iosrs.tisgame.com/";  //内外网正式
-	public static final String URL_SERVER = "http://211.162.126.221:8081/"; //外网测试
-	//public static final String URL_SERVER = "http://10.0.0.124:8080/";    //内网测试
+	//public static final String URL_SERVER = "http://211.162.126.221:8081/"; //外网测试
+	public static final String URL_SERVER = "http://10.0.0.124:8080/";    //内网测试
 
 	/**
 	 * lbs接口

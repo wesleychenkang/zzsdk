@@ -8,6 +8,8 @@ import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.zz.sdk.util.DebugFlags;
+
 /**
  * @Description: 支付参数
  * @author roger
@@ -176,6 +178,10 @@ public class PayParam implements Serializable, JsonParseInterface {
 					.append("&").append(K_REQUESTID).append("=")
 					.append(requestId).append("&").append(K_IMSI).append("=")
 					.append(smsImsi);
+			if(DebugFlags.DEBUG) {
+				b.append("&").append("ip=").append(DebugFlags.DEF_DEBUG_IP);
+			}
+			
 			break;
 
 		case PayChannel.PAY_TYPE_KKFUNPAY_EX:

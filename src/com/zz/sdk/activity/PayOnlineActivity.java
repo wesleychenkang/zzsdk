@@ -40,32 +40,7 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 	private String mUrl;
 	private String mUrlGuard;
 	private int mType;
-
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-
-		Intent intent = getIntent();
-		mUrl = intent.getStringExtra(K_URL);
-		mUrlGuard = intent.getStringExtra(K_URL_GUARD);
-		mType = intent.getIntExtra(K_TYPE, -1);
-
-		if (mUrl == null || mUrlGuard == null || mType < 0) {
-			finish();
-		}
-
-		String title = null;
-		if (mType == PayChannel.PAY_TYPE_ALIPAY
-				|| mType == PayChannel.PAY_TYPE_TENPAY) {
-			title = String.format(" - %s", PayChannel.CHANNEL_NAME[mType]);
-		}
-		MyLayout v = new MyLayout(this, title);
-		setContentView(v);
-
-		setupView(v);
-		v.setButtonClickListener(this);
-	}
-
+	
 	/**
 	 * 启动在线支付界面。
 	 * 
@@ -95,6 +70,31 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 			intent.putExtra(K_URL_GUARD, guard);
 		intent.putExtra(K_TYPE, type);
 		host.startActivityForResult(intent, requestCode);
+	}
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
+		Intent intent = getIntent();
+		mUrl = intent.getStringExtra(K_URL);
+		mUrlGuard = intent.getStringExtra(K_URL_GUARD);
+		mType = intent.getIntExtra(K_TYPE, -1);
+
+		if (mUrl == null || mUrlGuard == null || mType < 0) {
+			finish();
+		}
+
+		String title = null;
+		if (mType == PayChannel.PAY_TYPE_ALIPAY
+				|| mType == PayChannel.PAY_TYPE_TENPAY) {
+			title = String.format(" - %s", PayChannel.CHANNEL_NAME[mType]);
+		}
+		MyLayout v = new MyLayout(this, title);
+		setContentView(v);
+
+		setupView(v);
+		v.setButtonClickListener(this);
 	}
 
 	private void setupView(View v) {
