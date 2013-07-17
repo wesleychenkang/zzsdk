@@ -1,8 +1,10 @@
 package com.zz.sdk.activity;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Stack;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -19,27 +21,29 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
-import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Toast;
 
 import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
-import com.zz.sdk.entity.PayResult;
 import com.zz.sdk.entity.Result;
 import com.zz.sdk.entity.SMSChannelMessage;
 import com.zz.sdk.entity.UnionpayImpl;
+import com.zz.sdk.entity.UserAction;
 import com.zz.sdk.layout.ChargeAbstractLayout;
 import com.zz.sdk.layout.ChargeDetailLayout;
 import com.zz.sdk.layout.ChargeDetailLayoutForCard;
 import com.zz.sdk.layout.ChargePaymentListLayout;
 import com.zz.sdk.layout.ChargeSMSDecLayout;
+import com.zz.sdk.layout.MyDialog;
 import com.zz.sdk.layout.SmsChannelLayout;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.DialogUtil;
 import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.JsonUtil;
 import com.zz.sdk.util.Logger;
+import com.zz.sdk.util.RequestRunnable;
 import com.zz.sdk.util.SMSUtil;
 import com.zz.sdk.util.Utils;
 
@@ -49,16 +53,17 @@ import com.zz.sdk.util.Utils;
  */
 public class ChargeActivity extends Activity implements View.OnClickListener {
 
+	public static  int types = -1;
 	private static final String TOAST_TEXT = "充值金额不正确，请输入1-9999范围内的金额";
 	private static final String EXTRA_SERVERID = "serverId";
 	private static final String EXTRA_SERVERNAME = "serverName";
 	private static final String EXTRA_ROLEID = "roleID";
-	private static final String EXTRA_ROLE = "role";
+	private static final String EXTRA_GAME_ROLE = "gameRole";
 	private static final String EXTRA_CALLBACKINFO = "callBackInfo";
 
 	/** 银联的 request_code 被固定成了[10] */
 	public static final int ACTIVITY_REQUEST_CODE_UNIONPAY = 10;
-	
+
 	/** web在线支付 */
 	public static final int ACTIVITY_REQUEST_CODE_WEBPAY = 20;
 
@@ -70,24 +75,12 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 	public static ChargeActivity instance;
 
 	/* 第三方回调(可选) */
-	private static Handler mCallbackHandler;
-	private static int mCallbackWhat;
+	public static Handler mCallbackHandler;
+	public static int mCallbackWhat;
 
 	private String imsi;
 	private boolean isCancelDialog = false;
-
-	// 预定义充值方式的编号
-	// 卡类
-	// public static final int INDEX_CHARGE_CARD = 1;
-	// // 支付宝
-	// public static final int INDEX_CHARGE_ZHIFUBAO = 2;
-	// // 财付通
-	// public static final int INDEX_CHARGE_CAIFUTONG = 3;
-	// // 银联
-	// public static final int INDEX_CHARGE_UNIONPAY = 4;
-	//
-	// // 短信
-	// private static final int INDEX_CHARGE_SMS_GET_CHENNEL = 6;
+	private ExecutorService executor =null;
 	// 短信第二步请求
 	private static final int INDEX_CHARGE_SMSCHARGE_FEEDBACK = 100;
 
@@ -106,15 +99,15 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 	 * 充值卡类布局
 	 */
 	private ChargeDetailLayoutForCard mCardChargeLayout;
-	
+
 	/**
 	 * 支付宝 财付通布局
 	 */
 	private ChargeDetailLayout mDetailChargeLayout;
-	
+
 	/** 当前布局 **/
 	protected ChargeAbstractLayout mCurrentView;
-	
+
 	/** 单击操作 */
 	private final static int WO_FLAG_CLICK = 1 << 0;
 	/** 发送操作 */
@@ -123,7 +116,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			| WO_FLAG_SEND;
 	/** 阈值: {防止连续点击，时间间隔2秒, 发送短信失败超时90秒} */
 	private final static long WATCH_THRESHOLD[] = new long[] { 2 * 1000,
-			90 * 1000 };
+		90 * 1000 };
 	private final static long sWatchOp[] = new long[2];
 
 	/** 返回是否超时 */
@@ -138,29 +131,25 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 
 	/** 当前正在使用的支付参数 */
 	private PayParam mPayParam;
-
+	/**当前的用户*/
+	private UserAction userAction;
 	/** 当前正在使用的支付渠道 */
 	private PayChannel mPayChannel;
-	
+
 	/** 视图栈 */
 	final private Stack<ChargeAbstractLayout> mViewStack = new Stack<ChargeAbstractLayout>();
-	
+
 	/** 上次与服务器通信的返回结果 */
-	private Result mResult;
+	public Result mResult;
 
 	/** 信息发送渠道 */
 	private SMSChannelMessage sms;
 
 	/** 正在等待「支付」，用于提示框 */
 	private boolean isPay = true;
-	
+
 	/** 订单号 */
-	private String mOrderNumber = null;
-
-
-	// private long lastPayTime;
-
-	// private int reConnectCount = 3;
+	public static String callBackOrderNumber = null;
 
 	private boolean isRetUnionpay = false;
 
@@ -169,23 +158,14 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 	// 短信發送狀態監聽
 	private SmsSendReceiver smsSentReceiver = new SmsSendReceiver();
 
-	// // 發送短信狀態
-	// private boolean sentStatus;
-
-	// // 查詢余额信息體
-	// private SMSCheckCommandInfo checkCommandInfo;
 
 	// 短信通道信息體
 	private SMSChannelMessage[] mSMSChannelMessages;
-
-	// private String mAmount = null;
-	// 短信充值订单号
-	// public static List<String> mSmsOrders = new ArrayList<String>();
 	
+	public MyDialog resultDialog = null;
 
 	/** XXX-Step1: 充值类别的子项选择 */
 	final private OnItemClickListener mOnItemClickListener = new OnItemClickListener() {
-
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
@@ -202,10 +182,6 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			case PayChannel.PAY_TYPE_TENPAY:
 				// TODO: 这两个需要转 web
 			case PayChannel.PAY_TYPE_UNMPAY:
-				// case INDEX_CHARGE_ZHIFUBAO:
-				// case INDEX_CHARGE_CAIFUTONG:
-				// case INDEX_CHARGE_UNIONPAY:
-				// case 21:
 				mDetailChargeLayout = new ChargeDetailLayout(
 						ChargeActivity.this, mPayChannel, mPayParam);
 				mDetailChargeLayout.setButtonClickListener(ChargeActivity.this);
@@ -213,21 +189,39 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 
 				break;
 
-			// case INDEX_CHARGE_MOBILE:
-			// 卡类
+				// case INDEX_CHARGE_MOBILE:
+				// 卡类
 			case PayChannel.PAY_TYPE_YEEPAY_LT:
+				types = 3;
+				if(checkStaticAmount()){
+					mPayParam.type = "3";
+					mCardChargeLayout = new ChargeDetailLayoutForCard(
+							ChargeActivity.this, mPayChannel, mPayParam);
+					mCardChargeLayout.setButtonClickListener(ChargeActivity.this);
+		   	pushView2Stack(mCardChargeLayout);
+				} else {
+					DialogUtil.showDialogErr(ChargeActivity.this,
+							"该充值方式，没有您选择的商品金额，请选择其他方式！");
+				}
+				break;
 			case PayChannel.PAY_TYPE_YEEPAY_YD:
 				// case INDEX_CHARGE_CARD:
-
-				mCardChargeLayout = new ChargeDetailLayoutForCard(
-						ChargeActivity.this, mPayChannel, mPayParam);
-				mCardChargeLayout.setButtonClickListener(ChargeActivity.this);
-				pushView2Stack(mCardChargeLayout);
+				types = 3;
+				if(checkStaticAmount()){
+					mPayParam.type = "4";
+					mCardChargeLayout = new ChargeDetailLayoutForCard(
+							ChargeActivity.this, mPayChannel, mPayParam);
+					mCardChargeLayout
+							.setButtonClickListener(ChargeActivity.this);
+					pushView2Stack(mCardChargeLayout);
+				} else {
+					DialogUtil.showDialogErr(ChargeActivity.this,
+							"该充值方式，没有您选择的商品金额，请选择其他方式！");
+				}
 				break;
 
-			// 短信
+				// 短信
 			case PayChannel.PAY_TYPE_KKFUNPAY:
-				// case INDEX_CHARGE_SMS_GET_CHENNEL:
 
 				TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
 				imsi = tm.getSubscriberId();
@@ -241,46 +235,69 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 					imsi = DebugFlags.DEF_DEBUG_IMSI;
 				}
 				mPayParam.smsImsi = imsi;
-
 				getCommandOrChannel("{a:'" + imsi + "'}", 3);
-
 				break;
 			}
 
 		}
 	};
+	/**
+	 * 检查指定的金额与支付渠道的金额是否存在
+	 * @return
+	 */
+	private boolean checkStaticAmount() {
+		if (Application.staticAmount == null
+				|| "".equals(Application.staticAmount)) {
+			return true;
+		}
+		String list = Application.cardAmount; 
+		if(list!=null){
+			String[] s = list.split(",");
+			for(int i = 0;i<s.length;i++){
+				if(Application.staticAmount.equals(s[i])){
+					return true;
+				}
+			}
+		}
+		return false;
+
+	}
+
+
+
+
+
+
+
+
+
+
 
 	/** 短信渠道细节选择 */
 	private OnItemClickListener mSMSOnItemClickListener = new OnItemClickListener() {
-
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
-
-			// long millis = System.currentTimeMillis();
 			if (!check_op_timeout(WO_FLAG_CLICK)) {
 				return;
 			}
-
 			sms = (SMSChannelMessage) parent.getAdapter().getItem(position);
 			if ("1".equals(sms.isBlockPrompt)) {
 				ChargeSMSDecLayout chargeSMSDecLayout = new ChargeSMSDecLayout(
-						ChargeActivity.this, mPayChannel);
+						ChargeActivity.this, mPayChannel,
+						String.valueOf(sms.price / 100));
 				chargeSMSDecLayout.setButtonClickListener(ChargeActivity.this);
 				chargeSMSDecLayout.setSMSDec(sms.prompt);
 				pushView2Stack(chargeSMSDecLayout);
-			} else /*if ("0".equals(sms.isBlockPrompt))*/ {
+			}else{
 				mark_op_tick(WO_FLAG_CLICK_AND_SEND);
 				SMSUtil.sendMessage(ChargeActivity.this, sms);
 			}
-
-		}
-	};
-
+		  }
+	    };
 	/** XXX-Step3: 获取支付请求的结果，如果成功，则进入下一步支付 */
-	final private Handler mHandler = new Handler() {
+	 final private Handler mHandler = new Handler() {
 		public void handleMessage(Message msg) {
-
 			// 非「支付」状态，不处理任何消息, 此 handler 只接收一次消息
 			if (!isPay) {
 				hideDialog();
@@ -294,9 +311,8 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 				hideDialog();
 				return;
 			}
-			
-			mResult = (Result) msg.obj;
 
+			mResult = (Result) msg.obj;
 			Logger.d("订单号------>" + mResult.orderNumber);
 
 			if (!mResult.isSuccess()) {
@@ -304,35 +320,38 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 				hideDialog();
 				return;
 			}
-
-			mOrderNumber = mResult.orderNumber;
-
+			callBackOrderNumber = mResult.orderNumber;
 			mark_op_tick(WO_FLAG_CLICK);
-
 			switch (msg.what) {
 			// 支付宝
 			case PayChannel.PAY_TYPE_ALIPAY:
-				// new AlipayImpl(ChargeActivity.this, mResult,
-				// mPayChannel.channelId).pay();
-				// break;
 				// 财付通
-			case PayChannel.PAY_TYPE_TENPAY:
-			// TenpayImpl tenpay = new TenpayImpl(ChargeActivity.this,
-			// mPayChannel.channelId, mResult);
-			// tenpay.pay();
-			{
+			case PayChannel.PAY_TYPE_TENPAY: {
 				PayOnlineActivity.start(ChargeActivity.this,
 						ACTIVITY_REQUEST_CODE_WEBPAY, msg.what, mResult,
-						mPayChannel.channelId);
+						mPayChannel.channelId, mCallbackHandler, mPayParam);
 			}
 				break;
 			// 卡类
 			case PayChannel.PAY_TYPE_YEEPAY_LT:
 			case PayChannel.PAY_TYPE_YEEPAY_YD:
-				// case INDEX_CHARGE_CARD:
-				new CarThread(mResult, mPayChannel.channelId).start();
-				if (null != dialog)
+				if (mResult.codes == null || "1".equals(mResult.codes)) {
+					allPayCallBack(-1);
+				} else {
+					hideDialog();
+					resultDialog = DialogUtil.showPayResultDialog(
+							ChargeActivity.this, true);
+					allPayCallBack(0);
+				}
+				if (null != dialog) {
 					dialog.setCancelable(false);
+				}
+				if (Application.isCloseWindow == 1) {
+					if (resultDialog!=null) {
+						resultDialog.dismiss();
+					}
+					ChargeActivity.this.finish();
+				}
 				break;
 			// 银联
 			case PayChannel.PAY_TYPE_UNMPAY:
@@ -341,48 +360,38 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 				break;
 			}
 
-			if (msg.what != /* INDEX_CHARGE_CARD */PayChannel.PAY_TYPE_YEEPAY_YD
+			if (msg.what != PayChannel.PAY_TYPE_YEEPAY_YD
 					&& msg.what != PayChannel.PAY_TYPE_YEEPAY_LT) {
+				// 非卡类
 				hideDialog();
 			}
 
 		};
 	};
 
-	// 短信
-	final private Handler smsHandler = new Handler() {
+	 /**短信的查询与支付成功后订单上传成功后的反馈*/
+	 final private Handler smsHandler = new Handler() {
 		public void handleMessage(Message msg) {
-			// SMSHelper.hideDialog();
-
 			if (check_op_timeout(WO_FLAG_SEND))
 				return;
-
-			// SMSHelper.hideDialog();
-
 			if (null == msg.obj || !(msg.obj instanceof Result)) {
 				SMSUtil.hideDialog();
 				Utils.toastInfo(ChargeActivity.this,
 						"对不起，网络连接失败，请确认您的网络是否正常后再尝试，如需帮助请联系客服!");
 				return;
 			}
-
 			mResult = (Result) msg.obj;
-			
-
 			switch (msg.what) {
 			// 查询指令
 			case INDEX_CHARGE_SMS_GET_COMMAND:
+				boolean check = false;
 				if (!"0".equals(mResult.codes)) {
 					SMSUtil.hideDialog();
-					DialogUtil.showDialogErr(ChargeActivity.this, mResult.codes);
-					// SMSHelper.clearImsiAndProAndCityAndCar2xml(ChargeActivity.this);
+					DialogUtil.showDialogErr(ChargeActivity.this,
+							"获取不到支付通道，请选择其他方式");
 					return;
-				}
-				
+				  }
 				SMSUtil.hideDialog();
-				// mSMSChannelMessages = (SMSChannelMessage[]) JsonUtil
-				// .parseJSonArrayNotShortName(SMSChannelMessage.class,
-				// mResult.smsMoGap);
 				mSMSChannelMessages = (SMSChannelMessage[]) JsonUtil
 						.parseJSonArray(SMSChannelMessage.class,
 								mResult.attach2);
@@ -390,84 +399,62 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 				if (null != mSMSChannelMessages
 						&& mSMSChannelMessages.length > 0) {
 
-					if (mResult.enablePayConfirm) {
+					if (false ==mResult.enablePayConfirm) {
 						for (int i = 0, c = mSMSChannelMessages.length; i < c; i++) {
 							mSMSChannelMessages[i].isBlockPrompt = "1";
 						}
 					}
-					
-					SmsChannelLayout smsChannelLayout = new SmsChannelLayout(
-							ChargeActivity.this, mPayChannel,
-							mSMSChannelMessages, false);
-					pushView2Stack(smsChannelLayout);
-					smsChannelLayout
-							.setOnItemClickListener(mSMSOnItemClickListener);
-					smsChannelLayout
-							.setButtonClickListener(ChargeActivity.this);
-					
-					mOrderNumber = mResult.orderNumber;
-				} else {
+					for (int i = 0; i < mSMSChannelMessages.length; i++) {
+						if (Application.staticAmount != null
+								&& !"".equals(Application.staticAmount)) {
+							String value = new DecimalFormat("#.00")
+									.format(mSMSChannelMessages[i].price / 100.0);
+							if (value.equals(Application.staticAmount)) {
+								
+								check = true;
+								break;
+							}
+						}else{
+							check = true;
+							break;
+						}
+					}
+
+					if(check){
+						SmsChannelLayout smsChannelLayout = new SmsChannelLayout(
+								ChargeActivity.this, mPayChannel,
+								mSMSChannelMessages, false);
+						pushView2Stack(smsChannelLayout);
+						smsChannelLayout
+						.setOnItemClickListener(mSMSOnItemClickListener);
+						smsChannelLayout
+						.setButtonClickListener(ChargeActivity.this);
+
+						callBackOrderNumber = mResult.orderNumber;
+					} else {
+						DialogUtil.showDialogErr(ChargeActivity.this,
+								"该充值方式，没有您选择的商品金额，请选择其他方式！");
+
+					}
+				}else {
 					Utils.toastInfo(ChargeActivity.this, "获取不到支付通道，请选择其他方式");
 				}
 
 				break;
 
-			// 短信获取订单信息
+				// 短信获取订单信息
 			case INDEX_CHARGE_SMSCHARGE_FEEDBACK:
 
-				// SMSHelper.sendMessage(ChargeActivity.this, sms);
-				// System.out.println("充值");
-				
-				// XXX-Step4: 短信充值结果，目前只要短信发送成功，就认为充值成功。
 				SMSUtil.hideDialog();
-				//
-				// if (mResult == null || !"0".equals(mResult)) {
-				// DialogUtil.showPayResultDialog(ChargeActivity.this, false);
-				// } else {
-				DialogUtil.showPayResultDialog(ChargeActivity.this, true, ChargeActivity.this);
-				// }
+				resultDialog = DialogUtil.showPayResultDialog(
+						ChargeActivity.this, true);
 				break;
 			}
 		};
 	};
 
-//	private Handler channelHandler = new Handler() {
-//		public void handleMessage(Message msg) {
-//			hideDialog();
-//			mResult = (Result) msg.obj;
-//			// System.out.println("ccccc-->" + mResult.toString());
-//			if (null == mResult || !"0".equals(mResult)
-//					|| !mResult.orderNumber.equals("0")
-//					|| null == mResult.smsMoGap) {
-//				init();
-//				mPaymentListLayout.setChannelMessages(Application.mPayChannels);
-//				mPaymentListLayout.showPayList(View.VISIBLE);
-//				return;
-//			}
-//
-//			mSMSChannelMessages = (SMSChannelMessage[]) JsonUtil
-//					.parseJSonArrayNotShortName(SMSChannelMessage.class,
-//							mResult.smsMoGap);
-//
-//			if (null != mSMSChannelMessages && mSMSChannelMessages.length > 0) {
-//				SmsChannelLayout smsChannelLayout = new SmsChannelLayout(
-//						ChargeActivity.this, mPayChannel, mSMSChannelMessages,
-//						false);
-//				pushView2Stack(smsChannelLayout);
-//				smsChannelLayout
-//						.setOnItemClickListener(mSMSOnItemClickListener);
-//				smsChannelLayout.setButtonClickListener(ChargeActivity.this);
-//			} else {
-//				init();
-//				mPaymentListLayout.setChannelMessages(Application.mPayChannels);
-//				mPaymentListLayout.showPayList(View.VISIBLE);
-//			}
-//		};
-//
-//	};
-
-	Handler carHandler = new Handler();
-
+    /**
+     * 卡类的支付请求，封装到所有的支付请求当中去了
 	class CarThread extends Thread {
 
 		Result result;
@@ -500,7 +487,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 
 							String reCode = Utils.substringStatusStr(
 									list.toString(), "r1_Code=", ",");
-							
+
 							// 充值卡　提交成功
 							if ("1".equals(reCode)) {
 								DialogUtil.showPayResultDialog(
@@ -523,24 +510,24 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			}
 		}
 	};
+	*/
 
 	public static void start(Handler callbackHandler, int what,
 			Context context, String gameServerID, String serverName,
 			String roleId, String gameRole, String callBackInfo) {
 		mCallbackHandler = callbackHandler;
 		mCallbackWhat = what;
-
 		Intent intent = new Intent();
 		intent.putExtra(EXTRA_SERVERID, gameServerID);
 		intent.putExtra(EXTRA_SERVERNAME, serverName);
 		intent.putExtra(EXTRA_ROLEID, roleId);
-		intent.putExtra(EXTRA_ROLE, gameRole);
+		intent.putExtra(EXTRA_GAME_ROLE, gameRole);
 		intent.putExtra(EXTRA_CALLBACKINFO, callBackInfo);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		intent.setClass(context, ChargeActivity.class);
 		context.startActivity(intent);
 	}
-	
+
 	/** 清除所有缓存对象 */
 	private void clean() {
 		instance = null;
@@ -552,7 +539,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		mDetailChargeLayout= null;
 		mPaymentListLayout = null;
 		mSMSChannelMessages = null;
-		mOrderNumber = null;
+		userAction = null;
 		mViewStack.clear();
 	}
 
@@ -562,8 +549,11 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			unregisterReceiver(smsSentReceiver);
 		super.onDestroy();
 		clean();
+		if(executor!=null){
+			executor.shutdown(); 
+			executor = null;
+		}
 	}
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -571,66 +561,48 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		Intent intent = getIntent();
 		instance = this;
 		mPayParam = new PayParam();
+		userAction = new UserAction();
 		// 游戏服务器
 		mPayParam.serverId = intent.getStringExtra(EXTRA_SERVERID);
+		userAction.serverId = mPayParam.serverId;
+		userAction.loginName = Application.loginName;
+		userAction.memo = "";
+		userAction.actionType = "";
 		mPayParam.loginName = Application.loginName;
 		mPayParam.projectId = Utils.getProjectId(getBaseContext());
 		// 游戏角色
-		mPayParam.gameRole = intent.getStringExtra(EXTRA_ROLEID);
+		mPayParam.gameRole = intent.getStringExtra(EXTRA_GAME_ROLE);
 		mPayParam.callBackInfo = intent.getStringExtra(EXTRA_CALLBACKINFO);
-
+		
 		dialog = DialogUtil.showProgress(instance, "", true);
 		dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-
 			@Override
 			public void onCancel(DialogInterface dialog) {
 				isCancelDialog = true;
 				finish();
 			}
 		});
-
 		new PayListTask(mPayParam).execute();
-
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(SmsSendReceiver.ACTION);
 		intentFilter.addAction(SmsSendReceiver.ACTION_CHECK);
 		registerReceiver(smsSentReceiver, intentFilter);
-
+		if(executor==null){
+			executor = Executors.newSingleThreadExecutor();
+		}
 	}
 
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
-//		if (isRetUnionpay) {
-//			Bundle xmlData = intent.getExtras();
-//			if (xmlData != null) {
-//				String response = xmlData.getString("xml");
-//
-//				Logger.d("银联支付后返回的信息------->" + response);
-//				final PayResult payResult = new PayResult();
-//				payResult.channelId = mPayChannel.channelId;
-//				payResult.orderId = mResult.orderNumber;
-//				payResult.resultCode = response;
-//				// new PayResultReturnThread(ChargeActivity.this, payResult)
-//				// .start();
-//
-//				if ("0000".equals(Utils.substringStatusStr(response,
-//						"<respCode>", "</respCode>"))) {
-//					DialogUtil.showPayResultDialog(ChargeActivity.this, true);
-//				}
-//				isRetUnionpay = false;
-//			}
-//		}
 	}
 
 	private void init() {
-		// if (null == mPaymentListLayout) {
 		mPaymentListLayout = new ChargePaymentListLayout(ChargeActivity.this);
 		ChargeActivity.this.setContentView(mPaymentListLayout);
 		mPaymentListLayout.setOnItemClickListener(mOnItemClickListener);
 		mPaymentListLayout.setButtonClickListener(ChargeActivity.this);
 		pushView2Stack(mPaymentListLayout);
-		// }
 	}
 
 	protected void pushView2Stack(ChargeAbstractLayout newView) {
@@ -648,52 +620,51 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			// newView.startAnimation(mAnimRightIn);
 		}
 	}
-
 	private View popViewFromStack() {
 		if (mViewStack.size() > 1) {
+			if(Application.isCloseWindow==1){
+				this.finish();
+				return null;
+			}
 			// 弹出旧ui
 			View pop = mViewStack.pop();
 			pop.clearFocus();
-			// 动画
-			// pop.startAnimation(mAnimRightOut);
-
-			// 新ui
 			mCurrentView = mViewStack.peek();
 			setContentView(mCurrentView);
 			mCurrentView.requestFocus();
-			// mCurrentView.startAnimation(mAnimLeftIn);
+
 			return mCurrentView;
 		} else {
 			Logger.d("ChargeActivity exit");
+			if (Application.isAlreadyCB == 1) {
+				Application.isAlreadyCB = 0;
+			} else {
+				allPayCallBack(-2);
+				Application.isAlreadyCB = 0;
+			}
+			
 			finish();
 			return null;
 		}
 	}
-
 	/** XXX-Step2: 各种充值按钮监听器 */
 	public void onClick(View v) {
 		// 防止连续点击，时间间隔2秒
 		if (!check_op_timeout(WO_FLAG_CLICK)) 
 			return;
-
 		int type = -1;
 		switch (v.getId()) {
-		case DialogUtil.ID_PAY_SUCCESS:
-			postPayResult(true);
-			break;
-			
-		case DialogUtil.ID_PAY_FAILED:
-			// postPayResult(false);
-			break;
-			
-		// 取消按键 退出按钮
+			// 取消按键 退出按钮
 		case ChargeAbstractLayout.ID_CANCEL:
+			popViewFromStack();
+			String cancelType = Utils.getTypes(types);
+			postRequest(cancelType);
+			break;
 		case ChargeAbstractLayout.ID_EXIT:
 			popViewFromStack();
 			isPay = false;
 			return;
-			
-		// 其它支付方式，如「短信支付」等界面
+			// 其它支付方式，如「短信支付」等界面
 		case SmsChannelLayout.ID_OTHERPAY:
 			if (!mViewStack.isEmpty()) {
 				mViewStack.clear();
@@ -706,13 +677,11 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			mPaymentListLayout.setChannelMessages(Application.mPayChannels);
 			mPaymentListLayout.showPayList(View.VISIBLE);
 			return;
-			
+          //短信发送按钮
 		case ChargeSMSDecLayout.ID_NOTE:
-			// if (System.currentTimeMillis() - sendTimeMills < 2000) {
-			// return;
-			// }
 			SMSUtil.sendMessage(ChargeActivity.this, sms);
 			mark_op_tick(WO_FLAG_CLICK_AND_SEND);
+			postRequest(UserAction.PKKFUN);
 			return;
 
 			// 支付宝
@@ -722,17 +691,11 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 				Utils.toastInfo(instance, TOAST_TEXT);
 				return;
 			}
-
-			// MobileSecurePayHelper mspHelper = new MobileSecurePayHelper(
-			// ChargeActivity.this, null);
-			// boolean isMobile_spExist = mspHelper.detectMobile_sp();
-			// if (!isMobile_spExist) {
-			// return;
-			// }
 			type = PayChannel.PAY_TYPE_ALIPAY;
+			postRequest(UserAction.PALI);
 			break;
-			
-		// 财付通
+
+			// 财付通
 		case ChargeDetailLayout.ID_TENPAY:
 
 			if (!mDetailChargeLayout.checkMoney()) {
@@ -740,35 +703,36 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 				return;
 			}
 
-			/*
-			 * TenpayServiceHelper tenpayHelper = new TenpayServiceHelper(
-			 * ChargeActivity.this); tenpayHelper.setLogEnabled(false); // 打开log
-			 * 方便debug, 发布时不需要打开。 // 判断并安装财付通安全支付服务应用 if
-			 * (!tenpayHelper.isTenpayServiceInstalled(9)) {
-			 * tenpayHelper.installTenpayService( new
-			 * DialogInterface.OnCancelListener() {
-			 * 
-			 * @Override public void onCancel(DialogInterface dialog) { } },
-			 * "/sdcard/test"); return; }
-			 */
 			type = PayChannel.PAY_TYPE_TENPAY;
-
 			break;
 
-		// 卡类
-		case ChargeDetailLayoutForCard.ID_BTNSUBMIT:
+			// 卡类
+		case ChargeDetailLayoutForCard.ID_BTNSUBMIT_LT:
 			if (!mCardChargeLayout.checkNum())
 				return;
-			type = /* INDEX_CHARGE_CARD */PayChannel.PAY_TYPE_YEEPAY_YD;
+			if(dialog!=null){
+				dialog.show();
+			}
+			type = /* INDEX_CHARGE_CARD */PayChannel.PAY_TYPE_YEEPAY_LT;
+			postRequest(UserAction.PYEE);
 			break;
-			
-		// 银联
+		case ChargeDetailLayoutForCard.ID_BTNSUBMIT_YD:
+			if (!mCardChargeLayout.checkNum())
+				return;
+			if(dialog!=null){
+				dialog.show();
+			}
+			type = /* INDEX_CHARGE_CARD */PayChannel.PAY_TYPE_YEEPAY_YD;
+			postRequest(UserAction.PYEE);
+			break;
+			// 银联
 		case ChargeDetailLayout.ID_UNICOMPAY:
 			if (!mDetailChargeLayout.checkMoney()) {
 				Utils.toastInfo(instance, TOAST_TEXT);
 				return;
 			}
 			type = PayChannel.PAY_TYPE_UNMPAY;
+			postRequest(UserAction.PUNION);
 			break;
 
 		}
@@ -794,10 +758,9 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			}
 		}
 	}
-
+	
 	/** 支付请求线程，结果发送到 handler 中 */
 	class PaymentThread extends Thread {
-
 		private int type;
 		private PayParam charge;
 		private Handler handler;
@@ -818,7 +781,8 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			handler.sendMessage(message);
 		}
 	}
-
+	
+	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -827,7 +791,6 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		}
 		return super.onKeyDown(keyCode, event);
 	}
-
 	public void notifySendMessageFinish(boolean success, int type) {
 
 		// 超過90秒就認為發送失敗
@@ -840,11 +803,12 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 				SMSUtil.hideDialog();
 				DialogUtil.showDialogErr(ChargeActivity.this,
 						"对不起，查询余额失败,请确认您的卡是否已欠费或已失效，如需帮助请联系客服!");
+				smsPayCallBack(-1,String.valueOf(sms.price/100));
 				return;
 			} else {
 				SMSUtil.setTextSMS();
 			}
-		}
+		 }
 
 		if (type == 2) {
 			if (!success) {
@@ -852,60 +816,26 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 				Utils.toastInfo(ChargeActivity.this,
 						"对不起，话费支付失败！请确认您的卡是否已欠费或已失效，如需帮助请联系客服!");
 				popViewFromStack();
-				popViewFromStack();
+				//popViewFromStack();
+				smsPayCallBack(-1, String.valueOf(sms.price / 100));
+
 			} else {
+				SMSUtil.hideDialog();
 				sendSmsFeedback();
 			}
+			if(Application.isCloseWindow == 1){
+				this.finish();
+			 }
 		}
 	}
 
 	private void sendSmsFeedback() {
-
 		PayParam payParam = new PayParam();
-//		payParam.channelId = "5";
-//		payParam.smsActionType = "2";
-//		payParam.gameRole = mPayParam.gameRole;
-//		payParam.serverId = mPayParam.serverId;
-//		payParam.callBackInfo = mPayParam.callBackInfo;
-//		payParam.amount = String.valueOf(sms.price);
-//		try {
-//			JSONObject obj = new JSONObject();
-//			obj.put("a", imsi);
-//			obj.put("b", sms.serviceType);
-//			// 以元为单位传
-//			obj.put("c", "" + sms.price);
-//			obj.put("d", sms.command);
-//			obj.put("e", sms.sendToAddress);
-//			// if (success) {
-//			obj.put("f", "1");
-//			obj.put("g", "充值成功");
-//			// } else {
-//			// obj.put("f", "0");
-//			// obj.put("g", "充值失败");
-//			// }
-//			// if (null == mAmount || "".equals(mAmount)) {
-//			// SharedPreferences prefs = getSharedPreferences(
-//			// SMSHelper.XML_COMMAND, Context.MODE_PRIVATE);
-//			// mAmount = prefs.getString(SMSHelper.AMOUNT, "0");
-//			// }
-//			// double amount1 = Double.parseDouble(mAmount) - sms.price;
-//			// mAmount = (amount1 < 0 ? 0 :amount1) + "";
-//
-//			obj.put("h", "0");
-//
-//			// SharedPreferences prefs = getSharedPreferences(
-//			// SMSHelper.XML_COMMAND, Context.MODE_PRIVATE);
-//			// prefs.edit().putString(SMSHelper.AMOUNT, mAmount).commit();
-//
-//			payParam.smsImsi = obj.toString();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
 		HashMap<String, String> ap = new HashMap<String, String>();
 		ap.put("dueFee", String.valueOf(sms.price/100));
 		ap.put("serviceType", sms.serviceType);
-		ap.put("status", "");
-		ap.put("cmgeOrderNum", mOrderNumber);
+		ap.put("status", "0");
+		ap.put("cmgeOrderNum", callBackOrderNumber);
 		payParam.loginName = Application.loginName;
 		payParam.smsImsi = mPayParam.smsImsi;
 		payParam.attachParam = ap;
@@ -913,9 +843,9 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		mPayParam.amount = String.valueOf((int)(sms.price/100));
 		if (payParam != null) {
 			Logger.d("charge------>" + payParam.toString());
-			// System.out.println("生成订单");
-			SMSUtil.charge(instance, payParam, smsHandler,
-					INDEX_CHARGE_SMSCHARGE_FEEDBACK);
+			// System.out.println("生成订单上传到服务器");
+			SMSUtil.charge(instance, payParam, INDEX_CHARGE_SMSCHARGE_FEEDBACK);
+			smsPayCallBack(0, String.valueOf(sms.price / 100));
 		}
 	}
 
@@ -941,7 +871,6 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 
 		@Override
 		protected PayChannel[] doInBackground(Void... params) {
-
 			Logger.d("获取列表Task！");
 			return GetDataImpl.getInstance(ChargeActivity.this).getPaymentList(
 					payParam);
@@ -950,35 +879,17 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		@Override
 		protected void onPostExecute(PayChannel[] result) {
 
-			// hideDialog();
-
 			if (isCancelDialog) {
 				hideDialog();
 				finish();
 				return;
 			}
-			// boolean isSMS = false;
 
 			if (result != null && result.length != 0
 					&& Application.mPayChannels != null
 					&& Application.mPayChannels.length > 0) {
 				Logger.d("获取列表成功!");
 
-				// XXX: 自动使用 短信 方式？
-//				for (int i = 0; i < Application.mPayChannels.length; i++) {
-//					if (Application.mPayChannels[i].type == PayChannel.PAY_TYPE_KKFUNPAY) {
-//						if (null != imsi1 && !"".equals(imsi1)) {
-//							PayParam payParam = new PayParam();
-//							payParam.smsImsi = "{a:'" + imsi1 + "'}";
-//							payParam.smsActionType = "1";
-//							payParam.channelId = "5";
-//							SMSUtil.getSMSCheckCommand(instance, payParam,
-//									channelHandler, INDEX_CHARGE_SMS_CHENNEL);
-//							mPayChannel = Application.mPayChannels[i];
-//							return;
-//						}
-//					}
-//				}
 				hideDialog();
 				init();
 				mPaymentListLayout.setChannelMessages(Application.mPayChannels);
@@ -990,7 +901,18 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			}
 		}
 	}
-
+    
+	
+	/**
+	 * 用户行为请求请求
+	 * @author aaa
+	 *
+	 */
+	private void postRequest(String types) {
+		userAction.actionType = types;
+		executor.execute(new RequestRunnable(ChargeActivity.this,userAction));
+	}
+	
 	/** 关闭提示框，如「等待框」等 */
 	private void hideDialog() {
 		if (null != dialog && dialog.isShowing()) {
@@ -1010,28 +932,32 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		payParam.channelId = "5";
 
 		mark_op_tick(WO_FLAG_SEND);
-		SMSUtil.getSMSCheckCommand(instance, /* payParam */mPayParam,
-				smsHandler, INDEX_CHARGE_SMS_GET_COMMAND);
+		SMSUtil.getSMSCheckCommand(instance, mPayParam, smsHandler,
+				INDEX_CHARGE_SMS_GET_COMMAND);
 		SMSUtil.showDialog(ChargeActivity.this, type);
 
 	}
 
-	/** 通知「用户」回调此次支付结果 */
+	/** 通知「用户」回调此次支付结果 
 	private void postPayResult(boolean success) {
-		if (mCallbackHandler != null) {
+		if(mCallbackHandler != null) {
 			PaymentCallbackInfo info = new PaymentCallbackInfo();
 			info.statusCode = success ? PaymentCallbackInfo.STATUS_SUCCESS
 					: PaymentCallbackInfo.STATUS_FAILURE;
+			if (Application.payStatusCancel == PaymentCallbackInfo.STATUS_CANCEL) {
+				info.statusCode = PaymentCallbackInfo.STATUS_CANCEL;
+			}
 			try {
-				info.amount = Integer.parseInt(mPayParam.amount);
+				info.amount = mPayParam.amount;
+				info.cmgeOrderNumber = callBackOrderNumber;
 			} catch (NumberFormatException e) {
 			}
 			Message msg = Message.obtain(mCallbackHandler, mCallbackWhat, info);
 			mCallbackHandler.sendMessage(msg);
 		}
 		setResult(success ? RESULT_OK : RESULT_CANCELED);
-		finish();
 	}
+	*/
 
 	/**
 	 * XXX-Step4: 调用子窗体的返回值，目前只有 {@link PayChannel#PAY_TYPE_UNMPAY 银联}、
@@ -1039,12 +965,13 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 	 * 财富通}
 	 */
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
 		if (DebugFlags.DEBUG) {
 			Toast.makeText(
 					getBaseContext(),
 					"[调试]充值结果： request=" + requestCode + " result="
 							+ resultCode + " data=" + data, Toast.LENGTH_SHORT)
-					.show();
+							.show();
 		}
 
 		String pay_result = data != null ? data.getStringExtra(PAY_RESULT)
@@ -1052,18 +979,33 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 
 		if (requestCode == ACTIVITY_REQUEST_CODE_UNIONPAY) {
 			if (isRetUnionpay) {
-				// 银联的支付结果
-				// requestCode =10;
-				// resultCode = -1;
 				if (PAY_RESULT_SUCCESS.equalsIgnoreCase(pay_result)) {
-					// showResultDialog(" 支付成功! ");
-					DialogUtil.showPayResultDialog(this, true, ChargeActivity.this);
+					if (Application.isCloseWindow != 1) {
+						resultDialog = DialogUtil.showPayResultDialog(this,
+								true);
+					}
+					allPayCallBack(0);
 				} else if (PAY_RESULT_FAIL.equalsIgnoreCase(pay_result)) {
-					// showResultDialog(" 支付失败! ");
-					DialogUtil.showPayResultDialog(this, false, ChargeActivity.this);
+					if (Application.isCloseWindow != 1) {
+						resultDialog = DialogUtil.showPayResultDialog(this,
+								false);
+					}
+					allPayCallBack(-1);
 				} else if (PAY_RESULT_CANCEL.equalsIgnoreCase(pay_result)) {
-					// showResultDialog(" 你已取消了本次订单的支付! ");
-					DialogUtil.showDialogErr(this, "你已取消了本次订单的支付! ");
+					Application.payStatusCancel = PaymentCallbackInfo.STATUS_CANCEL;
+					new Thread(new Runnable(){
+						@Override
+						public void run() {
+							GetDataImpl.getInstance(ChargeActivity.this)
+									.canclePay(mResult.orderNumber, "银联内取消支付");
+						}
+					}).start();
+					if (Application.isCloseWindow != 1) {
+						DialogUtil.showDialogErr(this, "你已取消了本次订单的支付!订单号为:"
+								+ mResult.orderNumber);
+					}
+					allPayCallBack(-2);
+
 				}
 			}
 		} else if (requestCode == ACTIVITY_REQUEST_CODE_WEBPAY) {
@@ -1071,11 +1013,43 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			if (PAY_RESULT_SUCCESS.equalsIgnoreCase(pay_result)) {
 				PayChannel pc = mPayChannel;
 				PayParam pp = mPayParam;
-				if (pc != null && pp != null) {
-					DialogUtil.showPayResultDialog(this, true, ChargeActivity.this);
-				}
+				 if (pc != null && pp != null) {
+					resultDialog = DialogUtil.showPayResultDialog(this, true);
+					allPayCallBack(0);
+				 }
 			}
 		}
+	}
+
+	/**
+	 * 支付回调方法
+	 * @param codes
+	 */
+	private void allPayCallBack(int codes){
+		PaymentCallbackInfo info = new PaymentCallbackInfo();
+		info.amount = mPayParam.amount;
+		info.cmgeOrderNumber = callBackOrderNumber;
+		info.statusCode=codes;
+		Application.isAlreadyCB = 1;
+		Message msg = Message.obtain(mCallbackHandler, mCallbackWhat, info);
+		mCallbackHandler.sendMessage(msg);
+		if (Application.isCloseWindow == 1) {
+			finish();
+		}
+
+	}
+	private void smsPayCallBack(int codes,String amount){
+		PaymentCallbackInfo info = new PaymentCallbackInfo();
+		info.amount = amount;
+		info.cmgeOrderNumber = callBackOrderNumber;
+		info.statusCode=codes;
+		Application.isAlreadyCB = 1;
+		Message msg = Message.obtain(mCallbackHandler, mCallbackWhat, info);
+		mCallbackHandler.sendMessage(msg);
+		if (Application.isCloseWindow == 1) {
+			finish();
+		}
+
 	}
 
 }

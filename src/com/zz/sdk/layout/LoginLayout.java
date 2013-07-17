@@ -73,14 +73,14 @@ public class LoginLayout extends AbstractLayout implements OnClickListener, View
 	 * @return
 	 */
 	public String getAccount() {
-		return mInputAccount.getText().toString();
+		return mInputAccount.getText().toString().trim();
 	}
 	
 	/**
 	 * 获取密码
 	 */
 	public String getPassWord() {
-		return mInputPW.getText().toString();
+		return mInputPW.getText().toString().trim();
 	}
 
 	public OnClickListener getRegisterListener() {
@@ -227,7 +227,7 @@ public class LoginLayout extends AbstractLayout implements OnClickListener, View
 			//显示
 			mAutoDialog.show();
 			//2秒
-			mHandler.postDelayed(doAutoLogin, 5 * 1000);
+			mHandler.postDelayed(doAutoLogin, 2 * 1000);
 		}
 		
 		

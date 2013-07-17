@@ -107,8 +107,8 @@ public class PayChannel implements JsonParseInterface {
 			notifyUrl = json.isNull("notifyUrl") ? null : json
 					.getString("notifyUrl");
 			type = json.isNull("type") ? -1 : json.getInt("type");
-			priceList = json.isNull("priceList") ? null : json
-					.getString("priceList");
+			priceList = json.isNull("cardAmount") ? null : json
+					.getString("cardAmount");
 
 			// ---- 本地化调整
 			if (type >= 0 && type < _PAY_TYPE_MAX_) {

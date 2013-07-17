@@ -70,7 +70,7 @@ public abstract class ChargeAbstractLayout extends LinearLayout {
 		}
 
 		mContent = new LinearLayout(activity);
-		lp = new LayoutParams(mScreenWidth, mScreenHeight);
+		lp = new LayoutParams(-1, -1);
 		mContent.setOrientation(LinearLayout.VERTICAL);
 		mContent.setBackgroundDrawable(d);
 		addView(mContent, lp);
@@ -173,36 +173,36 @@ public abstract class ChargeAbstractLayout extends LinearLayout {
 
 	}
 
-	class ChargeSMSPayView extends LinearLayout {
-
-		public TextView mSMSPay;
-
-		public ChargeSMSPayView(Context context) {
-			super(context);
-
-			setOrientation(LinearLayout.VERTICAL);
-			setBackgroundDrawable(BitmapCache.getDrawable(context,
-					Constants.ASSETS_RES_PATH + "list_title.png"));
-
-			LayoutParams lp1 = new LayoutParams(-1, -1);
-			LinearLayout ll1 = new LinearLayout(context);
-			lp1.topMargin = DimensionUtil.dip2px(context, 5);
-			lp1.leftMargin = DimensionUtil.dip2px(context, 20);
-			lp1.bottomMargin = DimensionUtil.dip2px(context, 5);
-			ll1.setGravity(Gravity.CENTER_VERTICAL);
-			ll1.setOrientation(LinearLayout.VERTICAL);
-			addView(ll1, lp1);
-
-			lp1 = new LayoutParams(-1, -2);
-			mSMSPay = new TextView(mActivity);
-			mSMSPay.setTextSize(16);
-			mSMSPay.setTextColor(0xfffbcf4b);
-			ll1.addView(mSMSPay, lp1);
-
-		}
-
-	}
-	
+//	class ChargeSMSPayView extends LinearLayout {
+//
+//		public TextView mSMSPay;
+//
+//		public ChargeSMSPayView(Context context) {
+//			super(context);
+//
+//			setOrientation(LinearLayout.VERTICAL);
+//			setBackgroundDrawable(BitmapCache.getDrawable(context,
+//					Constants.ASSETS_RES_PATH + "list_title.png"));
+//
+//			LayoutParams lp1 = new LayoutParams(-1, -1);
+//			LinearLayout ll1 = new LinearLayout(context);
+//			lp1.topMargin = DimensionUtil.dip2px(context, 5);
+//			lp1.leftMargin = DimensionUtil.dip2px(context, 20);
+//			lp1.bottomMargin = DimensionUtil.dip2px(context, 5);
+//			ll1.setGravity(Gravity.CENTER_VERTICAL);
+//			ll1.setOrientation(LinearLayout.VERTICAL);
+//			addView(ll1, lp1);
+//
+//			lp1 = new LayoutParams(-1, -2);
+//			mSMSPay = new TextView(mActivity);
+//			mSMSPay.setTextSize(16);
+//			mSMSPay.setTextColor(0xfffbcf4b);
+//			ll1.addView(mSMSPay, lp1);
+//
+//		}
+//
+//	}
+//	
 	
 	
 }

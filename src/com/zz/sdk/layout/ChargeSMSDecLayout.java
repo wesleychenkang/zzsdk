@@ -3,6 +3,7 @@ package com.zz.sdk.layout;
 import android.app.Activity;
 import android.text.Html;
 import android.text.util.Linkify;
+import android.util.Log;
 import android.view.Gravity;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -22,11 +23,13 @@ public class ChargeSMSDecLayout extends ChargeAbstractLayout {
 	private PayChannel mPayChannel;
 	private TextView mSMSDec;
 	private Button mConfirm;
+	private String price;
 
-	public ChargeSMSDecLayout(Activity activity, PayChannel channelMessage) {
+	public ChargeSMSDecLayout(Activity activity, PayChannel channelMessage,String price) {
 		super(activity);
 		mPayChannel = channelMessage;
 		initUI(activity);
+		this.price = price ;
 	}
 
 	@Override
@@ -76,7 +79,7 @@ public class ChargeSMSDecLayout extends ChargeAbstractLayout {
 		mConfirm.setTextSize(18);
 		parent.addView(mConfirm, lp);
 	}
-
+ 
 	@Override
 	public PayParam getPayParam() {
 		return null;
@@ -92,7 +95,12 @@ public class ChargeSMSDecLayout extends ChargeAbstractLayout {
 		if (null != dec && !"".equals(dec)) {
 			mSMSDec.setAutoLinkMask(Linkify.PHONE_NUMBERS);
 			mSMSDec.setLinkTextColor(0xffffea00);
-			mSMSDec.setText(Html.fromHtml(dec+ Application.customerServiceHotline+ ", "+ Application.customerServiceQQ) );
-		}
+			String[] spit = dec.split(",");
+			if(spit!=null&&spit.length>=2){
+			//Application.customerServiceHotline+ ", "+ Application.customerServiceQQ)
+			mSMSDec.setText(dec);
+			mSMSDec.setText(Html.fromHtml("您将使用<font color='#ffea00'>"+spit[0]+"</font>公司提供的<font color='#ffea00'>"+spit[1]+"</font>业务进行代支付,资费是<font color='#ffea00'>"+price+"</font>元，您将收到相关的短信提示，请注意查收！"));
+			}
+			}
 	}
 }

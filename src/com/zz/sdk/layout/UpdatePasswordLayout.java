@@ -130,11 +130,11 @@ public class UpdatePasswordLayout extends AbstractLayout implements View.OnClick
 	}
 	
 	public String getInputOldPwd() {
-		return mOldPwd.getText().toString();
+		return mOldPwd.getText().toString().trim();
 	}
 	
 	public String getInputNewPwd() {
-		return mNewPwd.getText().toString();
+		return mNewPwd.getText().toString().trim();
 	}
 
 	public OnClickListener getConfirmListener() {

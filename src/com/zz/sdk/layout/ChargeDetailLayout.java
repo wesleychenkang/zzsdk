@@ -44,14 +44,18 @@ public class ChargeDetailLayout extends ChargeAbstractLayout {
 		switch (id) {
 		// 支付宝
 		case PayChannel.PAY_TYPE_ALIPAY:
+			
+			ChargeActivity.types = 2;
 			ID_PAY = ID_ALIPAY;
 			break;
 		// 银联卡
 		case PayChannel.PAY_TYPE_UNMPAY:
 			ID_PAY = ID_UNICOMPAY;
+			ChargeActivity.types = 1;
 			break;
 		// 财付通
 		case PayChannel.PAY_TYPE_TENPAY:
+			ChargeActivity.types = 0;
 			ID_PAY = ID_TENPAY;
 			break;
 		}
@@ -136,12 +140,13 @@ public class ChargeDetailLayout extends ChargeAbstractLayout {
 		layout.addView(tv1, lp);
 
 		mInput = new EditText(activity);
-		mInput.setText("50");
+		
+		
 		mInput.setTextColor(0xffbf956e);
 		mInput.setTextSize(14);
 		mInput.setId(ID_INPUT);
 		mInput.setGravity(Gravity.CENTER_VERTICAL);
-		mInput.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
+		mInput.setInputType(EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
 		mInput.setBackgroundDrawable(BitmapCache.getDrawable(activity,
 				Constants.ASSETS_RES_PATH + "input_money.png"));
 		lp = new LayoutParams(-2, -2);
@@ -158,6 +163,14 @@ public class ChargeDetailLayout extends ChargeAbstractLayout {
 		lp.leftMargin = DimensionUtil.dip2px(activity, 10);
 		layout.addView(mSelect, lp);
 
+		String tempAmount = Application.staticAmount;
+		if(!"".equals(tempAmount) && null != tempAmount) {
+			mInput.setText(tempAmount);
+			mInput.setEnabled(false);
+			mSelect.setClickable(false);
+		}else{
+			mInput.setText("50");
+		}
 		LinearLayout buttonLayout = new LinearLayout(activity);
 		buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
 		buttonLayout.setGravity(Gravity.CENTER);

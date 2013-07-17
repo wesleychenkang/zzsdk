@@ -21,7 +21,6 @@ public class PayResult implements JsonParseInterface {
 			json.put("d", resultCode);
 			json.put("e", desc);
 			json.put("f", attach);
-			
 			return json;
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -34,12 +33,9 @@ public class PayResult implements JsonParseInterface {
 		if (json == null)
 			return ;
 		try {
-			channelId = json.isNull("a") ? "-1" : json.getString("a");
-			orderId = json.isNull("b") ? null : json.getString("b");
-			statusCode = json.isNull("c") ? null : json.getString("c");
-			resultCode = json.isNull("d") ? null : json.getString("d");
-			desc = json.isNull("e") ? null : json.getString("e");
-			attach = json.isNull("f") ? null : json.getString("f");
+		
+			statusCode = json.isNull("status") ? null : json.getString("c");
+			resultCode = json.isNull("codes") ? null : json.getJSONArray("codes").getString(0);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}

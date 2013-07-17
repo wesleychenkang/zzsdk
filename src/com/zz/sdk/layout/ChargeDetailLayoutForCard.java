@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -36,7 +37,8 @@ public class ChargeDetailLayoutForCard extends ChargeAbstractLayout {
 	protected static final int ID_TVMONEY = 10006;
 	protected static final int ID_ETMONEY = 10007;
 	protected static final int ID_TVCONFIRM = 10008;
-	public static final int ID_BTNSUBMIT = 10009;
+	public static final int ID_BTNSUBMIT_LT = 10009;
+	public static final int ID_BTNSUBMIT_YD = 10011;
 	protected static final int ID_BTNCANNEL = 10010;
 	protected static final int ID_BTNMONEY = 10010;
 
@@ -44,7 +46,7 @@ public class ChargeDetailLayoutForCard extends ChargeAbstractLayout {
 	private Button btnSubmit;
 	private EditText etNumber;
 	private EditText etPassword;
-	private TextView etPayMoney;
+	private EditText etPayMoney;
 
 	private PayChannel mPayChannel;
 	private List<String> moneyList = new ArrayList<String>();
@@ -188,27 +190,37 @@ public class ChargeDetailLayoutForCard extends ChargeAbstractLayout {
 		lp = new LayoutParams(-2,-2);
 		moneyLayout.addView(moneyText, lp);
 		
-		etPayMoney = new TextView(mActivity);
+		etPayMoney = new EditText(mActivity);
 		etPayMoney.setId(ID_ETMONEY);
 		etPayMoney.setTextColor(0xffffe5c5);
-		etPayMoney.setText("50");
 		etPayMoney.setTextSize(16);
+		etPayMoney.setInputType(EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
 		etPayMoney.setGravity(Gravity.CENTER_VERTICAL);
 		etPayMoney.setPadding(DimensionUtil.dip2px(activity, 8), 0, 0, 0);
 		etPayMoney.setBackgroundDrawable(BitmapCache.getDrawable(activity,
 				Constants.ASSETS_RES_PATH + "input_money.png"));
 		lp = new LayoutParams(-2,-2);
+		
+		
+		
 		moneyLayout.addView(etPayMoney, lp);
-
-		ImageView btnPayMoney = new ImageView(mActivity);
-		btnPayMoney.setId(ID_BTNMONEY);
-		btnPayMoney.setBackgroundDrawable(BitmapCache.getDrawable(activity,
+		ImageButton btnSelectMoney = new ImageButton(mActivity);
+		
+		btnSelectMoney.setId(ID_BTNMONEY);
+		btnSelectMoney.setBackgroundDrawable(BitmapCache.getDrawable(activity,
 				Constants.ASSETS_RES_PATH + "charge_money.png"));
 		lp = new LayoutParams(-2,-2);
 		lp.leftMargin = DimensionUtil.dip2px(activity, 10);
 		// lp10.addRule(RelativeLayout.ALIGN_BASELINE, ID_ETMONEY);
-		moneyLayout.addView(btnPayMoney, lp);
-		
+		moneyLayout.addView(btnSelectMoney, lp);
+		String tempAmount = Application.staticAmount;
+		if(!"".equals(tempAmount) && null != tempAmount) {
+			etPayMoney.setText(tempAmount);
+			etPayMoney.setEnabled(false);
+			btnSelectMoney.setVisibility(GONE);
+		}else{
+			etPayMoney.setText("50");
+		}
 		
 		LinearLayout buttonLayout = new LinearLayout(mActivity);
 		buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -220,7 +232,12 @@ public class ChargeDetailLayoutForCard extends ChargeAbstractLayout {
 		btnSubmit = new Button(mActivity);
 		btnSubmit.setBackgroundDrawable(Utils.getStateListDrawable(activity,
 				"tijiao_pressed.png", "tijiao_normal.png"));
-		btnSubmit.setId(ID_BTNSUBMIT);
+		if ("3".equals(mPayParam.type)) {
+			btnSubmit.setId(ID_BTNSUBMIT_LT);
+		}
+		else if ("4".equals(mPayParam.type)){
+			btnSubmit.setId(ID_BTNSUBMIT_YD);
+		}
 		// btnSubmit.setOnClickListener(listener2);
 		lp = new LayoutParams(-2,-2);
 		buttonLayout.addView(btnSubmit, lp);
@@ -267,8 +284,8 @@ public class ChargeDetailLayoutForCard extends ChargeAbstractLayout {
 
 
 
-		btnPayMoney.setOnClickListener(listener2);
-		etPayMoney.setOnClickListener(listener2);
+		btnSelectMoney.setOnClickListener(selectMoneyListener);
+		//etPayMoney.setOnClickListener(listener2);
 	}
 
 	@Override
@@ -318,7 +335,7 @@ public class ChargeDetailLayoutForCard extends ChargeAbstractLayout {
 		return mPayParam;
 	}
 
-	private OnClickListener listener2 = new OnClickListener() {
+	private OnClickListener selectMoneyListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View v) {

@@ -4,6 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,35 +17,42 @@ import java.util.Set;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.Manifest.permission;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.os.Debug;
+import android.util.Log;
 
 import com.zz.sdk.activity.Application;
 import com.zz.sdk.activity.Constants;
 import com.zz.sdk.entity.DeviceProperties;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
+import com.zz.sdk.entity.PayResult;
 import com.zz.sdk.entity.Result;
 import com.zz.sdk.entity.SdkUser;
 import com.zz.sdk.entity.SdkUserTable;
+import com.zz.sdk.entity.UserAction;
 
 public class GetDataImpl {
 
 	private static GetDataImpl mInstance;
 
-	private DeviceProperties mDeviceProperties;
+	private DeviceProperties mDeviceProperties = null;
 
 	protected static SdkUser mSdkUser;
 
+	public static  final String DEVICESYN ="devicesyn";
 	/**
 	 * 缓存从服务器上拿取的数据
 	 */
@@ -49,8 +61,9 @@ public class GetDataImpl {
 	private static Context mContext;
 
 	private GetDataImpl(Context ctx) {
+		
 		mContext = ctx;
-		mDeviceProperties = new DeviceProperties(ctx);
+	
 		mSdkUser = new SdkUser();
 	}
 
@@ -87,7 +100,6 @@ public class GetDataImpl {
 		if (json == null) {
 			return null;
 		}
-
 		Result result = (Result) JsonUtil.parseJSonObject(Result.class, json);
 		if (result == null) {
 			return null;
@@ -99,6 +111,11 @@ public class GetDataImpl {
 			mSdkUser.autoLogin = autoLogin;
 			mSdkUser.password = password;
 			syncSdkUser();
+			isOperationDeviceSyn(loginName,ctx);
+			UserAction useraction = new UserAction();
+			useraction.loginName = loginName;
+			useraction.actionType=UserAction.LOGIN;
+			useraction.requestActivon(ctx);
 		}
 		return result;
 	}
@@ -115,7 +132,12 @@ public class GetDataImpl {
 		Logger.d("quicklogin---------");
 		HashMap<String, String> params = new HashMap<String, String>();
 		params.put("projectId", Utils.getProjectId(ctx));
-		params.put("imsi", Utils.getIMSI(ctx));
+		if(DebugFlags.DEBUG) {
+			params.put("imsi", DebugFlags.DEF_DEBUG_IMSI);
+		} else {
+			params.put("imsi", Utils.getIMSI(ctx));
+		}
+		
 		String url = Constants.QUICK_LOGIN_REQ + appendUrl(params);
 		try {
 			InputStream in = doRequest(url, "");
@@ -136,6 +158,13 @@ public class GetDataImpl {
 				mSdkUser.password = result.password;
 				mSdkUser.autoLogin = 1;
 				syncSdkUser();
+				isOperationDeviceSyn(result.username,ctx);
+			    UserAction useraction = new UserAction();
+	
+			    useraction.loginName = result.username;
+			    useraction.actionType=UserAction.AUTOREG;
+			    useraction.requestActivon(ctx);
+			    
 			}
 			return result;
 		} catch (Exception e) {
@@ -178,6 +207,10 @@ public class GetDataImpl {
 			mSdkUser.autoLogin = 1;
 			mSdkUser.password = password;
 			syncSdkUser();
+			isOperationDeviceSyn(result.username,ctx);
+			 UserAction useraction = new UserAction();
+			 useraction.loginName = loginName;
+			 useraction.actionType =UserAction.REGISTER;
 		}
 		return result;
 	}
@@ -227,6 +260,9 @@ public class GetDataImpl {
 		return t.update(mSdkUser);
 	}
 
+	
+	
+	
 	/**
 	 * 请求c/s数据
 	 * 
@@ -242,14 +278,10 @@ public class GetDataImpl {
 		if (client == null) {
 			return null;
 		}
-
 		HttpPost httpPost = new HttpPost(url);
-		// if (str != null) {
-		// HttpEntity entity = new ByteArrayEntity(Utils.encode(str)
-		// .getBytes());
-		// httpPost.setEntity(entity);
-		// }
-
+		
+		//UrlEncodedFormEntity entity = new UrlEncodedFormEntity()
+		httpPost.setHeader("Content-Type","application/x-www-form-urlencoded; charset=utf-8");  
 		HttpResponse response = null;
 		int reconnectCount = 0;
 		while (reconnectCount < 2) {
@@ -261,6 +293,7 @@ public class GetDataImpl {
 					return response.getEntity().getContent();
 				}
 			} catch (ClientProtocolException e) {
+
 				Logger.d(e.getMessage());
 			} catch (IOException e) {
 				Logger.d(e.getMessage());
@@ -273,7 +306,36 @@ public class GetDataImpl {
 		}
 		return null;
 	}
+    /**
+     * 用户其他操作取消的请求
+     * @param url 用户请求的路径
+     * @return
+     */
+	private InputStream doRequestForCheck(String url,String str) {
+		HttpClient client = HttpUtil.getHttpClient(mContext);
+		if (client == null) {
+			return null;
+		}
+		HttpPost httpPost = new HttpPost(url);
+		HttpResponse response = null;
+		try {
+			response = client.execute(httpPost);
+			int status = response.getStatusLine().getStatusCode();
+			Logger.d("status == " + status);
+			if (status == HttpStatus.SC_OK) {
+				return response.getEntity().getContent();
+			}
+		   }catch (Exception e) {
 
+			e.printStackTrace();
+			return null;
+
+		}
+
+		return null;
+
+	}
+	
 	private String parseJsonData(InputStream in) {
 		if (in == null)
 			return null;
@@ -329,7 +391,47 @@ public class GetDataImpl {
 		}
 		return url;
 	}
+     
+	/**
+	 * 带有中文请求的方法
+	 * @param url 服务器的路径
+	 * @param nvps 需要专递的参数
+	 * @return
+	 */
+	private InputStream doRequestForChinese(String url,List<NameValuePair> nvps){
+		HttpClient client = HttpUtil.getHttpClient(mContext);
+		if (client == null) {
+			return null;
+		}
+		HttpPost httpPost = new HttpPost(url);
+		try {
+	    httpPost.setEntity(new UrlEncodedFormEntity(nvps, "utf-8"));
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
+		}
+		HttpResponse response = null;
+		try {
+			response = client.execute(httpPost);
+			int status = response.getStatusLine().getStatusCode();
+			Logger.d("status == " + status);
+			if (status == HttpStatus.SC_OK) {
+				return response.getEntity().getContent();
+			}
+		   }catch (Exception e) {
 
+			e.printStackTrace();
+			return null;
+
+		}
+
+		return null;
+		
+		
+	}
+	
+	
+	
+	
 	/**
 	 * 清除缓存
 	 */
@@ -401,7 +503,127 @@ public class GetDataImpl {
 			}
 		}
 	}
+	 
+	/**
+	 * 取消支付中的结果
+	 * @param ctx
+	 * @param OrderNum
+	 * @param payMsg
+	 */
+	 public void canclePay(String OrderNum,String payMsg){
+//		    HashMap<String, String> params = new HashMap<String, String>();
+//			params.put("cmgeOrderNum", OrderNum);
+//			params.put("payMsg", payMsg);
+		 String url = Constants.NPM_REQ;
+		 List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+		 nvps.add(new BasicNameValuePair("cmgeOrderNum",OrderNum));
+		 nvps.add(new BasicNameValuePair("payMsg",payMsg));
+		 doRequestForChinese(url,nvps);
+//			doRequest(url,"");
+			 //doRequestForCheck(url, "");
+	 }
+	  public Result getPayUrlMessage(){
+		  String url = Constants.GPM_REQ ;
+		  doRequestForCheck(url, "");
+		  InputStream in = doRequest(url, "");
+			String json = parseJsonData(in);
+			Logger.d("zz_sdk" + json);
+			if (json == null) {
+				return null;
+			}
+			Result result = (Result) JsonUtil.parseJSonObject(Result.class, json);
+			if (result == null) {
+				return null;
+			}
+			return result;
+	 }
+	
+   /**
+    * 客服端的取消请求操作
+    * @param ctx 上下文对象
+    * @param type 请求的取消的类型
+    * @return
+    */
+	public  Result request(Context ctx,UserAction user){
+		HashMap<String, String> params = new HashMap<String, String>();
+		params.put("projectId", Utils.getProjectId(ctx));
+		params.put("serverId", user.serverId);
+		params.put("actionType", "" + user.actionType);
+		params.put("loginName", user.loginName);
+		params.put("memo", "");
+		String url = Constants.LOG_REQ + appendUrl(params);
+		Log.d("zz_sdk","请求的url:"+ url);
+		InputStream in =doRequestForCheck(url, "");
+		if (in == null)
+			return null;
 
+		String json = parseJsonData(in);
+		if (json == null)
+			return null;
+		Result result = (Result) JsonUtil.parseJSonObject(Result.class, json);
+		return result;
+		
+	}
+	/**
+	 * 
+	 * 确认是否需要同步设备信息
+	 * @param loginName
+	 */
+	
+	private void isOperationDeviceSyn(String loginName,Context ctx){
+		SharedPreferences prefs = mContext.getSharedPreferences(DEVICESYN,
+				Context.MODE_PRIVATE);
+		String res = prefs.getString(DEVICESYN, "tt");
+		if(res.equals("1")||res.equals("tt")){
+		 deviceSyn(loginName,ctx);
+		}
+	}
+	/**
+	 * 客服端同步设备信息请求
+	 * @param ctx 上下文对象
+	 * @param dp  设备信息类的对象
+	 * @param loginname  登录的用户名
+	 * @return
+	 */
+	  private Result deviceSyn(String loginname,Context ctx){
+		HashMap<String, String> params = new HashMap<String, String>();
+		
+		mDeviceProperties = new DeviceProperties(ctx);
+		params.put("loginName", loginname);
+		params.put("systemVersion","" +mDeviceProperties.versionCode);
+		params.put("deviceType",mDeviceProperties.type);
+		params.put("imei", mDeviceProperties.imei);
+		params.put("imsi", mDeviceProperties.imsi);
+		params.put("latitude", ""+mDeviceProperties.latitude);
+		params.put("longtitude", ""+mDeviceProperties.longitude);
+		params.put("area", ""+mDeviceProperties.area);
+		params.put("netType",mDeviceProperties.networkInfo);
+		params.put("projectId", mDeviceProperties.projectId);
+		params.put("sdkVersion", mDeviceProperties.sdkVersion);
+		String url = Constants.DSYN_REQ + appendUrl(params);
+		InputStream in = doRequest(url, "");
+		if (in == null)
+			return null;
+		String json = parseJsonData(in);
+		if (json == null)
+			return null;
+		Result result = (Result) JsonUtil.parseJSonObject(Result.class, json);
+		if (result == null) {
+			return null;
+		}
+		SharedPreferences prefs = mContext.getSharedPreferences(DEVICESYN,
+				Context.MODE_PRIVATE);
+		if ("0".equals(result.codes)) {
+			
+			prefs.edit().putString(DEVICESYN, "0").commit();
+			
+		 }else{
+			 
+		   prefs.edit().putString(DEVICESYN, "1").commit(); 
+		 }
+		return result;
+	}
+	
 	/**
 	 * 平台登入 表示用户打开软件
 	 * 
@@ -411,7 +633,7 @@ public class GetDataImpl {
 		HashMap<String, String> params = new HashMap<String, String>();
 		params.put("projectId", Utils.getProjectId(ctx));
 		params.put("imsi", Utils.getIMSI(ctx));
-		params.put("actionType", "" + Constants.ACTIONTYPE.INSTALL);
+		params.put("actionType", UserAction.ONLINE);
 		String url = Constants.LOG_REQ + appendUrl(params);
 
 		InputStream in = doRequest(url, "");
@@ -435,7 +657,7 @@ public class GetDataImpl {
 		HashMap<String, String> params = new HashMap<String, String>();
 		params.put("projectId", Utils.getProjectId(ctx));
 		params.put("imsi", Utils.getIMSI(ctx));
-		params.put("actionType", "" + Constants.ACTIONTYPE.INSTALL);
+		params.put("actionType", UserAction.OFFLINE);
 		String url = Constants.LOG_REQ + appendUrl(params);
 
 		InputStream in = doRequest(url, "");
@@ -455,71 +677,47 @@ public class GetDataImpl {
 	 * @return
 	 */
 	public Result charge(int type, PayParam payParam) {
-		String action = payParam.getUrl_PayAction(type);
-
-		if (action == null) {
+		if (DebugFlags.DEBUG){
+			payParam.loginName = DebugFlags.DEF_LOGIN_NAME;
+		}
+		ArrayList<NameValuePair> all =payParam.getChargeParameters(type);
+//		String action = payParam.getUrl_PayAction(type);
+//
+//		if (action == null) {
+//			Result result1 = new Result();
+//			result1.codes = "-1";
+//			// 无效支付方式
+//			return result1;
+//		}
+		if(all == null){
 			Result result1 = new Result();
 			result1.codes = "-1";
 			// 无效支付方式
 			return result1;
 		}
-
-		HashMap<String, String> params = new HashMap<String, String>();
-		params.put("requestId", "");
-		String url = /* appendUrl(params) */Constants.URL_SERVER_SRV + action;
-
-		if (Application.loginName == null || !Application.isLogin) {
-			Result result1 = new Result();
-			result1.codes = "-1";
-			return result1;
-		}
-
+		
+		String url = /* appendUrl(params) */Constants.URL_SERVER_SRV + payParam.part;      
+//		if (Application.loginName == null || !Application.isLogin) {
+//			Result result1 = new Result();
+//			result1.codes = "-1";
+//			return result1;
+//		}
+        Log.d("zz_sdk", url);
 		mSdkUser = new SdkUser();
 		mSdkUser.loginName = Application.loginName;
-		InputStream in = doRequest(url, "");
+		InputStream in = doRequestForChinese(url,all);
 		if (in == null)
 			return null;
-
 		String json = parseJsonData(in);
 		Logger.d("charge json -> " + json);
 		if (json == null)
 			return null;
 		Result result = (Result) JsonUtil.parseJSonObject(Result.class, json);
-		result.attach2 = json;
-		return result;
+		if(result!=null){
+		 result.attach2 = json;
+		}
+ 		return result;
 	}
-
-	/**
-	 * 获取「短信」支付的通道表
-	 * 
-	 * @param payParam
-	 */
-	// public void getSMSChannelList(PayParam payParam) {
-	// if (Application.loginName == null || !Application.isLogin) {
-	// Result result1 = new Result();
-	// result1.codes = "-1";
-	// return /* result1 */;
-	// }
-	//
-	// String action = payParam.getUrl_PayAction(PayChannel.PAY_TYPE_KKFUNPAY);
-	// String url = Constants.URL_SERVER_SRV + action;
-	//
-	// mSdkUser = new SdkUser();
-	// mSdkUser.loginName = Application.loginName;
-	// InputStream in = doRequest(url, "");
-	// if (in != null) {
-	//
-	// String json = parseJsonData(in);
-	// Logger.d("charge json -> " + json);
-	// if (json != null) {
-	// Result result = (Result) JsonUtil.parseJSonObject(Result.class,
-	// json);
-	//
-	// PayChannel[] channelMessages = (PayChannel[]) JsonUtil
-	// .parseJSonArray(PayChannel.class, json);
-	// }
-	// }
-	// }
 
 	/**
 	 * 获取支付列表
@@ -532,14 +730,6 @@ public class GetDataImpl {
 		params.put("requestId", ""/* + RequestId.ID_PAYMENT_LIST */);
 		params.put("serverId", charge.serverId);
 		String url = Constants.GPL_REQ + appendUrl(params);
-
-		// JSONObject jsonObject = getSessionAndDevicesPropertiesJson();
-		// try {
-		// jsonObject.put(charge.getShortName(), charge.buildJson());
-		// } catch (JSONException e) {
-		// e.printStackTrace();
-		// }
-
 		InputStream in = doRequest(url, "");
 		if (in == null)
 			return null;
@@ -561,6 +751,8 @@ public class GetDataImpl {
 
 		parseTopic(result.payServerDesc);
 
+		Application.cardAmount = result.cardAmount;
+		
 		Set<Integer> payTypes = PayChannel.getPayType();
 
 		ArrayList<PayChannel> payLists = new ArrayList<PayChannel>();
@@ -614,11 +806,23 @@ public class GetDataImpl {
 			Application.topicDes = str;
 		}
 	}
-
-	public void getChannelMessage(DeviceProperties deviceProperties) {
-		// TODO Auto-generated method stub
-		// XXX: 暂时强制写入 projectID
-		Utils.writeProjectId2cache(mContext, deviceProperties.projectId);
+     /**
+      *  查询订单
+      */
+	public PayResult checkOrder(String ordrNumber) {
+		HashMap<String, String> params = new HashMap<String, String>();
+		params.put("cmgeOrderNum", ordrNumber);
+		String url = Constants.GPM_QO+appendUrl(params);
+	    InputStream in =doRequestForCheck(url,"");
+	    if(in == null){
+	    	return null;
+	    }
+	    String json = parseJsonData(in);
+	    Log.d("zz_sdk", json);
+	    PayResult p =(PayResult)JsonUtil.parseJSonObject(PayResult.class,json);
+	    if(p!=null){
+	    	return p;
+	    }
+		return null;
 	}
-
 }

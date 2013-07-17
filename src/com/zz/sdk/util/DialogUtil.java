@@ -15,6 +15,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.zz.sdk.activity.Constants;
+import com.zz.sdk.layout.MyDialog;
 
 public class DialogUtil {
 
@@ -44,11 +45,12 @@ public class DialogUtil {
 		return dialog;
 	}
 
-	public static void showPayResultDialog(Activity activity, boolean isSucc, View.OnClickListener listener) {
-		MyDialog dialog = new MyDialog(activity, isSucc, listener);
+	public static MyDialog showPayResultDialog(Activity activity, boolean isSucc) {
+		MyDialog dialog = new MyDialog(activity, isSucc);
 		dialog.setCancelable(false);
 		dialog.setCanceledOnTouchOutside(false);
 		dialog.show();
+		return dialog;
 	}
 
 	public static void showDialogErr(Activity activity, String text) {
@@ -57,64 +59,62 @@ public class DialogUtil {
 	}
 }
 
-class MyDialog extends Dialog {
-	private Activity mActivity;
-	TextView textView;
-
-	public MyDialog(Activity activity, boolean isSucc, android.view.View.OnClickListener listener) {
-		super(activity);
-		mActivity = activity;
-		getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-		LinearLayout ll = new LinearLayout(activity);
-		ll.setOrientation(LinearLayout.VERTICAL);
-		ll.setGravity(Gravity.CENTER);
-		ll.setBackgroundDrawable(BitmapCache.getDrawable(activity,
-				Constants.ASSETS_RES_PATH + "payresult.png"));
-
-		textView = new TextView(activity);
-		textView.setTextSize(18);
-		textView.setTextColor(0xffeedaaf);
-		textView.setAutoLinkMask(Linkify.PHONE_NUMBERS);
-		textView.setLinkTextColor(0xffeedaaf);
-		if (isSucc) {
-			textView.setText("充值正在进行中，请稍后在游戏中查看，一般1-10分钟到账，如未到账，请联系客服。"
-					+ com.zz.sdk.activity.Application.customerServiceHotline
-					+ "祝您游戏愉快！");
-		} else {
-			textView.setText("充值未到账！请立即联系客服解决问题。"
-					+ com.zz.sdk.activity.Application.customerServiceHotline
-					+ ",祝您游戏愉快！");
-		}
-		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-2, -2);
-		lp.rightMargin =DimensionUtil.dip2px(activity, 25);
-		lp.leftMargin =DimensionUtil.dip2px(activity, 25);
-		ll.addView(textView, lp);
-
-		Button imageButton = new Button(activity);
-		imageButton.setBackgroundDrawable(Utils.getStateListDrawable(activity,
-				"pay_result_pressed.png", "pay_result_normal.png"));
-		lp = new LinearLayout.LayoutParams(-2, -2);
-		lp.topMargin = DimensionUtil.dip2px(activity, 25);
-		lp.topMargin = DimensionUtil.dip2px(activity, 25);
-		imageButton.setId(isSucc ? DialogUtil.ID_PAY_SUCCESS
-				: DialogUtil.ID_PAY_FAILED);
-		imageButton.setOnClickListener(listener);
-		ll.addView(imageButton, lp);
-		setContentView(ll);
-	}
-
-	class CloseListener implements View.OnClickListener {
-		@Override
-		public void onClick(View v) {
-			cancel();
-			if (null != mActivity)
-				mActivity.finish();
-		}
-	};
-
-}
+//class MyDialog extends Dialog {
+//	private Activity mActivity;
+//	TextView textView;
+//
+//	public MyDialog(Activity activity, boolean isSucc, android.view.View.OnClickListener listener) {
+//		super(activity);
+//		mActivity = activity;
+//		getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+//		requestWindowFeature(Window.FEATURE_NO_TITLE);
+//
+//		LinearLayout ll = new LinearLayout(activity);
+//		ll.setOrientation(LinearLayout.VERTICAL);
+//		ll.setGravity(Gravity.CENTER);
+//		ll.setBackgroundDrawable(BitmapCache.getDrawable(activity,
+//				Constants.ASSETS_RES_PATH + "payresult.png"));
+//
+//		textView = new TextView(activity);
+//		textView.setTextSize(18);
+//		textView.setTextColor(0xffeedaaf);
+//		textView.setAutoLinkMask(Linkify.PHONE_NUMBERS);
+//		textView.setLinkTextColor(0xffeedaaf);
+//		if (isSucc) {
+//			textView.setText("充值正在进行中，请稍后在游戏中查看，一般1-10分钟到账，如未到账，请联系客服。"
+//					+ "祝您游戏愉快！");
+//		} else {
+//			textView.setText("充值未到账！请立即联系客服解决问题。"
+//					+ ",祝您游戏愉快！");
+//		}
+//		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-2, -2);
+//		lp.rightMargin =DimensionUtil.dip2px(activity, 25);
+//		lp.leftMargin =DimensionUtil.dip2px(activity, 25);
+//		ll.addView(textView, lp);
+//
+//		Button imageButton = new Button(activity);
+//		imageButton.setBackgroundDrawable(Utils.getStateListDrawable(activity,
+//				"pay_result_pressed.png", "pay_result_normal.png"));
+//		lp = new LinearLayout.LayoutParams(-2, -2);
+//		lp.topMargin = DimensionUtil.dip2px(activity, 25);
+//		lp.topMargin = DimensionUtil.dip2px(activity, 25);
+//		imageButton.setId(isSucc ? DialogUtil.ID_PAY_SUCCESS
+//				: DialogUtil.ID_PAY_FAILED);
+//		imageButton.setOnClickListener(listener);
+//		ll.addView(imageButton, lp);
+//		setContentView(ll);
+//	}
+//
+//	class CloseListener implements View.OnClickListener {
+//		@Override
+//		public void onClick(View v) {
+//			cancel();
+//			if (null != mActivity)
+//				mActivity.finish();
+//		}
+//	};
+//
+//}
 
 class MyProgressDialog extends Dialog {
 
@@ -198,7 +198,8 @@ class CustomDialog extends Dialog {
 	class CloseListener implements View.OnClickListener {
 		@Override
 		public void onClick(View v) {
-			cancel();
+		
+			dismiss();
 		}
 	};
 }
