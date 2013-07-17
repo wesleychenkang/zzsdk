@@ -33,8 +33,8 @@ public class LoginForQiFu extends Activity {
 	public static Handler callBackhandler;
 	private static int mWhatCallback;
 	private String productId = "D1001";// 大话360测试
-	private String prjectId ="-1";
-	private String sign ="$360U$";
+	private String prjectId = "-1";
+	private String sign = "$360U$";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -67,51 +67,61 @@ public class LoginForQiFu extends Activity {
 					@Override
 					public void run() {
 						final Context ctx = LoginForQiFu.this.getBaseContext();
-						QiHooResult qhResult = GetDataImpl.getInstance(ctx).getAcessToken(productId,
-										authorizationCode);
+
+						QiHooResult qhResult = GetDataImpl.getInstance(ctx)
+								.getAcessToken(productId, authorizationCode);
 						LoginCallbackInfo loginCBInfo = new LoginCallbackInfo();
 						if (qhResult != null && "0".equals(qhResult.codes)
 								&& callBackhandler != null) {
 							Application.isLogin = true;
 							loginCBInfo.statusCode = 1;
-							Application.loginName =qhResult.id+sign;
+							Application.loginName = qhResult.id + sign;
 							loginCBInfo.loginName = Application.loginName;
 							Message msg = Message.obtain();
 							msg.obj = loginCBInfo;
 							msg.what = mWhatCallback;
-							if (Utils.getAccountFromSDcard(ctx) == null) {
+							if (isExistAcount()) {
 								Result r = GetDataImpl.getInstance(
 										LoginForQiFu.this).register(
-												Application.loginName, "qihumm",
-												LoginForQiFu.this);
-
-								 if (r!=null){
-									if(r.codes.equals("2")) {
-										Utils.writeAccount2SDcard(ctx, Application.loginName,"qihumm");
-									 }
-									loginCBInfo.statusCode = Integer.parseInt(r.codes);
-								 }else{
+										Application.loginName, "qihumm",
+										LoginForQiFu.this);
+								if (r != null) {
+									if (r.codes.equals("2")
+											|| r.codes.equals("0")) {
+										Utils.writeAccount2SDcard(ctx,
+												Application.loginName, "qihumm");
+										loginCBInfo.loginName =Application.loginName;
+									}else{
+										Application.loginName = null;
+										loginCBInfo.loginName = null;
+									}
+									loginCBInfo.statusCode = Integer
+											.parseInt(r.codes);
+								 } else {
+									Application.loginName = null;
 									loginCBInfo.loginName = null;
 									loginCBInfo.statusCode = 1;
-								 }
-								 Log.d("zz_sdk","执行了注册回调");
-								  callBackhandler.sendMessage(msg);
-								
+								}
+								Log.d("zz_sdk", "执行了注册回调");
+								callBackhandler.sendMessage(msg);
+
 							} else {
 								loginCBInfo.statusCode = -1;
 								loginCBInfo.loginName = Application.loginName;
-								Result r =GetDataImpl.getInstance(LoginForQiFu.this)
-										.login(Application.loginName,
-												"qihumm", 0, LoginForQiFu.this);
-								  if(r!=null){
-									loginCBInfo.statusCode = Integer.parseInt(r.codes);
-									
-								  }else{
+								Result r = GetDataImpl.getInstance(
+										LoginForQiFu.this).login(
+										Application.loginName, "qihumm", 0,
+										LoginForQiFu.this);
+								if (r != null) {
+									loginCBInfo.statusCode = Integer
+											.parseInt(r.codes);
+
+								} else {
 									loginCBInfo.statusCode = 1;
-								  }
-								Log.d("zz_sdk","执行了登录回调");
+								}
+								Log.d("zz_sdk", "执行了登录回调");
 								callBackhandler.sendMessage(msg);
-							  }
+							}
 						}
 					}
 				}).start();
@@ -121,6 +131,24 @@ public class LoginForQiFu extends Activity {
 			LoginForQiFu.this.finish();
 		}
 	};
+
+	/** 判断当前用户是否已写入SD卡 */
+	private boolean isExistAcount() {
+		Pair<String, String> p = Utils.getAccountFromSDcard(getBaseContext());
+		if (p == null) {
+			return true;
+		} else {
+
+			if (!p.first.equals(Application.loginName)) {
+				return true;
+			} else {
+				return false;
+			}
+
+		}
+
+	}
+
 	/**
 	 * 从Json字符中获取授权码
 	 * 
