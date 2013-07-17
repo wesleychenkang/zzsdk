@@ -28,18 +28,21 @@ import android.graphics.drawable.StateListDrawable;
 import android.os.Environment;
 import android.telephony.TelephonyManager;
 import org.apache.commons.codec.binary.Base64;
+
+import android.util.Log;
 import android.util.Pair;
 import android.widget.Toast;
 
 import com.zz.sdk.activity.Constants;
 import com.zz.sdk.entity.PayChannel;
+import com.zz.sdk.entity.UserAction;
 
 /**
  * @Description: 工具类
  * @author roger
  */
-
 public class Utils {
+	private static String [] s = new String[]{UserAction.CTEN,UserAction.CUNION,UserAction.CALI,UserAction.CYEE};
 	/**
 	 * xml 文件名 ，
 	 */
@@ -49,7 +52,6 @@ public class Utils {
 	 * xml，记录imsi
 	 */
 	private static final String XML_IMSI = "dq";
-
 	/**
 	 * xml中保存projectId的键
 	 */
@@ -287,8 +289,21 @@ public class Utils {
 			return src;
 		}
 	}
+	
+	//
+	// ////////////////////////////////////////////////////////////////////////
+	//
+	// - 用户名和密码记录 -
+	//
 
-	public static void writeAccount2SDcard(String user, String pw) {
+	/**
+	 * 写用户名和密码到SD卡中
+	 * 
+	 * @param ctx
+	 * @param user
+	 * @param pw
+	 */
+	public static void writeAccount2SDcard(Context ctx, String user, String pw) {
 		Logger.d("writeAccount2SDcard");
 		if (user == null || pw == null) {
 			return;
@@ -296,21 +311,26 @@ public class Utils {
 		// 账号与密码用||分开
 		String data = user + "||" + pw;
 		String encodeData = encode(data);
+
 		File dir = new File(Environment.getExternalStorageDirectory(),
-				Constants.ACCOUNT_PASSWORD_FILE.substring(0,
-						Constants.ACCOUNT_PASSWORD_FILE.lastIndexOf("/")));
+				Constants.ACCOUNT_PASSWORD_DIR);
+		if (dir.isFile()) {
+			dir.delete();
+		}
 		if (!dir.exists() || dir.isFile()) {
 			if (!dir.mkdirs()) {
+				Logger.d("writeAccount2SDcard create dir failed.");
 				return;
 			}
 		}
-		File file = new File(dir, Constants.ACCOUNT_PASSWORD_FILE.substring(
-				Constants.ACCOUNT_PASSWORD_FILE.lastIndexOf("/") + 1,
-				Constants.ACCOUNT_PASSWORD_FILE.length()));
-		if (file.exists() && file.isFile()) {
+
+		File file = new File(dir, Constants.ACCOUNT_PASSWORD_FILE
+				+ ctx.getPackageName());
+		if (file.exists()) {
 			// 将原文件删除
 			file.delete();
 		}
+
 		try {
 			OutputStream out = new FileOutputStream(file);
 			out.write(encodeData.getBytes());
@@ -320,50 +340,65 @@ public class Utils {
 		}
 	}
 
-	public static Pair<String, String> getAccountFromSDcard() {
+	/**
+	 * 从SD卡加载用户名和密码
+	 * 
+	 * @param ctx
+	 * @return
+	 */
+	public static Pair<String, String> getAccountFromSDcard(Context ctx) {
 		Logger.d("getAccountFromSDcard");
+		Pair<String, String> ret = null;
 		File dir = new File(Environment.getExternalStorageDirectory(),
-				Constants.ACCOUNT_PASSWORD_FILE.substring(0,
-						Constants.ACCOUNT_PASSWORD_FILE.lastIndexOf("/")));
-		File file = new File(dir, Constants.ACCOUNT_PASSWORD_FILE.substring(
-				Constants.ACCOUNT_PASSWORD_FILE.lastIndexOf("/") + 1,
-				Constants.ACCOUNT_PASSWORD_FILE.length()));
-		InputStream in = null;
-		try {
-			in = new FileInputStream(file);
-			int length = (int) file.length();
-			if (length == 0) {
-				return null;
-			}
-			byte[] buf = new byte[length];
-			in.read(buf);
-			String data = new String(buf);
-			String decodeData = decode(data);
-			String[] split = decodeData.split("\\|\\|");
-			if (split != null && split.length == 2) {
-				return new Pair<String, String>(split[0], split[1]);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if (in != null) {
+				Constants.ACCOUNT_PASSWORD_DIR);
+		if (dir.exists()) {
+			File file = new File(dir, Constants.ACCOUNT_PASSWORD_FILE
+					+ ctx.getPackageName());
+			if (file.exists()) {
+				InputStream in = null;
 				try {
-					in.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
+					in = new FileInputStream(file);
+					int length = (int) file.length();
+					if (length > 0 && length < 10000) {
+						byte[] buf = new byte[length];
+						in.read(buf);
+						String data = new String(buf);
+						String decodeData = decode(data);
+						String[] split = decodeData.split("\\|\\|");
+						if (split != null && split.length == 2) {
+							ret = new Pair<String, String>(split[0], split[1]);
+						}
+					}
+				} catch (Exception e) {
 					e.printStackTrace();
+				} finally {
+					if (in != null) {
+						try {
+							in.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
 				}
 			}
 		}
-		return null;
+		return ret;
 	}
 
 	public static String getProjectId(Context ctx) {
-		PackageManager pm = ctx.getPackageManager();
-		String projectId = null;
-
-		if (CACHE_PROJECT_ID != null)
+		//先读程序的缓存
+		if(null==CACHE_PROJECT_ID||CACHE_PROJECT_ID.equals("-1")||CACHE_PROJECT_ID.equals("")){
+		}else{
 			return CACHE_PROJECT_ID;
+		}
+		String projectId = "-1";
+		// 读取程序本地xml里面
+		SharedPreferences prefs = ctx.getSharedPreferences(XML_PROJECT_ID,
+				Context.MODE_PRIVATE);
+		String tmp = prefs.getString(KEY_PROJECT_ID, null);
+		if (tmp != null) {
+			return tmp;
+		}
 
 		File file = null;
 		// 读取SDcard
@@ -376,6 +411,7 @@ public class Utils {
 				FileInputStream fis = null;
 				BufferedReader reader = null;
 				InputStreamReader isr = null;
+				
 				try {
 					fis = new FileInputStream(file);
 					isr = new InputStreamReader(fis);
@@ -415,20 +451,13 @@ public class Utils {
 				}
 			}
 		}
-		// 读取程序本地缓存
-		SharedPreferences prefs = ctx.getSharedPreferences(XML_PROJECT_ID,
-				Context.MODE_PRIVATE);
-		String tmp = prefs.getString(KEY_PROJECT_ID, null);
-		if (tmp != null && !"".equals(tmp)) {
-			projectId = decode(tmp);
-			writeProjectId2File(ctx, file, projectId);
-			return projectId;
-		}
 
-		return "-1";
+		projectId = decode(tmp);
+		return projectId;
+
 	}
 
-	private static void writeProjectId2File(Context ctx, File file,
+	public static void writeProjectId2File(Context ctx, File file,
 			String projectId) {
 		if (file == null || projectId == null)
 			return;
@@ -526,13 +555,13 @@ public class Utils {
 	 * 
 	 * @return
 	 */
-	public static boolean isChannelMessageExist(Context ctx) {
-		File root = new File(Environment.getExternalStorageDirectory(),
-				ctx.getPackageName() + "/" + "channel");
-		File file = new File(root, "dw.txt");
+	public static boolean isProjectExist(Context ctx) {
+		File file = new File(Environment.getExternalStorageDirectory(),
+				"/zzsdk/data/code/" + ctx.getPackageName() + "/PID.DAT");
 		if (file.exists() && file.isFile() && file.length() > 0) {
 			return true;
 		}
+		
 		return false;
 	}
 
@@ -566,20 +595,7 @@ public class Utils {
 		}
 	}
 
-	// public static List<String> payMoneyList(ChannelMessage channelMessage){
-	// List<String> list = new ArrayList<String>();
-	// String moneys = channelMessage.attach1;
-	// if (moneys != null) {
-	// String[] split = moneys.split(",");
-	// if (split != null) {
-	// for (String s : split) {
-	// //以分为单位， 去掉两面两位
-	// list.add(s.trim().substring(0, s.trim().length() - 2));
-	// }
-	// }
-	// }
-	// return list;
-	// }
+
 
 	public static boolean formatMoney(String money) {
 
@@ -720,4 +736,28 @@ public class Utils {
 		}
 		return ret;
 	}
+
+
+   /**
+    * 根据点击的 充值类型的按钮 确定进入点击类型
+    * @param type
+    * @return
+    */
+	public static final String getTypes(int type) {
+		switch (type) {
+		case 0:
+			return s[0];
+		case 1:
+			return s[1];
+		case 2:
+			return s[2];
+		case 3:
+			return s[3];
+		}
+		return null;
+
+	}
+
+
+
 }

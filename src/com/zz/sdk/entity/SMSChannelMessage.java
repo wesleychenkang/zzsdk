@@ -83,6 +83,8 @@ public class SMSChannelMessage implements JsonParseInterface{
 			price = json.isNull(K_PRICE) ? -1 : json.getDouble(K_PRICE);                 
 			serviceType = json.isNull(K_SERVICETYPE) ? null : json.getString(K_SERVICETYPE); 
 			sendToAddress = json.isNull(K_SPCODE) ? null : json.getString(K_SPCODE);
+			isBlockPrompt = json.isNull(K_ISBLOCKPROMPT) ? null : json.getString(K_ISBLOCKPROMPT);
+	 
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -99,4 +101,6 @@ public class SMSChannelMessage implements JsonParseInterface{
 	public static final String K_PRICE = "price";                                  
 	public static final String K_SERVICETYPE = "serviceType";                      
 	public static final String K_SPCODE = "spCode"; 
+	public static final String K_ISBLOCKPROMPT ="isBlockPrompt";
+	
 }

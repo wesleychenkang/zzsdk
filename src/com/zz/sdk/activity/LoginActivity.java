@@ -4,6 +4,7 @@ import static com.zz.sdk.activity.Application.loginName;
 import static com.zz.sdk.activity.Application.password;
 
 import java.util.Stack;
+import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
 
 import android.app.Activity;
@@ -28,6 +29,7 @@ import android.widget.Toast;
 
 
 import com.zz.sdk.entity.Result;
+import com.zz.sdk.entity.UserAction;
 import com.zz.sdk.layout.LoginLayout;
 import com.zz.sdk.layout.RegisterLayout;
 import com.zz.sdk.layout.UpdatePasswordLayout;
@@ -39,7 +41,7 @@ import com.zz.sdk.util.Logger;
 public class LoginActivity extends Activity implements OnClickListener{
 
 	private static final String TAG_MODIFY_LAYOUT = "modify";
-	
+	private ExecutorService executor =null;
 	//登录，注册，修改密码视图栈
 	private Stack<View> mViewStack = new Stack<View>();
 	// 登录布局
@@ -49,6 +51,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 	// 修改密码布局
 	private UpdatePasswordLayout updatePasswordLayout;
 	private Handler mHandler;
+	private UserAction user;
 	// 第三方回调
 	private static Handler mCallback;
 	private static int mWhatCallback;
@@ -65,6 +68,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		user = new UserAction(); 
 		mHandler = new Handler();
 		loginLayout = null;
 		if (loginName == null || "".equals(loginName)) {
@@ -218,7 +222,8 @@ public class LoginActivity extends Activity implements OnClickListener{
 			/** 注册页 */
 		case 6:
 			// 返回
-			onBackPressed();
+			//onBackPressed();
+			popViewFromStack();
 			break;
 		case 5:
 			// 开始注册
@@ -329,7 +334,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 			}
 			//			mDialog.cancel();
 			if (result != null) {
-				if (result.codes == "0") {
+				if ("0".equals(result.codes)) {
 					// 快速登陆成功
 
 					loginLayout.setAccount(loginName);
@@ -347,13 +352,16 @@ public class LoginActivity extends Activity implements OnClickListener{
 						}
 					}, 1500);
 				} else {
-					// mDialog.cancel();
-					toast("快速登录失败");
+					 if(Application.isDisplayLoginfail){
+					  toast("快速登录失败");
+					 }
 					Application.isLogin = false;
 				}
 			} else {
 				// mDialog.cancel();
+				 if(Application.isDisplayLoginfail){
 				toast("快速登录失败");
+				 }
 				Application.isLogin = false;
 			}
 		}
@@ -372,8 +380,8 @@ public class LoginActivity extends Activity implements OnClickListener{
 
 		RegisterTask(Context context, String userName, String password) {
 			ctx = context;
-			user = userName;
-			pw = password;
+			user = userName.trim();
+			pw = password.trim();
 			mDialog = new CustomDialog(ctx);
 			mDialog.show();
 		}
@@ -410,10 +418,21 @@ public class LoginActivity extends Activity implements OnClickListener{
 					}, 1000);
 				} else {
 					// 注册失败
-					toast("注册失败： " + result.codes);
+					int code = Integer.parseInt(result.codes);
+					switch (code) {
+					case 1:
+						toast("注册请求失败，服务连接出错!");
+						break;
+					case 2:
+						toast("注册请求失败,用户名已存在!");
+						break;
+					default:
+						toast("注册请求失败,连接网络出错!");
+					}
+
 				}
 			} else {
-				toast("注册失败");
+				toast("注册请求失败，连接网络或服务出错!");
 			}
 		}
 
@@ -435,8 +454,8 @@ public class LoginActivity extends Activity implements OnClickListener{
 		public ModifyTask(Context context, String user, String pw) {
 
 			ctx = context;
-			this.user = user;
-			this.pw = pw;
+			this.user = user.trim();
+			this.pw = pw.trim();
 			mDialog = new CustomDialog(context);
 			mDialog.show();
 		}
@@ -526,8 +545,8 @@ public class LoginActivity extends Activity implements OnClickListener{
 
 		public LoginTask(Context context, String user, String pw) {
 			ctx = context;
-			this.user = user;
-			this.pw = pw;
+			this.user = user.trim();
+			this.pw = pw.trim();
 			mDialog = new CustomDialog(context);
 			mDialog.show();
 		}
@@ -563,18 +582,25 @@ public class LoginActivity extends Activity implements OnClickListener{
 
 					// 反馈成功信息
 					onPostLogin(result);
-					toast("登陆成功");
+					if (Application.isDisplayLoginTip) {
+						toast("登陆成功");
+					}
 					// 退出登陆页面
 					finish();
 					break;
 				default:
 					// 登陆失败
-					toast("登录失败： " + result.codes);
+					if (Application.isDisplayLoginfail) {
+						toast("登录失败,连接服务器失败 ");
+					}
+
 					Application.isLogin = false;
 					break;
 				}
 			} else {
+				if(Application.isDisplayLoginfail){
 				toast("登录失败");
+				}
 				Application.isLogin = false;
 			}
 		}
@@ -602,7 +628,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		 */
 		DoModifyPWTask(Context ctx, String newPW) {
 			this.ctx = ctx;
-			this.newPW = newPW;
+			this.newPW = newPW.trim();
 			mDialog = new CustomDialog(ctx);
 			mDialog.show();
 		}
@@ -631,11 +657,11 @@ public class LoginActivity extends Activity implements OnClickListener{
 					finish();
 				} else {
 					// 修改密码失败
-					toast("修改密码失败：" + result.codes);
+					toast("修改密码失败!");
 				}
 			} else {
 				// 修改密码失败
-				toast("修改密码失败");
+				toast("修改密码失败!");
 			}
 		}
 	}
@@ -698,10 +724,15 @@ public class LoginActivity extends Activity implements OnClickListener{
 	private Pair<Boolean, String> validUserName(String user) {
 		String des = null;
 		boolean result = false;
+		if(user!=null){
+		   user=user.trim();
+		}
 		if (user == null || user.length() < 6) {
 			des = "帐号至少6位";
 		} else if (!user.matches("^(?!_)(?!.*?_$)[a-zA-Z0-9_]+$")) {
-			des = "帐号必须由字母、数字或下划线组成";
+			des = "帐号必须由字母、数字或下划线组成,并以数字或字母开头";
+		}else if(user.length()>45){
+			des ="账号长度太长";
 		} else {
 			result = true;
 		}
@@ -717,10 +748,17 @@ public class LoginActivity extends Activity implements OnClickListener{
 	private Pair<Boolean, String> validPassWord(String pw) {
 		String des = null;
 		boolean result = false;
+		if(pw!=null){
+		 pw = pw.trim();
+		 }
 		if (pw == null || pw.length() < 6) {
 			des = "密码不能少于6位";
 		} else if (getChinese(pw)) {
 			des = "密码不能包含中文";
+		}else if(!pw.matches("^(?!_)(?!.*?_$)[a-zA-Z0-9]+$")){
+			des = "密码中只能包含数字和字母";
+		} else if (pw.length() >45) {
+			des = "密码的长度太长超过45位";
 		} else {
 			result = true;
 		}

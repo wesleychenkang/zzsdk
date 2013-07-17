@@ -113,6 +113,7 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 		mOtherPay.setId(ID_OTHERPAY);
 		mOtherPay.getPaint().setFlags(Paint. UNDERLINE_TEXT_FLAG |Paint.ANTI_ALIAS_FLAG);
 		mOtherPay.setTextSize(14);
+		mOtherPay.setTextColor(0xff92acbc);
 		mOtherPay.setGravity(Gravity.RIGHT);
 		lp = new LayoutParams(-1,-2);
 		ll2.addView(mOtherPay, lp);
@@ -160,12 +161,18 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 
 		@Override
 		public int getCount() {
-
+            if(Application.staticAmount!=null){
+            	return 1;
+            }
 			return mSmsMsg.length;
 		}
 
 		@Override
 		public Object getItem(int position) {
+			 if(Application.staticAmount!=null){
+				 mSmsMsg[0].price = Double.parseDouble(Application.staticAmount) * 100;
+	           return mSmsMsg[position];
+	         }
 			return mSmsMsg[position];
 		}
 
@@ -185,11 +192,13 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 				holder.setGravity(Gravity.CENTER);
 				holder.setTextColor(0xff3c2110);
 			}
-
+			 if(Application.staticAmount!=null){
+				 holder.setText("充值" + Application.staticAmount + "元");
+				 return holder;
+			  }
 			double price = mSmsMsg[position].price;
 			DecimalFormat fmt = new DecimalFormat("##.#");
 			String s = fmt.format(price / 100);
-
 			holder.setText("充值" + s + "元");
 			return holder;
 		}

@@ -39,8 +39,7 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout {
 		super(activity);
 		mActivity = activity;
 		initUI(activity);
-	}
-
+		}
 	@Override
 	protected void initUI(Activity activity) {
 		super.initUI(activity);

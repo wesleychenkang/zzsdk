@@ -231,23 +231,18 @@ public class SMSUtil {
 		}
 	}
 
-	public static String charge(final Context ctx, final PayParam payParam,
-			final Handler handler, final int what) {
-		new ChargeTask(ctx, payParam, handler, what).start();
+	public static String charge(final Context ctx, final PayParam payParam, final int what) {
+		new ChargeTask(ctx, payParam, what).start();
 		return null;
 	}
 
 	private static class ChargeTask extends Thread {
 		Context ctx;
 		PayParam payParam;
-		Handler handler;
 		int what;
-
-		ChargeTask(final Context ctx, final PayParam payParam,
-				final Handler handler, final int what) {
+		ChargeTask(final Context ctx, final PayParam payParam, final int what) {
 			this.ctx = ctx;
 			this.payParam = payParam;
-			this.handler = handler;
 			this.what = what;
 		}
 
@@ -255,20 +250,20 @@ public class SMSUtil {
 		public void run() {
 			/*
 			 * loginName
-cmgeOrderNum
-imsi
-serviceType
-status
-dueFee
-/pkkfunnt.lg
+				cmgeOrderNum
+				imsi
+				serviceType
+				status
+				dueFee
+				/pkkfunnt.lg
 
 			 */
 			GetDataImpl getDataImpl = GetDataImpl.getInstance(ctx);
-			Message msg = handler.obtainMessage(what);
+			//Message msg = handler.obtainMessage(what);
 			Result result = getDataImpl.charge(PayChannel.PAY_TYPE_KKFUNPAY_EX, payParam);
-			Logger.d("result -> " + result);
-			msg.obj = result;
-			msg.sendToTarget();
+//			Logger.d("result -> " + result);
+//			msg.obj = result;
+//			msg.sendToTarget();
 		}
 	}
 

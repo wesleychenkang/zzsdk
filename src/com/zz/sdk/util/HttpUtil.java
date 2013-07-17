@@ -13,6 +13,7 @@ import org.apache.http.params.HttpParams;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
 
 public class HttpUtil {
 	public static HttpClient getHttpClient(Context ctx) {
@@ -28,6 +29,7 @@ public class HttpUtil {
 			HttpConnectionParams.setSocketBufferSize(httpParams, 100 * 1024);
 			HttpClientParams.setRedirecting(httpParams, true);
 			HttpHost host = new HttpHost("10.0.0.172", 80);
+			//HttpHost host = new HttpHost("10.0.0.124", 8080);
 			httpParams.setParameter(ConnRoutePNames.DEFAULT_PROXY, host);
 			client = new DefaultHttpClient(httpParams);
 		} else {
@@ -60,10 +62,23 @@ public class HttpUtil {
 		if (activeNetworkInfo == null) {
 			return null;
 		}
-		String extraInfo = activeNetworkInfo.getExtraInfo();
-		if (extraInfo != null && extraInfo.length() > 0) {
-			return extraInfo;
+		
+//		String extraInfo = activeNetworkInfo.getExtraInfo();
+//		if (extraInfo != null && extraInfo.length() > 0) {
+//			return extraInfo;
+//		}
+	Log.d("activeNetworkInfo.getType()",""+activeNetworkInfo.getType());
+		switch(activeNetworkInfo.getType()){ 
+
+		
+		case ConnectivityManager.TYPE_WIFI:
+			return "1";
+		case ConnectivityManager.TYPE_MOBILE:
+			return "2";
+		default:
+			return "3";
+		
+		
 		}
-		return activeNetworkInfo.getTypeName();
 	}
 }

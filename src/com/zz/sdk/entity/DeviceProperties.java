@@ -129,7 +129,6 @@ public class DeviceProperties implements Serializable, JsonParseInterface {
 		
 		type = android.os.Build.PRODUCT;
 		sdkVersion = android.os.Build.VERSION.SDK;
-		
 		TelephonyManager tm = (TelephonyManager) ctx.getSystemService(Context.TELEPHONY_SERVICE);
 //		imsi = tm.getSubscriberId();
 		imei = tm.getDeviceId();
@@ -161,13 +160,21 @@ public class DeviceProperties implements Serializable, JsonParseInterface {
 		}
 		networkInfo = HttpUtil.getNetworkTypeName(ctx);
 		if (networkInfo == null) {
-			networkInfo = "unknown";
+			networkInfo = "3";
 		}
 		Location location = LocationUtil.getLocation(ctx);
 		if (location != null) {
 			longitude = location.getLongitude();
+			String l = ""+longitude;
+			if(l.length()>7){
+			 longitude =Double.parseDouble((l.substring(0, 7)));
+			}
 			latitude = location.getLatitude();
-			String tmp = LocationUtil.getAddress(longitude, latitude);
+			String b =""+latitude;
+			if(b.length()>7){
+			latitude =Double.parseDouble((b.substring(0, 7)));	
+			}
+			String tmp = "";//LocationUtil.getAddress(longitude, latitude);
 			if (tmp != null) {
 				area = tmp;
 			}
