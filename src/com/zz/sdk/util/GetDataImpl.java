@@ -352,13 +352,11 @@ public class GetDataImpl {
 
 			e.printStackTrace();
 			return null;
-
 		} finally {
 			// client.getConnectionManager().shutdown();
 		}
 
 		return null;
-
 	}
 	
 	private String parseJsonData(InputStream in) {
@@ -450,8 +448,6 @@ public class GetDataImpl {
 		}
 
 		return null;
-		
-		
 	}
 	
 	
@@ -831,6 +827,7 @@ public class GetDataImpl {
 			Application.topicDes = str;
 		}
 	}
+
 	public void getChannelMessage(DeviceProperties deviceProperties) {
 		// TODO Auto-generated method stub
 		// XXX: 暂时强制写入 projectID

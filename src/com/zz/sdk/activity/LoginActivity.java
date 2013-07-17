@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Pair;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -55,7 +56,8 @@ public class LoginActivity extends Activity implements OnClickListener{
 	// 第三方回调
 	private static Handler mCallback;
 	private static int mWhatCallback;
-	
+    private boolean check = true;
+//    private boolean checkonkeydown = true;
 	public static void start(Context ctx, Handler callback, int what) {
 		mCallback = callback;
 		mWhatCallback = what;
@@ -68,7 +70,8 @@ public class LoginActivity extends Activity implements OnClickListener{
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		user = new UserAction(); 
+		check = true;
+		user = new UserAction();
 		mHandler = new Handler();
 		loginLayout = null;
 		if (loginName == null || "".equals(loginName)) {
@@ -245,10 +248,20 @@ public class LoginActivity extends Activity implements OnClickListener{
 			break;
 		}
 
-
 	}
 
-
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+	   if(keyCode == KeyEvent.KEYCODE_BACK){
+		  // checkonkeydown = false;
+		   if(check){
+			 popViewFromStack();  
+		   }
+		   return true;
+	     }
+	    
+		return super.onKeyDown(keyCode, event);
+	}
 	/**
 	 * 视图入栈
 	 * @param newView
@@ -281,6 +294,14 @@ public class LoginActivity extends Activity implements OnClickListener{
 			peek.requestFocus();
 			return peek;
 		} else {
+			//退出回调
+		    LoginCallbackInfo loging = new LoginCallbackInfo();
+		    loging.statusCode = -2;
+			Message msg = mCallback.obtainMessage();
+			msg.obj = loging;
+			msg.what = mWhatCallback;
+			mCallback.sendMessage(msg);
+			this.finish();
 			return null;
 		}
 	}
@@ -311,7 +332,8 @@ public class LoginActivity extends Activity implements OnClickListener{
 		Context ctx;
 		CustomDialog mDialog;
 
-		QuickLogin(Context ctx) {
+		QuickLogin(Context ctx){
+			check =false;
 			this.ctx = ctx;
 			mDialog = new CustomDialog(ctx);
 			mDialog.show();
@@ -364,6 +386,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 				 }
 				Application.isLogin = false;
 			}
+			check = true;
 		}
 
 	}
@@ -379,6 +402,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		CustomDialog mDialog;
 
 		RegisterTask(Context context, String userName, String password) {
+			check =false;
 			ctx = context;
 			user = userName.trim();
 			pw = password.trim();
@@ -434,6 +458,9 @@ public class LoginActivity extends Activity implements OnClickListener{
 			} else {
 				toast("注册请求失败，连接网络或服务出错!");
 			}
+			
+			check = true;
+			
 		}
 
 	}
@@ -452,7 +479,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		Result result;
 
 		public ModifyTask(Context context, String user, String pw) {
-
+			check =false;
 			ctx = context;
 			this.user = user.trim();
 			this.pw = pw.trim();
@@ -476,6 +503,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		@Override
 		protected void onPostExecute(Result result) {
 			Logger.d("AsyncTask完成");
+			check = true;
 			if (null != mDialog && mDialog.isShowing()) {
 				mDialog.cancel();
 			}
@@ -501,6 +529,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 			} else {
 				toast("该帐号与密码不正确");
 			}
+			check = true;
 		}
 
 		@Override
@@ -544,6 +573,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		Context ctx;
 
 		public LoginTask(Context context, String user, String pw) {
+			check =false;
 			ctx = context;
 			this.user = user.trim();
 			this.pw = pw.trim();
@@ -603,6 +633,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 				}
 				Application.isLogin = false;
 			}
+			check = true;
 		}
 
 	}
@@ -627,6 +658,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		 *            新密码
 		 */
 		DoModifyPWTask(Context ctx, String newPW) {
+			check = false;
 			this.ctx = ctx;
 			this.newPW = newPW.trim();
 			mDialog = new CustomDialog(ctx);
@@ -663,12 +695,14 @@ public class LoginActivity extends Activity implements OnClickListener{
 				// 修改密码失败
 				toast("修改密码失败!");
 			}
+			check = true;
 		}
 	}
 	class CustomDialog extends Dialog {
 		public CustomDialog(Context context) {
 			super(context);
 			requestWindowFeature(Window.FEATURE_NO_TITLE);
+			this.setCanceledOnTouchOutside(false);
 			getWindow().setBackgroundDrawableResource(
 					android.R.color.transparent);
 			LinearLayout container = new LinearLayout(context);
@@ -691,6 +725,15 @@ public class LoginActivity extends Activity implements OnClickListener{
 			container.addView(iv);
 			setCanceledOnTouchOutside(false);
 			setContentView(container);
+		}
+
+		@Override
+		public boolean onKeyDown(int keyCode, KeyEvent event) {
+            if(keyCode == KeyEvent.KEYCODE_BACK){
+            	return true;
+             }
+ 
+			return super.onKeyDown(keyCode, event);
 		}
 
 		@Override

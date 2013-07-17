@@ -9,7 +9,6 @@ public final class Constants {
 	public enum ACTIONTYPE {
 		LOGIN, CTEN, CUNION, CALI, CYEE
 	}
-
 	/** 服务器 */
 	public static final String URL_SERVER = "http://andrs.tisgame.com/"; // 内外网正式
 	// public static final String URL_SERVER = "http://testsdk.kkfun.cn:8081/";
@@ -51,6 +50,7 @@ public final class Constants {
 	public static final String MODIFY_PWD = URL_SERVER_SRV + "cpd.do";
 
 	public static final String LOG_REQ = URL_SERVER_SRV + "log.lg";
+
 	public static final String GPM_REQ = URL_SERVER_SRV + "gpm.do";
 	/** 获取支付列表 */
 	public static final String GPL_REQ = URL_SERVER_SRV + "gpl.do";

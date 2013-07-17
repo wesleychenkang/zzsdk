@@ -196,10 +196,12 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 				holder.setGravity(Gravity.CENTER);
 				holder.setTextColor(0xff3c2110);
 			}
+
 			if (Application.staticAmount != null) {
 				holder.setText("充值" + Application.staticAmount + "元");
 				return holder;
 			}
+			
 			double price = mSmsMsg[position].price;
 			DecimalFormat fmt = new DecimalFormat("##.#");
 			String s = fmt.format(price / 100);

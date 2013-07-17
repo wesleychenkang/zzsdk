@@ -1,5 +1,4 @@
 package com.zz.sdk.activity;
-
 import java.io.File;
 
 import android.content.Context;
@@ -9,12 +8,8 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Message;
 import android.util.Pair;
-import android.widget.Toast;
 
-import com.zz.sdk.PaymentCallbackInfo;
-import com.zz.sdk.entity.PayResult;
 import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.Utils;
 import com.zz.sdk.util.ZZSDKConfig;
@@ -136,7 +131,7 @@ public class SDKManager {
 			}.start();
 		}
 	}
-
+		
 	/**
 	 * 显示SDK登录界面
 	 * 

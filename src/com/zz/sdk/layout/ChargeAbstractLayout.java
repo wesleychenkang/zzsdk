@@ -176,7 +176,6 @@ public abstract class ChargeAbstractLayout extends LinearLayout {
 		}
 
 	}
-
 	// class ChargeSMSPayView extends LinearLayout {
 	//
 	// public TextView mSMSPay;
@@ -207,5 +206,4 @@ public abstract class ChargeAbstractLayout extends LinearLayout {
 	//
 	// }
 	//
-
 }

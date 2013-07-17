@@ -759,8 +759,6 @@ public class Utils {
 
 	}
 
-	
-
 	public static boolean isOrientationVertical(Context ctx) {
 		if (ZZSDKConfig.ORIENTATION == ZZSDKConfig.DIR_VERTITAL) 
 			return true;
@@ -771,5 +769,4 @@ public class Utils {
 		}
 		return false;
 	}
-
 }
