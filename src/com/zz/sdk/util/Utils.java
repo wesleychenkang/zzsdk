@@ -24,6 +24,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Environment;
 import android.telephony.TelephonyManager;
@@ -758,6 +759,17 @@ public class Utils {
 
 	}
 
+	
 
+	public static boolean isOrientationVertical(Context ctx) {
+		if (ZZSDKConfig.ORIENTATION == ZZSDKConfig.DIR_VERTITAL) 
+			return true;
+		if (ZZSDKConfig.ORIENTATION == ZZSDKConfig.DIR_AUTO) {
+			int o = ctx.getResources().getConfiguration().orientation;
+			if (o == Configuration.ORIENTATION_PORTRAIT)
+				return true;
+		}
+		return false;
+	}
 
 }

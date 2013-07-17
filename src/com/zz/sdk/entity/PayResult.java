@@ -10,7 +10,10 @@ public class PayResult implements JsonParseInterface {
 	public String resultCode;
 	public String desc;
 	public String attach;
-	
+
+	final static String K_CODES = "codes";
+	final static String K_STATUS = "status";
+
 	@Override
 	public JSONObject buildJson() {
 		try {
@@ -31,11 +34,12 @@ public class PayResult implements JsonParseInterface {
 	@Override
 	public void parseJson(JSONObject json) {
 		if (json == null)
-			return ;
+			return;
 		try {
-		
-			statusCode = json.isNull("status") ? null : json.getString("c");
-			resultCode = json.isNull("codes") ? null : json.getJSONArray("codes").getString(0);
+			statusCode = json.isNull(K_STATUS) ? null : json
+					.getString(K_STATUS);
+			resultCode = json.isNull(K_CODES) ? null : json.getJSONArray(
+					K_CODES).getString(0);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -44,8 +48,8 @@ public class PayResult implements JsonParseInterface {
 	@Override
 	public String toString() {
 		return "PayResult [paymentId=" + channelId + ", orderId=" + orderId
-				+ ", statusCode=" + statusCode + ", resultCode=" +resultCode + ", desc=" + desc + ", attach="
-				+ attach + "]";
+				+ ", statusCode=" + statusCode + ", resultCode=" + resultCode
+				+ ", desc=" + desc + ", attach=" + attach + "]";
 	}
 
 	@Override

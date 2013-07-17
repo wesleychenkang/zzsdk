@@ -29,7 +29,7 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 
 	public static final int ID_OTHERPAY = 90001;
 
-//	public static final int ID_BTN_QUERY = 950;
+	// public static final int ID_BTN_QUERY = 950;
 
 	private PayChannel mChannelMsg;
 	private SMSChannelMessage[] mSmsMsg;
@@ -37,6 +37,7 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 	private boolean mFlag;
 
 	private TextView mOtherPay;
+
 	public SmsChannelLayout(Activity activity, PayChannel pc,
 			SMSChannelMessage[] sms, boolean flag) {
 		super(activity);
@@ -49,6 +50,8 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 	@Override
 	protected void initUI(Activity activity) {
 		super.initUI(activity);
+
+		final boolean isVertical = Utils.isOrientationVertical(activity);
 
 		mSubject.setOrientation(1);
 
@@ -79,15 +82,15 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 		lp = new LinearLayout.LayoutParams(-2, -2);
 		lp.gravity = Gravity.LEFT;
 		lp.topMargin = DimensionUtil.dip2px(activity, 10);
-		lp.leftMargin = DimensionUtil.dip2px(activity, 125);
+		lp.leftMargin = DimensionUtil.dip2px(activity, isVertical ? 25 : 125);
 		ll.addView(tv1, lp);
 
 		LinearLayout ll2 = new LinearLayout(activity);
 		ll2.setOrientation(VERTICAL);
 		lp = new LayoutParams(-2, -2);
 		ll2.setGravity(Gravity.CENTER);
-		lp.leftMargin = DimensionUtil.dip2px(activity, 125);
-		lp.rightMargin = DimensionUtil.dip2px(activity, 125);
+		lp.leftMargin = DimensionUtil.dip2px(activity, isVertical ? 25 : 125);
+		lp.rightMargin = DimensionUtil.dip2px(activity, isVertical ? 25 : 125);
 		ll2.setPadding(DimensionUtil.dip2px(activity, 20),
 				DimensionUtil.dip2px(activity, 5),
 				DimensionUtil.dip2px(activity, 10),
@@ -106,16 +109,16 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 		lp.topMargin = DimensionUtil.dip2px(activity, 20);
 		lp.bottomMargin = DimensionUtil.dip2px(activity, 20);
 		ll2.addView(mSelAmout, lp);
-		
 
 		mOtherPay = new TextView(activity);
 		mOtherPay.setText("其他支付方式");
 		mOtherPay.setId(ID_OTHERPAY);
-		mOtherPay.getPaint().setFlags(Paint. UNDERLINE_TEXT_FLAG |Paint.ANTI_ALIAS_FLAG);
+		mOtherPay.getPaint().setFlags(
+				Paint.UNDERLINE_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
 		mOtherPay.setTextSize(14);
 		mOtherPay.setTextColor(0xff92acbc);
 		mOtherPay.setGravity(Gravity.RIGHT);
-		lp = new LayoutParams(-1,-2);
+		lp = new LayoutParams(-1, -2);
 		ll2.addView(mOtherPay, lp);
 
 		LinearLayout ll3 = new LinearLayout(activity);
@@ -142,6 +145,7 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 		ll3.addView(helpqq, lp);
 
 	}
+
 	@Override
 	public void setButtonClickListener(OnClickListener listener) {
 		super.setButtonClickListener(listener);
@@ -161,18 +165,18 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 
 		@Override
 		public int getCount() {
-            if(Application.staticAmount!=null){
-            	return 1;
-            }
+			if (Application.staticAmount != null) {
+				return 1;
+			}
 			return mSmsMsg.length;
 		}
 
 		@Override
 		public Object getItem(int position) {
-			 if(Application.staticAmount!=null){
-				 mSmsMsg[0].price = Double.parseDouble(Application.staticAmount) * 100;
-	           return mSmsMsg[position];
-	         }
+			if (Application.staticAmount != null) {
+				mSmsMsg[0].price = Double.parseDouble(Application.staticAmount) * 100;
+				return mSmsMsg[position];
+			}
 			return mSmsMsg[position];
 		}
 
@@ -192,10 +196,10 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 				holder.setGravity(Gravity.CENTER);
 				holder.setTextColor(0xff3c2110);
 			}
-			 if(Application.staticAmount!=null){
-				 holder.setText("充值" + Application.staticAmount + "元");
-				 return holder;
-			  }
+			if (Application.staticAmount != null) {
+				holder.setText("充值" + Application.staticAmount + "元");
+				return holder;
+			}
 			double price = mSmsMsg[position].price;
 			DecimalFormat fmt = new DecimalFormat("##.#");
 			String s = fmt.format(price / 100);

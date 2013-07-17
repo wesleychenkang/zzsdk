@@ -60,7 +60,8 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout {
 		mPaymentType = new TypeGridView(activity);
 		mPaymentType.setHorizontalSpacing(DimensionUtil.dip2px(activity, 35));
 		mPaymentType.setVerticalSpacing(DimensionUtil.dip2px(activity, 10));
-		mPaymentType.setNumColumns(3);
+		mPaymentType.setNumColumns(Utils.isOrientationVertical(activity) ? 1
+				: 3);
 		mPaymentType.setBackgroundDrawable(null);
 		mPaymentType.setSelector(android.R.color.transparent);
 		lp = new LinearLayout.LayoutParams(-2, -2);

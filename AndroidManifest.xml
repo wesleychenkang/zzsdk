@@ -7,7 +7,17 @@
     <uses-sdk
         android:minSdkVersion="8"
         android:targetSdkVersion="14" />
-    ，
+    
+
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
     <!-- 权限列表 -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -39,7 +49,7 @@
         <activity
             android:name="com.zz.sdk.activity.MainActivity"
             android:label="@string/app_name"
-            android:configChanges="keyboardHidden|orientation"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:launchMode="singleTask"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
@@ -51,6 +61,13 @@
             </intent-filter>
         </activity>
         <activity
+            android:name="com.zz.sdk.activity.LoginForQiFu"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
             android:name="com.zz.sdk.activity.LoginActivity"
             android:configChanges="keyboardHidden|orientation"
             android:launchMode="singleTask"
@@ -60,19 +77,35 @@
         </activity>
         <activity
             android:name="com.zz.sdk.activity.ChargeActivity"
-            android:configChanges="keyboardHidden|orientation"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:excludeFromRecents="true"
             android:launchMode="singleTask"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" >
         </activity>
+         <activity
+            android:name="com.qihoopay.insdk.activity.ContainerActivity"
+            android:configChanges="orientation|keyboardHidden|navigation"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+        </activity>
+        <activity
+            android:name="com.qihoopay.insdk.activity.RemoteContainerActivity"
+            android:configChanges="orientation|keyboardHidden|navigation|screenSize"
+            android:process=":remote"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+        </activity>
+             <meta-data android:name="QHOPENSDK_APPID" android:value="200632826" > </meta-data>
+             <meta-data android:name="QHOPENSDK_APPKEY" android:value="4ebf535fe5749b77a26cf8971733aa73" > </meta-data>
+             <meta-data android:name="QHOPENSDK_PRIVATEKEY" android:value="321eb8e6a3c4e1a0d72b5545a283319d" > </meta-data>
+             <meta-data android:name="QHOPENSDK_CHANNEL" android:value="default" ></meta-data>
 
         <meta-data
             android:name="PROJECT_ID"
-            android:value="P10009" />
+            android:value="P10003A" />
         <activity android:name=".activity.PayOnlineActivity"
             android:exported="false"
             android:screenOrientation="landscape"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"></activity>
     </application>
 

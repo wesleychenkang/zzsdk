@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import com.zz.sdk.activity.Constants;
 import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.DimensionUtil;
+import com.zz.sdk.util.Utils;
 
 /**
  * 背景类
@@ -37,14 +38,18 @@ public class AbstractLayout extends LinearLayout {
 	
 	private void init() {
 		
+		
 		widthPixels = getResources().getDisplayMetrics().widthPixels;
 		heightPixels = getResources().getDisplayMetrics().heightPixels;
 		int weight1 = widthPixels * 4 / 5;
 		int weight2 = widthPixels * 7 / 8;
 		
 		setOrientation(VERTICAL);
-		//整体背景图
-		setBackgroundDrawable(BitmapCache.getDrawable(mActivity, Constants.ASSETS_RES_PATH + "bg.jpg"));
+		// 整体背景图
+		final boolean isVertical = Utils.isOrientationVertical(getContext());
+		setBackgroundDrawable(BitmapCache.getDrawable(mActivity,
+				(isVertical ? Constants.ASSETS_RES_PATH_VERTICAL
+						: Constants.ASSETS_RES_PATH) + "bg.jpg"));
 		setWeightSum(1.0f);
 		
 		LinearLayout layout1 = new LinearLayout(mActivity);

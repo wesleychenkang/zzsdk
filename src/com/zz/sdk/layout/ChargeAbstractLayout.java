@@ -16,6 +16,7 @@ import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.DimensionUtil;
 import com.zz.sdk.util.Logger;
+import com.zz.sdk.util.Utils;
 
 public abstract class ChargeAbstractLayout extends LinearLayout {
 
@@ -42,7 +43,6 @@ public abstract class ChargeAbstractLayout extends LinearLayout {
 
 	public abstract PayParam getPayParam();
 
-
 	protected void initUI(Activity activity) {
 		mActivity = activity;
 
@@ -63,7 +63,7 @@ public abstract class ChargeAbstractLayout extends LinearLayout {
 		Logger.d("metrics.heightPixels---->" + metrics.heightPixels);
 		Logger.d("densityDpi---->" + densityDpi);
 		Drawable d = BitmapCache.getDrawable(activity,
-				Constants.ASSETS_RES_PATH +"biankuang_bg.png");
+				Constants.ASSETS_RES_PATH + "biankuang_bg.png");
 		if (densityDpi > 240) {
 			mScreenWidth = d.getIntrinsicWidth();
 			mScreenHeight = d.getIntrinsicHeight();
@@ -90,14 +90,14 @@ public abstract class ChargeAbstractLayout extends LinearLayout {
 		mTileType = new TextView(activity);
 		lp = new LayoutParams(-2, -2);
 		mTileType.setText("游戏充值");
-//		mTileType.setGravity(Gravity.CENTER);
+		// mTileType.setGravity(Gravity.CENTER);
 		mTileType.setTextColor(0xffffe5c5);
 		mTileType.setTextSize(20);
-//		mTileType.setPadding(DimensionUtil.dip2px(activity, 4),
-//				DimensionUtil.dip2px(activity, 2), 0,
-//				DimensionUtil.dip2px(activity, 2));
+		// mTileType.setPadding(DimensionUtil.dip2px(activity, 4),
+		// DimensionUtil.dip2px(activity, 2), 0,
+		// DimensionUtil.dip2px(activity, 2));
 		mTileType.setGravity(Gravity.CENTER);
-		lp.bottomMargin =DimensionUtil.dip2px(activity, 2);
+		lp.bottomMargin = DimensionUtil.dip2px(activity, 2);
 		lp.topMargin = DimensionUtil.dip2px(activity, 2);
 		lp.weight = 1;
 		ll.addView(mTileType, lp);
@@ -124,8 +124,11 @@ public abstract class ChargeAbstractLayout extends LinearLayout {
 		mSubject = new LinearLayout(activity);
 		mSubject.setOrientation(LinearLayout.VERTICAL);
 		lp = new LayoutParams(-1, -1);
+
+		final boolean isVertical = Utils.isOrientationVertical(getContext());
 		mSubject.setBackgroundDrawable(BitmapCache.getDrawable(activity,
-				Constants.ASSETS_RES_PATH + "bg_content.png"));
+				(isVertical ? Constants.ASSETS_RES_PATH_VERTICAL
+						: Constants.ASSETS_RES_PATH) + "bg_content.png"));
 		lp.setMargins(DimensionUtil.dip2px(activity, 5), 0,
 				DimensionUtil.dip2px(activity, 5),
 				DimensionUtil.dip2px(activity, 3));
@@ -154,16 +157,17 @@ public abstract class ChargeAbstractLayout extends LinearLayout {
 			ll.setGravity(Gravity.CENTER_VERTICAL);
 			ll.setOrientation(LinearLayout.HORIZONTAL);
 			addView(ll, lp);
-			
+
 			ImageView imageView = new ImageView(context);
 			imageView.setScaleType(ScaleType.CENTER);
-			imageView.setBackgroundDrawable(BitmapCache.getDrawable(context, Constants.ASSETS_RES_PATH + "select.png"));
+			imageView.setBackgroundDrawable(BitmapCache.getDrawable(context,
+					Constants.ASSETS_RES_PATH + "select.png"));
 			lp = new LayoutParams(-2, -2);
 			lp.leftMargin = DimensionUtil.dip2px(context, 10);
 			ll.addView(imageView, lp);
 
 			mPaymentDesc = new TextView(mActivity);
-			mPaymentDesc.setTextSize(18);			
+			mPaymentDesc.setTextSize(18);
 			mPaymentDesc.setTextColor(0xfffdc581);
 			mPaymentDesc.setGravity(Gravity.CENTER);
 			mPaymentDesc.setPadding(DimensionUtil.dip2px(context, 10), 0, 0, 0);
@@ -173,36 +177,35 @@ public abstract class ChargeAbstractLayout extends LinearLayout {
 
 	}
 
-//	class ChargeSMSPayView extends LinearLayout {
-//
-//		public TextView mSMSPay;
-//
-//		public ChargeSMSPayView(Context context) {
-//			super(context);
-//
-//			setOrientation(LinearLayout.VERTICAL);
-//			setBackgroundDrawable(BitmapCache.getDrawable(context,
-//					Constants.ASSETS_RES_PATH + "list_title.png"));
-//
-//			LayoutParams lp1 = new LayoutParams(-1, -1);
-//			LinearLayout ll1 = new LinearLayout(context);
-//			lp1.topMargin = DimensionUtil.dip2px(context, 5);
-//			lp1.leftMargin = DimensionUtil.dip2px(context, 20);
-//			lp1.bottomMargin = DimensionUtil.dip2px(context, 5);
-//			ll1.setGravity(Gravity.CENTER_VERTICAL);
-//			ll1.setOrientation(LinearLayout.VERTICAL);
-//			addView(ll1, lp1);
-//
-//			lp1 = new LayoutParams(-1, -2);
-//			mSMSPay = new TextView(mActivity);
-//			mSMSPay.setTextSize(16);
-//			mSMSPay.setTextColor(0xfffbcf4b);
-//			ll1.addView(mSMSPay, lp1);
-//
-//		}
-//
-//	}
-//	
-	
-	
+	// class ChargeSMSPayView extends LinearLayout {
+	//
+	// public TextView mSMSPay;
+	//
+	// public ChargeSMSPayView(Context context) {
+	// super(context);
+	//
+	// setOrientation(LinearLayout.VERTICAL);
+	// setBackgroundDrawable(BitmapCache.getDrawable(context,
+	// Constants.ASSETS_RES_PATH + "list_title.png"));
+	//
+	// LayoutParams lp1 = new LayoutParams(-1, -1);
+	// LinearLayout ll1 = new LinearLayout(context);
+	// lp1.topMargin = DimensionUtil.dip2px(context, 5);
+	// lp1.leftMargin = DimensionUtil.dip2px(context, 20);
+	// lp1.bottomMargin = DimensionUtil.dip2px(context, 5);
+	// ll1.setGravity(Gravity.CENTER_VERTICAL);
+	// ll1.setOrientation(LinearLayout.VERTICAL);
+	// addView(ll1, lp1);
+	//
+	// lp1 = new LayoutParams(-1, -2);
+	// mSMSPay = new TextView(mActivity);
+	// mSMSPay.setTextSize(16);
+	// mSMSPay.setTextColor(0xfffbcf4b);
+	// ll1.addView(mSMSPay, lp1);
+	//
+	// }
+	//
+	// }
+	//
+
 }

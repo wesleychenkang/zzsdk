@@ -39,6 +39,7 @@ import com.zz.sdk.entity.DeviceProperties;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.PayResult;
+import com.zz.sdk.entity.QiHooResult;
 import com.zz.sdk.entity.Result;
 import com.zz.sdk.entity.SdkUser;
 import com.zz.sdk.entity.SdkUserTable;
@@ -215,6 +216,25 @@ public class GetDataImpl {
 		return result;
 	}
 
+	/** 获取QiHoo返回的token */
+	public QiHooResult getAcessToken(String productId, String authCode) {
+		ArrayList<NameValuePair> list = new ArrayList<NameValuePair>();
+		list.add(new BasicNameValuePair("productId", productId));
+		list.add(new BasicNameValuePair("authCode", authCode));
+		InputStream in = doRequestForChinese(Constants.GET_TOKEN, list);
+		String json = parseJsonData(in);
+		//System.out.println("请求返回的json" + json);
+		if (json == null) {
+			return null;
+		}
+		QiHooResult qr = (QiHooResult) JsonUtil.parseJSonObject(
+				QiHooResult.class, json);
+		if (qr != null) {
+			return qr;
+		}
+		return null;
+	}
+
 	/**
 	 * 修改密码
 	 * 
@@ -297,6 +317,9 @@ public class GetDataImpl {
 				Logger.d(e.getMessage());
 			} catch (IOException e) {
 				Logger.d(e.getMessage());
+			} finally {
+
+				// client.getConnectionManager().shutdown();
 			}
 			reconnectCount++;
 			try {
@@ -330,6 +353,8 @@ public class GetDataImpl {
 			e.printStackTrace();
 			return null;
 
+		} finally {
+			// client.getConnectionManager().shutdown();
 		}
 
 		return null;
@@ -805,6 +830,11 @@ public class GetDataImpl {
 			// }
 			Application.topicDes = str;
 		}
+	}
+	public void getChannelMessage(DeviceProperties deviceProperties) {
+		// TODO Auto-generated method stub
+		// XXX: 暂时强制写入 projectID
+		Utils.writeProjectId2cache(mContext, deviceProperties.projectId);
 	}
      /**
       *  查询订单

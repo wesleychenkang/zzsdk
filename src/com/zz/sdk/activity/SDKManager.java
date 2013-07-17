@@ -1,4 +1,5 @@
 package com.zz.sdk.activity;
+
 import java.io.File;
 
 import android.content.Context;
@@ -16,6 +17,7 @@ import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.entity.PayResult;
 import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.Utils;
+import com.zz.sdk.util.ZZSDKConfig;
 
 /**
  * @Description: sdk接口管理类
@@ -39,16 +41,16 @@ public class SDKManager {
 
 	public SDKManager(Context ctx) {
 		mContext = ctx.getApplicationContext();
-//		HandlerThread handlerThread = new HandlerThread("zzsdk",
-//				android.os.Process.THREAD_PRIORITY_BACKGROUND);
-//		handlerThread.start();
-//		Looper looper = handlerThread.getLooper();
-//		new Handler(looper).post(new Runnable() {
-//			public void run() {
-//			  init();
-		   saveProjectIdToContext();
-//			}
-//		});
+		// HandlerThread handlerThread = new HandlerThread("zzsdk",
+		// android.os.Process.THREAD_PRIORITY_BACKGROUND);
+		// handlerThread.start();
+		// Looper looper = handlerThread.getLooper();
+		// new Handler(looper).post(new Runnable() {
+		// public void run() {
+		// init();
+		saveProjectIdToContext();
+		// }
+		// });
 	}
 
 	private void saveProjectIdToContext() {
@@ -93,16 +95,22 @@ public class SDKManager {
 
 	/**
 	 * 设置配置信息
-	 * @param isOnlineGame 是为网络游戏
-	 * @param isDisplayLoginTip 是否显示登录成功Toast
-	 * @param isDisplayLoginfail 是否显示登录失败Toast
+	 * 
+	 * @param isOnlineGame
+	 *            是为网络游戏
+	 * @param isDisplayLoginTip
+	 *            是否显示登录成功Toast
+	 * @param isDisplayLoginfail
+	 *            是否显示登录失败Toast
 	 */
-	public void setConfigInfo(boolean isOnlineGame,boolean isDisplayLoginTip,boolean isDisplayLoginfail) {
+	public void setConfigInfo(boolean isOnlineGame, boolean isDisplayLoginTip,
+			boolean isDisplayLoginfail) {
 		final boolean flag = isOnlineGame;
-		final Pair<String, String> account = Utils.getAccountFromSDcard(mContext);
+		final Pair<String, String> account = Utils
+				.getAccountFromSDcard(mContext);
 		Application.isDisplayLoginTip = isDisplayLoginTip;
 		Application.isDisplayLoginfail = isDisplayLoginfail;
-		if(!flag) { //单机
+		if (!flag) { // 单机
 			new Thread() {
 				@Override
 				public void run() {
@@ -110,21 +118,25 @@ public class SDKManager {
 						final String loginName = account.first;
 						final String password = account.second;
 						if (loginName != null && !"".equals(loginName)) {
-							GetDataImpl data_impl = GetDataImpl.getInstance(mContext);
-							data_impl.login(loginName.trim(), password.trim(), 1, mContext);
+							GetDataImpl data_impl = GetDataImpl
+									.getInstance(mContext);
+							data_impl.login(loginName.trim(), password.trim(),
+									1, mContext);
 						} else {
-							GetDataImpl data_impl = GetDataImpl.getInstance(mContext);
+							GetDataImpl data_impl = GetDataImpl
+									.getInstance(mContext);
 							data_impl.quickLogin(mContext);
 						}
 					} else {
-						    GetDataImpl data_impl = GetDataImpl.getInstance(mContext);
-						    data_impl.quickLogin(mContext);
+						GetDataImpl data_impl = GetDataImpl
+								.getInstance(mContext);
+						data_impl.quickLogin(mContext);
 					}
 				}
 			}.start();
 		}
 	}
-	
+
 	/**
 	 * 显示SDK登录界面
 	 * 
@@ -133,25 +145,30 @@ public class SDKManager {
 	 * @param what
 	 */
 	public void showLoginView(Handler callbackHandler, int what) {
-		Application.autoLoginUser(mContext);
-		// init(); //统计登录
-		LoginActivity.start(mContext, callbackHandler, what);
-		// savaChannalMessage();
+		if (ZZSDKConfig.SUPPORT_360SDK) {
+			LoginForQiFu.startLogin(mContext, true, false, callbackHandler,
+					what);
+		} else {
+			Application.autoLoginUser(mContext);
+			// init(); //统计登录
+			LoginActivity.start(mContext, callbackHandler, what);
+			// savaChannalMessage();
+		}
 	}
 
 	/**
 	 * 游戏登出，资源回收
 	 */
 	public void recycle() {
-		    instance = null;
-//		Thread thread = new Thread(new Runnable() {
-//			public void run() {
-////				GetDataImpl data_impl = GetDataImpl.getInstance(mContext);
-////				data_impl.offline(mContext);
-//				instance = null;
-//			}
-//		});
-//		thread.start();
+		instance = null;
+		// Thread thread = new Thread(new Runnable() {
+		// public void run() {
+		// // GetDataImpl data_impl = GetDataImpl.getInstance(mContext);
+		// // data_impl.offline(mContext);
+		// instance = null;
+		// }
+		// });
+		// thread.start();
 	}
 
 	/**
@@ -179,10 +196,9 @@ public class SDKManager {
 			final String roleId, final String gameRole, final String amount,
 			final int isCloseWindow, final String callBackInfo) {
 		Application.isCloseWindow = isCloseWindow;
-        if(amount != null && !"".equals(amount))
-	     {
+		if (amount != null && !"".equals(amount)) {
 			Application.staticAmount = amount.trim();
-		 }
+		}
 		Pair<String, String> account = Utils.getAccountFromSDcard(mContext);
 		if (account != null) {
 			Application.loginName = account.first;
@@ -191,9 +207,9 @@ public class SDKManager {
 		ChargeActivity.start(callbackHandler, what, mContext, gameServerID,
 				serverName, roleId, gameRole, callBackInfo);
 	}
-	
-	 public static String getLoginName() {
-		if(Application.isLogin) {
+
+	public static String getLoginName() {
+		if (Application.isLogin) {
 			return Application.loginName;
 		} else {
 			return null;
@@ -207,35 +223,35 @@ public class SDKManager {
 	 */
 	public void queryOrderState(final Handler callbackHandler,
 			final Context context, final String orderNumber) {
-//		     if("".equals(orderNumber)||orderNumber==null||orderNumber.length()<5){
-//		    	 Toast.makeText(context, "输入的订单号无效!", Toast.LENGTH_SHORT).show();
-//		    	 return;
-//		       }
-//		    Thread thread = new Thread(new Runnable() {
-//			public void run() {
-//				PaymentCallbackInfo info = new PaymentCallbackInfo();
-//				PayResult p = GetDataImpl.getInstance(context).checkOrder(
-//						orderNumber);
-//				if (p != null) {
-//					if ("0".equals(p.resultCode) && "0".equals(p.statusCode)) {
-//						info.statusCode = 0;
-//					} else if ("1".equals(p.resultCode)) {
-//						info.statusCode = -1;
-//					} else {
-//						info.statusCode = -1;
-//					}
-//				} else {
-//					info.statusCode = -2;
-//
-//				}
-//
-//				Message msg = callbackHandler.obtainMessage();
-//				msg.obj = info;
-//				msg.what = WHAT_ORDER_CALLBACK_DEFAULT;
-//				callbackHandler.sendMessage(msg);
-//			}
-//		});
-//		thread.start();
-//	
-		}
+		// if("".equals(orderNumber)||orderNumber==null||orderNumber.length()<5){
+		// Toast.makeText(context, "输入的订单号无效!", Toast.LENGTH_SHORT).show();
+		// return;
+		// }
+		// Thread thread = new Thread(new Runnable() {
+		// public void run() {
+		// PaymentCallbackInfo info = new PaymentCallbackInfo();
+		// PayResult p = GetDataImpl.getInstance(context).checkOrder(
+		// orderNumber);
+		// if (p != null) {
+		// if ("0".equals(p.resultCode) && "0".equals(p.statusCode)) {
+		// info.statusCode = 0;
+		// } else if ("1".equals(p.resultCode)) {
+		// info.statusCode = -1;
+		// } else {
+		// info.statusCode = -1;
+		// }
+		// } else {
+		// info.statusCode = -2;
+		//
+		// }
+		//
+		// Message msg = callbackHandler.obtainMessage();
+		// msg.obj = info;
+		// msg.what = WHAT_ORDER_CALLBACK_DEFAULT;
+		// callbackHandler.sendMessage(msg);
+		// }
+		// });
+		// thread.start();
+		//
+	}
 }
