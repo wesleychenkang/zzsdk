@@ -1,12 +1,5 @@
 package com.zz.sdk.activity;
-import java.io.File;
-
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.util.Pair;
 
@@ -43,31 +36,9 @@ public class SDKManager {
 		// new Handler(looper).post(new Runnable() {
 		// public void run() {
 		// init();
-		saveProjectIdToContext();
+//		saveProjectIdToContext();
 		// }
 		// });
-	}
-
-	private void saveProjectIdToContext() {
-		String projectId = "-1";
-		ApplicationInfo appInfo = null;
-		try {
-			appInfo = mContext.getPackageManager().getApplicationInfo(
-					mContext.getPackageName(), PackageManager.GET_META_DATA);
-		} catch (NameNotFoundException e) {
-			return;
-		}
-		Bundle metaData = appInfo.metaData;
-		projectId = metaData.getString("PROJECT_ID");
-		Utils.writeProjectId2cache(mContext, projectId);
-		Utils.writeProjectId2xml(mContext, projectId);
-		if (!Utils.isProjectExist(mContext)) {
-			File file = new File(Environment.getExternalStorageDirectory(),
-					"/zzsdk/data/code/" + mContext.getPackageName()
-							+ "/PID.DAT");
-			Utils.writeProjectId2File(mContext, file, projectId);
-		}
-
 	}
 
 	private void init() {

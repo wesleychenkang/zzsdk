@@ -74,5 +74,10 @@ public final class Constants {
 	/**
 	 * serviceId
 	 */
-	public static String SERVERID = "serverId";
+	public static final String SERVERID = "serverId";
+	
+	/**
+	 * 键: 项目ID,配置于 AndroidManifest.xml
+	 */
+	public static final String K_PROJECT_ID = "PROJECT_ID";
 }

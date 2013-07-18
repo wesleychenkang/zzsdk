@@ -51,7 +51,6 @@
             android:label="@string/app_name"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:launchMode="singleTask"
-            android:screenOrientation="landscape"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             android:windowSoftInputMode="adjustPan" >
             <intent-filter>
@@ -71,7 +70,6 @@
             android:name="com.zz.sdk.activity.LoginActivity"
             android:configChanges="keyboardHidden|orientation"
             android:launchMode="singleTask"
-            android:screenOrientation="landscape"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             android:windowSoftInputMode="adjustPan" >
         </activity>
@@ -80,7 +78,6 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:excludeFromRecents="true"
             android:launchMode="singleTask"
-            android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" >
         </activity>
          <activity
@@ -104,7 +101,6 @@
             android:value="P10003A" />
         <activity android:name=".activity.PayOnlineActivity"
             android:exported="false"
-            android:screenOrientation="landscape"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"></activity>
     </application>

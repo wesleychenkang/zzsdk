@@ -19,11 +19,10 @@
 #   public *;
 #}
 
--libraryjars 'E:\software\adt-bundle-windows-x86-20130219\sdk\platforms\android-17\android.jar'
--libraryjars 'D:\zzsdk\libs\UPPayAssistEx.jar'
--libraryjars 'D:\zzsdk\libs\android-support-v4.jar'
--libraryjars 'D:\zzsdk\libs\commons-codec-1.6.jar'
--libraryjars 'libs\360SDK.jar'
+-libraryjars 'libs/UPPayAssistEx.jar'
+-libraryjars 'libs/android-support-v4.jar'
+-libraryjars 'libs/commons-codec-1.6.jar'
+-libraryjars 'libs/360SDK.jar'
 
 -optimizationpasses 5
 -dontusemixedcaseclassnames
@@ -31,8 +30,10 @@
 -dontskipnonpubliclibraryclasses
 -dontoptimize
 -verbose
+-dontskipnonpubliclibraryclassmembers
 
 -optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
+
 -keep public class * extends android.app.Activity
 -keep public class * extends android.app.Application
 -keep public class * extends android.app.Service
@@ -43,36 +44,11 @@
 -keep public class com.android.vending.licensing.ILicensingService
 -keep public class * extends android.os.Bundle
 -keep public class * extends android.content.Context
--keep public class  com.qihoopay.outsdk.Dispatcher{
-}
--keep public class  com.qihoopay.*
-{
- public * ;
-}
--keep public class  com.qihoopay.insdk.*
-{
- public * ;
-}
--keep public class  com.qihoopay.insdk.activity.*
-{
- public * ;
-}
--keep public class  com.qihoopay.insdk.interfaces.*
-{
- public * ;
-}
--keep public class  com.qihoopay.insdk.matrix.*
-{
- public * ;
-}
--keep public class  com.qihoopay.insdk.utils.*
-{
- public * ;
-}
--keep public class  com.qihoopay.sdk.protocols.*
-{
- public * ;
-}
+
+-keep class android.support.**{ *;}
+-keep class com.qihoopay.**{ *;} 
+-keep class org.apache.**{*;}
+
 -keep public class com.zz.sdk.activity.SDKManager{
   public * ;
   private * ;
@@ -86,18 +62,10 @@
 }                                                                                  
 -keep public class com.zz.sdk.util.Logger {                                        
    public *;                                                                    
-}                                                                               
--keep public class com.zz.sdk.util.DebugFlags {                                 
-   public *;                                                                                                                          
-}                                                                               
+}
 -keep public class com.zz.sdk.PaymentCallbackInfo {                             
    public *;                                                                    
 }                                                                               
 -keep public class com.zz.sdk.activity.LoginCallbackInfo {                      
    public *;                                                                    
 } 
--keep public class com.zz.sdk.activity.MainActivity{                               
-   public *;
-   private *; 
-   public protected <methods>;                                                                       
-}  

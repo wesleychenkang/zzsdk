@@ -8,6 +8,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -28,6 +29,7 @@ import com.zz.sdk.layout.ChargeAbstractLayout;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.DialogUtil;
 import com.zz.sdk.util.GetDataImpl;
+import com.zz.sdk.util.Utils;
 
 /***
  * Web版本在线支付。
@@ -99,6 +101,10 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		setRequestedOrientation(Utils.isOrientationVertical(this) ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+				: ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+		
 		if(dialog!=null && dialog.isShowing()){
 			dialog.dismiss();
 		 }
