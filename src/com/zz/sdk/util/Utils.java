@@ -43,7 +43,8 @@ import com.zz.sdk.entity.UserAction;
  * @author roger
  */
 public class Utils {
-	private static String [] s = new String[]{UserAction.CTEN,UserAction.CUNION,UserAction.CALI,UserAction.CYEE};
+	private static String[] s = new String[] { UserAction.CTEN,
+			UserAction.CUNION, UserAction.CALI, UserAction.CYEE };
 	/**
 	 * xml 文件名 ，
 	 */
@@ -290,7 +291,7 @@ public class Utils {
 			return src;
 		}
 	}
-	
+
 	//
 	// ////////////////////////////////////////////////////////////////////////
 	//
@@ -387,9 +388,10 @@ public class Utils {
 	}
 
 	public static String getProjectId(Context ctx) {
-		//先读程序的缓存
-		if(null==CACHE_PROJECT_ID||CACHE_PROJECT_ID.equals("-1")||CACHE_PROJECT_ID.equals("")){
-		}else{
+		// 先读程序的缓存
+		if (null == CACHE_PROJECT_ID || CACHE_PROJECT_ID.equals("-1")
+				|| CACHE_PROJECT_ID.equals("")) {
+		} else {
 			return CACHE_PROJECT_ID;
 		}
 		String projectId = "-1";
@@ -411,7 +413,7 @@ public class Utils {
 				FileInputStream fis = null;
 				BufferedReader reader = null;
 				InputStreamReader isr = null;
-				
+
 				try {
 					fis = new FileInputStream(file);
 					isr = new InputStreamReader(fis);
@@ -561,7 +563,7 @@ public class Utils {
 		if (file.exists() && file.isFile() && file.length() > 0) {
 			return true;
 		}
-		
+
 		return false;
 	}
 
@@ -594,8 +596,6 @@ public class Utils {
 			throw new RuntimeException(e);
 		}
 	}
-
-
 
 	public static boolean formatMoney(String money) {
 
@@ -737,12 +737,12 @@ public class Utils {
 		return ret;
 	}
 
-
-   /**
-    * 根据点击的 充值类型的按钮 确定进入点击类型
-    * @param type
-    * @return
-    */
+	/**
+	 * 根据点击的 充值类型的按钮 确定进入点击类型
+	 * 
+	 * @param type
+	 * @return
+	 */
 	public static final String getTypes(int type) {
 		switch (type) {
 		case 0:
@@ -758,8 +758,14 @@ public class Utils {
 
 	}
 
+	/**
+	 * 判断设定当前屏幕方向
+	 * 
+	 * @param ctx
+	 * @return
+	 */
 	public static boolean isOrientationVertical(Context ctx) {
-		if (ZZSDKConfig.ORIENTATION == ZZSDKConfig.DIR_VERTITAL) 
+		if (ZZSDKConfig.ORIENTATION == ZZSDKConfig.DIR_VERTITAL)
 			return true;
 		if (ZZSDKConfig.ORIENTATION == ZZSDKConfig.DIR_AUTO) {
 			int o = ctx.getResources().getConfiguration().orientation;

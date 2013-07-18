@@ -11,6 +11,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -38,6 +39,7 @@ import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.DimensionUtil;
 import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.Logger;
+import com.zz.sdk.util.Utils;
 
 public class LoginActivity extends Activity implements OnClickListener{
 
@@ -70,6 +72,10 @@ public class LoginActivity extends Activity implements OnClickListener{
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		setRequestedOrientation(Utils.isOrientationVertical(this) ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+				: ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+		
 		check = true;
 		user = new UserAction();
 		mHandler = new Handler();
