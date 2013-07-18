@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Pair;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -13,19 +12,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.zz.sdk.PaymentCallbackInfo;
-import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.Logger;
-import com.zz.sdk.util.Utils;
 
+/**
+ * 演示 SDK 使用
+ */
 public class MainActivity extends Activity implements OnClickListener {
 
 	private SDKManager mSDKManager;
 
 	private LoginCallbackInfo mLoginCallbackInfo;
 	private TextView mTvTip;
-	
+
 	private final static int RC_PAYMENT = 2;
 	private String ordernumber = "";
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -45,7 +46,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		setConfigBtn.setText("单机设置信息");
 		setConfigBtn.setId(4);
 		linearLayout.addView(setConfigBtn);
-		
+
 		Button queryBtn = new Button(this);
 		queryBtn.setText("查询订单");
 		queryBtn.setId(5);
@@ -67,60 +68,75 @@ public class MainActivity extends Activity implements OnClickListener {
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
-		case 1:
+		case 1: {
 			mSDKManager.showLoginView(mHandler,
 					SDKManager.WHAT_LOGIN_CALLBACK_DEFAULT);
+		}
 			break;
 		case 2: {
-			Handler handler = null;
+			if (!Application.isLogin) {
+				String tip = "尚未登录用户, 请选择[单机模式]或[登录].";
+				pushLog(tip);
+				break;
+			}
+
 			if (mLoginCallbackInfo == null) {
 				Toast.makeText(getBaseContext(), "使用单机充值方式", Toast.LENGTH_LONG)
 						.show();
-				Pair<String, String> account = Utils.getAccountFromSDcard(getBaseContext());
-				if (account != null) {
-					Application.loginName = account.first;
-					Application.password = account.second;
-				}
-				Application.isLogin = true;
-				pushLog("「单机模式」 用户名:" + Application.loginName);
-	           }
-			 handler = mHandler;
-			 mSDKManager.showPaymentView(handler,
+				pushLog("「单机模式」 "
+						+ (Application.isLogin ? ("用户名:" + Application.loginName)
+								: "末登录"));
+			}
+			mSDKManager.showPaymentView(mHandler,
 					SDKManager.WHAT_PAYMENT_CALLBACK_DEFAULT, "M1001A",
-					"乐活测试服务器","007", "战士001","",1,"厂商自定义参数（长度限制250个字符）");
+					"乐活测试服务器", "007", "战士001", "", 1, "厂商自定义参数（长度限制250个字符）");
 		}
-	   case 4:{
-			   mSDKManager.setConfigInfo(false,true,true); //单机
-		    }
 			break;
-			
-	   case 5:
-		   System.out.println("调用了"+ordernumber);
-		   mSDKManager.queryOrderState(mHandler, this,ordernumber);
-		   break;
+
+		case 4: {
+			// 单机
+			boolean isOnlineGame = false;
+			boolean isDisplayLoginTip = true;
+			boolean isDisplayLoginfail = true;
+			pushLog("[单机模式] 等待自动注册或登录... 模式:"
+					+ (isOnlineGame ? "网络游戏" : "单机游戏") + ";"
+					+ (isDisplayLoginTip ? "" : "不") + "显示登录成功Toast, "
+					+ (isDisplayLoginfail ? "" : "不") + "显示登录失败Toast");
+			mSDKManager.setConfigInfo(isOnlineGame, isDisplayLoginTip,
+					isDisplayLoginfail);
+		}
+			break;
+
+		case 5: {
+			pushLog("调用了" + ordernumber);
+			mSDKManager.queryOrderState(mHandler, this, ordernumber);
+		}
+			break;
 		}
 	}
+
 	private void pushLog(String txt) {
 		mTvTip.setText(mTvTip.getText() + "\n" + txt);
 	}
+
 	private Handler mHandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
 			switch (msg.what) {
 			case SDKManager.WHAT_LOGIN_CALLBACK_DEFAULT: {
 				LoginCallbackInfo info = (LoginCallbackInfo) msg.obj;
-				Logger.d("zz_sdk" +"info----- :"+ info.toString());
+				Logger.d("zz_sdk" + "info----- :" + info.toString());
 				Logger.d("---------用户登录-------");
 				if (mLoginCallbackInfo == null) {
 					mTvTip.setText(info.toString());
 				} else {
 					pushLog(info.toString());
-				 }
+				}
 				mLoginCallbackInfo = info;
 			}
 				break;
 			case SDKManager.WHAT_PAYMENT_CALLBACK_DEFAULT: {
 				PaymentCallbackInfo info = (PaymentCallbackInfo) msg.obj;
-				Logger.d("zz_sdk"+"info----- : "+ info.toString());
+				Logger.d("zz_sdk" + "info----- : " + info.toString());
 				ordernumber = info.cmgeOrderNumber;
 				Logger.d("---------充值-------");
 				pushLog(info.toString());
@@ -128,7 +144,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				break;
 			case SDKManager.WHAT_ORDER_CALLBACK_DEFAULT:
 				PaymentCallbackInfo info = (PaymentCallbackInfo) msg.obj;
-				Logger.d("zz_sdk"+"info----- : "+ info.toString());
+				Logger.d("zz_sdk" + "info----- : " + info.toString());
 				Logger.d("---------订单查询-------");
 				pushLog(info.toString());
 				break;
@@ -142,7 +158,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		mSDKManager.recycle();
 	}
 
-	@Override 
+	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (requestCode) {
 		case RC_PAYMENT: {
