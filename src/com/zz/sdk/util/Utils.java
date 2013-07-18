@@ -398,9 +398,8 @@ public class Utils {
 				Context.MODE_PRIVATE);
 		String tmp = prefs.getString(KEY_PROJECT_ID, null);
 		if (tmp != null) {
-			return tmp;
+			return decode(tmp);
 		}
-
 		File file = null;
 		// 读取SDcard
 		if (Environment.MEDIA_MOUNTED.equals(Environment

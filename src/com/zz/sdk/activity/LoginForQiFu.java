@@ -125,10 +125,21 @@ public class LoginForQiFu extends Activity {
 						}
 					}
 				}).start();
-
-			}
-
+				}else{
+					LoginCallbackInfo loginCBInfo = new LoginCallbackInfo();
+					loginCBInfo.statusCode = -2;
+					loginCBInfo.loginName = null;
+					Message msg =new Message();
+					msg.what = mWhatCallback;
+					msg.obj = loginCBInfo;
+					if(callBackhandler!=null){
+					callBackhandler.sendMessage(msg);
+					}
+					Log.d("zz_sdk", "收到的data为null");
+					
+				}
 			LoginForQiFu.this.finish();
+			
 		}
 	};
 
@@ -202,4 +213,16 @@ public class LoginForQiFu extends Activity {
 		return intent;
 	}
 
-}
+	@Override
+	protected void onDestroy() {
+
+		System.out.println("被销毁掉了");
+		super.onDestroy();
+	}
+
+	
+	
+	
+	}	
+	
+

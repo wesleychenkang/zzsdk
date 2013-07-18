@@ -299,8 +299,6 @@ public class GetDataImpl {
 			return null;
 		}
 		HttpPost httpPost = new HttpPost(url);
-		
-		//UrlEncodedFormEntity entity = new UrlEncodedFormEntity()
 		httpPost.setHeader("Content-Type","application/x-www-form-urlencoded; charset=utf-8");  
 		HttpResponse response = null;
 		int reconnectCount = 0;
@@ -702,27 +700,13 @@ public class GetDataImpl {
 			payParam.loginName = DebugFlags.DEF_LOGIN_NAME;
 		}
 		ArrayList<NameValuePair> all =payParam.getChargeParameters(type);
-//		String action = payParam.getUrl_PayAction(type);
-//
-//		if (action == null) {
-//			Result result1 = new Result();
-//			result1.codes = "-1";
-//			// 无效支付方式
-//			return result1;
-//		}
 		if(all == null){
 			Result result1 = new Result();
 			result1.codes = "-1";
 			// 无效支付方式
 			return result1;
 		}
-		
-		String url = /* appendUrl(params) */Constants.URL_SERVER_SRV + payParam.part;      
-//		if (Application.loginName == null || !Application.isLogin) {
-//			Result result1 = new Result();
-//			result1.codes = "-1";
-//			return result1;
-//		}
+		String url = Constants.URL_SERVER_SRV + payParam.part;      
         Log.d("zz_sdk", url);
 		mSdkUser = new SdkUser();
 		mSdkUser.loginName = Application.loginName;
