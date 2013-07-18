@@ -231,8 +231,8 @@ public class PayParam implements Serializable, JsonParseInterface {
 		return b.toString();
 	}
 	
-	public ArrayList<NameValuePair> getChargeParameters(int payType){
-	     ArrayList<NameValuePair> listParames = new ArrayList<NameValuePair>();
+	public ArrayList<BasicNameValuePair> getChargeParameters(int payType){
+	     ArrayList<BasicNameValuePair> listParames = new ArrayList<BasicNameValuePair>();
 		switch(payType){
 		case PayChannel.PAY_TYPE_ALIPAY:	
 		case PayChannel.PAY_TYPE_UNMPAY:

@@ -49,6 +49,7 @@ public class Application {
 	public static int payStatusCancel = 0;
 	public static int isCloseWindow;
 	public static int isAlreadyCB = 0;
+	public static int isMessagePage = 0;
 	public static boolean isDisplayLoginTip = false; //是否显示登录提示
 	public static boolean isDisplayLoginfail = false;//是否显示登录失败提示
 	protected static void autoLoginUser(Context ctx) {

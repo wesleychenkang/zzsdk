@@ -73,7 +73,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 	static final String PAY_RESULT_CANCEL = "cancel";
 
 	public static ChargeActivity instance;
-
+    private boolean isSendMessage = false;
 	/* 第三方回调(可选) */
 	public static Handler mCallbackHandler;
 	public static int mCallbackWhat;
@@ -262,15 +262,6 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		return false;
 
 	}
-
-
-
-
-
-
-
-
-
 
 
 	/** 短信渠道细节选择 */
@@ -557,6 +548,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Application.isAlreadyCB = 0;
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		Intent intent = getIntent();
 		instance = this;
@@ -606,6 +598,10 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 	}
 
 	protected void pushView2Stack(ChargeAbstractLayout newView) {
+		if(Application.isMessagePage==0){
+		    
+			isSendMessage=false;
+		 }
 		if (mViewStack.size() > 0) {
 			View peek = mViewStack.peek();
 			peek.clearFocus();
@@ -621,8 +617,15 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		}
 	}
 	private View popViewFromStack() {
+		if(Application.isMessagePage==1&&isSendMessage==false){
+		  //短信取消后发送取消支付请求	
+		  Application.isMessagePage = 0;
+		  smsPayCallBack(-2,null);
+		 
+		}
 		if (mViewStack.size() > 1) {
-			if(Application.isCloseWindow==1){
+			if (Application.isCloseWindow == 1&&Application.isAlreadyCB == 1) {
+				Utils.loginOut(mCallbackHandler, Application.loginName,mCallbackWhat);
 				this.finish();
 				return null;
 			}
@@ -636,13 +639,11 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			return mCurrentView;
 		} else {
 			Logger.d("ChargeActivity exit");
-			if (Application.isAlreadyCB == 1) {
-				Application.isAlreadyCB = 0;
-			} else {
-				allPayCallBack(-2);
-				Application.isAlreadyCB = 0;
-			}
-			
+//			if (Application.isAlreadyCB == 1) {
+//				allPayCallBack(-2);
+//				Application.isAlreadyCB = 0;
+//			 }
+			Utils.loginOut(mCallbackHandler, Application.loginName, mCallbackWhat);
 			finish();
 			return null;
 		}
@@ -792,9 +793,10 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		return super.onKeyDown(keyCode, event);
 	}
 	public void notifySendMessageFinish(boolean success, int type) {
-
+		Application.isAlreadyCB = 1;
 		// 超過90秒就認為發送失敗
 		if (check_op_timeout(WO_FLAG_SEND)) {
+			isSendMessage = false;
 			return ;
 		}
 
@@ -818,10 +820,11 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 				popViewFromStack();
 				//popViewFromStack();
 				smsPayCallBack(-1, String.valueOf(sms.price / 100));
-
+				isSendMessage = true;
 			} else {
 				SMSUtil.hideDialog();
 				sendSmsFeedback();
+				isSendMessage = true;
 			}
 			if(Application.isCloseWindow == 1){
 				this.finish();
@@ -1043,7 +1046,6 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		info.amount = amount;
 		info.cmgeOrderNumber = callBackOrderNumber;
 		info.statusCode=codes;
-		Application.isAlreadyCB = 1;
 		Message msg = Message.obtain(mCallbackHandler, mCallbackWhat, info);
 		mCallbackHandler.sendMessage(msg);
 		if (Application.isCloseWindow == 1) {

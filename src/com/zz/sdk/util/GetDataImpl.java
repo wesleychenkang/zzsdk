@@ -83,19 +83,15 @@ public class GetDataImpl {
 	public Result login(String loginName, String password, int autoLogin,
 			Context ctx) {
 		Application.isLogin = false;
-
 		mSdkUser = new SdkUser();
 		mSdkUser.loginName = loginName;
 		mSdkUser.password = Utils.md5Encode(password);
-		Logger.d("----------password: " + password);
-
-		HashMap<String, String> params = new HashMap<String, String>();
-		params.put("loginName", "" + loginName);
-		params.put("password", "" + password);
-		params.put("projectId", "" + Utils.getProjectId(ctx));
-
-		String url = Constants.LOGIN_REQ + appendUrl(params);
-		InputStream in = doRequest(url, "");
+        ArrayList<BasicNameValuePair> list = new ArrayList<BasicNameValuePair>();
+        list.add(new BasicNameValuePair("loginName",loginName));
+        list.add(new BasicNameValuePair("password",password));
+        list.add(new BasicNameValuePair("projectId",Utils.getProjectId(ctx)));
+		String url = Constants.LOGIN_REQ;
+		InputStream in = doRequest(url, list, 2);
 		String json = parseJsonData(in);
 		Logger.d("login json -> " + json);
 		if (json == null) {
@@ -131,17 +127,17 @@ public class GetDataImpl {
 		Application.isLogin = false;
 
 		Logger.d("quicklogin---------");
-		HashMap<String, String> params = new HashMap<String, String>();
-		params.put("projectId", Utils.getProjectId(ctx));
-		if(DebugFlags.DEBUG) {
-			params.put("imsi", DebugFlags.DEF_DEBUG_IMSI);
+
+		ArrayList<BasicNameValuePair> list = new ArrayList<BasicNameValuePair>();
+		list.add(new BasicNameValuePair("projectId", Utils.getProjectId(ctx)));
+		if (DebugFlags.DEBUG) {
+			list.add(new BasicNameValuePair("imsi", DebugFlags.DEF_DEBUG_IMSI));
 		} else {
-			params.put("imsi", Utils.getIMSI(ctx));
+			list.add(new BasicNameValuePair("imsi", Utils.getIMSI(ctx)));
 		}
-		
-		String url = Constants.QUICK_LOGIN_REQ + appendUrl(params);
+		String url = Constants.QUICK_LOGIN_REQ;
 		try {
-			InputStream in = doRequest(url, "");
+			InputStream in = doRequest(url, list, 2);
 			if (in == null)
 				return null;
 
@@ -159,13 +155,13 @@ public class GetDataImpl {
 				mSdkUser.password = result.password;
 				mSdkUser.autoLogin = 1;
 				syncSdkUser();
-				isOperationDeviceSyn(result.username,ctx);
-			    UserAction useraction = new UserAction();
-	
-			    useraction.loginName = result.username;
-			    useraction.actionType=UserAction.AUTOREG;
-			    useraction.requestActivon(ctx);
-			    
+				isOperationDeviceSyn(result.username, ctx);
+				UserAction useraction = new UserAction();
+
+				useraction.loginName = result.username;
+				useraction.actionType = UserAction.AUTOREG;
+				useraction.requestActivon(ctx);
+
 			}
 			return result;
 		} catch (Exception e) {
@@ -183,15 +179,13 @@ public class GetDataImpl {
 		mSdkUser = new SdkUser();
 		mSdkUser.loginName = loginName;
 		mSdkUser.password = Utils.md5Encode(password);
-
-		HashMap<String, String> params = new HashMap<String, String>();
-		params.put("loginName", loginName);
-		params.put("password", password);
-		params.put("projectId", Utils.getProjectId(ctx));
-		params.put("imsi", Utils.getIMSI(ctx));
-
-		String url = Constants.REG_REQ + appendUrl(params);
-		InputStream in = doRequest(url, "");
+		ArrayList<BasicNameValuePair> list = new ArrayList<BasicNameValuePair>();
+		list.add(new BasicNameValuePair("loginName",loginName));
+		list.add(new BasicNameValuePair("password",password));
+		list.add(new BasicNameValuePair("projectId",Utils.getProjectId(ctx)));
+		list.add(new BasicNameValuePair("imsi",Utils.getIMSI(ctx)));
+		String url = Constants.REG_REQ;
+		InputStream in = doRequest(url,list,2);
 		String json = parseJsonData(in);
 		Logger.d("register json -> " + json);
 		if (json == null) {
@@ -218,12 +212,12 @@ public class GetDataImpl {
 
 	/** 获取QiHoo返回的token */
 	public QiHooResult getAcessToken(String productId, String authCode) {
-		ArrayList<NameValuePair> list = new ArrayList<NameValuePair>();
+		ArrayList<BasicNameValuePair> list = new ArrayList<BasicNameValuePair>();
 		list.add(new BasicNameValuePair("productId", productId));
 		list.add(new BasicNameValuePair("authCode", authCode));
-		InputStream in = doRequestForChinese(Constants.GET_TOKEN, list);
+		InputStream in = doRequest(Constants.GET_TOKEN,list,2);
 		String json = parseJsonData(in);
-		//System.out.println("请求返回的json" + json);
+		Logger.d("QiHoo json -> " + json);
 		if (json == null) {
 			return null;
 		}
@@ -246,13 +240,13 @@ public class GetDataImpl {
 		String oldPassword = Application.password;
 		mSdkUser.newPassword = Utils.md5Encode(newPassword);
 		mSdkUser.password = Utils.md5Encode(oldPassword);
-		HashMap<String, String> params = new HashMap<String, String>();
-		params.put("loginName", Application.loginName);
-		params.put("password", oldPassword);
-		params.put("newPassword", newPassword);
-		String url = Constants.MODIFY_PWD + appendUrl(params);
-
-		InputStream in = doRequest(url, "");
+		
+		ArrayList<BasicNameValuePair> list = new ArrayList<BasicNameValuePair>();
+		list.add(new BasicNameValuePair("loginName", Application.loginName));
+		list.add(new BasicNameValuePair("password", oldPassword));
+		list.add(new BasicNameValuePair("newPassword", newPassword));
+		InputStream in = doRequest(Constants.MODIFY_PWD,list,2);
+		
 		if (in == null)
 			return null;
 
@@ -282,27 +276,32 @@ public class GetDataImpl {
 
 	
 	
-	
 	/**
 	 * 请求c/s数据
 	 * 
-	 * @param params
-	 *            url参数
-	 * @param bytes
-	 *            post内容
+	 * @param url 请求的url
+	 *           
+	 * @param nvps 请求的参数
+	 * 
+	 * @param connectCount 请求连接的次数         
 	 * @return 返回内容
 	 */
-	private InputStream doRequest(String url, String str) {
+	private InputStream doRequest(String url, ArrayList<BasicNameValuePair> nvps,int connectCount) {
 		HttpClient client = HttpUtil.getHttpClient(mContext);
-
 		if (client == null) {
 			return null;
 		}
 		HttpPost httpPost = new HttpPost(url);
-		httpPost.setHeader("Content-Type","application/x-www-form-urlencoded; charset=utf-8");  
+		try {
+			if(nvps!=null){
+		    httpPost.setEntity(new UrlEncodedFormEntity(nvps, "utf-8"));
+			}
+		} catch (UnsupportedEncodingException e1) {
+				e1.printStackTrace();
+	    }
 		HttpResponse response = null;
-		int reconnectCount = 0;
-		while (reconnectCount < 2) {
+		int i = 0;
+		while (i < connectCount) {
 			try {
 				response = client.execute(httpPost);
 				int status = response.getStatusLine().getStatusCode();
@@ -319,41 +318,12 @@ public class GetDataImpl {
 
 				// client.getConnectionManager().shutdown();
 			}
-			reconnectCount++;
+			i++;
 			try {
 				Thread.sleep(2000);
 			} catch (InterruptedException e) {
 			}
 		}
-		return null;
-	}
-    /**
-     * 用户其他操作取消的请求
-     * @param url 用户请求的路径
-     * @return
-     */
-	private InputStream doRequestForCheck(String url,String str) {
-		HttpClient client = HttpUtil.getHttpClient(mContext);
-		if (client == null) {
-			return null;
-		}
-		HttpPost httpPost = new HttpPost(url);
-		HttpResponse response = null;
-		try {
-			response = client.execute(httpPost);
-			int status = response.getStatusLine().getStatusCode();
-			Logger.d("status == " + status);
-			if (status == HttpStatus.SC_OK) {
-				return response.getEntity().getContent();
-			}
-		   }catch (Exception e) {
-
-			e.printStackTrace();
-			return null;
-		} finally {
-			// client.getConnectionManager().shutdown();
-		}
-
 		return null;
 	}
 	
@@ -389,67 +359,6 @@ public class GetDataImpl {
 		return null;
 	}
 
-	private String appendUrl(HashMap<String, String> params) {
-		String url = "";
-		// 添加url参数
-		if (params != null) {
-			Iterator<String> it = params.keySet().iterator();
-			StringBuffer sb = null;
-			while (it.hasNext()) {
-				String key = it.next();
-				String value = params.get(key);
-				if (sb == null) {
-					sb = new StringBuffer();
-					sb.append("?");
-				} else {
-					sb.append("&");
-				}
-				sb.append(key);
-				sb.append("=");
-				sb.append(value);
-			}
-			url += sb.toString();
-		}
-		return url;
-	}
-     
-	/**
-	 * 带有中文请求的方法
-	 * @param url 服务器的路径
-	 * @param nvps 需要专递的参数
-	 * @return
-	 */
-	private InputStream doRequestForChinese(String url,List<NameValuePair> nvps){
-		HttpClient client = HttpUtil.getHttpClient(mContext);
-		if (client == null) {
-			return null;
-		}
-		HttpPost httpPost = new HttpPost(url);
-		try {
-	    httpPost.setEntity(new UrlEncodedFormEntity(nvps, "utf-8"));
-		} catch (UnsupportedEncodingException e1) {
-			e1.printStackTrace();
-		}
-		HttpResponse response = null;
-		try {
-			response = client.execute(httpPost);
-			int status = response.getStatusLine().getStatusCode();
-			Logger.d("status == " + status);
-			if (status == HttpStatus.SC_OK) {
-				return response.getEntity().getContent();
-			}
-		   }catch (Exception e) {
-
-			e.printStackTrace();
-			return null;
-
-		}
-
-		return null;
-	}
-	
-	
-	
 	
 	/**
 	 * 清除缓存
@@ -458,54 +367,6 @@ public class GetDataImpl {
 		mUrlCache.clear();
 	}
 
-	/**
-	 * 易宝支付
-	 * 
-	 * @param ctx
-	 * @param req
-	 * @return
-	 * @throws IOException
-	 */
-	public List<String> URLGet(String req) {
-
-		String path = "https://www.yeepay.com/app-merchant-proxy/command.action?"
-				+ req;
-		List<String> result = new ArrayList<String>();
-		HttpClient httpClient = HttpUtil.getHttpClient(mContext);
-		if (httpClient == null) {
-			return null;
-		}
-		HttpGet httpGet = new HttpGet(path);
-		HttpResponse response = null;
-
-		try {
-			response = httpClient.execute(httpGet);
-			int status = response.getStatusLine().getStatusCode();
-			Logger.d("status == " + status);
-			if (status == HttpStatus.SC_OK) {
-				BufferedReader in = new BufferedReader(new InputStreamReader(
-						response.getEntity().getContent()));
-				// response.getEntity().getContent();
-				while (true) {
-					String line = in.readLine();
-					if (line == null) {
-						break;
-					} else {
-						result.add(line);
-					}
-				}
-				in.close();
-				return result;
-			}
-		} catch (ClientProtocolException e) {
-			Logger.d(e.getMessage());
-			return null;
-		} catch (IOException e) {
-			Logger.d(e.getMessage());
-			return null;
-		}
-		return null;
-	}
 
 	// 解析客服熱線和QQ
 	private static void parseTelAndQQ(String str) {
@@ -530,31 +391,26 @@ public class GetDataImpl {
 	 * @param payMsg
 	 */
 	 public void canclePay(String OrderNum,String payMsg){
-//		    HashMap<String, String> params = new HashMap<String, String>();
-//			params.put("cmgeOrderNum", OrderNum);
-//			params.put("payMsg", payMsg);
 		 String url = Constants.NPM_REQ;
-		 List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+		 ArrayList<BasicNameValuePair> nvps = new ArrayList<BasicNameValuePair>();
 		 nvps.add(new BasicNameValuePair("cmgeOrderNum",OrderNum));
 		 nvps.add(new BasicNameValuePair("payMsg",payMsg));
-		 doRequestForChinese(url,nvps);
-//			doRequest(url,"");
-			 //doRequestForCheck(url, "");
+		 doRequest(url,nvps, 1);
 	 }
+	 /**获取支付URL对应判断消息*/
 	  public Result getPayUrlMessage(){
-		  String url = Constants.GPM_REQ ;
-		  doRequestForCheck(url, "");
-		  InputStream in = doRequest(url, "");
-			String json = parseJsonData(in);
-			Logger.d("zz_sdk" + json);
-			if (json == null) {
-				return null;
-			}
-			Result result = (Result) JsonUtil.parseJSonObject(Result.class, json);
-			if (result == null) {
-				return null;
-			}
-			return result;
+		String url = Constants.GPM_REQ;
+		InputStream in = doRequest(url, null, 2);
+		String json = parseJsonData(in);
+		Logger.d("zz_sdk" + json);
+		if (json == null) {
+			return null;
+		}
+		Result result = (Result) JsonUtil.parseJSonObject(Result.class, json);
+		if (result == null) {
+			return null;
+		}
+		return result;
 	 }
 	
    /**
@@ -564,16 +420,16 @@ public class GetDataImpl {
     * @return
     */
 	public  Result request(Context ctx,UserAction user){
-		HashMap<String, String> params = new HashMap<String, String>();
-		params.put("projectId", Utils.getProjectId(ctx));
-		params.put("serverId", user.serverId);
-		params.put("actionType", "" + user.actionType);
-		params.put("loginName", user.loginName);
-		params.put("memo", "");
-		String url = Constants.LOG_REQ + appendUrl(params);
-		Log.d("zz_sdk","请求的url:"+ url);
-		InputStream in =doRequestForCheck(url, "");
-		if (in == null)
+		 ArrayList<BasicNameValuePair> nvps = new ArrayList<BasicNameValuePair>();
+		 nvps.add(new BasicNameValuePair("projectId",Utils.getProjectId(ctx)));
+		 nvps.add(new BasicNameValuePair("serverId",user.serverId));
+		 nvps.add(new BasicNameValuePair("actionType","" + user.actionType));
+		 nvps.add(new BasicNameValuePair("loginName",user.loginName));
+		 nvps.add(new BasicNameValuePair("memo",""));
+		 String url = Constants.LOG_REQ;
+		 Log.d("zz_sdk","请求的url:"+ url);
+		 InputStream in =doRequest(url, nvps, 1);
+		 if (in == null)
 			return null;
 
 		String json = parseJsonData(in);
@@ -605,22 +461,21 @@ public class GetDataImpl {
 	 * @return
 	 */
 	  private Result deviceSyn(String loginname,Context ctx){
-		HashMap<String, String> params = new HashMap<String, String>();
-		
-		mDeviceProperties = new DeviceProperties(ctx);
-		params.put("loginName", loginname);
-		params.put("systemVersion","" +mDeviceProperties.versionCode);
-		params.put("deviceType",mDeviceProperties.type);
-		params.put("imei", mDeviceProperties.imei);
-		params.put("imsi", mDeviceProperties.imsi);
-		params.put("latitude", ""+mDeviceProperties.latitude);
-		params.put("longtitude", ""+mDeviceProperties.longitude);
-		params.put("area", ""+mDeviceProperties.area);
-		params.put("netType",mDeviceProperties.networkInfo);
-		params.put("projectId", mDeviceProperties.projectId);
-		params.put("sdkVersion", mDeviceProperties.sdkVersion);
-		String url = Constants.DSYN_REQ + appendUrl(params);
-		InputStream in = doRequest(url, "");
+		  mDeviceProperties = new DeviceProperties(ctx);
+	    ArrayList<BasicNameValuePair> nvps = new ArrayList<BasicNameValuePair>();
+	    nvps.add(new BasicNameValuePair("loginName",loginname));
+	    nvps.add(new BasicNameValuePair("systemVersion",""+mDeviceProperties.versionCode));
+	    nvps.add(new BasicNameValuePair("deviceType",mDeviceProperties.type));
+	    nvps.add(new BasicNameValuePair("imei",mDeviceProperties.imei));
+	    nvps.add(new BasicNameValuePair("imsi",mDeviceProperties.imsi));
+	    nvps.add(new BasicNameValuePair("latitude",""+mDeviceProperties.latitude));
+	    nvps.add(new BasicNameValuePair("longtitude", ""+mDeviceProperties.longitude));
+	    nvps.add(new BasicNameValuePair("area", ""+mDeviceProperties.area));
+	    nvps.add(new BasicNameValuePair("netType",mDeviceProperties.networkInfo));
+	    nvps.add(new BasicNameValuePair("projectId", mDeviceProperties.projectId));
+	    nvps.add(new BasicNameValuePair("sdkVersion", mDeviceProperties.sdkVersion));
+		String url = Constants.DSYN_REQ;
+		InputStream in = doRequest(url,nvps,1);
 		if (in == null)
 			return null;
 		String json = parseJsonData(in);
@@ -649,13 +504,13 @@ public class GetDataImpl {
 	 * @return
 	 */
 	public Result online(Context ctx) {
-		HashMap<String, String> params = new HashMap<String, String>();
-		params.put("projectId", Utils.getProjectId(ctx));
-		params.put("imsi", Utils.getIMSI(ctx));
-		params.put("actionType", UserAction.ONLINE);
-		String url = Constants.LOG_REQ + appendUrl(params);
-
-		InputStream in = doRequest(url, "");
+		ArrayList<BasicNameValuePair> nvps = new ArrayList<BasicNameValuePair>();
+	    nvps.add(new BasicNameValuePair("projectId", Utils.getProjectId(ctx)));
+	    nvps.add(new BasicNameValuePair("imsi", Utils.getIMSI(ctx)));
+	    nvps.add(new BasicNameValuePair("actionType", UserAction.ONLINE));
+	    
+		String url = Constants.LOG_REQ;
+		InputStream in = doRequest(url,nvps,1);
 		if (in == null)
 			return null;
 
@@ -673,14 +528,14 @@ public class GetDataImpl {
 	 * @return
 	 */
 	public Result offline(Context ctx) {
-		HashMap<String, String> params = new HashMap<String, String>();
-		params.put("projectId", Utils.getProjectId(ctx));
-		params.put("imsi", Utils.getIMSI(ctx));
-		params.put("actionType", UserAction.OFFLINE);
-		String url = Constants.LOG_REQ + appendUrl(params);
+		ArrayList<BasicNameValuePair> nvps = new ArrayList<BasicNameValuePair>();
+	    nvps.add(new BasicNameValuePair("projectId", Utils.getProjectId(ctx)));
+	    nvps.add(new BasicNameValuePair("imsi", Utils.getIMSI(ctx)));
+	    nvps.add(new BasicNameValuePair("actionType", UserAction.OFFLINE));
+		
+		String url = Constants.LOG_REQ;
 
-		InputStream in = doRequest(url, "");
-
+		InputStream in = doRequest(url,nvps,1);
 		String json = parseJsonData(in);
 		Logger.d("offline json ----> " + json);
 		if (json == null)
@@ -699,7 +554,7 @@ public class GetDataImpl {
 		if (DebugFlags.DEBUG){
 			payParam.loginName = DebugFlags.DEF_LOGIN_NAME;
 		}
-		ArrayList<NameValuePair> all =payParam.getChargeParameters(type);
+		ArrayList<BasicNameValuePair> all =payParam.getChargeParameters(type);
 		if(all == null){
 			Result result1 = new Result();
 			result1.codes = "-1";
@@ -710,7 +565,7 @@ public class GetDataImpl {
         Log.d("zz_sdk", url);
 		mSdkUser = new SdkUser();
 		mSdkUser.loginName = Application.loginName;
-		InputStream in = doRequestForChinese(url,all);
+		InputStream in = doRequest(url, all, 1);
 		if (in == null)
 			return null;
 		String json = parseJsonData(in);
@@ -730,12 +585,12 @@ public class GetDataImpl {
 	 * @return
 	 */
 	public PayChannel[] getPaymentList(PayParam charge) {
-
-		HashMap<String, String> params = new HashMap<String, String>();
-		params.put("requestId", ""/* + RequestId.ID_PAYMENT_LIST */);
-		params.put("serverId", charge.serverId);
-		String url = Constants.GPL_REQ + appendUrl(params);
-		InputStream in = doRequest(url, "");
+		ArrayList<BasicNameValuePair> nvps = new ArrayList<BasicNameValuePair>();
+	    nvps.add(new BasicNameValuePair("requestId",""));
+	    nvps.add(new BasicNameValuePair("serverId",charge.serverId));
+	
+		String url = Constants.GPL_REQ;
+		InputStream in = doRequest(url,nvps,2);
 		if (in == null)
 			return null;
 
@@ -800,14 +655,6 @@ public class GetDataImpl {
 	private static void parseTopic(String str) {
 
 		if (null != str && !"".equals(str)) {
-			// try {
-			// JSONObject json = new JSONObject(str);
-			// Application.topicTitle = json.isNull("a") ? null : json
-			// .getString("a").trim();
-			// Application.topicDes = json.isNull("b") ? null : json
-			// .getString("b").trim();
-			// } catch (JSONException e) {
-			// }
 			Application.topicDes = str;
 		}
 	}
@@ -821,10 +668,10 @@ public class GetDataImpl {
       *  查询订单
       */
 	public PayResult checkOrder(String ordrNumber) {
-		HashMap<String, String> params = new HashMap<String, String>();
-		params.put("cmgeOrderNum", ordrNumber);
-		String url = Constants.GPM_QO+appendUrl(params);
-	    InputStream in =doRequestForCheck(url,"");
+		ArrayList<BasicNameValuePair> list = new ArrayList<BasicNameValuePair>();
+		list.add(new BasicNameValuePair("cmgeOrderNum", ordrNumber));
+		String url = Constants.GPM_QO;
+	    InputStream in =doRequest(url,list,1);
 	    if(in == null){
 	    	return null;
 	    }

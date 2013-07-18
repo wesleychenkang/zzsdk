@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.codec.binary.Base64;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -27,14 +29,15 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.telephony.TelephonyManager;
-import org.apache.commons.codec.binary.Base64;
-
-import android.util.Log;
 import android.util.Pair;
 import android.widget.Toast;
 
 import com.zz.sdk.activity.Constants;
+import com.zz.sdk.activity.LoginCallbackInfo;
+import com.zz.sdk.activity.SDKManager;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.UserAction;
 
@@ -768,4 +771,23 @@ public class Utils {
 		}
 		return false;
 	}
+
+  /**
+   * 用户退出平台回调给游戏方
+   * @param handler
+   * @param loginName
+   */
+  public static void loginOut(Handler handler,String loginName,int what){
+	  Message msg = handler.obtainMessage();
+	  LoginCallbackInfo info = new LoginCallbackInfo();
+	  info.statusCode = -2;
+	  info.loginName = loginName;
+	  msg.obj =info;
+	  msg.what = what;
+	  handler.sendMessage(msg);
+  }
+
+
+
+
 }

@@ -50,7 +50,7 @@ public final class Constants {
 	public static final String MODIFY_PWD = URL_SERVER_SRV + "cpd.do";
 
 	public static final String LOG_REQ = URL_SERVER_SRV + "log.lg";
-
+    /**获取支付URL对应判断消息*/
 	public static final String GPM_REQ = URL_SERVER_SRV + "gpm.do";
 	/** 获取支付列表 */
 	public static final String GPL_REQ = URL_SERVER_SRV + "gpl.do";

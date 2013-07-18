@@ -45,6 +45,7 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 		this.mChannelMsg = pc;
 		mSmsMsg = sms;
 		initUI(activity);
+		Application.isMessagePage = 1;
 	}
 
 	@Override
