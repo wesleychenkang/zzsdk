@@ -20,17 +20,17 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.codec.binary.Base64;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Environment;
 import android.telephony.TelephonyManager;
-import org.apache.commons.codec.binary.Base64;
-
-import android.util.Log;
 import android.util.Pair;
 import android.widget.Toast;
 
@@ -45,19 +45,11 @@ import com.zz.sdk.entity.UserAction;
 public class Utils {
 	private static String[] s = new String[] { UserAction.CTEN,
 			UserAction.CUNION, UserAction.CALI, UserAction.CYEE };
-	/**
-	 * xml 文件名 ，
-	 */
-	private static final String XML_PROJECT_ID = "xpi";
 
 	/**
 	 * xml，记录imsi
 	 */
 	private static final String XML_IMSI = "dq";
-	/**
-	 * xml中保存projectId的键
-	 */
-	private static final String KEY_PROJECT_ID = "pi";
 
 	/** imsi保存路径 */
 	private static final String IMSI_FILE = "/zzsdk/data/code/PQ.DAT";
@@ -69,7 +61,7 @@ public class Utils {
 
 	private static final String DATA_DIR = "/zzsdk/data/zz/cache";
 
-	private static String CACHE_PROJECT_ID = "-1";
+	private static String CACHE_PROJECT_ID = null;
 
 	static {
 		String state = Environment.getExternalStorageState();
@@ -387,136 +379,32 @@ public class Utils {
 		return ret;
 	}
 
-	public static String getProjectId(Context ctx) {
-		// 先读程序的缓存
-		if (null == CACHE_PROJECT_ID || CACHE_PROJECT_ID.equals("-1")
-				|| CACHE_PROJECT_ID.equals("")) {
+	/**
+	 * 获取工程ID
+	 * 
+	 * @param ctx
+	 * @return
+	 */
+	public static synchronized String getProjectId(Context ctx) {
+		if (null == CACHE_PROJECT_ID) {
+			String projectId = null;
+			try {
+				ApplicationInfo appInfo;
+				appInfo = ctx.getPackageManager().getApplicationInfo(
+						ctx.getPackageName(), PackageManager.GET_META_DATA);
+				if (appInfo != null && appInfo.metaData != null) {
+					projectId = appInfo.metaData.getString(
+							Constants.K_PROJECT_ID, null);
+				}
+				CACHE_PROJECT_ID = projectId;
+			} catch (Exception e) {
+				Logger.d("read PROJECT_ID error!");
+				e.printStackTrace();
+			}
+			return projectId;
 		} else {
 			return CACHE_PROJECT_ID;
 		}
-		String projectId = "-1";
-		// 读取程序本地xml里面
-		SharedPreferences prefs = ctx.getSharedPreferences(XML_PROJECT_ID,
-				Context.MODE_PRIVATE);
-		String tmp = prefs.getString(KEY_PROJECT_ID, null);
-		if (tmp != null) {
-			return decode(tmp);
-		}
-		File file = null;
-		// 读取SDcard
-		if (Environment.MEDIA_MOUNTED.equals(Environment
-				.getExternalStorageState())) {
-			// sdcard上保存的路径
-			file = new File(Environment.getExternalStorageDirectory(),
-					"/zzsdk/data/code/" + ctx.getPackageName() + "/PID.DAT");
-			if (file.exists()) {
-				FileInputStream fis = null;
-				BufferedReader reader = null;
-				InputStreamReader isr = null;
-
-				try {
-					fis = new FileInputStream(file);
-					isr = new InputStreamReader(fis);
-					reader = new BufferedReader(isr);
-					String temp = null;
-					if ((temp = reader.readLine()) != null) {
-						projectId = decode(temp);
-						writeProjectId2xml(ctx, projectId);
-						return projectId;
-					}
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				} finally {
-					if (reader != null) {
-						try {
-							reader.close();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-					if (isr != null) {
-						try {
-							isr.close();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-					if (fis != null) {
-						try {
-							fis.close();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-				}
-			}
-		}
-
-		projectId = decode(tmp);
-		return projectId;
-
-	}
-
-	public static void writeProjectId2File(Context ctx, File file,
-			String projectId) {
-		if (file == null || projectId == null)
-			return;
-		// 把projectId写到sdcard
-		FileOutputStream fos = null;
-		OutputStreamWriter osw = null;
-		BufferedWriter writer = null;
-		try {
-			File parent = file.getParentFile();
-			if (!parent.exists())
-				parent.mkdirs();
-			file.createNewFile();
-			fos = new FileOutputStream(file);
-			osw = new OutputStreamWriter(fos);
-			writer = new BufferedWriter(osw);
-			writer.write(encode(projectId));
-			writer.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			if (writer != null) {
-				try {
-					writer.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			if (osw != null) {
-				try {
-					osw.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			if (fos != null) {
-				try {
-					fos.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-
-	/**
-	 * 将projectId加密写到xml文件
-	 * 
-	 * @param ctx
-	 * @param projectId
-	 */
-	public static void writeProjectId2xml(Context ctx, String projectId) {
-		if (projectId == null) {
-			return;
-		}
-		SharedPreferences prefs = ctx.getSharedPreferences(XML_PROJECT_ID,
-				Context.MODE_PRIVATE);
-		prefs.edit().putString(KEY_PROJECT_ID, encode(projectId)).commit();
 	}
 
 	/**
@@ -550,21 +438,6 @@ public class Utils {
 				e.printStackTrace();
 			}
 		}
-	}
-
-	/**
-	 * 判断sdcard上是否已经保存有渠道信息
-	 * 
-	 * @return
-	 */
-	public static boolean isProjectExist(Context ctx) {
-		File file = new File(Environment.getExternalStorageDirectory(),
-				"/zzsdk/data/code/" + ctx.getPackageName() + "/PID.DAT");
-		if (file.exists() && file.isFile() && file.length() > 0) {
-			return true;
-		}
-
-		return false;
 	}
 
 	/**
@@ -661,10 +534,10 @@ public class Utils {
 		return list;
 	}
 
-	public static void writeProjectId2cache(Context ctx, String projectId) {
-		if (projectId != null)
-			CACHE_PROJECT_ID = projectId;
-	}
+//	public static void writeProjectId2cache(Context ctx, String projectId) {
+//		if (projectId != null)
+//			CACHE_PROJECT_ID = projectId;
+//	}
 
 	//
 	// ------------------------------------------------------------------------

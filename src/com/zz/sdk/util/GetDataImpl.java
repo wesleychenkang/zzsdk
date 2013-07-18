@@ -5,10 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -811,12 +807,7 @@ public class GetDataImpl {
 			Application.topicDes = str;
 		}
 	}
-
-	public void getChannelMessage(DeviceProperties deviceProperties) {
-		// TODO Auto-generated method stub
-		// XXX: 暂时强制写入 projectID
-		Utils.writeProjectId2cache(mContext, deviceProperties.projectId);
-	}
+ 
      /**
       *  查询订单
       */
