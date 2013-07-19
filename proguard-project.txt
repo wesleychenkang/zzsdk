@@ -53,6 +53,9 @@
 -keep public class com.zz.sdk.SDKManager {
    public *;
 }
+
+-keep public class com.zz.sdk.MSG_* { public *;}
+
 -keep public class com.zz.sdk.PaymentCallbackInfo {
    public *;
 }

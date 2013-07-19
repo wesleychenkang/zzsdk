@@ -26,8 +26,8 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.zz.sdk.LoginCallbackInfo;
-import com.zz.sdk.SDKManager.MSG_STATUS;
-import com.zz.sdk.SDKManager.MSG_TYPE;
+import com.zz.sdk.MSG_STATUS;
+import com.zz.sdk.MSG_TYPE;
 import com.zz.sdk.entity.Result;
 import com.zz.sdk.entity.UserAction;
 import com.zz.sdk.layout.LoginLayout;

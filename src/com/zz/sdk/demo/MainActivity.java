@@ -13,6 +13,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.zz.sdk.LoginCallbackInfo;
+import com.zz.sdk.MSG_STATUS;
+import com.zz.sdk.MSG_TYPE;
 import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.SDKManager;
 
@@ -138,9 +140,9 @@ public class MainActivity extends Activity implements OnClickListener {
 		public void handleMessage(android.os.Message msg) {
 			switch (msg.what) {
 			case WHAT_LOGIN_CALLBACK_DEFAULT: {
-				if (msg.arg1 == SDKManager.MSG_TYPE.LOGIN) {
+				if (msg.arg1 == MSG_TYPE.LOGIN) {
 
-					if (msg.arg2 == SDKManager.MSG_STATUS.SUCCESS) {
+					if (msg.arg2 == MSG_STATUS.SUCCESS) {
 						if (msg.obj instanceof LoginCallbackInfo) {
 							LoginCallbackInfo info = (LoginCallbackInfo) msg.obj;
 							Log.d(DBG_TAG,
@@ -155,9 +157,9 @@ public class MainActivity extends Activity implements OnClickListener {
 						} else {
 							pushLog(" - 登录成功，但没有用户数据");
 						}
-					} else if (msg.arg2 == SDKManager.MSG_STATUS.CANCEL) {
+					} else if (msg.arg2 == MSG_STATUS.CANCEL) {
 						pushLog(" - 用户取消了登录.");
-					} else if (msg.arg2 == SDKManager.MSG_STATUS.EXIT_SDK) {
+					} else if (msg.arg2 == MSG_STATUS.EXIT_SDK) {
 						pushLog(" - 登录业务结束。");
 					} else {
 						pushLog(" ! 未知登录结果，请检查：s=" + msg.arg2 + " info:"
