@@ -2,6 +2,7 @@ package com.zz.sdk;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Pair;
 
 import com.zz.sdk.activity.ChargeActivity;
@@ -22,6 +23,8 @@ import com.zz.sdk.util.Utils;
  * <li>启动<strong>支付</strong>界面:
  * {@link #showPaymentView(Handler, int, String, String, String, String, String, int, String)}
  * </li>
+ * <li>启动<strong>登录</strong>或<strong>支付</strong>时，消息类型 {@link Message#arg2} 为
+ * {@link MSG_STATUS#EXIT_SDK} 时表示此次SDK操作结束。</li>
  * <li>退出游戏时，调用 {@link #recycle()} 释放资源</li>
  * </ol>
  * 
@@ -30,12 +33,14 @@ import com.zz.sdk.util.Utils;
 
 public class SDKManager {
 
-	private Context mContext;
-
 	/**
 	 * 业务类型
 	 */
 	public static final class MSG_TYPE {
+		private MSG_TYPE() {
+
+		}
+
 		/** 业务: 登录 */
 		public final static int LOGIN = 0;
 		/** 业务: 支付 */
@@ -44,6 +49,10 @@ public class SDKManager {
 
 	/** 业务状态 */
 	public static final class MSG_STATUS {
+		private MSG_STATUS() {
+
+		}
+
 		/** 操作成功 */
 		public final static int SUCCESS = 0;
 		/** 操作失败 */
@@ -88,8 +97,10 @@ public class SDKManager {
 		// thread.start();
 	}
 
+	private Context mContext;
+
 	private SDKManager(Context ctx) {
-		mContext = ctx.getApplicationContext();
+		mContext = ctx;
 		// HandlerThread handlerThread = new HandlerThread("zzsdk",
 		// android.os.Process.THREAD_PRIORITY_BACKGROUND);
 		// handlerThread.start();
@@ -162,13 +173,13 @@ public class SDKManager {
 	 * 
 	 * <table>
 	 * <tr>
-	 * <th>android.os.Message:</th>
+	 * <th>{@link Message android.os.Message:}</th>
 	 * </tr>
 	 * <tr>
-	 * <th>.what</th>
-	 * <th>.arg1</th>
-	 * <th>.arg2</th>
-	 * <th>.obj</th>
+	 * <th>{@link Message#what .what}</th>
+	 * <th>{@link Message#arg1 .arg1}</th>
+	 * <th>{@link Message#arg2 .arg2}</th>
+	 * <th>{@link Message#obj .obj}</th>
 	 * <td>描述</td>
 	 * <tr>
 	 * <tr>
@@ -181,16 +192,16 @@ public class SDKManager {
 	 * <tr>
 	 * <td></td>
 	 * <td></td>
-	 * <td>{@link MSG_STATUS#FAILED}</td>
+	 * <td>{@link MSG_STATUS#CANCEL}</td>
 	 * <td>..</td>
-	 * <td>登录失败，无其它信息</td>
+	 * <td>用户取消登录，无其它信息</td>
 	 * </tr>
 	 * <tr>
 	 * <td></td>
 	 * <td></td>
 	 * <td>{@link MSG_STATUS#EXIT_SDK}</td>
 	 * <td>..</td>
-	 * <td>用户取消登录，无其它信息</td>
+	 * <td>登录业务结束，无其它信息</td>
 	 * </tr>
 	 * </table>
 	 * 
@@ -223,13 +234,13 @@ public class SDKManager {
 	 * 
 	 * <table>
 	 * <tr>
-	 * <th>android.os.Message:</th>
+	 * <th>{@link Message android.os.Message:}</th>
 	 * </tr>
 	 * <tr>
-	 * <th>.what</th>
-	 * <th>.arg1</th>
-	 * <th>.arg2</th>
-	 * <th>.obj</th>
+	 * <th>{@link Message#what .what}</th>
+	 * <th>{@link Message#arg1 .arg1}</th>
+	 * <th>{@link Message#arg2 .arg2}</th>
+	 * <th>{@link Message#obj .obj}</th>
 	 * <td>描述</td>
 	 * <tr>
 	 * <tr>

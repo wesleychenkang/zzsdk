@@ -72,7 +72,7 @@ public class GetDataImpl {
 	/**
 	 * 用户登录
 	 * 
-	 * @return true表示登录成功 false表示登录失败
+	 * @return true表示登录成功 false表示登录失败 </br> codes=0成功|1用户不存在|2密码错误
 	 */
 	public Result login(String loginName, String password, int autoLogin,
 			Context ctx) {
@@ -167,7 +167,7 @@ public class GetDataImpl {
 	/**
 	 * 用户注册
 	 * 
-	 * @return 注册
+	 * @return 注册, codes=0成功|1失败|2用户名已经存在
 	 */
 	public Result register(String loginName, String password, Context ctx) {
 		mSdkUser = new SdkUser();

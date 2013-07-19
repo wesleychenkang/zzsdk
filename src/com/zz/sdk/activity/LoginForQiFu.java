@@ -4,13 +4,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 
 import com.qihoopay.insdk.activity.ContainerActivity;
@@ -18,144 +20,201 @@ import com.qihoopay.insdk.matrix.Matrix;
 import com.qihoopay.sdk.protocols.IDispatcherCallback;
 import com.qihoopay.sdk.protocols.ProtocolConfigs;
 import com.qihoopay.sdk.protocols.ProtocolKeys;
+import com.zz.sdk.BuildConfig;
 import com.zz.sdk.LoginCallbackInfo;
+import com.zz.sdk.SDKManager.MSG_STATUS;
+import com.zz.sdk.SDKManager.MSG_TYPE;
+import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.entity.QiHooResult;
 import com.zz.sdk.entity.Result;
 import com.zz.sdk.util.Application;
+import com.zz.sdk.util.DialogUtil;
 import com.zz.sdk.util.GetDataImpl;
+import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.Utils;
 
+/**
+ * 封装 奇虎(360SDK) 的用户登录
+ */
 public class LoginForQiFu extends Activity {
-	protected static final String RESPONSE_TYPE_CODE = "code";
+	private static final String RESPONSE_TYPE_CODE = "code";
 	private static final String AUTH_CODE = "code";
-	public static Handler callBackhandler;
+
+	private static Handler mCallBackhandler;
 	private static int mWhatCallback;
-	private String productId = "D1001";// 大话360测试
-	private String prjectId = "-1";
-	private String sign = "$360U$";
+
+	private static final String PRODUCT_ID = ZZSDKConfig.QIHOO_PRODUCT_ID;
+	private static final String SIGN = "$360U$";
+
+	private static final String K_IS_LANDSCAPE = "isLandScape";
+	private static final String K_IS_BG_TRANSPARENT = "isBgTransparent";
+	/** 默认的奇虎密码 */
+	private static final String DEF_PWD_QIHOO = "qihumm";
+
+	private Dialog mDialog;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		prjectId = Utils.getProjectId(this);
 		Intent intent = getIntent();
-		doSdkLogin(intent.getBooleanExtra("isLandScape", false),
-				intent.getBooleanExtra("isBgTransparent", false));
+		boolean isLand = intent.getBooleanExtra(K_IS_LANDSCAPE, false);
+		boolean isTransparent = intent.getBooleanExtra(K_IS_BG_TRANSPARENT,
+				false);
+		invoke360SDK(isLand, isTransparent);
+		setRequestedOrientation(!isLand ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+				: ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		if (BuildConfig.DEBUG) {
+			Logger.d("被销毁掉了");
+		}
+
+		try {
+
+			if (mDialog != null) {
+				mDialog.dismiss();
+			}
+
+			if (mCallBackhandler != null) {
+				Message msg = Message.obtain(mCallBackhandler, mWhatCallback,
+						MSG_TYPE.LOGIN, MSG_STATUS.EXIT_SDK);
+				mCallBackhandler.sendMessage(msg);
+			}
+			clean();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
 	}
 
 	public static void startLogin(Context ctx, boolean isLandScape,
 			boolean isBgTransparent, Handler mhandler, int what) {
 		Intent inent = new Intent(ctx, LoginForQiFu.class);
 		inent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		inent.putExtra("isLandScape", isLandScape);
-		inent.putExtra("isBgTransparent", isBgTransparent);
-		callBackhandler = mhandler;
+		inent.putExtra(K_IS_LANDSCAPE, isLandScape);
+		inent.putExtra(K_IS_BG_TRANSPARENT, isBgTransparent);
+		mCallBackhandler = mhandler;
 		mWhatCallback = what;
 		ctx.startActivity(inent);
+	}
+
+	private synchronized void clean() {
+		mCallBackhandler = null;
+		mWhatCallback = 0;
+		mDialog = null;
+	}
+
+	private synchronized void tryNotify(int status, LoginCallbackInfo info) {
+		if (mCallBackhandler != null) {
+			Message msg = mCallBackhandler.obtainMessage(mWhatCallback,
+					MSG_TYPE.LOGIN, status, info);
+			mCallBackhandler.sendMessage(msg);
+		}
 	}
 
 	private IDispatcherCallback mLoginCallback = new IDispatcherCallback() {
 		@Override
 		public void onFinished(String data) {
-			Log.d("zz_sdk", "mLoginCallback, data is " + data);
+			Logger.d("mLoginCallback, data is " + data);
 			final String authorizationCode = parseAuthorizationCode(data);
-			Log.d("zz_sdk", "360" + authorizationCode);
+			Logger.d("360" + authorizationCode);
 			if (authorizationCode != null) {
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
 						final Context ctx = LoginForQiFu.this.getBaseContext();
-
 						QiHooResult qhResult = GetDataImpl.getInstance(ctx)
-								.getAcessToken(productId, authorizationCode);
-						LoginCallbackInfo loginCBInfo = new LoginCallbackInfo();
-						if (qhResult != null && "0".equals(qhResult.codes)
-								&& callBackhandler != null) {
-							Application.isLogin = true;
-							loginCBInfo.statusCode = 1;
-							Application.loginName = qhResult.id + sign;
-							loginCBInfo.loginName = Application.loginName;
-							Message msg = Message.obtain();
-							msg.obj = loginCBInfo;
-							msg.what = mWhatCallback;
-							if (isExistAcount()) {
-								Result r = GetDataImpl.getInstance(
-										LoginForQiFu.this).register(
-										Application.loginName, "qihumm",
-										LoginForQiFu.this);
+								.getAcessToken(PRODUCT_ID, authorizationCode);
+
+						// 失败的 codes = "1"
+						if (qhResult != null && "0".equals(qhResult.codes)) {
+							String loginName = qhResult.id + SIGN;
+							if (checkLoginNameExist(loginName)) {
+								// 向服务器注册， codes=0成功|1失败|2用户名已经存在
+								Result r = GetDataImpl
+										.getInstance(ctx)
+										.register(loginName, DEF_PWD_QIHOO, ctx);
 								if (r != null) {
-									if (r.codes.equals("2")
-											|| r.codes.equals("0")) {
+									// 已经存在(2)或注册成功(0)
+									if ("2".equals(r.codes)
+											|| "0".equals(r.codes)) {
 										Utils.writeAccount2SDcard(ctx,
-												Application.loginName, "qihumm");
-										loginCBInfo.loginName =Application.loginName;
-									}else{
-										Application.loginName = null;
-										loginCBInfo.loginName = null;
+												loginName, DEF_PWD_QIHOO);
+									} else {
+										loginName = null;
 									}
-									loginCBInfo.statusCode = Integer
-											.parseInt(r.codes);
-								 } else {
-									Application.loginName = null;
-									loginCBInfo.loginName = null;
-									loginCBInfo.statusCode = 1;
-								}
-								Log.d("zz_sdk", "执行了注册回调");
-								callBackhandler.sendMessage(msg);
-
-							} else {
-								loginCBInfo.statusCode = -1;
-								loginCBInfo.loginName = Application.loginName;
-								Result r = GetDataImpl.getInstance(
-										LoginForQiFu.this).login(
-										Application.loginName, "qihumm", 0,
-										LoginForQiFu.this);
-								if (r != null) {
-									loginCBInfo.statusCode = Integer
-											.parseInt(r.codes);
-
 								} else {
-									loginCBInfo.statusCode = 1;
+									// 未知结果
+									loginName = null;
 								}
-								Log.d("zz_sdk", "执行了登录回调");
-								callBackhandler.sendMessage(msg);
+								Logger.d("执行了注册回调");
+							} else {
+								Result r = GetDataImpl.getInstance(ctx).login(
+										loginName, DEF_PWD_QIHOO, 0, ctx);
+								Logger.d("login [" + loginName + " result:" + r);
+								if (r != null) {
+									// codes=0成功|1用户不存在|2密码错误
+									if ("0".equals(r.codes)) {
+									} else {
+										loginName = null;
+									}
+								} else {
+									loginName = null;
+								}
+								Logger.d("执行了登录回调");
 							}
+
+							Application.SetLoginName(loginName);
+
+							LoginCallbackInfo loginCBInfo = new LoginCallbackInfo();
+							loginCBInfo.loginName = loginName;
+							loginCBInfo.statusCode = loginName == null ? LoginCallbackInfo.STATUS_FAILURE
+									: LoginCallbackInfo.STATUS_SUCCESS;
+							tryNotify(loginName == null ? MSG_STATUS.FAILED
+									: MSG_STATUS.SUCCESS, loginCBInfo);
 						}
+						LoginForQiFu.this.finish();
 					}
 				}).start();
-				}else{
-					LoginCallbackInfo loginCBInfo = new LoginCallbackInfo();
-					loginCBInfo.statusCode = -2;
-					loginCBInfo.loginName = null;
-					Message msg =new Message();
-					msg.what = mWhatCallback;
-					msg.obj = loginCBInfo;
-					if(callBackhandler!=null){
-					callBackhandler.sendMessage(msg);
-					}
-					Log.d("zz_sdk", "收到的data为null");
-					
+				try {
+					mDialog = DialogUtil.showProgress(LoginForQiFu.this,
+							"请稍候...", false);
+					getWindow().setBackgroundDrawable(
+							new ColorDrawable(0xFFAEDAEB));
+				} catch (Exception e) {
 				}
-			LoginForQiFu.this.finish();
-			
+			} else {
+				Logger.d("收到的data为null");
+				LoginCallbackInfo info = new LoginCallbackInfo();
+				info.statusCode = LoginCallbackInfo.STATUS_CLOSE_VIEW;
+				info.loginName = null;
+				tryNotify(MSG_STATUS.CANCEL, info);
+				LoginForQiFu.this.finish();
+			}
 		}
 	};
 
-	/** 判断当前用户是否已写入SD卡 */
-	private boolean isExistAcount() {
+	/**
+	 * 判断当前用户是否已写入SD卡
+	 * 
+	 * @param name
+	 *            待比对的用户名
+	 * @return true表示与 name 不匹配，需要向服务器重新注册
+	 */
+	private boolean checkLoginNameExist(String name) {
 		Pair<String, String> p = Utils.getAccountFromSDcard(getBaseContext());
 		if (p == null) {
 			return true;
 		} else {
-
-			if (!p.first.equals(Application.loginName)) {
+			if (p.first == null || !p.first.equals(name)
+					|| !DEF_PWD_QIHOO.equals(p.second)) {
 				return true;
 			} else {
 				return false;
 			}
-
 		}
-
 	}
 
 	/**
@@ -183,13 +242,7 @@ public class LoginForQiFu extends Activity {
 		return authorizationCode;
 	}
 
-	protected void doSdkLogin(boolean isLandScape, boolean isBgTransparent) {
-		Intent intent = getLoginIntent(isLandScape, isBgTransparent);
-		Matrix.invokeActivity(LoginForQiFu.this, intent, mLoginCallback);
-	}
-
-	private Intent getLoginIntent(boolean isLandScape, boolean isBgTransparent) {
-
+	protected void invoke360SDK(boolean isLandScape, boolean isBgTransparent) {
 		Bundle bundle = new Bundle();
 
 		// 界面相关参数，360SDK界面是否以横屏显示。
@@ -208,19 +261,7 @@ public class LoginForQiFu extends Activity {
 				ProtocolConfigs.FUNC_CODE_LOGIN);
 		Intent intent = new Intent(this, ContainerActivity.class);
 		intent.putExtras(bundle);
-		return intent;
+		Matrix.invokeActivity(LoginForQiFu.this, intent, mLoginCallback);
 	}
 
-	@Override
-	protected void onDestroy() {
-
-		System.out.println("被销毁掉了");
-		super.onDestroy();
-	}
-
-	
-	
-	
-	}	
-	
-
+}

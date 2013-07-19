@@ -550,8 +550,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setRequestedOrientation(Utils.isOrientationVertical(this) ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-				: ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+		Utils.loack_screen_orientation(this);
 		Application.isAlreadyCB = 0;
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		Intent intent = getIntent();

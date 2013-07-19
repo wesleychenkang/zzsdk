@@ -133,15 +133,35 @@ public class MainActivity extends Activity implements OnClickListener {
 		public void handleMessage(android.os.Message msg) {
 			switch (msg.what) {
 			case WHAT_LOGIN_CALLBACK_DEFAULT: {
-				LoginCallbackInfo info = (LoginCallbackInfo) msg.obj;
-				Log.d(DBG_TAG, "zz_sdk" + "info----- :" + info.toString());
-				Log.d(DBG_TAG, "---------用户登录-------");
-				if (mLoginCallbackInfo == null) {
-					mTvTip.setText(info.toString());
+				if (msg.arg1 == SDKManager.MSG_TYPE.LOGIN) {
+
+					if (msg.arg2 == SDKManager.MSG_STATUS.SUCCESS) {
+						if (msg.obj instanceof LoginCallbackInfo) {
+							LoginCallbackInfo info = (LoginCallbackInfo) msg.obj;
+							Log.d(DBG_TAG,
+									"zz_sdk" + "info----- :" + info.toString());
+							Log.d(DBG_TAG, "---------用户登录-------");
+							if (mLoginCallbackInfo == null) {
+								mTvTip.setText(info.toString());
+							} else {
+								pushLog(info.toString());
+							}
+							mLoginCallbackInfo = info;
+						} else {
+							pushLog(" - 登录成功，但没有用户数据");
+						}
+					} else if (msg.arg2 == SDKManager.MSG_STATUS.CANCEL) {
+						pushLog(" - 用户取消了登录.");
+					} else if (msg.arg2 == SDKManager.MSG_STATUS.EXIT_SDK) {
+						pushLog(" - 登录业务结束。");
+					} else {
+						pushLog(" ! 未知登录结果，请检查：s=" + msg.arg2 + " info:"
+								+ msg.obj);
+					}
 				} else {
-					pushLog(info.toString());
+					pushLog(" # 未知类型 t=" + msg.arg1 + " s=" + msg.arg2
+							+ " info:" + msg.obj);
 				}
-				mLoginCallbackInfo = info;
 			}
 				break;
 			case WHAT_PAYMENT_CALLBACK_DEFAULT: {

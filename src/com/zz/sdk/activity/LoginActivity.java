@@ -1,8 +1,5 @@
 package com.zz.sdk.activity;
 
-import static com.zz.sdk.util.Application.loginName;
-import static com.zz.sdk.util.Application.password;
-
 import java.util.Stack;
 import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
@@ -11,7 +8,6 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -29,8 +25,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-
 import com.zz.sdk.LoginCallbackInfo;
+import com.zz.sdk.SDKManager.MSG_STATUS;
+import com.zz.sdk.SDKManager.MSG_TYPE;
 import com.zz.sdk.entity.Result;
 import com.zz.sdk.entity.UserAction;
 import com.zz.sdk.layout.LoginLayout;
@@ -44,26 +41,38 @@ import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.Utils;
 
-public class LoginActivity extends Activity implements OnClickListener{
+/**
+ * SDK 的登录界面，<strong>包含：</strong>
+ * <ul>
+ * <li>自动登录（等待2s）</li>
+ * <li>登录</li>
+ * <li>注册</li>
+ * <li>修改密码</li>
+ * </ul>
+ */
+public class LoginActivity extends Activity implements OnClickListener {
 
 	private static final String TAG_MODIFY_LAYOUT = "modify";
-	private ExecutorService executor =null;
-	//登录，注册，修改密码视图栈
+	private ExecutorService executor = null;
+	/** 登录，注册，修改密码视图栈 */
 	private Stack<View> mViewStack = new Stack<View>();
-	// 登录布局
+	/** 登录布局 */
 	private LoginLayout loginLayout;
-	// 注册布局
+	/** 注册布局 */
 	private RegisterLayout registerLayout;
-	// 修改密码布局
+	/** 修改密码布局 */
 	private UpdatePasswordLayout updatePasswordLayout;
 	private Handler mHandler;
 	private UserAction user;
-	// 第三方回调
+
+	/** 第三方回调 */
 	private static Handler mCallback;
 	private static int mWhatCallback;
-    private boolean check = true;
-//    private boolean checkonkeydown = true;
-	public static void start(Context ctx, Handler callback, int what) {
+	private boolean check = true;
+
+	// private boolean checkonkeydown = true;
+	public synchronized static void start(Context ctx, Handler callback,
+			int what) {
 		mCallback = callback;
 		mWhatCallback = what;
 
@@ -72,26 +81,26 @@ public class LoginActivity extends Activity implements OnClickListener{
 		intent.setClass(ctx, LoginActivity.class);
 		ctx.startActivity(intent);
 	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		setRequestedOrientation(Utils.isOrientationVertical(this) ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-				: ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-		
+
+		Utils.loack_screen_orientation(this);
+
 		check = true;
 		user = new UserAction();
 		mHandler = new Handler();
 		loginLayout = null;
-		if (loginName == null || "".equals(loginName)) {
+		if (Application.loginName == null || "".equals(Application.loginName)) {
 			// 数据库中没有数据
 			loginLayout = new LoginLayout(this, false);
 		} else {
 			loginLayout = new LoginLayout(this, true);
 			// 用户名
-			loginLayout.setAccount(loginName);
+			loginLayout.setAccount(Application.loginName);
 			// 密码
-			loginLayout.setPassWord(password);
+			loginLayout.setPassWord(Application.password);
 		}
 		loginLayout.setQuickLoginListener(this);
 		loginLayout.setModifyPWListener(this);
@@ -102,15 +111,14 @@ public class LoginActivity extends Activity implements OnClickListener{
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		//getMenuInflater().inflate(R.menu.login, menu);
+		// getMenuInflater().inflate(R.menu.login, menu);
 		return true;
 	}
 
 	private void toast(String text) {
 		Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT)
-		.show();
+				.show();
 	}
-
 
 	@Override
 	public void onClick(View v) {
@@ -185,7 +193,8 @@ public class LoginActivity extends Activity implements OnClickListener{
 			// 先判断用户有没有输入
 			iLoginName = loginLayout.getAccount();
 			iPassword = loginLayout.getPassWord();
-			if ((Application.loginName == null || "".equals(Application.loginName))
+			if ((Application.loginName == null || ""
+					.equals(Application.loginName))
 					&& iLoginName != null
 					&& iLoginName.length() > 0) {
 				Pair<Boolean, String> resultName = validUserName(iLoginName);
@@ -231,10 +240,10 @@ public class LoginActivity extends Activity implements OnClickListener{
 			ModifyTask task = new ModifyTask(this, un, p);
 			task.execute();
 			break;
-			/** 注册页 */
+		/** 注册页 */
 		case 6:
 			// 返回
-			//onBackPressed();
+			// onBackPressed();
 			popViewFromStack();
 			break;
 		case 5:
@@ -261,18 +270,20 @@ public class LoginActivity extends Activity implements OnClickListener{
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-	   if(keyCode == KeyEvent.KEYCODE_BACK){
-		  // checkonkeydown = false;
-		   if(check){
-			 popViewFromStack();  
-		   }
-		   return true;
-	     }
-	    
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			// checkonkeydown = false;
+			if (check) {
+				popViewFromStack();
+			}
+			return true;
+		}
+
 		return super.onKeyDown(keyCode, event);
 	}
+
 	/**
 	 * 视图入栈
+	 * 
 	 * @param newView
 	 */
 	private void pushView2Stack(View newView) {
@@ -287,6 +298,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 
 	/**
 	 * 视图出栈
+	 * 
 	 * @return
 	 */
 	private View popViewFromStack() {
@@ -303,37 +315,61 @@ public class LoginActivity extends Activity implements OnClickListener{
 			peek.requestFocus();
 			return peek;
 		} else {
-			//退出回调
-		    LoginCallbackInfo loging = new LoginCallbackInfo();
-		    loging.statusCode = -2;
-			Message msg = mCallback.obtainMessage();
-			msg.obj = loging;
-			msg.what = mWhatCallback;
-			mCallback.sendMessage(msg);
-			this.finish();
+			// 退出回调
+			onCancelLogin();
+			finish();
 			return null;
 		}
 	}
 
-	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		try {
+			tryNotify(MSG_STATUS.EXIT_SDK, null);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		clean();
+	}
+
+	private synchronized void clean() {
+		mHandler = null;
+		mWhatCallback = 0;
+
+		mViewStack.clear();
+	}
+
+	private synchronized void tryNotify(int status, LoginCallbackInfo info) {
+		if (mCallback != null) {
+			Message msg = mCallback.obtainMessage(mWhatCallback,
+					MSG_TYPE.LOGIN, status, info);
+			mCallback.sendMessage(msg);
+		}
+	}
+
+	private void onCancelLogin() {
+		LoginCallbackInfo loging = new LoginCallbackInfo();
+		loging.statusCode = LoginCallbackInfo.STATUS_CLOSE_VIEW;
+		tryNotify(MSG_STATUS.CANCEL, loging);
+	}
+
 	/**
 	 * 登陆成功 或 注册成功 或 修改密码成功后 反馈第三方
 	 */
 	private void onPostLogin(final Result result) {
 		Logger.d("onPostLogin ------------------result -> " + result);
 		if (mCallback != null && result != null && "0".equals(result.codes)
-				&& loginName != null) {
+				&& Application.loginName != null) {
 			LoginCallbackInfo loginCallbackInfo = new LoginCallbackInfo();
 			loginCallbackInfo.statusCode = LoginCallbackInfo.STATUS_SUCCESS;
-			loginCallbackInfo.loginName = loginName;
-
-			Message message = Message.obtain();
-			message.obj = loginCallbackInfo;
-			message.what = mWhatCallback;
-			mCallback.sendMessage(message);
+			loginCallbackInfo.loginName = Application.loginName;
+			tryNotify(MSG_STATUS.SUCCESS, loginCallbackInfo);
 			Logger.d("has run send message-------------");
 		}
 	}
+
 	/**
 	 * 快速登录
 	 */
@@ -341,8 +377,8 @@ public class LoginActivity extends Activity implements OnClickListener{
 		Context ctx;
 		CustomDialog mDialog;
 
-		QuickLogin(Context ctx){
-			check =false;
+		QuickLogin(Context ctx) {
+			check = false;
 			this.ctx = ctx;
 			mDialog = new CustomDialog(ctx);
 			mDialog.show();
@@ -351,11 +387,13 @@ public class LoginActivity extends Activity implements OnClickListener{
 		@Override
 		protected void onPreExecute() {
 		}
+
 		@Override
 		protected Result doInBackground(Void... params) {
 			Result result = GetDataImpl.getInstance(ctx).quickLogin(ctx);
 			return result;
 		}
+
 		@Override
 		protected void onPostExecute(Result result) {
 			Logger.d("AsyncTask完成");
@@ -363,13 +401,13 @@ public class LoginActivity extends Activity implements OnClickListener{
 			if (null != mDialog && mDialog.isShowing()) {
 				mDialog.cancel();
 			}
-			//			mDialog.cancel();
+			// mDialog.cancel();
 			if (result != null) {
 				if ("0".equals(result.codes)) {
 					// 快速登陆成功
 
-					loginLayout.setAccount(loginName);
-					loginLayout.setPassWord(password);
+					loginLayout.setAccount(Application.loginName);
+					loginLayout.setPassWord(Application.password);
 					// 反馈成功消息
 					onPostLogin(result);
 
@@ -383,26 +421,28 @@ public class LoginActivity extends Activity implements OnClickListener{
 						}
 					}, 1500);
 				} else {
-					 if(Application.isDisplayLoginfail){
-					  toast("快速登录失败");
-					 }
+					if (Application.isDisplayLoginfail) {
+						toast("快速登录失败");
+					}
 					Application.isLogin = false;
 				}
 			} else {
 				// mDialog.cancel();
-				 if(Application.isDisplayLoginfail){
-				toast("快速登录失败");
-				 }
+				if (Application.isDisplayLoginfail) {
+					toast("快速登录失败");
+				}
 				Application.isLogin = false;
 			}
 			check = true;
 		}
 
 	}
+
 	/**
 	 * 注册
+	 * 
 	 * @author roger
-	 *
+	 * 
 	 */
 	class RegisterTask extends AsyncTask<Void, Void, Result> {
 		String user;
@@ -411,7 +451,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		CustomDialog mDialog;
 
 		RegisterTask(Context context, String userName, String password) {
-			check =false;
+			check = false;
 			ctx = context;
 			user = userName.trim();
 			pw = password.trim();
@@ -431,7 +471,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		}
 
 		protected void onPostExecute(Result result) {
-			//			mDialog.cancel();
+			// mDialog.cancel();
 			if (null != mDialog && mDialog.isShowing()) {
 				mDialog.cancel();
 			}
@@ -467,13 +507,13 @@ public class LoginActivity extends Activity implements OnClickListener{
 			} else {
 				toast("注册请求失败，连接网络或服务出错!");
 			}
-			
+
 			check = true;
-			
+
 		}
 
 	}
-	
+
 	/**
 	 * 修改密码
 	 */
@@ -488,7 +528,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		Result result;
 
 		public ModifyTask(Context context, String user, String pw) {
-			check =false;
+			check = false;
 			ctx = context;
 			this.user = user.trim();
 			this.pw = pw.trim();
@@ -516,16 +556,17 @@ public class LoginActivity extends Activity implements OnClickListener{
 			if (null != mDialog && mDialog.isShowing()) {
 				mDialog.cancel();
 			}
-			
+
 			if (result != null) {
 				int codes = "0".equals(result.codes) ? 0 : 1;
 				switch (codes) {
 				case 0:
 					// 登陆成功
-					updatePasswordLayout = new UpdatePasswordLayout((Activity) ctx);
+					updatePasswordLayout = new UpdatePasswordLayout(
+							(Activity) ctx);
 					updatePasswordLayout.setConfirmListener(this);
 					updatePasswordLayout.setCloseListener(this);
-					updatePasswordLayout.setOldPassWord(password);
+					updatePasswordLayout.setOldPassWord(Application.password);
 					updatePasswordLayout.setTag(TAG_MODIFY_LAYOUT);
 					// 清空view栈
 					// mViewStack.clear();
@@ -571,8 +612,9 @@ public class LoginActivity extends Activity implements OnClickListener{
 
 	/**
 	 * 登录
+	 * 
 	 * @author roger
-	 *
+	 * 
 	 */
 	class LoginTask extends AsyncTask<Void, Void, Result> {
 		CustomDialog mDialog;
@@ -582,7 +624,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		Context ctx;
 
 		public LoginTask(Context context, String user, String pw) {
-			check =false;
+			check = false;
 			ctx = context;
 			this.user = user.trim();
 			this.pw = pw.trim();
@@ -609,7 +651,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 			if (null != mDialog && mDialog.isShowing()) {
 				mDialog.cancel();
 			}
-//			mDialog.cancel();
+			// mDialog.cancel();
 			if (result != null) {
 				int codes = "0".equals(result.codes) ? 0 : 1;
 				switch (codes) {
@@ -637,8 +679,8 @@ public class LoginActivity extends Activity implements OnClickListener{
 					break;
 				}
 			} else {
-				if(Application.isDisplayLoginfail){
-				toast("登录失败");
+				if (Application.isDisplayLoginfail) {
+					toast("登录失败");
 				}
 				Application.isLogin = false;
 			}
@@ -646,11 +688,12 @@ public class LoginActivity extends Activity implements OnClickListener{
 		}
 
 	}
-	
+
 	/**
 	 * 修改密码
+	 * 
 	 * @author roger
-	 *
+	 * 
 	 */
 	class DoModifyPWTask extends AsyncTask<Void, Void, Result> {
 		// 新密码
@@ -686,7 +729,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 
 		@Override
 		protected void onPostExecute(Result result) {
-//			mDialog.cancel();
+			// mDialog.cancel();
 			if (null != mDialog && mDialog.isShowing()) {
 				mDialog.cancel();
 			}
@@ -707,6 +750,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 			check = true;
 		}
 	}
+
 	class CustomDialog extends Dialog {
 		public CustomDialog(Context context) {
 			super(context);
@@ -738,10 +782,10 @@ public class LoginActivity extends Activity implements OnClickListener{
 
 		@Override
 		public boolean onKeyDown(int keyCode, KeyEvent event) {
-            if(keyCode == KeyEvent.KEYCODE_BACK){
-            	return true;
-             }
- 
+			if (keyCode == KeyEvent.KEYCODE_BACK) {
+				return true;
+			}
+
 			return super.onKeyDown(keyCode, event);
 		}
 
@@ -766,25 +810,25 @@ public class LoginActivity extends Activity implements OnClickListener{
 			}
 		}
 	}
-	
-	
+
 	/**
 	 * 验证用户名输入
+	 * 
 	 * @param user
 	 * @return
 	 */
 	private Pair<Boolean, String> validUserName(String user) {
 		String des = null;
 		boolean result = false;
-		if(user!=null){
-		   user=user.trim();
+		if (user != null) {
+			user = user.trim();
 		}
 		if (user == null || user.length() < 6) {
 			des = "帐号至少6位";
 		} else if (!user.matches("^(?!_)(?!.*?_$)[a-zA-Z0-9_]+$")) {
 			des = "帐号必须由字母、数字或下划线组成,并以数字或字母开头";
-		}else if(user.length()>45){
-			des ="账号长度太长";
+		} else if (user.length() > 45) {
+			des = "账号长度太长";
 		} else {
 			result = true;
 		}
@@ -794,22 +838,23 @@ public class LoginActivity extends Activity implements OnClickListener{
 
 	/**
 	 * 验证密码输入
+	 * 
 	 * @param pw
 	 * @return
 	 */
 	private Pair<Boolean, String> validPassWord(String pw) {
 		String des = null;
 		boolean result = false;
-		if(pw!=null){
-		 pw = pw.trim();
-		 }
+		if (pw != null) {
+			pw = pw.trim();
+		}
 		if (pw == null || pw.length() < 6) {
 			des = "密码不能少于6位";
 		} else if (getChinese(pw)) {
 			des = "密码不能包含中文";
-		}else if(!pw.matches("^(?!_)(?!.*?_$)[a-zA-Z0-9]+$")){
+		} else if (!pw.matches("^(?!_)(?!.*?_$)[a-zA-Z0-9]+$")) {
 			des = "密码中只能包含数字和字母";
-		} else if (pw.length() >45) {
+		} else if (pw.length() > 45) {
 			des = "密码的长度太长超过45位";
 		} else {
 			result = true;
@@ -817,6 +862,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		Pair<Boolean, String> p = new Pair<Boolean, String>(result, des);
 		return p;
 	}
+
 	/**
 	 * @param str
 	 * @return true表示包含有中文

@@ -22,9 +22,11 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Base64;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -650,6 +652,17 @@ public class Utils {
 				return true;
 		}
 		return false;
+	}
+
+	/**
+	 * 锁定窗体的横竖屏方向，禁止自动旋转。建议在窗体的
+	 * {@link Activity#onCreate(Bundle savedInstanceState)} 调用。
+	 * 
+	 * @param activity
+	 */
+	public static void loack_screen_orientation(Activity activity) {
+		activity.setRequestedOrientation(Utils.isOrientationVertical(activity) ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+				: ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 	}
 
   /**
