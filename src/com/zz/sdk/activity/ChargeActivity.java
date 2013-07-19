@@ -25,7 +25,10 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Toast;
 
+import com.zz.sdk.BuildConfig;
 import com.zz.sdk.PaymentCallbackInfo;
+import com.zz.sdk.SDKManager.MSG_STATUS;
+import com.zz.sdk.SDKManager.MSG_TYPE;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.Result;
@@ -540,8 +543,22 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 	protected void onDestroy() {
 		if (null != smsSentReceiver)
 			unregisterReceiver(smsSentReceiver);
-		super.onDestroy();
+		 super.onDestroy();
+		 if (BuildConfig.DEBUG) {
+				System.out.println("被销毁掉了");
+			}
+		 if (mCallbackHandler != null) {
+			    PaymentCallbackInfo p = new PaymentCallbackInfo();
+			    p.statusCode = -2;
+				Message msg = Message.obtain(mCallbackHandler, mCallbackWhat,
+						MSG_TYPE.PAYMENT, MSG_STATUS.EXIT_SDK);
+				msg.obj = p;
+				mCallbackHandler.sendMessage(msg);
+			}
+
 		clean();
+		
+   
 		if(executor!=null){
 			executor.shutdown(); 
 			executor = null;
@@ -629,12 +646,14 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		}
 		if (mViewStack.size() > 1) {
 			if (Application.isCloseWindow == 1&&Application.isAlreadyCB == 1) {
-				Utils.loginOut(mCallbackHandler, Application.loginName,mCallbackWhat);
 				this.finish();
 				return null;
 			}
 			// 弹出旧ui
 			View pop = mViewStack.pop();
+			if(pop instanceof SmsChannelLayout){
+				Application.isMessagePage=1	;
+			}
 			pop.clearFocus();
 			mCurrentView = mViewStack.peek();
 			setContentView(mCurrentView);
@@ -647,7 +666,6 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 //				allPayCallBack(-2);
 //				Application.isAlreadyCB = 0;
 //			 }
-			Utils.loginOut(mCallbackHandler, Application.loginName, mCallbackWhat);
 			finish();
 			return null;
 		}
@@ -1039,6 +1057,18 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		info.statusCode=codes;
 		Application.isAlreadyCB = 1;
 		Message msg = Message.obtain(mCallbackHandler, mCallbackWhat, info);
+		msg.arg1 = MSG_TYPE.PAYMENT;
+		switch(codes){
+		case PaymentCallbackInfo.STATUS_CANCEL:
+			msg.arg2 = MSG_STATUS.CANCEL;
+			break;
+		case PaymentCallbackInfo.STATUS_FAILURE:
+			msg.arg2 = MSG_STATUS.FAILED;
+			break;
+		case PaymentCallbackInfo.STATUS_SUCCESS:
+			msg.arg2 = MSG_STATUS.SUCCESS;
+			break;	
+		}
 		mCallbackHandler.sendMessage(msg);
 		if (Application.isCloseWindow == 1) {
 			finish();
@@ -1051,11 +1081,31 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		info.cmgeOrderNumber = callBackOrderNumber;
 		info.statusCode=codes;
 		Message msg = Message.obtain(mCallbackHandler, mCallbackWhat, info);
+		msg.arg1 = MSG_TYPE.PAYMENT;
+		switch(codes){
+		case PaymentCallbackInfo.STATUS_CANCEL:
+			msg.arg2 = MSG_STATUS.CANCEL;
+			break;
+		case PaymentCallbackInfo.STATUS_FAILURE:
+			msg.arg2 = MSG_STATUS.FAILED;
+			break;
+		case PaymentCallbackInfo.STATUS_SUCCESS:
+			msg.arg2 = MSG_STATUS.SUCCESS;
+			break;	
+		}
 		mCallbackHandler.sendMessage(msg);
-		if (Application.isCloseWindow == 1) {
+		if (Application.isCloseWindow == 1&&isSendMessage == true) {
 			finish();
 		}
-
 	}
 
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }

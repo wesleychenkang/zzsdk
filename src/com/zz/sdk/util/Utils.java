@@ -37,7 +37,10 @@ import android.util.Pair;
 import android.widget.Toast;
 
 import com.zz.sdk.LoginCallbackInfo;
+import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.SDKManager;
+import com.zz.sdk.SDKManager.MSG_STATUS;
+import com.zz.sdk.SDKManager.MSG_TYPE;
 import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.UserAction;
@@ -651,23 +654,5 @@ public class Utils {
 		}
 		return false;
 	}
-
-  /**
-   * 用户退出平台回调给游戏方
-   * @param handler
-   * @param loginName
-   */
-  public static void loginOut(Handler handler,String loginName,int what){
-	  Message msg = handler.obtainMessage();
-	  LoginCallbackInfo info = new LoginCallbackInfo();
-	  info.statusCode = -2;
-	  info.loginName = loginName;
-	  msg.obj =info;
-	  msg.what = what;
-	  handler.sendMessage(msg);
-  }
-
-
-
 
 }

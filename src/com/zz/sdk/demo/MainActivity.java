@@ -87,7 +87,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		case 2: {
 			if (!mSDKManager.isLogined()) {
 				String tip = "尚未登录用户, 请选择[单机模式]或[登录].";
-				pushLog(tip);
+				pushLog(tip,-1,-1);
 				break;
 			}
 
@@ -95,7 +95,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				Toast.makeText(getBaseContext(), "使用单机充值方式", Toast.LENGTH_LONG)
 						.show();
 				String name = mSDKManager.getLoginName();
-				pushLog("「单机模式」 " + (name == null ? "末登录" : ("用户名:" + name)));
+				pushLog("「单机模式」 " + (name == null ? "末登录" : ("用户名:" + name)),-1,-1);
 			}
 			mSDKManager.showPaymentView(mHandler,
 					WHAT_PAYMENT_CALLBACK_DEFAULT, "M1001A", "乐活测试服务器", "007",
@@ -111,22 +111,22 @@ public class MainActivity extends Activity implements OnClickListener {
 			pushLog("[单机模式] 等待自动注册或登录... 模式:"
 					+ (isOnlineGame ? "网络游戏" : "单机游戏") + ";"
 					+ (isDisplayLoginTip ? "" : "不") + "显示登录成功Toast, "
-					+ (isDisplayLoginfail ? "" : "不") + "显示登录失败Toast");
+					+ (isDisplayLoginfail ? "" : "不") + "显示登录失败Toast",-1,-1);
 			mSDKManager.setConfigInfo(isOnlineGame, isDisplayLoginTip,
 					isDisplayLoginfail);
 		}
 			break;
 
 		case 5: {
-			pushLog("调用了" + ordernumber);
+			//pushLog("调用了" + ordernumber);
 			// mSDKManager.queryOrderState(mHandler, this, ordernumber);
 		}
 			break;
 		}
 	}
 
-	private void pushLog(String txt) {
-		mTvTip.setText(mTvTip.getText() + "\n" + txt);
+	private void pushLog(String txt,int type,int staue) {
+		mTvTip.setText(mTvTip.getText() + "\n" + txt+"\t"+"type"+type+"staue"+staue);
 	}
 
 	private Handler mHandler = new Handler() {
@@ -139,7 +139,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				if (mLoginCallbackInfo == null) {
 					mTvTip.setText(info.toString());
 				} else {
-					pushLog(info.toString());
+					pushLog(info.toString(),msg.arg1,msg.arg2);
 				}
 				mLoginCallbackInfo = info;
 			}
@@ -149,14 +149,14 @@ public class MainActivity extends Activity implements OnClickListener {
 				Log.d(DBG_TAG, "zz_sdk" + "info----- : " + info.toString());
 				ordernumber = info.cmgeOrderNumber;
 				Log.d(DBG_TAG, "---------充值-------");
-				pushLog(info.toString());
+				pushLog(info.toString(),msg.arg1,msg.arg2);
 			}
 				break;
 			case WHAT_ORDER_CALLBACK_DEFAULT:
 				PaymentCallbackInfo info = (PaymentCallbackInfo) msg.obj;
 				Log.d(DBG_TAG, "zz_sdk" + "info----- : " + info.toString());
 				Log.d(DBG_TAG, "---------订单查询-------");
-				pushLog(info.toString());
+				pushLog(info.toString(),msg.arg1,msg.arg2);
 				break;
 			}
 

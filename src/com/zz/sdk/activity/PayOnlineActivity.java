@@ -22,6 +22,8 @@ import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import com.zz.sdk.PaymentCallbackInfo;
+import com.zz.sdk.SDKManager.MSG_STATUS;
+import com.zz.sdk.SDKManager.MSG_TYPE;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.Result;
@@ -349,6 +351,8 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 			} catch (NumberFormatException e) {
 			}
 			Message msg = Message.obtain(hander, ChargeActivity.mCallbackWhat, info);
+			msg.arg1 = MSG_TYPE.PAYMENT;
+			msg.arg2 = MSG_STATUS.CANCEL;
 			hander.sendMessage(msg);
 			Application.isAlreadyCB = 1;
 		}
