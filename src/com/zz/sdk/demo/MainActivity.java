@@ -1,9 +1,10 @@
-package com.zz.sdk.activity;
+package com.zz.sdk.demo;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -11,13 +12,24 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.zz.sdk.LoginCallbackInfo;
 import com.zz.sdk.PaymentCallbackInfo;
-import com.zz.sdk.util.Logger;
+import com.zz.sdk.SDKManager;
 
 /**
  * 演示 SDK 使用
  */
 public class MainActivity extends Activity implements OnClickListener {
+	static final String DBG_TAG = "zzsdk";
+
+	/**
+	 * 回调接口默认使用的what，用户可以自定义
+	 */
+	public static final int WHAT_LOGIN_CALLBACK_DEFAULT = 20;
+
+	public static final int WHAT_PAYMENT_CALLBACK_DEFAULT = 30;
+
+	public static final int WHAT_ORDER_CALLBACK_DEFAULT = 40;
 
 	private SDKManager mSDKManager;
 
@@ -69,12 +81,11 @@ public class MainActivity extends Activity implements OnClickListener {
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case 1: {
-			mSDKManager.showLoginView(mHandler,
-					SDKManager.WHAT_LOGIN_CALLBACK_DEFAULT);
+			mSDKManager.showLoginView(mHandler, WHAT_LOGIN_CALLBACK_DEFAULT);
 		}
 			break;
 		case 2: {
-			if (!Application.isLogin) {
+			if (!mSDKManager.isLogined()) {
 				String tip = "尚未登录用户, 请选择[单机模式]或[登录].";
 				pushLog(tip);
 				break;
@@ -83,13 +94,12 @@ public class MainActivity extends Activity implements OnClickListener {
 			if (mLoginCallbackInfo == null) {
 				Toast.makeText(getBaseContext(), "使用单机充值方式", Toast.LENGTH_LONG)
 						.show();
-				pushLog("「单机模式」 "
-						+ (Application.isLogin ? ("用户名:" + Application.loginName)
-								: "末登录"));
+				String name = mSDKManager.getLoginName();
+				pushLog("「单机模式」 " + (name == null ? "末登录" : ("用户名:" + name)));
 			}
 			mSDKManager.showPaymentView(mHandler,
-					SDKManager.WHAT_PAYMENT_CALLBACK_DEFAULT, "M1001A",
-					"乐活测试服务器", "007", "战士001", "", 1, "厂商自定义参数（长度限制250个字符）");
+					WHAT_PAYMENT_CALLBACK_DEFAULT, "M1001A", "乐活测试服务器", "007",
+					"战士001", "", 1, "厂商自定义参数（长度限制250个字符）");
 		}
 			break;
 
@@ -109,7 +119,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		case 5: {
 			pushLog("调用了" + ordernumber);
-			mSDKManager.queryOrderState(mHandler, this, ordernumber);
+			// mSDKManager.queryOrderState(mHandler, this, ordernumber);
 		}
 			break;
 		}
@@ -122,10 +132,10 @@ public class MainActivity extends Activity implements OnClickListener {
 	private Handler mHandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
 			switch (msg.what) {
-			case SDKManager.WHAT_LOGIN_CALLBACK_DEFAULT: {
+			case WHAT_LOGIN_CALLBACK_DEFAULT: {
 				LoginCallbackInfo info = (LoginCallbackInfo) msg.obj;
-				Logger.d("zz_sdk" + "info----- :" + info.toString());
-				Logger.d("---------用户登录-------");
+				Log.d(DBG_TAG, "zz_sdk" + "info----- :" + info.toString());
+				Log.d(DBG_TAG, "---------用户登录-------");
 				if (mLoginCallbackInfo == null) {
 					mTvTip.setText(info.toString());
 				} else {
@@ -134,18 +144,18 @@ public class MainActivity extends Activity implements OnClickListener {
 				mLoginCallbackInfo = info;
 			}
 				break;
-			case SDKManager.WHAT_PAYMENT_CALLBACK_DEFAULT: {
+			case WHAT_PAYMENT_CALLBACK_DEFAULT: {
 				PaymentCallbackInfo info = (PaymentCallbackInfo) msg.obj;
-				Logger.d("zz_sdk" + "info----- : " + info.toString());
+				Log.d(DBG_TAG, "zz_sdk" + "info----- : " + info.toString());
 				ordernumber = info.cmgeOrderNumber;
-				Logger.d("---------充值-------");
+				Log.d(DBG_TAG, "---------充值-------");
 				pushLog(info.toString());
 			}
 				break;
-			case SDKManager.WHAT_ORDER_CALLBACK_DEFAULT:
+			case WHAT_ORDER_CALLBACK_DEFAULT:
 				PaymentCallbackInfo info = (PaymentCallbackInfo) msg.obj;
-				Logger.d("zz_sdk" + "info----- : " + info.toString());
-				Logger.d("---------订单查询-------");
+				Log.d(DBG_TAG, "zz_sdk" + "info----- : " + info.toString());
+				Log.d(DBG_TAG, "---------订单查询-------");
 				pushLog(info.toString());
 				break;
 			}

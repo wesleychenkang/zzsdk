@@ -1,9 +1,9 @@
 package com.zz.sdk.layout;
 
-import com.zz.sdk.activity.Application;
 import com.zz.sdk.activity.ChargeActivity;
-import com.zz.sdk.activity.Constants;
+import com.zz.sdk.util.Application;
 import com.zz.sdk.util.BitmapCache;
+import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.DialogUtil;
 import com.zz.sdk.util.DimensionUtil;
 import com.zz.sdk.util.Utils;

@@ -39,6 +39,7 @@ import com.zz.sdk.layout.ChargePaymentListLayout;
 import com.zz.sdk.layout.ChargeSMSDecLayout;
 import com.zz.sdk.layout.MyDialog;
 import com.zz.sdk.layout.SmsChannelLayout;
+import com.zz.sdk.util.Application;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.DialogUtil;
 import com.zz.sdk.util.GetDataImpl;

@@ -29,8 +29,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
-import com.zz.sdk.activity.Application;
-import com.zz.sdk.activity.Constants;
 import com.zz.sdk.entity.DeviceProperties;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;

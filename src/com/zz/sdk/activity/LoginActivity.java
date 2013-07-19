@@ -1,7 +1,7 @@
 package com.zz.sdk.activity;
 
-import static com.zz.sdk.activity.Application.loginName;
-import static com.zz.sdk.activity.Application.password;
+import static com.zz.sdk.util.Application.loginName;
+import static com.zz.sdk.util.Application.password;
 
 import java.util.Stack;
 import java.util.concurrent.ExecutorService;
@@ -30,12 +30,15 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 
+import com.zz.sdk.LoginCallbackInfo;
 import com.zz.sdk.entity.Result;
 import com.zz.sdk.entity.UserAction;
 import com.zz.sdk.layout.LoginLayout;
 import com.zz.sdk.layout.RegisterLayout;
 import com.zz.sdk.layout.UpdatePasswordLayout;
+import com.zz.sdk.util.Application;
 import com.zz.sdk.util.BitmapCache;
+import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.DimensionUtil;
 import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.Logger;

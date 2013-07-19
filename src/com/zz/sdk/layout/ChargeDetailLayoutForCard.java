@@ -18,11 +18,11 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.zz.sdk.activity.Application;
-import com.zz.sdk.activity.Constants;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
+import com.zz.sdk.util.Application;
 import com.zz.sdk.util.BitmapCache;
+import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.DimensionUtil;
 import com.zz.sdk.util.Utils;
 

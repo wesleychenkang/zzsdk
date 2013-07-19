@@ -8,8 +8,8 @@ import android.view.Gravity;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import com.zz.sdk.activity.Constants;
 import com.zz.sdk.util.BitmapCache;
+import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.DimensionUtil;
 import com.zz.sdk.util.Utils;
 

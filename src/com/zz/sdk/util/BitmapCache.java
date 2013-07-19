@@ -18,7 +18,6 @@ import android.graphics.drawable.NinePatchDrawable;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
-import com.zz.sdk.activity.Constants;
 
 public class BitmapCache {
 

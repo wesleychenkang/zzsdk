@@ -14,7 +14,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.zz.sdk.activity.Constants;
 import com.zz.sdk.layout.MyDialog;
 
 public class DialogUtil {

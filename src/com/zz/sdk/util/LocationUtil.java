@@ -27,7 +27,6 @@ import android.telephony.TelephonyManager;
 import android.telephony.cdma.CdmaCellLocation;
 import android.telephony.gsm.GsmCellLocation;
 
-import com.zz.sdk.activity.Constants;
 
 public class LocationUtil {
 	/**

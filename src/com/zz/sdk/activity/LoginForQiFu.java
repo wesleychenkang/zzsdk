@@ -1,29 +1,27 @@
 package com.zz.sdk.activity;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
-
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
+
 import com.qihoopay.insdk.activity.ContainerActivity;
 import com.qihoopay.insdk.matrix.Matrix;
 import com.qihoopay.sdk.protocols.IDispatcherCallback;
 import com.qihoopay.sdk.protocols.ProtocolConfigs;
 import com.qihoopay.sdk.protocols.ProtocolKeys;
+import com.zz.sdk.LoginCallbackInfo;
 import com.zz.sdk.entity.QiHooResult;
 import com.zz.sdk.entity.Result;
+import com.zz.sdk.util.Application;
 import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.Utils;
 

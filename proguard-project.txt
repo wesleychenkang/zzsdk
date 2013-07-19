@@ -46,26 +46,16 @@
 -keep public class * extends android.content.Context
 
 -keep class android.support.**{ *;}
--keep class com.qihoopay.**{ *;} 
+-keep class com.qihoopay.**{ *;}
 -keep class org.apache.**{*;}
 
--keep public class com.zz.sdk.activity.SDKManager{
-  public * ;
-  private * ;
-  public protected <methods>; 
- }                         
--keep public class com.zz.sdk.activity.Application {                               
-   public *;                                                                       
-}  
--keep public class com.zz.sdk.activity.LoginForQiFu{                               
-   public *;                                                                       
-}                                                                                  
--keep public class com.zz.sdk.util.Logger {                                        
-   public *;                                                                    
+
+-keep public class com.zz.sdk.SDKManager {
+   public *;
 }
--keep public class com.zz.sdk.PaymentCallbackInfo {                             
-   public *;                                                                    
-}                                                                               
--keep public class com.zz.sdk.activity.LoginCallbackInfo {                      
-   public *;                                                                    
-} 
+-keep public class com.zz.sdk.PaymentCallbackInfo {
+   public *;
+}
+-keep public class com.zz.sdk.LoginCallbackInfo {
+   public *;
+}

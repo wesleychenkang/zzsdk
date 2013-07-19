@@ -24,7 +24,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.zz.sdk.activity.Constants;
 import com.zz.sdk.activity.SmsSendReceiver;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;

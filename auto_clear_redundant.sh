@@ -20,7 +20,7 @@ rm assets/* src/* -rf
 
 cp ${lib} libs/
 
-git checkout src/com/zz/sdk/activity/MainActivity.java
+git checkout src/com/zz/sdk/demo/MainActivity.java
 
 ant clean
 

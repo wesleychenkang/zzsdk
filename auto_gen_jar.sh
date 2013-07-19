@@ -21,7 +21,7 @@ ant release
 cd bin
 ${D2J} ${s}.dex
 $Z -d ${j} "*" -x "com/zz/sdk*" -x "META-INF/*"
-$Z -d ${j} "com/zz/sdk/activity/MainActivity.class"
+$Z -d ${j} "com/zz/sdk/demo/MainActivity.class"
 cd ..
 $Z -ur ./bin/${j} assets/* assets/zz_res/* 
 cp ./bin/${j} ${t}

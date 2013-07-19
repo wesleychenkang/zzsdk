@@ -36,9 +36,9 @@ import android.telephony.TelephonyManager;
 import android.util.Pair;
 import android.widget.Toast;
 
-import com.zz.sdk.activity.Constants;
-import com.zz.sdk.activity.LoginCallbackInfo;
-import com.zz.sdk.activity.SDKManager;
+import com.zz.sdk.LoginCallbackInfo;
+import com.zz.sdk.SDKManager;
+import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.UserAction;
 
@@ -642,9 +642,9 @@ public class Utils {
 	 * @return
 	 */
 	public static boolean isOrientationVertical(Context ctx) {
-		if (ZZSDKConfig.ORIENTATION == ZZSDKConfig.DIR_VERTITAL)
+		if (ZZSDKConfig.ORIENTATION == Constants.DIR_VERTITAL)
 			return true;
-		if (ZZSDKConfig.ORIENTATION == ZZSDKConfig.DIR_AUTO) {
+		if (ZZSDKConfig.ORIENTATION == Constants.DIR_AUTO) {
 			int o = ctx.getResources().getConfiguration().orientation;
 			if (o == Configuration.ORIENTATION_PORTRAIT)
 				return true;

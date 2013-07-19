@@ -1,16 +1,9 @@
-package com.zz.sdk.activity;
-
-import android.content.Context;
-import android.util.Pair;
-
+package com.zz.sdk.util;
 
 import com.zz.sdk.entity.PayChannel;
-import com.zz.sdk.entity.SdkUser;
-import com.zz.sdk.entity.SdkUserTable;
-import com.zz.sdk.util.Utils;
 
 /** 
- * @Description: 管理静态数据
+ * @Description: 管理静态数据, <strong>内部类</strong>
  * @author roger
  */
 
@@ -52,25 +45,4 @@ public class Application {
 	public static int isMessagePage = 0;
 	public static boolean isDisplayLoginTip = false; //是否显示登录提示
 	public static boolean isDisplayLoginfail = false;//是否显示登录失败提示
-	protected static void autoLoginUser(Context ctx) {
-		SdkUserTable t = SdkUserTable.getInstance(ctx);
-		SdkUser sdkUser = t.getSdkUserByAutoLogin();
-		if (sdkUser != null) {
-			loginName = sdkUser.loginName;
-			password = sdkUser.password;
-		}
-		if (loginName == null || "".equals(loginName)) {
-			SdkUser[] sdkUsers = t.getAllSdkUsers();
-			if (sdkUsers != null && sdkUsers.length > 0) {
-				sdkUser = sdkUsers[0];
-			} else {
-				//尝试从sdcard中读取
-				Pair<String, String> pair = Utils.getAccountFromSDcard(ctx);
-				if (pair != null) {
-					loginName = pair.first;
-					password = pair.second;
-				}
-			}
-		}
-	}
 }

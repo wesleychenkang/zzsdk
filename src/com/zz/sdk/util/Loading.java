@@ -12,7 +12,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.zz.sdk.activity.Constants;
 
 /** 
  * @Description: 启动缓冲动画
