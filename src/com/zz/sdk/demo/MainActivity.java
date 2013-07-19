@@ -87,7 +87,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		case 2: {
 			if (!mSDKManager.isLogined()) {
 				String tip = "尚未登录用户, 请选择[单机模式]或[登录].";
-				pushLog(tip,-1,-1);
+				pushLog(tip, -1, -1);
 				break;
 			}
 
@@ -95,7 +95,8 @@ public class MainActivity extends Activity implements OnClickListener {
 				Toast.makeText(getBaseContext(), "使用单机充值方式", Toast.LENGTH_LONG)
 						.show();
 				String name = mSDKManager.getLoginName();
-				pushLog("「单机模式」 " + (name == null ? "末登录" : ("用户名:" + name)),-1,-1);
+				pushLog("「单机模式」 " + (name == null ? "末登录" : ("用户名:" + name)),
+						-1, -1);
 			}
 			mSDKManager.showPaymentView(mHandler,
 					WHAT_PAYMENT_CALLBACK_DEFAULT, "M1001A", "乐活测试服务器", "007",
@@ -111,37 +112,61 @@ public class MainActivity extends Activity implements OnClickListener {
 			pushLog("[单机模式] 等待自动注册或登录... 模式:"
 					+ (isOnlineGame ? "网络游戏" : "单机游戏") + ";"
 					+ (isDisplayLoginTip ? "" : "不") + "显示登录成功Toast, "
-					+ (isDisplayLoginfail ? "" : "不") + "显示登录失败Toast",-1,-1);
+					+ (isDisplayLoginfail ? "" : "不") + "显示登录失败Toast", -1, -1);
 			mSDKManager.setConfigInfo(isOnlineGame, isDisplayLoginTip,
 					isDisplayLoginfail);
 		}
 			break;
 
 		case 5: {
-			//pushLog("调用了" + ordernumber);
+			// pushLog("调用了" + ordernumber);
 			// mSDKManager.queryOrderState(mHandler, this, ordernumber);
 		}
 			break;
 		}
 	}
 
-	private void pushLog(String txt,int type,int staue) {
-		mTvTip.setText(mTvTip.getText() + "\n" + txt+"\t"+"type"+type+"staue"+staue);
+	private void pushLog(String txt) {
+		mTvTip.setText(mTvTip.getText() + "\n" + txt);
+	}
+
+	private void pushLog(String txt, int type, int staue) {
+		pushLog(txt + "\t" + "type" + type + "staue" + staue);
 	}
 
 	private Handler mHandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
 			switch (msg.what) {
 			case WHAT_LOGIN_CALLBACK_DEFAULT: {
-				LoginCallbackInfo info = (LoginCallbackInfo) msg.obj;
-				Log.d(DBG_TAG, "zz_sdk" + "info----- :" + info.toString());
-				Log.d(DBG_TAG, "---------用户登录-------");
-				if (mLoginCallbackInfo == null) {
-					mTvTip.setText(info.toString());
+				if (msg.arg1 == SDKManager.MSG_TYPE.LOGIN) {
+
+					if (msg.arg2 == SDKManager.MSG_STATUS.SUCCESS) {
+						if (msg.obj instanceof LoginCallbackInfo) {
+							LoginCallbackInfo info = (LoginCallbackInfo) msg.obj;
+							Log.d(DBG_TAG,
+									"zz_sdk" + "info----- :" + info.toString());
+							Log.d(DBG_TAG, "---------用户登录-------");
+							if (mLoginCallbackInfo == null) {
+								mTvTip.setText(info.toString());
+							} else {
+								pushLog(info.toString());
+							}
+							mLoginCallbackInfo = info;
+						} else {
+							pushLog(" - 登录成功，但没有用户数据");
+						}
+					} else if (msg.arg2 == SDKManager.MSG_STATUS.CANCEL) {
+						pushLog(" - 用户取消了登录.");
+					} else if (msg.arg2 == SDKManager.MSG_STATUS.EXIT_SDK) {
+						pushLog(" - 登录业务结束。");
+					} else {
+						pushLog(" ! 未知登录结果，请检查：s=" + msg.arg2 + " info:"
+								+ msg.obj);
+					}
 				} else {
-					pushLog(info.toString(),msg.arg1,msg.arg2);
+					pushLog(" # 未知类型 t=" + msg.arg1 + " s=" + msg.arg2
+							+ " info:" + msg.obj);
 				}
-				mLoginCallbackInfo = info;
 			}
 				break;
 			case WHAT_PAYMENT_CALLBACK_DEFAULT: {
@@ -149,14 +174,14 @@ public class MainActivity extends Activity implements OnClickListener {
 				Log.d(DBG_TAG, "zz_sdk" + "info----- : " + info.toString());
 				ordernumber = info.cmgeOrderNumber;
 				Log.d(DBG_TAG, "---------充值-------");
-				pushLog(info.toString(),msg.arg1,msg.arg2);
+				pushLog(info.toString(), msg.arg1, msg.arg2);
 			}
 				break;
 			case WHAT_ORDER_CALLBACK_DEFAULT:
 				PaymentCallbackInfo info = (PaymentCallbackInfo) msg.obj;
 				Log.d(DBG_TAG, "zz_sdk" + "info----- : " + info.toString());
 				Log.d(DBG_TAG, "---------订单查询-------");
-				pushLog(info.toString(),msg.arg1,msg.arg2);
+				pushLog(info.toString(), msg.arg1, msg.arg2);
 				break;
 			}
 

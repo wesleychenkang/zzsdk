@@ -105,9 +105,8 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		setRequestedOrientation(Utils.isOrientationVertical(this) ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-				: ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
+		Utils.loack_screen_orientation(this);
 		
 		if(dialog!=null && dialog.isShowing()){
 			dialog.dismiss();

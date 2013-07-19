@@ -22,9 +22,11 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Base64;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -325,8 +327,7 @@ public class Utils {
 			}
 		}
 
-		File file = new File(dir, Constants.ACCOUNT_PASSWORD_FILE
-				+ ctx.getPackageName());
+		File file = new File(dir, Constants.ACCOUNT_PASSWORD_FILE);
 		if (file.exists()) {
 			// 将原文件删除
 			file.delete();
@@ -353,8 +354,7 @@ public class Utils {
 		File dir = new File(Environment.getExternalStorageDirectory(),
 				Constants.ACCOUNT_PASSWORD_DIR);
 		if (dir.exists()) {
-			File file = new File(dir, Constants.ACCOUNT_PASSWORD_FILE
-					+ ctx.getPackageName());
+			File file = new File(dir, Constants.ACCOUNT_PASSWORD_FILE);
 			if (file.exists()) {
 				InputStream in = null;
 				try {
@@ -400,8 +400,8 @@ public class Utils {
 				appInfo = ctx.getPackageManager().getApplicationInfo(
 						ctx.getPackageName(), PackageManager.GET_META_DATA);
 				if (appInfo != null && appInfo.metaData != null) {
-					projectId = appInfo.metaData.getString(
-							Constants.K_PROJECT_ID, null);
+					projectId = appInfo.metaData
+							.getString(Constants.K_PROJECT_ID);
 				}
 				CACHE_PROJECT_ID = projectId;
 			} catch (Exception e) {
@@ -541,10 +541,10 @@ public class Utils {
 		return list;
 	}
 
-//	public static void writeProjectId2cache(Context ctx, String projectId) {
-//		if (projectId != null)
-//			CACHE_PROJECT_ID = projectId;
-//	}
+	// public static void writeProjectId2cache(Context ctx, String projectId) {
+	// if (projectId != null)
+	// CACHE_PROJECT_ID = projectId;
+	// }
 
 	//
 	// ------------------------------------------------------------------------
@@ -655,4 +655,14 @@ public class Utils {
 		return false;
 	}
 
+	/**
+	 * 锁定窗体的横竖屏方向，禁止自动旋转。建议在窗体的
+	 * {@link Activity#onCreate(Bundle savedInstanceState)} 调用。
+	 * 
+	 * @param activity
+	 */
+	public static void loack_screen_orientation(Activity activity) {
+		activity.setRequestedOrientation(Utils.isOrientationVertical(activity) ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+				: ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+	}
 }
