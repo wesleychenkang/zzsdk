@@ -324,8 +324,7 @@ public class Utils {
 			}
 		}
 
-		File file = new File(dir, Constants.ACCOUNT_PASSWORD_FILE
-				+ ctx.getPackageName());
+		File file = new File(dir, Constants.ACCOUNT_PASSWORD_FILE);
 		if (file.exists()) {
 			// 将原文件删除
 			file.delete();
@@ -352,8 +351,7 @@ public class Utils {
 		File dir = new File(Environment.getExternalStorageDirectory(),
 				Constants.ACCOUNT_PASSWORD_DIR);
 		if (dir.exists()) {
-			File file = new File(dir, Constants.ACCOUNT_PASSWORD_FILE
-					+ ctx.getPackageName());
+			File file = new File(dir, Constants.ACCOUNT_PASSWORD_FILE);
 			if (file.exists()) {
 				InputStream in = null;
 				try {
@@ -540,10 +538,10 @@ public class Utils {
 		return list;
 	}
 
-//	public static void writeProjectId2cache(Context ctx, String projectId) {
-//		if (projectId != null)
-//			CACHE_PROJECT_ID = projectId;
-//	}
+	// public static void writeProjectId2cache(Context ctx, String projectId) {
+	// if (projectId != null)
+	// CACHE_PROJECT_ID = projectId;
+	// }
 
 	//
 	// ------------------------------------------------------------------------
@@ -665,22 +663,20 @@ public class Utils {
 				: ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 	}
 
-  /**
-   * 用户退出平台回调给游戏方
-   * @param handler
-   * @param loginName
-   */
-  public static void loginOut(Handler handler,String loginName,int what){
-	  Message msg = handler.obtainMessage();
-	  LoginCallbackInfo info = new LoginCallbackInfo();
-	  info.statusCode = -2;
-	  info.loginName = loginName;
-	  msg.obj =info;
-	  msg.what = what;
-	  handler.sendMessage(msg);
-  }
-
-
-
+	/**
+	 * 用户退出平台回调给游戏方
+	 * 
+	 * @param handler
+	 * @param loginName
+	 */
+	public static void loginOut(Handler handler, String loginName, int what) {
+		Message msg = handler.obtainMessage();
+		LoginCallbackInfo info = new LoginCallbackInfo();
+		info.statusCode = -2;
+		info.loginName = loginName;
+		msg.obj = info;
+		msg.what = what;
+		handler.sendMessage(msg);
+	}
 
 }
