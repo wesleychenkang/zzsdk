@@ -38,7 +38,10 @@ public class Application {
 	public static String topicTitle;
 	public static String topicDes;
 	public static String cardAmount;
-	public static String staticAmount; // 固定支付金额
+	/** 固定支付金额, 为空表示不固定 */
+	public static String staticAmount;
+	/** 固定支付金额的通道索引, -1为空 */
+	public static int staticAmountIndex;
 	public static int payStatusCancel = 0;
 	public static int isCloseWindow;
 	public static int isAlreadyCB = 0;

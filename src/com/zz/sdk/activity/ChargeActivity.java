@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
@@ -405,7 +406,11 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 							String value = new DecimalFormat("#.00")
 									.format(mSMSChannelMessages[i].price / 100.0);
 							if (value.equals(Application.staticAmount)) {
-								
+								if (BuildConfig.DEBUG) {
+									Logger.d("SMS 匹配到固定金额: index=" + i + " "
+											+ mSMSChannelMessages[i].toString());
+								}
+								Application.staticAmountIndex = i;
 								check = true;
 								break;
 							}

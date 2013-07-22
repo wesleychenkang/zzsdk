@@ -271,9 +271,18 @@ public class SDKManager {
 			final String roleId, final String gameRole, final String amount,
 			final int isCloseWindow, final String callBackInfo) {
 		Application.isCloseWindow = isCloseWindow;
-		if (amount != null && !"".equals(amount)) {
+
+		/* 固定金额设置 */
+		if (amount != null) {
 			Application.staticAmount = amount.trim();
+			if ("".equals(Application.staticAmount)) {
+				Application.staticAmount = null;
+			}
+		} else {
+			Application.staticAmount = null;
 		}
+		Application.staticAmountIndex = -1;
+		
 		Pair<String, String> account = Utils.getAccountFromSDcard(mContext);
 		if (account != null) {
 			Application.loginName = account.first;

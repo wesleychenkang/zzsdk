@@ -15,11 +15,13 @@ import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.zz.sdk.BuildConfig;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.SMSChannelMessage;
 import com.zz.sdk.util.Application;
 import com.zz.sdk.util.DimensionUtil;
+import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.Utils;
 
 /**
@@ -175,8 +177,11 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 		@Override
 		public Object getItem(int position) {
 			if (Application.staticAmount != null) {
-				mSmsMsg[0].price = Double.parseDouble(Application.staticAmount) * 100;
-				return mSmsMsg[position];
+				if (BuildConfig.DEBUG) {
+					Logger.d("SMS  固定金额: pos=" + position + " index="
+							+ Application.staticAmountIndex);
+				}
+				return mSmsMsg[Application.staticAmountIndex];
 			}
 			return mSmsMsg[position];
 		}
