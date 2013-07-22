@@ -47,6 +47,7 @@
 
 -keep class android.support.**{ *;}
 -keep class com.qihoopay.**{ *;}
+-keep class com.unionpay.**{*;}
 -keep class org.apache.**{*;}
 
 
