@@ -37,16 +37,15 @@ public class AbstractLayout extends LinearLayout {
 	}
 	
 	private void init() {
-		
+		final boolean isVertical = Utils.isOrientationVertical(getContext());
 		
 		widthPixels = getResources().getDisplayMetrics().widthPixels;
 		heightPixels = getResources().getDisplayMetrics().heightPixels;
 		int weight1 = widthPixels * 4 / 5;
-		int weight2 = widthPixels * 7 / 8;
+		int weight2 = widthPixels * (isVertical?8:7) / 8;
 		
 		setOrientation(VERTICAL);
 		// 整体背景图
-		final boolean isVertical = Utils.isOrientationVertical(getContext());
 		setBackgroundDrawable(BitmapCache.getDrawable(mActivity,
 				(isVertical ? Constants.ASSETS_RES_PATH_VERTICAL
 						: Constants.ASSETS_RES_PATH) + "bg.jpg"));
