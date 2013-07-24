@@ -9,6 +9,10 @@ import com.zz.sdk.entity.PayChannel;
 
 public class Application {
 	/**
+	 * 用户指定的金额
+	 */
+	public static int changeCount;
+	/**
 	 * 当前正在登录的用户帐号(用户信息保存在数据库中
 	 */
 	public static String loginName;
@@ -38,8 +42,6 @@ public class Application {
 	public static String topicTitle;
 	public static String topicDes;
 	public static String cardAmount;
-	/** 固定支付金额, 为空表示不固定 */
-	public static String staticAmount;
 	/** 固定支付金额的通道索引, -1为空 */
 	public static int staticAmountIndex;
 	public static int payStatusCancel = 0;

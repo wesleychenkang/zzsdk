@@ -168,7 +168,7 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 
 		@Override
 		public int getCount() {
-			if (Application.staticAmount != null) {
+			if (Application.changeCount != 0) {
 				return 1;
 			}
 			return mSmsMsg.length;
@@ -176,7 +176,7 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 
 		@Override
 		public Object getItem(int position) {
-			if (Application.staticAmount != null) {
+			if (Application.changeCount!= 0) {
 				if (BuildConfig.DEBUG) {
 					Logger.d("SMS  固定金额: pos=" + position + " index="
 							+ Application.staticAmountIndex);
@@ -203,8 +203,8 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 				holder.setTextColor(0xff3c2110);
 			}
 
-			if (Application.staticAmount != null) {
-				holder.setText("充值" + Application.staticAmount + "元");
+			if (Application.changeCount != 0) {
+				holder.setText("充值" + Utils.formateInt(Application.changeCount) + "元");
 				return holder;
 			}
 			
@@ -214,9 +214,13 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 			holder.setText("充值" + s + "元");
 			return holder;
 		}
-
+   
+		
+		
+		
+		
 	}
-
+     
 	class AmountGridView extends GridView {
 
 		public AmountGridView(Context context) {

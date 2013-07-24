@@ -295,15 +295,14 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 	 * @return
 	 */
 	private boolean checkStaticAmount() {
-		if (Application.staticAmount == null
-				|| "".equals(Application.staticAmount)) {
+		if (Application.changeCount == 0) {
 			return true;
 		}
 		String list = Application.cardAmount;
 		if (list != null) {
 			String[] s = list.split(",");
 			for (int i = 0; i < s.length; i++) {
-				if (Application.staticAmount.equals(s[i])) {
+				if (Application.changeCount==((int)Float.parseFloat(s[i]))*100){
 					return true;
 				}
 			}
@@ -444,11 +443,9 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 						}
 					}
 					for (int i = 0; i < mSMSChannelMessages.length; i++) {
-						if (Application.staticAmount != null
-								&& !"".equals(Application.staticAmount)) {
-							String value = new DecimalFormat("#.00")
-									.format(mSMSChannelMessages[i].price / 100.0);
-							if (value.equals(Application.staticAmount)) {
+						if (0!=Application.changeCount) {
+							int value =(int)(mSMSChannelMessages[i].price / 100.0);
+							if (value*100==Application.changeCount){
 								if (BuildConfig.DEBUG) {
 									Logger.d("SMS 匹配到固定金额: index=" + i + " "
 											+ mSMSChannelMessages[i].toString());
@@ -664,12 +661,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 	}
 
 	private View popViewFromStack() {
-		if (Application.isMessagePage == 1 && isSendMessage == false) {
-			// 短信取消后发送取消支付请求
-			Application.isMessagePage = 0;
-			smsPayCallBack(-2, null);
-
-		}
+		
 		if (mViewStack.size() > 1) {
 			if (Application.isCloseWindow == 1 && Application.isAlreadyCB == 1) {
 				this.finish();
@@ -677,8 +669,17 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			}
 			// 弹出旧ui
 			View pop = mViewStack.pop();
-			if (pop instanceof SmsChannelLayout) {
+			if (pop instanceof SmsChannelLayout){
 				Application.isMessagePage = 1;
+			}
+			if(pop instanceof ChargeSMSDecLayout){
+				Application.isMessagePage = 0;
+			}
+			if (Application.isMessagePage == 1 && isSendMessage == false) {
+				// 短信取消后发送取消支付请求
+				Application.isMessagePage = 0;
+				smsPayCallBack(-2, null);
+
 			}
 			pop.clearFocus();
 			mCurrentView = mViewStack.peek();

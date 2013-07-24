@@ -659,4 +659,17 @@ public class Utils {
 		activity.setRequestedOrientation(Utils.isOrientationVertical(activity) ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 				: ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 	}
+
+
+
+   public static String formateInt(int count){
+	    String price = String.valueOf(count/100.00);
+		if(price.contains(".")&&price.endsWith("0")){
+			price = price.substring(0, price.length()-2) ; 
+		 }
+	   return price; 
+   }
+
+
+
 }

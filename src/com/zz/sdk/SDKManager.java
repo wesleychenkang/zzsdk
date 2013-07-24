@@ -268,20 +268,19 @@ public class SDKManager {
 	 */
 	public void showPaymentView(Handler callbackHandler, int what,
 			final String gameServerID, final String serverName,
-			final String roleId, final String gameRole, final String amount,
+			final String roleId, final String gameRole, final int amount,
 			final int isCloseWindow, final String callBackInfo) {
 		Application.isCloseWindow = isCloseWindow;
-
+        
+		
 		/* 固定金额设置 */
-		if (amount != null) {
-			Application.staticAmount = amount.trim();
-			if ("".equals(Application.staticAmount)) {
-				Application.staticAmount = null;
-			}
+		if (amount>0) {
+		  //修改为整型int 接收
+		  Application.changeCount = amount;
 		} else {
-			Application.staticAmount = null;
+		  Application.changeCount = 0;
 		}
-		Application.staticAmountIndex = -1;
+		 Application.staticAmountIndex = -1;
 		
 		Pair<String, String> account = Utils.getAccountFromSDcard(mContext);
 		if (account != null) {

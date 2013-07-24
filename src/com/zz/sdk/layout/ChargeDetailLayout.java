@@ -163,14 +163,14 @@ public class ChargeDetailLayout extends ChargeAbstractLayout {
 		lp.leftMargin = DimensionUtil.dip2px(activity, 10);
 		layout.addView(mSelect, lp);
 
-		String tempAmount = Application.staticAmount;
-		if(!"".equals(tempAmount) && null != tempAmount) {
-			mInput.setText(tempAmount);
+		int tempAmount = Application.changeCount;
+		if(tempAmount!=0) {
+			mInput.setText(Utils.formateInt(tempAmount));
 			mInput.setEnabled(false);
 			mSelect.setClickable(false);
-		}else{
+		 }else{
 			mInput.setText("50");
-		}
+		 }
 		LinearLayout buttonLayout = new LinearLayout(activity);
 		buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
 		buttonLayout.setGravity(Gravity.CENTER);

@@ -176,12 +176,17 @@ public class MainActivity extends Activity implements OnClickListener {
 				Toast.makeText(getBaseContext(), tip, Toast.LENGTH_LONG).show();
 			}
 
-			String amount = (id == IDC_BT_PAY_AMOUNT ? (((TextView) findViewById(IDC_ET_PAY_AMOUNT))
+			String s_amount = (id == IDC_BT_PAY_AMOUNT ? (((TextView) findViewById(IDC_ET_PAY_AMOUNT))
 					.getText().toString()) : "");
-
+			int amount;
+			try {
+				amount = Integer.parseInt(s_amount);
+			} catch (NumberFormatException e) {
+				amount = 0;
+			}
 			mSDKManager.showPaymentView(mHandler, MSG_PAYMENT_CALLBACK,
 					CONFIG_GAME_SERVER_ID, CONFIG_GAME_SERVER_NAME,
-					CONFIG_GAME_ROLE_ID, CONFIG_GAME_ROLE, amount, 1,
+					CONFIG_GAME_ROLE_ID, CONFIG_GAME_ROLE, amount, 0,
 					CONFIG_GAME_CALLBACK_INFO);
 		}
 			break;

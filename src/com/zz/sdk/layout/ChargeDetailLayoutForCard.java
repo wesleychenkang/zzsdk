@@ -213,9 +213,9 @@ public class ChargeDetailLayoutForCard extends ChargeAbstractLayout {
 		lp.leftMargin = DimensionUtil.dip2px(activity, 10);
 		// lp10.addRule(RelativeLayout.ALIGN_BASELINE, ID_ETMONEY);
 		moneyLayout.addView(btnSelectMoney, lp);
-		String tempAmount = Application.staticAmount;
-		if(!"".equals(tempAmount) && null != tempAmount) {
-			etPayMoney.setText(tempAmount);
+		int tempAmount = Application.changeCount;
+		if(0!= tempAmount) {
+			etPayMoney.setText(Utils.formateInt(tempAmount));
 			etPayMoney.setEnabled(false);
 			btnSelectMoney.setVisibility(GONE);
 		}else{
