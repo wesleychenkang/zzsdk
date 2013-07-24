@@ -725,6 +725,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			} else {
 				init();
 			}
+			smsPayCallBack(-2, null);
 			mPaymentListLayout.setChannelMessages(Application.mPayChannels);
 			mPaymentListLayout.showPayList(View.VISIBLE);
 			return;
