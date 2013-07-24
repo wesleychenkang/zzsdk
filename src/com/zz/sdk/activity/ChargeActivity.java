@@ -198,7 +198,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		case PayChannel.PAY_TYPE_YEEPAY_LT:
 			types = 3;
 			if (checkStaticAmount()) {
-				mPayParam.type = "3";
+				mPayParam.type = String.valueOf(mPayChannel.type);
 				mCardChargeLayout = new ChargeDetailLayoutForCard(
 						ChargeActivity.this, mPayChannel, mPayParam);
 				mCardChargeLayout.setButtonClickListener(ChargeActivity.this);
@@ -212,7 +212,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			// case INDEX_CHARGE_CARD:
 			types = 3;
 			if (checkStaticAmount()) {
-				mPayParam.type = "4";
+				mPayParam.type = String.valueOf(mPayChannel.type);
 				mCardChargeLayout = new ChargeDetailLayoutForCard(
 						ChargeActivity.this, mPayChannel, mPayParam);
 				mCardChargeLayout.setButtonClickListener(ChargeActivity.this);
@@ -265,9 +265,9 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			mPaymentListLayout.setChannelMessages(Application.mPayChannels);
 			mPaymentListLayout.showPayList(View.VISIBLE);
 
-			// 自动 调用 话费 
-			for (PayChannel c:Application.mPayChannels) {
-				if (c.type==PayChannel.PAY_TYPE_KKFUNPAY) {
+			// 自动 调用 话费
+			for (PayChannel c : Application.mPayChannels) {
+				if (c.type == PayChannel.PAY_TYPE_KKFUNPAY) {
 					choosePayChannel(c);
 				}
 			}
@@ -302,7 +302,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		if (list != null) {
 			String[] s = list.split(",");
 			for (int i = 0; i < s.length; i++) {
-				if (Application.changeCount==((int)Float.parseFloat(s[i]))*100){
+				if (Application.changeCount == ((int) Float.parseFloat(s[i]) * 100)) {
 					return true;
 				}
 			}
@@ -443,9 +443,9 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 						}
 					}
 					for (int i = 0; i < mSMSChannelMessages.length; i++) {
-						if (0!=Application.changeCount) {
-							int value =(int)(mSMSChannelMessages[i].price / 100.0);
-							if (value*100==Application.changeCount){
+						if (0 != Application.changeCount) {
+							int value = (int) (mSMSChannelMessages[i].price);
+							if (value == Application.changeCount) {
 								if (BuildConfig.DEBUG) {
 									Logger.d("SMS 匹配到固定金额: index=" + i + " "
 											+ mSMSChannelMessages[i].toString());
@@ -661,7 +661,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 	}
 
 	private View popViewFromStack() {
-		
+
 		if (mViewStack.size() > 1) {
 			if (Application.isCloseWindow == 1 && Application.isAlreadyCB == 1) {
 				this.finish();
@@ -669,10 +669,10 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			}
 			// 弹出旧ui
 			View pop = mViewStack.pop();
-			if (pop instanceof SmsChannelLayout){
+			if (pop instanceof SmsChannelLayout) {
 				Application.isMessagePage = 1;
 			}
-			if(pop instanceof ChargeSMSDecLayout){
+			if (pop instanceof ChargeSMSDecLayout) {
 				Application.isMessagePage = 0;
 			}
 			if (Application.isMessagePage == 1 && isSendMessage == false) {

@@ -60,6 +60,13 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 	private String mUrlGuard;
 	private int mType;
     private Dialog dialog;
+	public static Handler hander = null;
+	private static PayParam payParam = null;
+	public String messages = "";
+	public String orderNumber = null;
+	public String currentUrl = "";
+	public Result webPayResult = null;
+
 	/**
 	 * 启动在线支付界面。
 	 * 
@@ -74,13 +81,6 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 	 * @param channelId
 	 * @see Activity#startActivityForResult(Intent, int)
 	 */
-	public static Handler hander = null;
-	private static PayParam payParam = null;
-	public String messages = "";
-	public String orderNumber = null;
-	public String currentUrl = "";
-	public Result webPayResult = null;
-
 	public static void start(Activity host, int requestCode, int type,
 			Result result, Handler handler, PayParam mPayParam) {
 		Intent intent = new Intent(host, PayOnlineActivity.class);

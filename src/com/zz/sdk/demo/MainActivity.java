@@ -109,7 +109,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			EditText etPayAmount = new EditText(ctx);
 			etPayAmount.setHint("{支付金额(单位:元)}");
 			etPayAmount.setId(IDC_ET_PAY_AMOUNT);
-			etPayAmount.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+			etPayAmount.setInputType(InputType.TYPE_CLASS_NUMBER);
 			amountLayout.addView(etPayAmount);
 
 			btPayAmount.setOnClickListener(onClickListener);

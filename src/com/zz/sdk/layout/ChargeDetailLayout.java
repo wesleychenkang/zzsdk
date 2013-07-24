@@ -146,7 +146,8 @@ public class ChargeDetailLayout extends ChargeAbstractLayout {
 		mInput.setTextSize(14);
 		mInput.setId(ID_INPUT);
 		mInput.setGravity(Gravity.CENTER_VERTICAL);
-		mInput.setInputType(EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
+		mInput.setInputType(EditorInfo.TYPE_CLASS_NUMBER
+				| EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
 		mInput.setBackgroundDrawable(BitmapCache.getDrawable(activity,
 				Constants.ASSETS_RES_PATH + "input_money.png"));
 		lp = new LayoutParams(-2, -2);
