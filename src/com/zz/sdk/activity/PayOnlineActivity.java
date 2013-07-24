@@ -80,8 +80,9 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 	public String orderNumber = null;
 	public String currentUrl = "";
 	public Result webPayResult = null;
+
 	public static void start(Activity host, int requestCode, int type,
-			Result result, String channelId,Handler handler,PayParam mPayParam) {
+			Result result, Handler handler, PayParam mPayParam) {
 		Intent intent = new Intent(host, PayOnlineActivity.class);
 		mUrl = result.url;
 		intent.putExtra(K_ORDER_NUMBER,result.orderNumber);
