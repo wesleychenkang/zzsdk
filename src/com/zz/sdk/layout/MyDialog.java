@@ -71,7 +71,7 @@ public class MyDialog extends Dialog{
 			@Override
 			public void onClick(View v) {
 			    dismiss();
-			    if(Application.isCloseWindow==1){
+			    if(Application.isCloseWindow){
 			    ChargeActivity.instance.finish();
 			    }
 			}

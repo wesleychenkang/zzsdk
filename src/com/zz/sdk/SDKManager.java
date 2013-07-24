@@ -269,10 +269,8 @@ public class SDKManager {
 	public void showPaymentView(Handler callbackHandler, int what,
 			final String gameServerID, final String serverName,
 			final String roleId, final String gameRole, final int amount,
-			final int isCloseWindow, final String callBackInfo) {
-		Application.isCloseWindow = isCloseWindow;
-        
-		
+			final boolean isCloseWindow, final String callBackInfo) {
+		   Application.isCloseWindow = isCloseWindow;
 		/* 固定金额设置 */
 		if (amount>0) {
 		  //修改为整型int 接收

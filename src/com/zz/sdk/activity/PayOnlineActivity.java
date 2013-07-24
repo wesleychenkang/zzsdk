@@ -310,7 +310,7 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 				case DialogInterface.BUTTON_NEGATIVE:
 					hideDialog();
 					postPayResult(false,orderNumber);
-					if(Application.isCloseWindow==1){
+					if(Application.isCloseWindow){
 						ChargeActivity.instance.finish();
 					  }
 					onCancel();
