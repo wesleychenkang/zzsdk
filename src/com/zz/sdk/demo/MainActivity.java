@@ -186,7 +186,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			}
 			mSDKManager.showPaymentView(mHandler, MSG_PAYMENT_CALLBACK,
 					CONFIG_GAME_SERVER_ID, CONFIG_GAME_SERVER_NAME,
-					CONFIG_GAME_ROLE_ID, CONFIG_GAME_ROLE, amount, 0,
+					CONFIG_GAME_ROLE_ID, CONFIG_GAME_ROLE, amount, true,
 					CONFIG_GAME_CALLBACK_INFO);
 		}
 			break;

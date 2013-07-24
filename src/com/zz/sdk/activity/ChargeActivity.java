@@ -384,7 +384,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 				if (null != dialog) {
 					dialog.setCancelable(false);
 				}
-				if (Application.isCloseWindow == 1) {
+				if (Application.isCloseWindow) {
 					if (resultDialog != null) {
 						resultDialog.dismiss();
 					}
@@ -663,7 +663,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 	private View popViewFromStack() {
 
 		if (mViewStack.size() > 1) {
-			if (Application.isCloseWindow == 1 && Application.isAlreadyCB == 1) {
+			if (Application.isCloseWindow && Application.isAlreadyCB == 1) {
 				this.finish();
 				return null;
 			}
@@ -725,6 +725,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			} else {
 				init();
 			}
+			smsPayCallBack(-2, null);
 			mPaymentListLayout.setChannelMessages(Application.mPayChannels);
 			mPaymentListLayout.showPayList(View.VISIBLE);
 			return;
@@ -876,7 +877,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 				sendSmsFeedback();
 				isSendMessage = true;
 			}
-			if (Application.isCloseWindow == 1) {
+			if (Application.isCloseWindow) {
 				this.finish();
 			}
 		}
@@ -1006,13 +1007,13 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		if (requestCode == ACTIVITY_REQUEST_CODE_UNIONPAY) {
 			if (isRetUnionpay) {
 				if (PAY_RESULT_SUCCESS.equalsIgnoreCase(pay_result)) {
-					if (Application.isCloseWindow != 1) {
+					if (!Application.isCloseWindow) {
 						resultDialog = DialogUtil.showPayResultDialog(this,
 								true);
 					}
 					allPayCallBack(0);
 				} else if (PAY_RESULT_FAIL.equalsIgnoreCase(pay_result)) {
-					if (Application.isCloseWindow != 1) {
+					if (!Application.isCloseWindow) {
 						resultDialog = DialogUtil.showPayResultDialog(this,
 								false);
 					}
@@ -1026,7 +1027,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 									.canclePay(mResult.orderNumber, "银联内取消支付");
 						}
 					}).start();
-					if (Application.isCloseWindow != 1) {
+					if (!Application.isCloseWindow) {
 						DialogUtil.showDialogErr(this, "你已取消了本次订单的支付!订单号为:"
 								+ mResult.orderNumber);
 					}
@@ -1072,7 +1073,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			break;
 		}
 		mCallbackHandler.sendMessage(msg);
-		if (Application.isCloseWindow == 1) {
+		if (Application.isCloseWindow) {
 			finish();
 		}
 
@@ -1097,7 +1098,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			break;
 		}
 		mCallbackHandler.sendMessage(msg);
-		if (Application.isCloseWindow == 1 && isSendMessage == true) {
+		if (Application.isCloseWindow && isSendMessage == true) {
 			finish();
 		}
 	}

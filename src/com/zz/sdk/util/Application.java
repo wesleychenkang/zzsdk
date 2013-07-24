@@ -45,7 +45,8 @@ public class Application {
 	/** 固定支付金额的通道索引, -1为空 */
 	public static int staticAmountIndex;
 	public static int payStatusCancel = 0;
-	public static int isCloseWindow;
+	/**冲值完成后是否关闭充值平台*/
+	public static boolean isCloseWindow;
 	public static int isAlreadyCB = 0;
 	public static int isMessagePage = 0;
 	public static boolean isDisplayLoginTip = false; // 是否显示登录提示
