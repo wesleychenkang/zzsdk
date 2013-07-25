@@ -194,7 +194,8 @@ public class ChargeDetailLayoutForCard extends ChargeAbstractLayout {
 		etPayMoney.setId(ID_ETMONEY);
 		etPayMoney.setTextColor(0xffffe5c5);
 		etPayMoney.setTextSize(16);
-		etPayMoney.setInputType(EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
+		etPayMoney.setInputType(EditorInfo.TYPE_CLASS_NUMBER
+				| EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
 		etPayMoney.setGravity(Gravity.CENTER_VERTICAL);
 		etPayMoney.setPadding(DimensionUtil.dip2px(activity, 8), 0, 0, 0);
 		etPayMoney.setBackgroundDrawable(BitmapCache.getDrawable(activity,
@@ -232,10 +233,10 @@ public class ChargeDetailLayoutForCard extends ChargeAbstractLayout {
 		btnSubmit = new Button(mActivity);
 		btnSubmit.setBackgroundDrawable(Utils.getStateListDrawable(activity,
 				"tijiao_pressed.png", "tijiao_normal.png"));
-		if ("3".equals(mPayParam.type)) {
+		if (mPayChannel.type == PayChannel.PAY_TYPE_YEEPAY_LT) {
 			btnSubmit.setId(ID_BTNSUBMIT_LT);
 		}
-		else if ("4".equals(mPayParam.type)){
+		else if (mPayChannel.type == PayChannel.PAY_TYPE_YEEPAY_YD){
 			btnSubmit.setId(ID_BTNSUBMIT_YD);
 		}
 		// btnSubmit.setOnClickListener(listener2);
