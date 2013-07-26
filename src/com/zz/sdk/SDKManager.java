@@ -3,6 +3,7 @@ package com.zz.sdk;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.util.Pair;
 
 import com.zz.sdk.activity.ChargeActivity;
@@ -32,7 +33,6 @@ import com.zz.sdk.util.Utils;
  */
 
 public class SDKManager {
-
 
 	/* -- 单例化 -- */
 
@@ -71,6 +71,8 @@ public class SDKManager {
 	private Context mContext;
 
 	private SDKManager(Context ctx) {
+		Log.d("zzsdk", "version:" + getVersionDesc());
+		
 		mContext = ctx;
 		// HandlerThread handlerThread = new HandlerThread("zzsdk",
 		// android.os.Process.THREAD_PRIORITY_BACKGROUND);
@@ -256,6 +258,10 @@ public class SDKManager {
 	 *            角色ID
 	 * @param gameRole
 	 *            角色名称
+	 * @param amount
+	 *            定额价格, 单位为 [分], 如果 >0表示此次充值只能以指定的价格交易.
+	 * @param isCloseWindow
+	 *            支付成功是否自动关闭支付SDK, 如果是 true 则在充值成功后自动退出SDK
 	 * @param callBackInfo
 	 *            厂家自定义参数
 	 * 
@@ -270,16 +276,16 @@ public class SDKManager {
 			final String gameServerID, final String serverName,
 			final String roleId, final String gameRole, final int amount,
 			final boolean isCloseWindow, final String callBackInfo) {
-		   Application.isCloseWindow = isCloseWindow;
+		Application.isCloseWindow = isCloseWindow;
 		/* 固定金额设置 */
-		if (amount>0) {
-		  //修改为整型int 接收
-		  Application.changeCount = amount;
+		if (amount > 0) {
+			// 修改为整型int 接收
+			Application.changeCount = amount;
 		} else {
-		  Application.changeCount = 0;
+			Application.changeCount = 0;
 		}
-		 Application.staticAmountIndex = -1;
-		
+		Application.staticAmountIndex = -1;
+
 		Pair<String, String> account = Utils.getAccountFromSDcard(mContext);
 		if (account != null) {
 			Application.loginName = account.first;
@@ -370,5 +376,24 @@ public class SDKManager {
 				}
 			}
 		}
+	}
+
+	/**
+	 * 获取版本号
+	 * 
+	 * @return
+	 */
+	public static int getVersionCode() {
+		return ZZSDKConfig.VERSION_CODE;
+	}
+
+	/**
+	 * 获取当前版本信息，
+	 * 
+	 * @return 格式 <strong>Ver:{版本号}-{版本名}-{发布日期}</strong>
+	 */
+	public static String getVersionDesc() {
+		return "Ver:" + ZZSDKConfig.VERSION_CODE + "-"
+				+ ZZSDKConfig.VERSION_NAME + "-" + ZZSDKConfig.VERSION_DATE;
 	}
 }
