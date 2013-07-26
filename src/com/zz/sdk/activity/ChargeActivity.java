@@ -1,6 +1,5 @@
 package com.zz.sdk.activity;
 
-import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Stack;
 import java.util.concurrent.ExecutorService;
@@ -17,7 +16,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
@@ -45,6 +43,7 @@ import com.zz.sdk.layout.SmsChannelLayout;
 import com.zz.sdk.util.Application;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.DialogUtil;
+import com.zz.sdk.util.FlagControl;
 import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.JsonUtil;
 import com.zz.sdk.util.Logger;
@@ -88,10 +87,10 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 	// 短信第二步请求
 	private static final int INDEX_CHARGE_SMSCHARGE_FEEDBACK = 100;
 
-	// 短信获查话费指令
+	/** 短信获查话费指令 */
 	private static final int INDEX_CHARGE_SMS_GET_COMMAND = 101;
 
-	// 获取通道
+	/** 获取话费通道 */
 	private static final int INDEX_CHARGE_SMS_CHENNEL = 102;
 
 	/**
@@ -167,6 +166,16 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 
 	public MyDialog resultDialog = null;
 
+	// ////////////////////////////////////////////////////////////////////////
+	//
+	// - (常规)状态控制 -
+	//
+
+	/** 正在尝试使用话费充值模式，用于进入充值界面时自动调用短信充值 */
+	private final static int FLAG_TRY_SMS_MODE = 1 << 0;
+
+	private FlagControl mFlag;
+
 	/**
 	 * 选择支付类型, 如 [支付宝] [话费] 等
 	 * 
@@ -229,8 +238,12 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
 			imsi = tm.getSubscriberId();
 			if (imsi == null || "".equals(imsi)) {
-				Utils.toastInfo(instance,
-						"对不起，手机没有插入SIM卡，无法使用话费支付，请选择其它支付方式，如需帮助请联系客服!");
+				if (mFlag.getAndClear(FLAG_TRY_SMS_MODE)) {
+					;
+				} else {
+					Utils.toastInfo(instance,
+							"对不起，手机没有插入SIM卡，无法使用话费支付，请选择其它支付方式，如需帮助请联系客服!");
+				}
 				return;
 			}
 
@@ -266,9 +279,11 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			mPaymentListLayout.showPayList(View.VISIBLE);
 
 			// 自动 调用 话费
-			for (PayChannel c : Application.mPayChannels) {
-				if (c.type == PayChannel.PAY_TYPE_KKFUNPAY) {
-					choosePayChannel(c);
+			if (mFlag.has(FLAG_TRY_SMS_MODE)) {
+				for (PayChannel c : Application.mPayChannels) {
+					if (c.type == PayChannel.PAY_TYPE_KKFUNPAY) {
+						choosePayChannel(c);
+					}
 				}
 			}
 		} else {
@@ -414,19 +429,28 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 				return;
 			if (null == msg.obj || !(msg.obj instanceof Result)) {
 				SMSUtil.hideDialog();
-				Utils.toastInfo(ChargeActivity.this,
-						"对不起，网络连接失败，请确认您的网络是否正常后再尝试，如需帮助请联系客服!");
+
+				if (mFlag.getAndClear(FLAG_TRY_SMS_MODE)) {
+					;
+				} else
+					Utils.toastInfo(ChargeActivity.this,
+							"对不起，网络连接失败，请确认您的网络是否正常后再尝试，如需帮助请联系客服!");
 				return;
 			}
 			mResult = (Result) msg.obj;
 			switch (msg.what) {
 			// 查询指令
 			case INDEX_CHARGE_SMS_GET_COMMAND:
+				break;
+			case INDEX_CHARGE_SMS_CHENNEL:
 				boolean check = false;
 				if (!"0".equals(mResult.codes)) {
 					SMSUtil.hideDialog();
-					DialogUtil.showDialogErr(ChargeActivity.this,
-							"获取不到支付通道，请选择其他方式");
+					if (mFlag.getAndClear(FLAG_TRY_SMS_MODE)) {
+						;
+					} else
+						DialogUtil.showDialogErr(ChargeActivity.this,
+								"获取不到支付通道，请选择其他方式");
 					return;
 				}
 				SMSUtil.hideDialog();
@@ -472,12 +496,18 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 
 						callBackOrderNumber = mResult.orderNumber;
 					} else {
-						DialogUtil.showDialogErr(ChargeActivity.this,
-								"该充值方式，没有您选择的商品金额，请选择其他方式！");
+						if (mFlag.has(FLAG_TRY_SMS_MODE)) {
+							mFlag.clear(FLAG_TRY_SMS_MODE);
+						} else
+							DialogUtil.showDialogErr(ChargeActivity.this,
+									"该充值方式，没有您选择的商品金额，请选择其他方式！");
 
 					}
 				} else {
-					Utils.toastInfo(ChargeActivity.this, "获取不到支付通道，请选择其他方式");
+					if (mFlag.has(FLAG_TRY_SMS_MODE)) {
+						mFlag.clear(FLAG_TRY_SMS_MODE);
+					} else
+						Utils.toastInfo(ChargeActivity.this, "获取不到支付通道，请选择其他方式");
 				}
 
 				break;
@@ -589,11 +619,18 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		mFlag = new FlagControl();
+
 		Utils.loack_screen_orientation(this);
 		Application.isAlreadyCB = 0;
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		Intent intent = getIntent();
 		instance = this;
+
+		// 默认进入 话费充值模式
+		mFlag.mark(FLAG_TRY_SMS_MODE);
+
 		mPayParam = new PayParam();
 		// 游戏服务器
 		mPayParam.serverId = intent.getStringExtra(EXTRA_SERVERID);
@@ -960,14 +997,14 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 	 */
 	private void getCommandOrChannel(String json, int type) {
 		// 3查询余额指令
-		PayParam payParam = new PayParam();
-		payParam.smsImsi = json;
-		payParam.smsActionType = "1";
-		payParam.channelId = "5";
+		// PayParam payParam = new PayParam();
+		// payParam.smsImsi = json;
+		// payParam.smsActionType = "1";
+		// payParam.channelId = "5";
 
 		mark_op_tick(WO_FLAG_SEND);
 		SMSUtil.getSMSCheckCommand(instance, mPayParam, smsHandler,
-				INDEX_CHARGE_SMS_GET_COMMAND);
+				INDEX_CHARGE_SMS_CHENNEL);
 		SMSUtil.showDialog(ChargeActivity.this, type);
 
 	}
