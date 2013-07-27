@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.text.Html;
 import android.view.Gravity;
@@ -112,17 +113,25 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 		lp.topMargin = DimensionUtil.dip2px(activity, 20);
 		lp.bottomMargin = DimensionUtil.dip2px(activity, 20);
 		ll2.addView(mSelAmout, lp);
-
+		
+		
+		
+		LinearLayout lpother = new LinearLayout(activity);
+	    lpother.setOrientation(VERTICAL);
+	    lpother.setGravity(Gravity.RIGHT);
 		mOtherPay = new TextView(activity);
 		mOtherPay.setText("其他支付方式");
 		mOtherPay.setId(ID_OTHERPAY);
 		mOtherPay.getPaint().setFlags(
 				Paint.UNDERLINE_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
 		mOtherPay.setTextSize(14);
-		mOtherPay.setTextColor(0xff92acbc);
 		mOtherPay.setGravity(Gravity.RIGHT);
-		lp = new LayoutParams(-1, -2);
-		ll2.addView(mOtherPay, lp);
+		mOtherPay.setPadding(0, 20, 0, 20);
+		mOtherPay.setTextColor(0xff92acbc);
+		lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		lpother.addView(mOtherPay,lp);
+		lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+		ll2.addView(lpother, lp);
 
 		LinearLayout ll3 = new LinearLayout(activity);
 		lp = new LayoutParams(-2, -2);
