@@ -138,7 +138,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			ScrollView sv = new ScrollView(this);
 			sv.setVerticalScrollBarEnabled(true);
 			TextView tvTip = new TextView(ctx);
-			tvTip.setText("{未登录}");
+			tvTip.setText(" ! version:" + SDKManager.getVersionDesc());
 			tvTip.setId(IDC_TV_LOG);
 			sv.addView(tvTip);
 			rootLayout.addView(sv);

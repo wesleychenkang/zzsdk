@@ -17,6 +17,7 @@ test  -z "$D2J" && D2J=dex2jar.sh
 test -z "$Z" && Z=zip
 
 sed -i '/SUPPORT_360SDK = .*;/s/\(.*= \)\w*;/\1false;/' src/com/zz/sdk/ZZSDKConfig.java
+./update_version.sh
 
 ant clean
 ant release
