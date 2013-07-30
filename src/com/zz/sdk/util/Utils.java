@@ -300,7 +300,7 @@ public class Utils {
 	 * @param user
 	 * @param pw
 	 */
-	public static void writeAccount2SDcard(Context ctx, String user, String pw) {
+	public synchronized static void writeAccount2SDcard(Context ctx, String user, String pw) {
 		Logger.d("writeAccount2SDcard");
 		if (user == null || pw == null) {
 			return;
@@ -342,9 +342,9 @@ public class Utils {
 	 * @param ctx
 	 * @return
 	 */
-	public static Pair<String, String> getAccountFromSDcard(Context ctx) {
+	public synchronized static Pair<String, String> getAccountFromSDcard(Context ctx) {
 		Logger.d("getAccountFromSDcard");
-		Pair<String, String> ret = null;
+		Pair<String, String> ret= null;
 		File dir = new File(Environment.getExternalStorageDirectory(),
 				Constants.ACCOUNT_PASSWORD_DIR);
 		if (dir.exists()) {
@@ -377,6 +377,7 @@ public class Utils {
 				}
 			}
 		}
+		
 		return ret;
 	}
 
