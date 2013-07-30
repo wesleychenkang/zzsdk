@@ -51,7 +51,10 @@
 
 * 发布
 
-    
+    每次脚本编译发布时，根据 `AndroidManifest.xml` 中的 versionCode 和 versionName，以及编译日期 `date +"%Y%m%d"` 来更新 `src/com/zz/sdk/ZZSDKConfig.java` 中的 
+    * VERSION_CODE
+    * VERSION_NAME
+    * VERSION_DATE
 
 
 * 动态更新
