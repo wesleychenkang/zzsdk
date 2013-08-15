@@ -633,7 +633,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 
 		mPayParam = new PayParam();
 		// 游戏服务器
-		mPayParam.serverId = intent.getStringExtra(EXTRA_SERVERID);
+		mPayParam.serverId = Utils.getServerId(getBaseContext());
 		mPayParam.loginName = Application.loginName;
 		mPayParam.projectId = Utils.getProjectId(getBaseContext());
 		// 游戏角色
@@ -641,7 +641,6 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		mPayParam.callBackInfo = intent.getStringExtra(EXTRA_CALLBACKINFO);
 
 		userAction = new UserAction();
-		userAction.serverId = mPayParam.serverId;
 		userAction.loginName = Application.loginName;
 		userAction.memo = "";
 		userAction.actionType = "";
@@ -884,7 +883,10 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		Application.isAlreadyCB = 1;
 		// 超過90秒就認為發送失敗
 		if (check_op_timeout(WO_FLAG_SEND)) {
+			SMSUtil.hideDialog();
 			isSendMessage = false;
+			mViewStack.clear();
+			pushView2Stack(mPaymentListLayout);
 			return;
 		}
 
@@ -916,6 +918,9 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			}
 			if (Application.isCloseWindow) {
 				this.finish();
+			}else{
+				mViewStack.clear();
+				pushView2Stack(mPaymentListLayout);
 			}
 		}
 	}

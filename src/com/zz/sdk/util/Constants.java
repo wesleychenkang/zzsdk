@@ -82,6 +82,8 @@ public final class Constants {
 	 */
 	public static final String K_PROJECT_ID = "PROJECT_ID";
 	
+	public static final String K_SERVER_ID= "SERVER_ID";
+	
 	/* -- 方向定义 -- */
 	public final static int DIR_HORIZONTAL = 1;
 	public final static int DIR_VERTITAL = 2;

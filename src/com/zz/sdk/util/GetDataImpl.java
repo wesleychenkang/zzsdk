@@ -416,7 +416,7 @@ public class GetDataImpl {
 	public  Result request(Context ctx,UserAction user){
 		 ArrayList<BasicNameValuePair> nvps = new ArrayList<BasicNameValuePair>();
 		 nvps.add(new BasicNameValuePair("projectId",Utils.getProjectId(ctx)));
-		 nvps.add(new BasicNameValuePair("serverId",user.serverId));
+		 nvps.add(new BasicNameValuePair("serverId",Utils.getServerId(ctx)));
 		 nvps.add(new BasicNameValuePair("actionType","" + user.actionType));
 		 nvps.add(new BasicNameValuePair("loginName",user.loginName));
 		 nvps.add(new BasicNameValuePair("memo",""));

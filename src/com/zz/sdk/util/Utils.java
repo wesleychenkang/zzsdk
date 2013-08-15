@@ -65,6 +65,8 @@ public class Utils {
 	private static final String DATA_DIR = "/zzsdk/data/zz/cache";
 
 	private static String CACHE_PROJECT_ID = null;
+	
+	private static String SERVER_ID = null;
 
 	static {
 		String state = Environment.getExternalStorageState();
@@ -408,6 +410,39 @@ public class Utils {
 			return CACHE_PROJECT_ID;
 		}
 	}
+	/**
+	 * 获取工程SERVERID
+	 * 
+	 * @param ctx
+	 * @return
+	 */
+	
+	public static synchronized String getServerId(Context ctx) {
+		if (null == SERVER_ID) {
+			String serverId = null;
+			try {
+				ApplicationInfo appInfo;
+				appInfo = ctx.getPackageManager().getApplicationInfo(
+						ctx.getPackageName(), PackageManager.GET_META_DATA);
+				if (appInfo != null && appInfo.metaData != null) {
+					serverId = appInfo.metaData
+							.getString(Constants.K_SERVER_ID);
+				}
+				SERVER_ID = serverId;
+			} catch (Exception e) {
+				Logger.d("read SERVER_ID error!");
+				e.printStackTrace();
+			}
+			return serverId;
+		} else {
+			return SERVER_ID;
+		}
+	}
+	
+	
+	
+	
+	
 
 	/**
 	 * 将渠道信息写到sdcard，路径 -> 应用包名/channel/dw.txt
