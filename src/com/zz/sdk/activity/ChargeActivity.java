@@ -633,7 +633,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 
 		mPayParam = new PayParam();
 		// 游戏服务器
-		mPayParam.serverId = Utils.getServerId(getBaseContext());
+		mPayParam.serverId = intent.getStringExtra(EXTRA_SERVERID);
 		mPayParam.loginName = Application.loginName;
 		mPayParam.projectId = Utils.getProjectId(getBaseContext());
 		// 游戏角色
