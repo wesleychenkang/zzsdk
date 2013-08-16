@@ -66,6 +66,8 @@ public class Utils {
 
 	private static String CACHE_PROJECT_ID = null;
 
+	private static String CACHE_GAME_SERVER_ID = null;
+
 	static {
 		String state = Environment.getExternalStorageState();
 		if (Environment.MEDIA_MOUNTED.equals(state)) {
@@ -300,7 +302,8 @@ public class Utils {
 	 * @param user
 	 * @param pw
 	 */
-	public synchronized static void writeAccount2SDcard(Context ctx, String user, String pw) {
+	public synchronized static void writeAccount2SDcard(Context ctx,
+			String user, String pw) {
 		Logger.d("writeAccount2SDcard");
 		if (user == null || pw == null) {
 			return;
@@ -342,9 +345,10 @@ public class Utils {
 	 * @param ctx
 	 * @return
 	 */
-	public synchronized static Pair<String, String> getAccountFromSDcard(Context ctx) {
+	public synchronized static Pair<String, String> getAccountFromSDcard(
+			Context ctx) {
 		Logger.d("getAccountFromSDcard");
-		Pair<String, String> ret= null;
+		Pair<String, String> ret = null;
 		File dir = new File(Environment.getExternalStorageDirectory(),
 				Constants.ACCOUNT_PASSWORD_DIR);
 		if (dir.exists()) {
@@ -377,7 +381,7 @@ public class Utils {
 				}
 			}
 		}
-		
+
 		return ret;
 	}
 
@@ -407,6 +411,39 @@ public class Utils {
 		} else {
 			return CACHE_PROJECT_ID;
 		}
+	}
+
+	/**
+	 * 获取 游戏服务器ID
+	 * 
+	 * @param ctx
+	 * @return
+	 */
+
+	public static synchronized String getGameServerId(Context ctx) {
+		if (null == CACHE_GAME_SERVER_ID) {
+			String serverId = null;
+			try {
+				ApplicationInfo appInfo;
+				appInfo = ctx.getPackageManager().getApplicationInfo(
+						ctx.getPackageName(), PackageManager.GET_META_DATA);
+				if (appInfo != null && appInfo.metaData != null) {
+					serverId = appInfo.metaData
+							.getString(Constants.K_SERVER_ID);
+				}
+				CACHE_GAME_SERVER_ID = serverId;
+			} catch (Exception e) {
+				Logger.d("read SERVER_ID error!");
+				e.printStackTrace();
+			}
+			return serverId;
+		} else {
+			return CACHE_GAME_SERVER_ID;
+		}
+	}
+
+	public static synchronized void setGameServerID(String gameServerId) {
+		CACHE_GAME_SERVER_ID = gameServerId;
 	}
 
 	/**
@@ -661,16 +698,11 @@ public class Utils {
 				: ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 	}
 
-
-
-   public static String formateInt(int count){
-	    String price = String.valueOf(count/100.00);
-		if(price.contains(".")&&price.endsWith("0")){
-			price = price.substring(0, price.length()-2) ; 
-		 }
-	   return price; 
-   }
-
-
-
+	public static String formateInt(int count) {
+		String price = String.valueOf(count / 100.00);
+		if (price.contains(".") && price.endsWith("0")) {
+			price = price.substring(0, price.length() - 2);
+		}
+		return price;
+	}
 }

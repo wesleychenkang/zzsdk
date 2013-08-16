@@ -884,7 +884,11 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		Application.isAlreadyCB = 1;
 		// 超過90秒就認為發送失敗
 		if (check_op_timeout(WO_FLAG_SEND)) {
+			SMSUtil.hideDialog();
 			isSendMessage = false;
+			mViewStack.clear();
+			pushView2Stack(mPaymentListLayout);
+			smsPayCallBack(-1, String.valueOf(sms.price / 100));
 			return;
 		}
 
@@ -916,6 +920,9 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			}
 			if (Application.isCloseWindow) {
 				this.finish();
+			}else{
+				mViewStack.clear();
+				pushView2Stack(mPaymentListLayout);
 			}
 		}
 	}

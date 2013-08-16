@@ -95,7 +95,12 @@
              <meta-data android:name="QHOPENSDK_APPKEY" android:value="4ebf535fe5749b77a26cf8971733aa73" > </meta-data>
              <meta-data android:name="QHOPENSDK_PRIVATEKEY" android:value="321eb8e6a3c4e1a0d72b5545a283319d" > </meta-data>
              <meta-data android:name="QHOPENSDK_CHANNEL" android:value="default" ></meta-data>
-
+          <!--  测试124使用   <meta-data
+            android:name="PROJECT_ID"
+            android:value="P10012" /> -->
+        <meta-data
+            android:name="SERVER_ID"
+            android:value="M1001A" />
         <meta-data
             android:name="PROJECT_ID"
             android:value="P10003A" />
