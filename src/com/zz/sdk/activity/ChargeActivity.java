@@ -633,7 +633,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 
 		mPayParam = new PayParam();
 		// 游戏服务器
-		mPayParam.serverId = Utils.getServerId(getBaseContext());
+		mPayParam.serverId = intent.getStringExtra(EXTRA_SERVERID);
 		mPayParam.loginName = Application.loginName;
 		mPayParam.projectId = Utils.getProjectId(getBaseContext());
 		// 游戏角色
@@ -641,6 +641,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		mPayParam.callBackInfo = intent.getStringExtra(EXTRA_CALLBACKINFO);
 
 		userAction = new UserAction();
+		userAction.serverId = mPayParam.serverId;
 		userAction.loginName = Application.loginName;
 		userAction.memo = "";
 		userAction.actionType = "";
@@ -887,6 +888,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			isSendMessage = false;
 			mViewStack.clear();
 			pushView2Stack(mPaymentListLayout);
+			smsPayCallBack(-1, String.valueOf(sms.price / 100));
 			return;
 		}
 

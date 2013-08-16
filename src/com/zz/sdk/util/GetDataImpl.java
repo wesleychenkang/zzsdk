@@ -84,6 +84,7 @@ public class GetDataImpl {
         list.add(new BasicNameValuePair("loginName",loginName));
         list.add(new BasicNameValuePair("password",password));
         list.add(new BasicNameValuePair("projectId",Utils.getProjectId(ctx)));
+        list.add(new BasicNameValuePair("serverId",Utils.getGameServerId(ctx)));
 		String url = Constants.LOGIN_REQ;
 		InputStream in = doRequest(url, list, 2);
 		String json = parseJsonData(in);
@@ -124,6 +125,7 @@ public class GetDataImpl {
 
 		ArrayList<BasicNameValuePair> list = new ArrayList<BasicNameValuePair>();
 		list.add(new BasicNameValuePair("projectId", Utils.getProjectId(ctx)));
+        list.add(new BasicNameValuePair("serverId",Utils.getGameServerId(ctx)));
 		if (DebugFlags.DEBUG) {
 			list.add(new BasicNameValuePair("imsi", DebugFlags.DEF_DEBUG_IMSI));
 		} else {
@@ -177,6 +179,7 @@ public class GetDataImpl {
 		list.add(new BasicNameValuePair("loginName",loginName));
 		list.add(new BasicNameValuePair("password",password));
 		list.add(new BasicNameValuePair("projectId",Utils.getProjectId(ctx)));
+        list.add(new BasicNameValuePair("serverId",Utils.getGameServerId(ctx)));
 		list.add(new BasicNameValuePair("imsi",Utils.getIMSI(ctx)));
 		String url = Constants.REG_REQ;
 		InputStream in = doRequest(url,list,2);
@@ -416,7 +419,7 @@ public class GetDataImpl {
 	public  Result request(Context ctx,UserAction user){
 		 ArrayList<BasicNameValuePair> nvps = new ArrayList<BasicNameValuePair>();
 		 nvps.add(new BasicNameValuePair("projectId",Utils.getProjectId(ctx)));
-		 nvps.add(new BasicNameValuePair("serverId",Utils.getServerId(ctx)));
+		 nvps.add(new BasicNameValuePair("serverId",(user.serverId==null||user.serverId.length()==0)?Utils.getGameServerId(ctx):user.serverId));
 		 nvps.add(new BasicNameValuePair("actionType","" + user.actionType));
 		 nvps.add(new BasicNameValuePair("loginName",user.loginName));
 		 nvps.add(new BasicNameValuePair("memo",""));

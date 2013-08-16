@@ -81,7 +81,10 @@ public final class Constants {
 	 * 键: 项目ID,配置于 AndroidManifest.xml
 	 */
 	public static final String K_PROJECT_ID = "PROJECT_ID";
-	
+
+	/**
+	 * 键: 游戏服务ID,配置于 AndroidManifest.xml
+	 */
 	public static final String K_SERVER_ID= "SERVER_ID";
 	
 	/* -- 方向定义 -- */
