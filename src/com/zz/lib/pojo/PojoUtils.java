@@ -1,6 +1,7 @@
 package com.zz.lib.pojo;
 
 import java.net.HttpURLConnection;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.json.JSONException;
@@ -206,7 +207,22 @@ public class PojoUtils {
 	// - 对外接口
 	//
 
-	private final static Pattern DEF_QOUQU_PATTERN = Pattern.compile("");
+	private final static Pattern DEF_DOUQU_ZUOYUE_ID = Pattern
+			.compile("\\d+\\$DQU\\$$");
+
+	/**
+	 * 判断　目标账户　是否符合豆趣转卓越账号的规则： 数字ID+"$DQU$"
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public static boolean isZuoyueUser(String name) {
+		Matcher m = DEF_DOUQU_ZUOYUE_ID.matcher(name);
+		if (m != null && m.matches()) {
+			return true;
+		}
+		return false;
+	}
 
 	/**
 	 * 检查　用户名是否是豆趣类型 ( id+"$DQU$" )
@@ -215,7 +231,9 @@ public class PojoUtils {
 	 * @return
 	 */
 	public static String getGameName(String loginName) {
-		// if (loginName!=null && )
+		if (isZuoyueUser(loginName)) {
+			return loginName.substring(0, loginName.length() - 5);
+		}
 		return loginName;
 	}
 

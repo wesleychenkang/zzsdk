@@ -6,6 +6,7 @@ import android.os.Message;
 import android.util.Log;
 import android.util.Pair;
 
+import com.zz.lib.pojo.PojoUtils;
 import com.zz.sdk.activity.ChargeActivity;
 import com.zz.sdk.activity.LoginActivity;
 import com.zz.sdk.activity.LoginForQiFu;
@@ -303,11 +304,11 @@ public class SDKManager {
 			Application.loginName = account.first;
 			Application.password = account.second;
 		}
-		
-		if (gameServerID!=null && gameServerID.length()>0) {
+
+		if (gameServerID != null && gameServerID.length() > 0) {
 			setGameServerId(gameServerID);
 		}
-		
+
 		ChargeActivity.start(callbackHandler, what, mContext, gameServerID,
 				serverName, roleId, gameRole, callBackInfo);
 	}
@@ -319,6 +320,9 @@ public class SDKManager {
 	 */
 	public String getLoginName() {
 		if (Application.isLogin) {
+			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+				return PojoUtils.getGameName(Application.loginName);
+			}
 			return Application.loginName;
 		} else {
 			return null;

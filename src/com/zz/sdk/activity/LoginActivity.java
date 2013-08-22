@@ -136,7 +136,14 @@ public class LoginActivity extends Activity implements OnClickListener {
 				toast("请输入帐号");
 				return;
 			} else {
-				Pair<Boolean, String> resultName = validUserName(iLoginName);
+				Pair<Boolean, String> resultName = null;
+				if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+					if (PojoUtils.isZuoyueUser(iLoginName)) {
+						resultName = new Pair<Boolean, String>(true, iLoginName);
+					}
+				}
+				if (resultName == null)
+					resultName = validUserName(iLoginName);
 				if (!resultName.first) {
 					// 输入不合法
 					toast(resultName.second);
@@ -367,6 +374,10 @@ public class LoginActivity extends Activity implements OnClickListener {
 			LoginCallbackInfo loginCallbackInfo = new LoginCallbackInfo();
 			loginCallbackInfo.statusCode = LoginCallbackInfo.STATUS_SUCCESS;
 			loginCallbackInfo.loginName = Application.loginName;
+			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+				loginCallbackInfo.loginName = PojoUtils
+						.getGameName(Application.loginName);
+			}
 			tryNotify(MSG_STATUS.SUCCESS, loginCallbackInfo);
 			Logger.d("has run send message-------------");
 		}
@@ -644,11 +655,15 @@ public class LoginActivity extends Activity implements OnClickListener {
 			GetDataImpl instance = GetDataImpl.getInstance(ctx);
 			// 自动登陆
 			Result loginResult = instance.login(user, pw, 1, ctx);
+
 			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
-				String dqName = PojoUtils.login(ctx, user, pw);
-				if (dqName != null) {
-					loginResult.codes = "0";
-					Application.loginName = dqName;
+				if (!"0".equals(loginResult.codes)
+						&& !PojoUtils.isZuoyueUser(user)) {
+					String dqName = PojoUtils.login(ctx, user, pw);
+					if (dqName != null) {
+						loginResult.codes = "0";
+						Application.loginName = dqName;
+					}
 				}
 			}
 			return loginResult;
