@@ -4,13 +4,15 @@ import java.io.Serializable;
 
 import org.json.JSONObject;
 
+import com.zz.lib.utils.Sign;
+
 /**
  * 用户注册对象
  * 
  * @author RSun
  * @Date 2013-6-15下午12:16:17
  */
-public class Register extends JsonParseInterface implements Serializable {
+class Register extends JsonParseInterface implements Serializable {
 
 	/**
 	 * 
@@ -46,11 +48,11 @@ public class Register extends JsonParseInterface implements Serializable {
 	private static final String u_isFast = "x";
 	private static final String u_app_secret = "y";
 	private static final String u_sign = "z";
-	
+
 	public String addTime = "";
 	public String lastTime = "";
 	public String lastIp = "";
-	
+
 	/** 快速注册 **/
 	public static final int reg_fast = 1;
 	/** 正常注册 **/
@@ -73,7 +75,6 @@ public class Register extends JsonParseInterface implements Serializable {
 	/** h 头像地址url **/
 	public String imageUrl;
 
-	
 	/** i 用户类型，1为CMGE平台用户，2为SDK用户，3为web注册用户，4为wap注册用户 **/
 	public int type;
 	/** j 自定义手机唯一标识 **/
@@ -92,8 +93,7 @@ public class Register extends JsonParseInterface implements Serializable {
 	public int displayScreenHeight;
 	/** q 注册IP **/
 	public String regIP;
-	
-	
+
 	/** r douId **/
 	public String douId;
 	/** s **/
@@ -107,20 +107,18 @@ public class Register extends JsonParseInterface implements Serializable {
 	/** w **/
 	public String mobile;
 
-
-	/** x 是否快速注册，1-快速注册；0-正常注册  **/
+	/** x 是否快速注册，1-快速注册；0-正常注册 **/
 	public int isFast;
 	/** y 授权码 **/
 	public String app_secret;
 	/** z MD5签名 **/
 	public String sign;
-	
+
 	public int age;
 	public String birthday;
 	public String address;
 	public String occupational;
 	public String hobby;
-	
 
 	@Override
 	public JSONObject buildJson() {
@@ -135,7 +133,6 @@ public class Register extends JsonParseInterface implements Serializable {
 			setInt(json, u_sex, sex);
 			setString(json, u_imageUrl, imageUrl);
 
-			
 			setInt(json, u_type, type);
 			setString(json, u_deviceParams, deviceParams);
 			setString(json, u_product, product);
@@ -145,8 +142,7 @@ public class Register extends JsonParseInterface implements Serializable {
 			setInt(json, u_displayScreenWidth, displayScreenWidth);
 			setInt(json, u_displayScreenHeight, displayScreenHeight);
 			setString(json, u_regIP, regIP);
-			
-			
+
 			setString(json, u_douId, douId);
 			setInt(json, u_productId, productId);
 			setString(json, u_imsi, imsi);
@@ -178,7 +174,6 @@ public class Register extends JsonParseInterface implements Serializable {
 			sex = getInt(json, u_sex);
 			imageUrl = getString(json, u_imageUrl);
 
-			
 			type = getInt(json, u_type);
 			deviceParams = getString(json, u_deviceParams);
 			product = getString(json, u_product);
@@ -188,15 +183,14 @@ public class Register extends JsonParseInterface implements Serializable {
 			displayScreenWidth = getInt(json, u_displayScreenWidth);
 			displayScreenHeight = getInt(json, u_displayScreenHeight);
 			regIP = getString(json, u_regIP);
-			
-			
+
 			douId = getString(json, u_douId);
 			productId = getInt(json, u_productId);
 			imsi = getString(json, u_imsi);
 			channelId = getInt(json, u_channelId);
 			versionName = getString(json, u_versionName);
 			mobile = getString(json, u_mobile);
-			
+
 			isFast = getInt(json, u_isFast);
 			app_secret = getString(json, u_app_secret);
 			sign = getString(json, u_sign);
@@ -211,7 +205,11 @@ public class Register extends JsonParseInterface implements Serializable {
 		return ShortName.register;
 	}
 
-	
+	@Override
+	public int getShortType() {
+		return ShortType.register;
+	}
+
 	@Override
 	public String toString() {
 		return "register [account=" + account + ", md5pwd=" + md5pwd
@@ -224,7 +222,16 @@ public class Register extends JsonParseInterface implements Serializable {
 				+ displayScreenWidth + ",displayScreenHeight="
 				+ displayScreenHeight + ",regIP=" + regIP + ",douId=" + douId
 				+ ",productId=" + productId + ",imsi=" + imsi + ",channelId="
-				+ channelId + ",versionName=" + versionName + ", isFast="+ isFast +", app_secret"
-				+ app_secret + ", sign" + sign + "]";
+				+ channelId + ",versionName=" + versionName + ", isFast="
+				+ isFast + ", app_secret" + app_secret + ", sign" + sign + "]";
+	}
+
+	public void updateSign(String app_key) {
+		try {
+			sign = Sign.calc(new String[] { account, md5pwd,
+					String.valueOf(type), app_secret, app_key });
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

@@ -1,53 +1,80 @@
 package com.zz.lib.pojo;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-public class JsonParseInterface {
+/**
+ * pojo类抽象方法
+ * 
+ * @author RSun
+ * @Date 2013-6-15上午11:40:09
+ */
+abstract class JsonParseInterface {
 
-	public static final class ShortName {
-		public static final String register = null;
-		public static final String result = null;
-		public static final String updatePwd = null;
-		public static final String login = null;
+	/** 组织JSON数据方法 **/
+	public abstract JSONObject buildJson();
 
-		private ShortName() {
+	/** 解析JSON数据 **/
+	public abstract void parseJson(JSONObject json);
 
+	/** 对象标识 **/
+	public abstract String getShortName();
+
+	public int getShortType() {
+		return 0;
+	}
+
+	private static boolean isNullOrEmpty(String k) {
+		return k == null || k.length() == 0;
+	}
+
+	/** set int数据 **/
+	protected void setInt(JSONObject json, String key, int value)
+			throws Exception {
+		if (!isNullOrEmpty(key)) {
+			json.put(key, value);
 		}
 	}
 
-	public JSONObject buildJson() {
-		// TODO Auto-generated method stub
-		return null;
+	/** set double数据 **/
+	protected void setDouble(JSONObject json, String key, double value)
+			throws Exception {
+		if (!isNullOrEmpty(key) && 0 != value) {
+			json.put(key, value);
+		}
 	}
 
-	public void parseJson(JSONObject json) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public String getShortName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	protected void setInt(JSONObject json, String key, int value)
-			throws JSONException {
-		json.put(key, value);
-	}
-
+	/** set String数据 **/
 	protected void setString(JSONObject json, String key, String value)
-			throws JSONException {
-		json.put(key, value);
+			throws Exception {
+		if (!isNullOrEmpty(key) && !isNullOrEmpty(value)) {
+			json.put(key, value);
+		}
 	}
 
-	protected int getInt(JSONObject json, String key) throws JSONException {
-		return json.getInt(key);
+	/** get int数据 **/
+	protected int getInt(JSONObject json, String key) throws Exception {
+		int value = 0;
+		if (!isNullOrEmpty(key) && json.has(key)) {
+			value = json.getInt(key);
+		}
+		return value;
 	}
 
-	protected String getString(JSONObject json, String key)
-			throws JSONException {
-		// TODO Auto-generated method stub
-		return json.getString(key);
+	/** get double数据 **/
+	protected double getDouble(JSONObject json, String key) throws Exception {
+		double value = 0;
+		if (!isNullOrEmpty(key) && json.has(key)) {
+			value = json.getDouble(key);
+		}
+		return value;
+	}
+
+	/** get String数据 **/
+	protected String getString(JSONObject json, String key) throws Exception {
+		String value = null;
+		if (!isNullOrEmpty(key) && json.has(key)) {
+			value = json.getString(key);
+		}
+		return value;
 	}
 }

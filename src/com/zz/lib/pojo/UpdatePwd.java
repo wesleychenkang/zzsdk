@@ -4,13 +4,15 @@ import java.io.Serializable;
 
 import org.json.JSONObject;
 
+import com.zz.lib.utils.Sign;
+
 /**
  * 用户密码
  * 
  * @author RSun
  * @Date 2013-6-15下午12:15:33
  */
-public class UpdatePwd extends JsonParseInterface implements Serializable {
+class UpdatePwd extends JsonParseInterface implements Serializable {
 
 	/**
 	 * 
@@ -77,10 +79,24 @@ public class UpdatePwd extends JsonParseInterface implements Serializable {
 	}
 
 	@Override
+	public int getShortType() {
+		return ShortType.updatePwd;
+	}
+
+	@Override
 	public String toString() {
 		return "UpdatePwd [account=" + account + ", md5pwd=" + md5pwd
 				+ ", newmd5pwd=" + newmd5pwd + ", app_secret" + app_secret
 				+ ", sign" + sign + "]";
+	}
+
+	public void updateSign(String app_key) {
+		try {
+			sign = Sign.calc(new String[] { account, md5pwd, newmd5pwd,
+					app_secret, app_key });
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 }

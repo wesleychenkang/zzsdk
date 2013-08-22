@@ -12,6 +12,9 @@ public final class ZZSDKConfig {
 	/** 使用360SDK */
 	public final static boolean SUPPORT_360SDK = false;
 
+	/** 支持豆趣的用户登录 */
+	public final static boolean SUPPORT_DOUQU_LOGIN = true;
+
 	/** 方向 */
 	public final static int ORIENTATION = Constants.DIR_AUTO;
 

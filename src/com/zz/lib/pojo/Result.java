@@ -4,16 +4,18 @@ import java.io.Serializable;
 
 import org.json.JSONObject;
 
+import com.zz.lib.utils.Sign;
 
 /**
  * 返回请求处理状态
+ * 
  * @author RSun
  * @Date 2013-6-15上午11:40:29
  */
-public class Result extends JsonParseInterface implements Serializable {	
-	
+class Result extends JsonParseInterface implements Serializable {
+
 	private static final long serialVersionUID = 5780667638751697330L;
-	
+
 	// 字段key
 	private static final String u_status = "a";
 	private static final String u_statusdescr = "b";
@@ -27,18 +29,18 @@ public class Result extends JsonParseInterface implements Serializable {
 	private static final String u_imsiRegCont = "j";
 	private static final String u_isUse = "k";
 	private static final String u_sign = "z";
-	//登录状态，0-成功；-1 失败，可使用描述提示；-2 失败，无描述
+	// 登录状态，0-成功；-1 失败，可使用描述提示；-2 失败，无描述
 	public static final int SUCCESS = 0;
 	public static final int FAIL = -1;
 	public static final int FAIL2 = -2;
 
-	/** a 服务器返回的结果码，0成功；-1失败；-2可显示结果描述  **/
+	/** a 服务器返回的结果码，0成功；-1失败；-2可显示结果描述 **/
 	public int status;
-	/** b 结果描述  **/
+	/** b 结果描述 **/
 	public String statusdescr;
-	
-	// ====================== 登录使用  =============================
-	/** c 帐号、手机号、邮箱   **/
+
+	// ====================== 登录使用 =============================
+	/** c 帐号、手机号、邮箱 **/
 	public String account;
 	/** d 用户id **/
 	public int userid = 0;
@@ -51,15 +53,13 @@ public class Result extends JsonParseInterface implements Serializable {
 
 	/** h 是否绑定，1-已绑定 **/
 	public int isBind;
-	/** i 注册使用，随机密码   **/
+	/** i 注册使用，随机密码 **/
 	public String randomPwd;
 	public int imsiRegCont;
 	public int isUse;
 	/** z MD5签名 **/
 	public String sign;
-	
-	
-	
+
 	@Override
 	public JSONObject buildJson() {
 		try {
@@ -82,12 +82,11 @@ public class Result extends JsonParseInterface implements Serializable {
 		}
 		return null;
 	}
-	
-	
+
 	@Override
 	public void parseJson(JSONObject json) {
-		if (json == null) 
-			return ;
+		if (json == null)
+			return;
 		try {
 			status = getInt(json, u_status);
 			statusdescr = getString(json, u_statusdescr);
@@ -98,22 +97,26 @@ public class Result extends JsonParseInterface implements Serializable {
 			bindEmail = getString(json, u_bindEmail);
 			isBind = getInt(json, u_isBind);
 			randomPwd = getString(json, u_randomPwd);
-			if(json.has("j"))
+			if (json.has("j"))
 				imsiRegCont = json.getInt("j");
-			if(json.has("k"))
+			if (json.has("k"))
 				isUse = json.getInt("k");
 			sign = getString(json, u_sign);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
-	
+
 	@Override
 	public String getShortName() {
 		return ShortName.result;
 	}
-	
+
+	@Override
+	public int getShortType() {
+		return ShortType.result;
+	}
+
 	public String toString() {
 		return "Result [status=" + status + ", descr=" + statusdescr
 				+ ", account=" + account + ", userid" + userid + ", time"
@@ -121,5 +124,23 @@ public class Result extends JsonParseInterface implements Serializable {
 				+ bindEmail + ", sign" + sign + "]";
 	}
 
-	
+	/**
+	 * 校验签名
+	 * 
+	 * @return
+	 */
+	public boolean checkSign(String... key) {
+		if (sign != null) {
+			String v;
+			try {
+				v = Sign.calc(key);
+				return sign.equals(v);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return false;
+	}
+
 }

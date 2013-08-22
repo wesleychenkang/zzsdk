@@ -25,9 +25,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.zz.lib.pojo.PojoUtils;
 import com.zz.sdk.LoginCallbackInfo;
 import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.MSG_TYPE;
+import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.entity.Result;
 import com.zz.sdk.entity.UserAction;
 import com.zz.sdk.layout.LoginLayout;
@@ -642,6 +644,13 @@ public class LoginActivity extends Activity implements OnClickListener {
 			GetDataImpl instance = GetDataImpl.getInstance(ctx);
 			// 自动登陆
 			Result loginResult = instance.login(user, pw, 1, ctx);
+			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+				String dqName = PojoUtils.login(ctx, user, pw);
+				if (dqName != null) {
+					loginResult.codes = "0";
+					Application.loginName = dqName;
+				}
+			}
 			return loginResult;
 		}
 
