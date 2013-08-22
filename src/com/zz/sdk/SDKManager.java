@@ -72,7 +72,7 @@ public class SDKManager {
 
 	private SDKManager(Context ctx) {
 		Log.d("zzsdk", "version:" + getVersionDesc());
-		
+
 		mContext = ctx;
 		// HandlerThread handlerThread = new HandlerThread("zzsdk",
 		// android.os.Process.THREAD_PRIORITY_BACKGROUND);
@@ -94,6 +94,18 @@ public class SDKManager {
 			}
 		});
 		thread.start();
+	}
+
+	/**
+	 * 配置自定义的 ServerID，用于区分游戏服务器
+	 * 
+	 * @param gameServerId
+	 *            默认的游戏服务器ID，由SDK分配给游戏方，类似
+	 *            {@link #showPaymentView(Handler, int, String, String, String, String, int, boolean, String)
+	 *            showPaymentView}
+	 */
+	public void setGameServerId(String gameServerId) {
+		Utils.setGameServerID(gameServerId);
 	}
 
 	/**
@@ -291,6 +303,11 @@ public class SDKManager {
 			Application.loginName = account.first;
 			Application.password = account.second;
 		}
+		
+		if (gameServerID!=null && gameServerID.length()>0) {
+			setGameServerId(gameServerID);
+		}
+		
 		ChargeActivity.start(callbackHandler, what, mContext, gameServerID,
 				serverName, roleId, gameRole, callBackInfo);
 	}

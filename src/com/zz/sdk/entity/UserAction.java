@@ -41,6 +41,7 @@ public class UserAction {
 	public String loginName;
 	public String memo ="";
 	public String actionType="";
+	public String serverId="";
 	public Result requestActivon(Context context){
 		return GetDataImpl.getInstance(context).request(context, this);
 	}

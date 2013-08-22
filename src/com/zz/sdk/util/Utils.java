@@ -65,8 +65,8 @@ public class Utils {
 	private static final String DATA_DIR = "/zzsdk/data/zz/cache";
 
 	private static String CACHE_PROJECT_ID = null;
-	
-	private static String SERVER_ID = null;
+
+	private static String CACHE_GAME_SERVER_ID = null;
 
 	static {
 		String state = Environment.getExternalStorageState();
@@ -302,7 +302,8 @@ public class Utils {
 	 * @param user
 	 * @param pw
 	 */
-	public synchronized static void writeAccount2SDcard(Context ctx, String user, String pw) {
+	public synchronized static void writeAccount2SDcard(Context ctx,
+			String user, String pw) {
 		Logger.d("writeAccount2SDcard");
 		if (user == null || pw == null) {
 			return;
@@ -344,9 +345,10 @@ public class Utils {
 	 * @param ctx
 	 * @return
 	 */
-	public synchronized static Pair<String, String> getAccountFromSDcard(Context ctx) {
+	public synchronized static Pair<String, String> getAccountFromSDcard(
+			Context ctx) {
 		Logger.d("getAccountFromSDcard");
-		Pair<String, String> ret= null;
+		Pair<String, String> ret = null;
 		File dir = new File(Environment.getExternalStorageDirectory(),
 				Constants.ACCOUNT_PASSWORD_DIR);
 		if (dir.exists()) {
@@ -379,7 +381,7 @@ public class Utils {
 				}
 			}
 		}
-		
+
 		return ret;
 	}
 
@@ -410,15 +412,16 @@ public class Utils {
 			return CACHE_PROJECT_ID;
 		}
 	}
+
 	/**
-	 * 获取工程SERVERID
+	 * 获取 游戏服务器ID
 	 * 
 	 * @param ctx
 	 * @return
 	 */
-	
-	public static synchronized String getServerId(Context ctx) {
-		if (null == SERVER_ID) {
+
+	public static synchronized String getGameServerId(Context ctx) {
+		if (null == CACHE_GAME_SERVER_ID) {
 			String serverId = null;
 			try {
 				ApplicationInfo appInfo;
@@ -428,21 +431,20 @@ public class Utils {
 					serverId = appInfo.metaData
 							.getString(Constants.K_SERVER_ID);
 				}
-				SERVER_ID = serverId;
+				CACHE_GAME_SERVER_ID = serverId;
 			} catch (Exception e) {
 				Logger.d("read SERVER_ID error!");
 				e.printStackTrace();
 			}
 			return serverId;
 		} else {
-			return SERVER_ID;
+			return CACHE_GAME_SERVER_ID;
 		}
 	}
-	
-	
-	
-	
-	
+
+	public static synchronized void setGameServerID(String gameServerId) {
+		CACHE_GAME_SERVER_ID = gameServerId;
+	}
 
 	/**
 	 * 将渠道信息写到sdcard，路径 -> 应用包名/channel/dw.txt
@@ -696,16 +698,11 @@ public class Utils {
 				: ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 	}
 
-
-
-   public static String formateInt(int count){
-	    String price = String.valueOf(count/100.00);
-		if(price.contains(".")&&price.endsWith("0")){
-			price = price.substring(0, price.length()-2) ; 
-		 }
-	   return price; 
-   }
-
-
-
+	public static String formateInt(int count) {
+		String price = String.valueOf(count / 100.00);
+		if (price.contains(".") && price.endsWith("0")) {
+			price = price.substring(0, price.length() - 2);
+		}
+		return price;
+	}
 }
