@@ -146,8 +146,8 @@ public class PojoUtils {
 			}
 		}
 		if (s != null) {
-			return new Pair<String, String>(cmgeID2ZZUse(s.sessionId),
-					s.password);
+			return new Pair<String, String>(
+					/* cmgeID2ZZUse(s.sessionId) */s.userName, s.password);
 		}
 		return null;
 	}
