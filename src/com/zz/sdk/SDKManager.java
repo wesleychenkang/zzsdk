@@ -23,7 +23,7 @@ import com.zz.sdk.util.Utils;
  * 
  * <li>启动<strong>登录</strong>界面: {@link #showLoginView(Handler, int)}</li>
  * <li>启动<strong>支付</strong>界面:
- * {@link #showPaymentView(Handler, int, String, String, String, String, String, int, String)}
+ * {@link #showPaymentView(Handler, int, String, String, String, String, int, boolean, String)}
  * </li>
  * <li>启动<strong>登录</strong>或<strong>支付</strong>时，消息类型 {@link Message#arg2} 为
  * {@link MSG_STATUS#EXIT_SDK} 时表示此次SDK操作结束。</li>
