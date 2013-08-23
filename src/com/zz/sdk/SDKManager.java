@@ -391,8 +391,25 @@ public class SDKManager {
 			if (sdkUsers != null && sdkUsers.length > 0) {
 				sdkUser = sdkUsers[0];
 			} else {
+				Pair<String, String> pair = null;
+
+				if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+					/*
+					 * 有：　1,cmge数据库 2,cmge的SD卡 3.zz数据库 4.zz的SD卡 这４个用户信息储存点
+					 * ３→１→４→２
+					 */
+					pair = PojoUtils.checkCmgeUse_DB(ctx);
+				}
+
 				// 尝试从sdcard中读取
-				Pair<String, String> pair = Utils.getAccountFromSDcard(ctx);
+				if (pair == null)
+					pair = Utils.getAccountFromSDcard(ctx);
+
+				if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+					if (pair == null)
+						pair = PojoUtils.checkCmgeUse_SDCard();
+				}
+
 				if (pair != null) {
 					Application.loginName = pair.first;
 					Application.password = pair.second;

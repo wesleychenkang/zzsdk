@@ -15,7 +15,6 @@ import com.zz.lib.utils.MD5Util;
 import com.zz.sdk.BuildConfig;
 import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.Logger;
-import com.zz.sdk.util.Utils;
 
 /**
  * 封装豆趣接口
@@ -62,6 +61,10 @@ public class PojoUtils {
 	// - 用户操作
 	//
 
+	private static String cmgeID2ZZUse(int cmgeId) {
+		return cmgeId + SIGN;
+	}
+
 	/**
 	 * 判断当前用户是否已写入SD卡
 	 * 
@@ -71,7 +74,8 @@ public class PojoUtils {
 	 */
 	private static boolean checkLoginNameExist(Context ctx, String name,
 			String passwd) {
-		Pair<String, String> p = Utils.getAccountFromSDcard(ctx);
+		Pair<String, String> p = com.zz.sdk.util.Utils
+				.getAccountFromSDcard(ctx);
 		if (p == null) {
 			return true;
 		} else {
@@ -95,7 +99,7 @@ public class PojoUtils {
 	 */
 	private static String auto_registe(Context ctx, Result result,
 			String account, String passwd) {
-		String loginName = result.userid + SIGN;
+		String loginName = cmgeID2ZZUse(result.userid);
 		if (checkLoginNameExist(ctx, loginName, passwd)) {
 			// 向服务器注册， codes=0成功|1失败|2用户名已经存在
 			com.zz.sdk.entity.Result r = GetDataImpl.getInstance(ctx).register(
@@ -103,7 +107,8 @@ public class PojoUtils {
 			if (r != null) {
 				// 已经存在(2)或注册成功(0)
 				if ("2".equals(r.codes) || "0".equals(r.codes)) {
-					Utils.writeAccount2SDcard(ctx, loginName, passwd);
+					com.zz.sdk.util.Utils.writeAccount2SDcard(ctx, loginName,
+							passwd);
 				} else {
 					loginName = null;
 				}
@@ -128,6 +133,28 @@ public class PojoUtils {
 			Logger.d("执行了登录回调");
 		}
 		return loginName;
+	}
+
+	/** 获取　数据库　中的 CMGE 用户 */
+	public static Pair<String, String> checkCmgeUse_DB(Context ctx) {
+		TSession ts = TSession.getInstance(ctx);
+		Session s = ts.getSessionByAutoLogin();
+		if (s == null) {
+			Session[] ss = ts.getAllSessions();
+			if (ss != null && ss.length != 0) {
+				s = ss[0];
+			}
+		}
+		if (s != null) {
+			return new Pair<String, String>(cmgeID2ZZUse(s.sessionId),
+					s.password);
+		}
+		return null;
+	}
+
+	/** 从 SD 卡中获取 CMGE 用户信息 */
+	public static Pair<String, String> checkCmgeUse_SDCard() {
+		return Utils.getAccountFromSDcard();
 	}
 
 	//
