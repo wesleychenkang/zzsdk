@@ -321,7 +321,9 @@ public class SDKManager {
 	public String getLoginName() {
 		if (Application.isLogin) {
 			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
-				return PojoUtils.getGameName(Application.loginName);
+				if (PojoUtils.isZuoyueUser(Application.loginName)) {
+					return PojoUtils.getGameName(Application.loginName);
+				}
 			}
 			return Application.loginName;
 		} else {

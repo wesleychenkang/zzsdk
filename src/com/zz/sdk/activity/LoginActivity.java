@@ -375,8 +375,10 @@ public class LoginActivity extends Activity implements OnClickListener {
 			loginCallbackInfo.statusCode = LoginCallbackInfo.STATUS_SUCCESS;
 			loginCallbackInfo.loginName = Application.loginName;
 			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
-				loginCallbackInfo.loginName = PojoUtils
-						.getGameName(Application.loginName);
+				if (PojoUtils.isZuoyueUser(Application.loginName)) {
+					loginCallbackInfo.loginName = PojoUtils
+							.getGameName(Application.loginName);
+				}
 			}
 			tryNotify(MSG_STATUS.SUCCESS, loginCallbackInfo);
 			Logger.d("has run send message-------------");
@@ -657,13 +659,13 @@ public class LoginActivity extends Activity implements OnClickListener {
 			Result loginResult = instance.login(user, pw, 1, ctx);
 
 			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
-				if (!"0".equals(loginResult.codes)
+				if ("1".equals(loginResult.codes)
 						&& !PojoUtils.isZuoyueUser(user)) {
 					String dqName = PojoUtils.login(ctx, user, pw);
 					if (dqName != null) {
 						loginResult.codes = "0";
 						Application.loginName = dqName;
-					}
+					} 
 				}
 			}
 			return loginResult;
@@ -688,7 +690,13 @@ public class LoginActivity extends Activity implements OnClickListener {
 					// 反馈成功信息
 					onPostLogin(result);
 					if (Application.isDisplayLoginTip) {
-						toast("登陆成功");
+						String tip = "登陆成功";
+						if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+							if (PojoUtils.isZuoyueUser(Application.loginName)) {
+								tip = "已使用 CMGE 通行证登录成功！";
+							}
+						}
+						toast(tip);
 					}
 					// 退出登陆页面
 					finish();
@@ -696,7 +704,8 @@ public class LoginActivity extends Activity implements OnClickListener {
 				default:
 					// 登陆失败
 					if (Application.isDisplayLoginfail) {
-						toast("登录失败,连接服务器失败 ");
+						// toast("登录失败,连接服务器失败 ");
+						toast("登录失败，用户信息有误，请重新输入 ");
 					}
 
 					Application.isLogin = false;
@@ -851,6 +860,9 @@ public class LoginActivity extends Activity implements OnClickListener {
 			des = "帐号至少6位";
 		} else if (!user.matches("^(?!_)(?!.*?_$)[a-zA-Z0-9_]+$")) {
 			des = "帐号必须由字母、数字或下划线组成,并以数字或字母开头";
+			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+				des += "；\r或使用 CMGE 通行证登录";
+			}
 		} else if (user.length() > 45) {
 			des = "账号长度太长";
 		} else {

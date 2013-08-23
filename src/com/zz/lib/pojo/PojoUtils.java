@@ -41,7 +41,12 @@ public class PojoUtils {
 	private final static String URL = HOST + "?t=%d&a=%d&b=%d";
 	private final static String URL_1 = HOST_1 + "?requestId=%d&a=%d&b=%d";
 
-	private static final String SIGN = "$DQU$";
+	/** CMGE 通行证 */
+	private static final String SIGN = ".cmge";
+
+	/** 转换卓越账户的规则 ( id+{@value #SIGN} ) */
+	private static final String SIGN_ID_PATTERN = "\\d+\\.cmge$";
+
 	/** 压缩 */
 	private static final int CONFIG_COMPRESS = 1;
 	/** 加密 */
@@ -131,6 +136,11 @@ public class PojoUtils {
 	// - http 操作
 	//
 
+	/** 获取 url */
+	private static String getUrl(int type, int encrypt, int compress) {
+		return String.format(URL_1, type, encrypt, compress);
+	}
+
 	/**
 	 * 调用豆趣的 http 请求
 	 * 
@@ -146,8 +156,8 @@ public class PojoUtils {
 			json.put(data.getShortName(), data.buildJson());
 
 			String requestStr = json.toString();
-			String url = String.format(URL_1, data.getShortType(),
-					CONFIG_ENCRYPT, CONFIG_COMPRESS);
+			String url = getUrl(data.getShortType(), CONFIG_ENCRYPT,
+					CONFIG_COMPRESS);
 
 			String content = Encrypt1.encode(requestStr,
 					String.valueOf(CONFIG_ENCRYPT));
@@ -208,33 +218,52 @@ public class PojoUtils {
 	//
 
 	private final static Pattern DEF_DOUQU_ZUOYUE_ID = Pattern
-			.compile("\\d+\\$DQU\\$$");
+			.compile(SIGN_ID_PATTERN);
 
 	/**
-	 * 判断　目标账户　是否符合豆趣转卓越账号的规则： 数字ID+"$DQU$"
+	 * 判断　目标账户　是否符合豆趣转卓越账号的规则： 数字ID+{@value #SIGN}
 	 * 
 	 * @param name
 	 * @return
 	 */
 	public static boolean isZuoyueUser(String name) {
-		Matcher m = DEF_DOUQU_ZUOYUE_ID.matcher(name);
-		if (m != null && m.matches()) {
-			return true;
+		if (name != null) {
+			Matcher m = DEF_DOUQU_ZUOYUE_ID.matcher(name);
+			if (m != null && m.matches()) {
+				return true;
+			}
 		}
 		return false;
 	}
 
 	/**
-	 * 检查　用户名是否是豆趣类型 ( id+"$DQU$" )
+	 * 检查　用户名是否是豆趣类型 ( id+{@value #SIGN} )
 	 * 
 	 * @param loginName
 	 * @return
 	 */
 	public static String getGameName(String loginName) {
 		if (isZuoyueUser(loginName)) {
-			return loginName.substring(0, loginName.length() - 5);
+			return loginName.substring(0, loginName.length() - SIGN.length());
 		}
 		return loginName;
+	}
+
+	private static void _test(Context ctx, String name, String passwd) {
+		if (BuildConfig.DEBUG) {
+			String s = null;
+			boolean success = false;
+			boolean run = false;
+			if (run) {
+				s = registe(ctx, name, passwd);
+			}
+			if (run) {
+				success = updatePasswd(ctx, name, passwd, passwd);
+			}
+			if (run) {
+				s = login(ctx, name, passwd);
+			}
+		}
 	}
 
 	/**
@@ -255,10 +284,7 @@ public class PojoUtils {
 		login.updateSign(app_key);
 
 		if (BuildConfig.DEBUG) {
-			int b = 1;
-			if (b == 0) {
-				String new_n = registe(ctx, name, passwd);
-			}
+			_test(ctx, name, passwd);
 		}
 
 		String r = douquPost(login);
