@@ -10,6 +10,9 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -34,7 +37,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final String CONFIG_GAME_ROLE_ID = "007";
 	private static final String CONFIG_GAME_ROLE = "战士001";
 	private static final String CONFIG_GAME_CALLBACK_INFO = "厂商自定义参数（长度限制250个字符）";
-
+  
 	/* ID */
 	private static final int _IDC_START_ = 0;
 	private static final int IDC_BT_LOGIN = _IDC_START_ + 1;
@@ -45,6 +48,8 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final int IDC_BT_QUERY = _IDC_START_ + 6;
 	private static final int IDC_TV_LOG = _IDC_START_ + 7;
 	private static final int _IDC_END_ = _IDC_START_ + 8;
+	private static final int IDC_CK_SUCCESS =_IDC_START_+9;
+	private static final int IDC_CK_FAILL = _IDC_START_+10;
 
 	/* 自定义消息 */
 	private static final int _MSG_USER_ = 2013;
@@ -59,6 +64,8 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	private final static int RC_PAYMENT = 2;
 	private String ordernumber = "";
+	private boolean isDisplayLoginTip = false;
+	private boolean isDisplayLoginfail = false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -124,7 +131,23 @@ public class MainActivity extends Activity implements OnClickListener {
 			btnSetConfig.setOnClickListener(onClickListener);
 			rootLayout.addView(btnSetConfig);
 		}
-
+		// 设置是否显示登录成功或者失败的信息
+		{
+			LinearLayout checkLayout = new LinearLayout(ctx);
+			checkLayout.setOrientation(LinearLayout.HORIZONTAL);
+			CheckBox checksucces = new CheckBox(ctx);
+			checksucces.setId(IDC_CK_SUCCESS);
+			checksucces.setText("是否提示登录成功");
+		
+			checksucces.setOnCheckedChangeListener(setonCheckedSuccessListener());
+			CheckBox checkfaill = new CheckBox(ctx);
+			checkfaill.setId(IDC_CK_FAILL);
+			checkfaill.setText("是否提示登录失败");
+			checkfaill.setOnCheckedChangeListener(setonCheckedFaillListener());
+			checkLayout.addView(checksucces);
+			checkLayout.addView(checkfaill);
+			rootLayout.addView(checkLayout);
+		}
 		// {
 		// Button btQuery = new Button(ctx);
 		// btQuery.setText("查询订单");
@@ -147,6 +170,51 @@ public class MainActivity extends Activity implements OnClickListener {
 		return rootLayout;
 	}
 
+	private OnCheckedChangeListener setonCheckedSuccessListener() {
+		
+		return new OnCheckedChangeListener(){
+
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView,
+					boolean isChecked) {
+				
+				  if(isChecked){
+					  isDisplayLoginTip = true;
+				   }else{
+					   isDisplayLoginTip = false; 
+				   }
+				   mSDKManager.setConfigInfo(true, isDisplayLoginTip,
+							isDisplayLoginfail); 
+			}
+		};
+	}
+
+	private OnCheckedChangeListener setonCheckedFaillListener() {
+		
+		return new OnCheckedChangeListener(){
+
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView,
+					boolean isChecked) {
+				
+				  if(isChecked){
+					  isDisplayLoginfail = true;
+				  }else{
+					  isDisplayLoginfail = false; 
+				  }
+				  
+				 mSDKManager.setConfigInfo(true, isDisplayLoginTip,
+							isDisplayLoginfail); 
+			}
+			
+			
+			
+			
+		};
+	}
+	
+	
+	
 	@Override
 	public void onClick(View v) {
 		int id = v.getId();
@@ -194,8 +262,6 @@ public class MainActivity extends Activity implements OnClickListener {
 		/* 单机 */
 		case IDC_BT_LOGIN_OFFLINE: {
 			boolean isOnlineGame = false;
-			boolean isDisplayLoginTip = true;
-			boolean isDisplayLoginfail = true;
 			pushLog("[单机模式] 等待自动注册或登录... 模式:"
 					+ (isOnlineGame ? "网络游戏" : "单机游戏") + ";"
 					+ (isDisplayLoginTip ? "" : "不") + "显示登录成功Toast, "
