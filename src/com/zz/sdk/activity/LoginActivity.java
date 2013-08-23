@@ -665,6 +665,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 					if (dqName != null) {
 						loginResult.codes = "0";
 						Application.loginName = dqName;
+						instance.updateLogin(dqName, pw, 1, ctx);
 					} 
 				}
 			}

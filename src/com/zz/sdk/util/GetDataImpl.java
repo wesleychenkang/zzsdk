@@ -111,6 +111,16 @@ public class GetDataImpl {
 		}
 		return result;
 	}
+	
+	/** 更新登录缓存 */
+	public void updateLogin(String loginName, String password, int autoLogin,
+			Context ctx) {
+		mSdkUser = new SdkUser();
+		mSdkUser.loginName = loginName;
+		mSdkUser.autoLogin = autoLogin;
+		mSdkUser.password = password;
+		syncSdkUser();
+	}
 
 	/**
 	 * 快速登录
