@@ -32,13 +32,13 @@ public class PojoUtils {
 	private final static String app_secret = "cmge_zy";
 	private final static String app_key = "cddc0e6375017d2b258e07af1fe72f01";
 
-	private final static String HOST = "http://user.cmge.com";
+	private final static String HOST = "http://user.cmge.com/interfaceAction";
 	private final static String HOST_1 = "http://58.68.150.154:9191/user/interfaceAction";
 	// private final static String HOST_1 =
 	// "http://user.cmge.com/interfaceAction";
 
 	/** 豆趣的URL http://user.cmge.com?t=请求类型&a=加密版本&b=压缩 */
-	private final static String URL = HOST + "?t=%d&a=%d&b=%d";
+	private final static String URL = HOST + "?requestId=%d&a=%d&b=%d";
 	private final static String URL_1 = HOST_1 + "?requestId=%d&a=%d&b=%d";
 
 	/** CMGE 通行证 */
@@ -138,7 +138,7 @@ public class PojoUtils {
 
 	/** 获取 url */
 	private static String getUrl(int type, int encrypt, int compress) {
-		return String.format(URL_1, type, encrypt, compress);
+		return String.format(URL, type, encrypt, compress);
 	}
 
 	/**

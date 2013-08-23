@@ -417,6 +417,7 @@ public class SDKManager {
 	 */
 	public static String getVersionDesc() {
 		return "Ver:" + ZZSDKConfig.VERSION_CODE + "-"
-				+ ZZSDKConfig.VERSION_NAME + "-" + ZZSDKConfig.VERSION_DATE;
+				+ ZZSDKConfig.VERSION_NAME + "-" + ZZSDKConfig.VERSION_DATE
+				+ ZZSDKConfig.CONFIG_DESC;
 	}
 }

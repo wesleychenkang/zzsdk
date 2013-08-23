@@ -29,4 +29,7 @@ public final class ZZSDKConfig {
 	public final static String VERSION_NAME = "1.0";
 	/** 版本发布时间，编译时更新 ，格式：20130725 */
 	public final static String VERSION_DATE = "20130726";
+
+	public final static String CONFIG_DESC = (SUPPORT_360SDK ? ",360sdk" : "")
+			+ (SUPPORT_DOUQU_LOGIN ? ",cmge" : "");
 }
