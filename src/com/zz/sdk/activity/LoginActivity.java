@@ -128,7 +128,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 		String iPassword = null;
 		switch (v.getId()) {
 		/** 登陆页 */
-		case 105:
+		case LoginLayout.IDC_BT_LOGIN:
 			// 登录
 			iLoginName = loginLayout.getAccount();
 			iPassword = loginLayout.getPassWord();
@@ -163,7 +163,8 @@ public class LoginActivity extends Activity implements OnClickListener {
 			}
 			new LoginTask(this, iLoginName, iPassword).execute();
 			break;
-		case 103:
+			
+		case LoginLayout.IDC_BT_QUICK_LOGIN:
 			// 快速登录
 			// 先判断用户有没有输入
 			iLoginName = loginLayout.getAccount();
@@ -197,7 +198,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 			}
 
 			break;
-		case 101:
+		case LoginLayout.IDC_BT_REGISTER:
 			// 注册按钮
 			// 先判断用户有没有输入
 			iLoginName = loginLayout.getAccount();
@@ -233,7 +234,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 				pushView2Stack(registerLayout);
 			}
 			break;
-		case 108:
+		case LoginLayout.IDC_BT_MODIFY_PASSWD:
 			// 修改密码
 			// 先登录成功后再显示修改密码页面
 			String un = loginLayout.getAccount();

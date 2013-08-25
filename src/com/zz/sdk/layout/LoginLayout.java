@@ -26,7 +26,19 @@ import com.zz.sdk.util.Logger;
 public class LoginLayout extends AbstractLayout implements OnClickListener,
 		View.OnFocusChangeListener {
 
-	public static final int IDC_BT_REGISTER = 100;
+	private static final int IDC_ET_INPUT_ACCOUNT = 100;
+	/** 按钮＠注册 */
+	public static final int IDC_BT_REGISTER = 101;
+	private static final int IDC_ET_INPUT_PASSWD = 102;
+	/** 按钮＠快速登录 */
+	public static final int IDC_BT_QUICK_LOGIN = 103;
+	private static final int IDC_IV_LINE = 104;
+	/** 按钮＠登录 */
+	public static final int IDC_BT_LOGIN = 105;
+	/** 按钮＠修改密码 */
+	public static final int IDC_BT_MODIFY_PASSWD = 108;
+	/** 按钮＠取消 */
+	public static final int IDC_BT_CANCEL = 110;
 
 	/** 注册按钮 */
 	private Button btnRegister;
@@ -129,133 +141,160 @@ public class LoginLayout extends AbstractLayout implements OnClickListener,
 	 */
 	private void initUI() {
 		Context ctx = mActivity;
-
-		LinearLayout wrap4 = new LinearLayout(ctx);
-		wrap4.setOrientation(VERTICAL);
-		wrap4.setPadding(dp2px(10), 0, dp2px(5), 0);
-
-		LinearLayout wrap1 = new LinearLayout(ctx);
-		wrap1.setOrientation(VERTICAL);
+		LinearLayout content = this.content;
 
 		// 注册按钮
 		btnRegister = new Button(ctx);
-		btnRegister.setId(101);
-		btnRegister.setBackgroundDrawable(getStateListDrawable("zhuce1.png",
-				"zhuce.png"));
-
-		mInputAccount = new EditText(ctx);
-		mInputAccount.setTextColor(Color.WHITE);
-		mInputAccount.setHint("请输入帐号");
-		mInputAccount.setSingleLine();
-		mInputAccount.setId(100);
-		mInputAccount.setBackgroundDrawable(getDrawable("wenbk.png"));
-
-		LayoutParams lp1 = new LayoutParams(LayoutParams.MATCH_PARENT,
-				LayoutParams.WRAP_CONTENT);
-		wrap1.addView(mInputAccount, lp1);
-
-		LinearLayout wrap2 = new LinearLayout(ctx);
-		// 水平
-		wrap2.setOrientation(0);
-		wrap2.setGravity(Gravity.CENTER_VERTICAL);
-		wrap2.setPadding(0, dp2px(10), 0, dp2px(10));
-		content.addView(wrap2, LayoutParams.MATCH_PARENT,
-				LayoutParams.WRAP_CONTENT);
-
-		mInputPW = new EditText(ctx);
-		mInputPW.setSingleLine(true);
-		mInputPW.setTextColor(Color.WHITE);
-		mInputPW.setId(102);
-		mInputPW.setHint("请输入密码");
-		mInputPW.setBackgroundDrawable(getDrawable("wenbk.png"));
-
-		mInputAccount.setOnFocusChangeListener(this);
-		mInputPW.setOnFocusChangeListener(this);
-
-		// 快速登录
-		btnQuickLogin = new Button(ctx);
-		btnQuickLogin.setId(103);
-		btnQuickLogin.setBackgroundDrawable(getStateListDrawable("tiyan1.png",
-				"tiyan.png"));
-
-		LayoutParams lp2 = new LayoutParams(LayoutParams.MATCH_PARENT,
-				LayoutParams.WRAP_CONTENT);
-		lp2.topMargin = dp2px(5);
-		wrap1.addView(mInputPW, lp2);
-
-		LinearLayout.LayoutParams lpwrap1 = new LinearLayout.LayoutParams(
-				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		lpwrap1.weight = 1;
-		wrap2.addView(wrap1, lpwrap1);
-		wrap2.addView(wrap4);
-
-		// 分隔线
-		ImageView line = new ImageView(ctx);
-		line.setId(104);
-		line.setBackgroundDrawable(getDrawable("gap.png"));
-		content.addView(line);
-
-		LinearLayout wrap3 = new LinearLayout(mActivity);
-		// 水平方向
-		wrap3.setOrientation(0);
-		wrap3.setPadding(0, dp2px(5), 0, 0);
-		wrap3.setGravity(Gravity.CENTER_HORIZONTAL);
+		btnRegister.setId(IDC_BT_REGISTER);
+		btnRegister.setOnClickListener(this);
+		if (hasAccount) {
+			btnRegister.setBackgroundDrawable(getStateListDrawable(
+					"zhuce1.png", "zhuce.png"));
+		} else {
+			btnRegister.setBackgroundDrawable(getStateListDrawable(
+					"zhuce3.png", "zhuce2.png"));
+		}
 
 		// 登录
 		btnLogin = new Button(ctx);
-		btnLogin.setId(105);
-		btnLogin.setBackgroundDrawable(getStateListDrawable("dlu1.png",
-				"dlu.png"));
-		content.addView(wrap3, LayoutParams.MATCH_PARENT,
-				LayoutParams.WRAP_CONTENT);
-
-		wrap3.addView(btnLogin, LayoutParams.WRAP_CONTENT,
-				LayoutParams.WRAP_CONTENT);
-		// 判断本地是否已经保存有帐号信息
-		if (!hasAccount) {
-			// 首次登陆木有帐号 显示快速登录按钮
-			wrap4.addView(btnQuickLogin);
-
-			btnRegister.setBackgroundDrawable(getStateListDrawable(
-					"zhuce3.png", "zhuce2.png"));
-
-			// 注册按钮显示下面
-			LinearLayout.LayoutParams lpregister = new LinearLayout.LayoutParams(
-					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-			lpregister.leftMargin = dp2px(10);
-			wrap3.addView(btnRegister, lpregister);
-		} else {
-			// 修改密码
-			Button btnModifyPW = new Button(ctx);
-			btnModifyPW.setId(108);
-			btnModifyPW.setBackgroundDrawable(getStateListDrawable("mima1.png",
-					"mima.png"));
-			btnModifyPW.setOnClickListener(this);
-			// 添加注册帐号按钮
-			btnRegister.setBackgroundDrawable(getStateListDrawable(
-					"zhuce1.png", "zhuce.png"));
-			wrap4.addView(btnRegister);
-			// 添加修改密码按钮
-			LinearLayout.LayoutParams lpmodify = new LinearLayout.LayoutParams(
-					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-			// 上边距5dp
-			lpmodify.topMargin = dp2px(5);
-			wrap4.addView(btnModifyPW, lpmodify);
-
-			// 立即登录按钮背景
+		btnLogin.setId(IDC_BT_LOGIN);
+		btnLogin.setOnClickListener(this);
+		if (hasAccount) {
 			btnLogin.setBackgroundDrawable(getStateListDrawable("game1.png",
 					"game.png"));
+		} else {
+			btnLogin.setBackgroundDrawable(getStateListDrawable("dlu1.png",
+					"dlu.png"));
+		}
 
+		// 快速登录
+		btnQuickLogin = new Button(ctx);
+		btnQuickLogin.setId(IDC_BT_QUICK_LOGIN);
+		btnQuickLogin.setOnClickListener(this);
+		btnQuickLogin.setBackgroundDrawable(getStateListDrawable("tiyan1.png",
+				"tiyan.png"));
+
+		// 第一层，左：账号输入，右：「快速注册」或「注册账号、修改密码」
+		if (true) {
+			LinearLayout wrap2 = new LinearLayout(ctx);
+			content.addView(wrap2, LayoutParams.MATCH_PARENT,
+					LayoutParams.WRAP_CONTENT);
+
+			wrap2.setOrientation(HORIZONTAL);
+			wrap2.setGravity(Gravity.CENTER_VERTICAL);
+			wrap2.setPadding(0, dp2px(10), 0, dp2px(10));
+
+			// 账号输入，上：账号，下：密码，权重１
+			{
+				LinearLayout wrap1 = new LinearLayout(ctx);
+				wrap2.addView(wrap1, new LinearLayout.LayoutParams(
+						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
+						1.0f));
+
+				wrap1.setOrientation(VERTICAL);
+
+				mInputAccount = new EditText(ctx);
+				mInputAccount.setId(IDC_ET_INPUT_ACCOUNT);
+				mInputAccount.setOnFocusChangeListener(this);
+				mInputAccount.setTextColor(Color.WHITE);
+				mInputAccount.setHint("请输入帐号");
+				mInputAccount.setSingleLine(true);
+				mInputAccount.setBackgroundDrawable(getDrawable("wenbk.png"));
+				wrap1.addView(mInputAccount, LayoutParams.MATCH_PARENT,
+						LayoutParams.WRAP_CONTENT);
+
+				mInputPW = new EditText(ctx);
+				mInputPW.setId(IDC_ET_INPUT_PASSWD);
+				mInputPW.setOnFocusChangeListener(this);
+				mInputPW.setTextColor(Color.WHITE);
+				mInputPW.setHint("请输入密码");
+				mInputPW.setSingleLine(true);
+				mInputPW.setBackgroundDrawable(getDrawable("wenbk.png"));
+				LayoutParams lp2 = new LayoutParams(LayoutParams.MATCH_PARENT,
+						LayoutParams.WRAP_CONTENT);
+				lp2.setMargins(0, dp2px(5), 0, 0);
+				wrap1.addView(mInputPW, lp2);
+			}
+
+			// 根据“是否有本地账号”来判断，有：「快速注册」，无：「注册账号、修改密码」
+			{
+				LinearLayout wrap4 = new LinearLayout(ctx);
+				wrap2.addView(wrap4);
+
+				wrap4.setOrientation(VERTICAL);
+				wrap4.setPadding(dp2px(10), 0, dp2px(5), 0);
+
+				// 判断本地是否已经保存有帐号信息
+				if (hasAccount) {
+					// 添加注册帐号按钮
+					wrap4.addView(btnRegister);
+
+					// 添加修改密码按钮
+					{
+						Button btnModifyPW = new Button(ctx);
+						btnModifyPW.setId(IDC_BT_MODIFY_PASSWD);
+						btnModifyPW.setOnClickListener(this);
+						btnModifyPW.setBackgroundDrawable(getStateListDrawable(
+								"mima1.png", "mima.png"));
+						LinearLayout.LayoutParams lpmodify = new LinearLayout.LayoutParams(
+								LayoutParams.WRAP_CONTENT,
+								LayoutParams.WRAP_CONTENT);
+						lpmodify.setMargins(0, dp2px(5), 0, 0); // 上边距5dp
+						wrap4.addView(btnModifyPW, lpmodify);
+					}
+				} else {
+					// 首次登陆木有帐号 显示快速登录按钮
+					wrap4.addView(btnQuickLogin);
+				}
+			}
+		}
+
+		// 分隔线
+		if (true) {
+			ImageView line = new ImageView(ctx);
+			line.setId(IDC_IV_LINE);
+			line.setBackgroundDrawable(getDrawable("gap.png"));
+			content.addView(line);
+		}
+
+		// 「立即登录」　[「注册账号」]
+		{
+			LinearLayout wrap3 = new LinearLayout(ctx);
+			content.addView(wrap3, LayoutParams.MATCH_PARENT,
+					LayoutParams.WRAP_CONTENT);
+
+			// 水平方向
+			wrap3.setOrientation(HORIZONTAL);
+			wrap3.setPadding(0, dp2px(5), 0, 0);
+			wrap3.setGravity(Gravity.CENTER_HORIZONTAL);
+
+			// 立即登录
+			{
+				wrap3.addView(btnLogin, LayoutParams.WRAP_CONTENT,
+						LayoutParams.WRAP_CONTENT);
+			}
+
+			if (hasAccount) {
+			} else {
+				// 判断本地是否已经保存有帐号信息
+
+				// 注册按钮显示下面
+				LinearLayout.LayoutParams lpregister = new LinearLayout.LayoutParams(
+						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+				lpregister.setMargins(dp2px(10), 0, 0, 0);
+				wrap3.addView(btnRegister, lpregister);
+			}
+
+		}
+
+		// 显示“自动登录”框
+		if (hasAccount) {
 			mAutoDialog = new AutoLoginDialog(mActivity);
 			// 显示
 			mAutoDialog.show();
 			// 2秒
 			mHandler.postDelayed(doAutoLogin, 2 * 1000);
 		}
-
-		btnRegister.setOnClickListener(this);
-		btnQuickLogin.setOnClickListener(this);
-		btnLogin.setOnClickListener(this);
 
 		mInputAccount.clearFocus();
 		mInputPW.clearFocus();
@@ -283,33 +322,35 @@ public class LoginLayout extends AbstractLayout implements OnClickListener,
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
-		case 105:
+		case IDC_BT_LOGIN:
 			// 登录
 			if (loginListener != null) {
 				loginListener.onClick(v);
 			}
 			break;
-		case 103:
+		case IDC_BT_QUICK_LOGIN:
 			// 快速登录
 			if (quickLoginListener != null) {
 				quickLoginListener.onClick(v);
 			}
 			break;
-		case 101:
+		case IDC_BT_REGISTER:
 			// 注册
 			if (registerListener != null) {
 				registerListener.onClick(v);
 			}
 			break;
-		case 108:
+		case IDC_BT_MODIFY_PASSWD:
 			// 修改密码
 			if (modifyPWListener != null) {
 				modifyPWListener.onClick(v);
 			}
 			break;
-		case 110:
+		case IDC_BT_CANCEL:
 			// 自动登陆提示框的取消按钮
-			mAutoDialog.dismiss();
+			if (mAutoDialog != null) {
+				mAutoDialog.dismiss();
+			}
 			break;
 		}
 	}
@@ -317,10 +358,10 @@ public class LoginLayout extends AbstractLayout implements OnClickListener,
 	@Override
 	public void onFocusChange(View v, boolean hasFocus) {
 		switch (v.getId()) {
-		case 100:
+		case IDC_ET_INPUT_ACCOUNT:
 			// 输入帐号
 			break;
-		case 102:
+		case IDC_ET_INPUT_PASSWD:
 			// 输入密码
 			break;
 		}
@@ -342,7 +383,7 @@ public class LoginLayout extends AbstractLayout implements OnClickListener,
 					new ColorDrawable(Color.TRANSPARENT));
 			LinearLayout content = new LinearLayout(ctx);
 			// 垂直
-			content.setOrientation(1);
+			content.setOrientation(VERTICAL);
 			content.setGravity(Gravity.CENTER_HORIZONTAL);
 			content.setPadding(dp2px(20), dp2px(15), dp2px(20), dp2px(15));
 			content.setBackgroundDrawable(getDrawable("login_bg_03.png"));
@@ -357,18 +398,18 @@ public class LoginLayout extends AbstractLayout implements OnClickListener,
 			Loading loading = new Loading(ctx);
 
 			cancel = new Button(ctx);
-			cancel.setId(110);
+			cancel.setId(IDC_BT_CANCEL);
 			cancel.setBackgroundDrawable(getStateListDrawable("quxiao1.png",
 					"quxiao.png"));
 			cancel.setOnClickListener(LoginLayout.this);
 
 			content.addView(tv);
 			LinearLayout.LayoutParams lploading = new LinearLayout.LayoutParams(
-					-2, -2);
+					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			lploading.topMargin = dp2px(10);
 			content.addView(loading, lploading);
 			LinearLayout.LayoutParams lpcancel = new LinearLayout.LayoutParams(
-					-2, -2);
+					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			lpcancel.topMargin = dp2px(10);
 			content.addView(cancel, lpcancel);
 
@@ -382,7 +423,6 @@ public class LoginLayout extends AbstractLayout implements OnClickListener,
 		public void onBackPressed() {
 			onClick(cancel);
 		}
-
 	}
 
 }
