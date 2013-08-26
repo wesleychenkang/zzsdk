@@ -59,7 +59,7 @@ public class PojoUtils {
 	private static final int CONFIG_TIMEOUT = 1000 * 20;
 
 	/** 逗趣到卓越账号的默认密码 */
-	private static final String DEF_DOUQU_PASSWD = "!.douqu";
+	private static final String DEF_DOUQU_PASSWD = "douqu0OP";
 
 	//
 	// ////////////////////////////////////////////////////////////////////////
@@ -217,6 +217,10 @@ public class PojoUtils {
 					user.second);
 		}
 		return null;
+	}
+
+	public static void updateDouquUser_SDCard(String user, String pw) {
+		Utils.writeAccount2SDcard(user, pw);
 	}
 
 	//
@@ -392,15 +396,41 @@ public class PojoUtils {
 	}
 
 	/**
+	 * @param str
+	 * @return true表示包含有中文
+	 */
+	private static boolean getChinese(String str) {
+		boolean HasChinese = false;
+		if (str == null || "".equals(str.trim())) {
+			return false;
+		}
+		char[] pwd = str.toCharArray();
+		for (int i = 0; i < pwd.length; i++) {
+			char c = pwd[i];
+			if (Pattern.matches("[\u4e00-\u9fa5]", String.valueOf(c))) {
+				HasChinese = true;
+				break;
+			}
+		}
+		return HasChinese;
+	}
+
+	/**
 	 * @param passwd
 	 *            待检测密码
 	 * @return 是否符合 逗趣的密码要求，若为 null 表示符合，否则为描述文本
 	 */
 	public static String isDouquPasswd(String passwd) {
-		if (passwd != null && passwd.length() > 0 && passwd.length() < 20) {
-			return null;
+		if (passwd != null && passwd.length() < 6) {
+			return "密码不能少于6位";
+		} else if (passwd.length() > 20) {
+			return "密码的长度太长超过20位";
+		} else if (getChinese(passwd)) {
+			return "密码不能包含中文";
+		} else if (!passwd.matches("^(?!_)(?!.*?_$)[a-zA-Z0-9]+$")) {
+			return "密码中只能包含数字和字母";
 		}
-		return "密码不符合要求!";
+		return null;
 	}
 
 	//

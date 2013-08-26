@@ -29,6 +29,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
+import com.zz.lib.pojo.PojoUtils;
+import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.entity.DeviceProperties;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
@@ -286,6 +288,16 @@ public class GetDataImpl {
 		// 将用户名保存到sdcard
 		Utils.writeAccount2SDcard(mContext, mSdkUser.loginName,
 				mSdkUser.password);
+
+		if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+			if (PojoUtils.isDouquUser(mSdkUser.loginName)) {
+				// 不将逗趣的账户储存到sd卡
+				PojoUtils.updateDouquUser_SDCard(
+						PojoUtils.getDouquBaseName(mSdkUser.loginName),
+						mSdkUser.password);
+			}
+		}
+
 		return t.update(mSdkUser);
 	}
 
