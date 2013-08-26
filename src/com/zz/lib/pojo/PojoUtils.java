@@ -58,6 +58,37 @@ public class PojoUtils {
 	//
 	// ////////////////////////////////////////////////////////////////////////
 	//
+	// - 操作记录
+	//
+
+	/** 未初始化 */
+	public static final int CODE_UNSET = -100;
+	/** 成功 */
+	public static final int CODE_SUCCESS = 0;
+	/** 失败 */
+	public static final int CODE_FAILED = -1;
+	/** 其它错误 */
+	public static final int CODE_FAILED_OTHER = -2;
+	/** 卓越服务器连接错误 */
+	public static final int CODE_FAILED_ZUOYUE = -3;
+	private static int sLastCode;
+
+	private static void reset_last_code() {
+		set_last_code(CODE_UNSET);
+	}
+
+	private static void set_last_code(int code) {
+		sLastCode = code;
+	}
+
+	/** 0成功；-1失败；-2可显示结果描述 -3向卓越注册或登录失败 */
+	public static int get_last_code(int code) {
+		return sLastCode;
+	}
+
+	//
+	// ////////////////////////////////////////////////////////////////////////
+	//
 	// - 用户操作
 	//
 
@@ -147,7 +178,7 @@ public class PojoUtils {
 		}
 		if (s != null) {
 			return new Pair<String, String>(
-					/* cmgeID2ZZUse(s.sessionId) */s.userName, s.password);
+			/* cmgeID2ZZUse(s.sessionId) */s.userName, s.password);
 		}
 		return null;
 	}
@@ -253,7 +284,7 @@ public class PojoUtils {
 	 * @param name
 	 * @return
 	 */
-	public static boolean isZuoyueUser(String name) {
+	public static boolean isDouquUser(String name) {
 		if (name != null) {
 			Matcher m = DEF_DOUQU_ZUOYUE_ID.matcher(name);
 			if (m != null && m.matches()) {
@@ -264,13 +295,24 @@ public class PojoUtils {
 	}
 
 	/**
+	 * 将普通用户名拼接成代表 逗趣 用户名的格式， "NAME"+{@value #SIGN}
+	 * 
+	 * @param nor_name
+	 *            普通用户名
+	 * @return
+	 */
+	public static String getDouquName(String nor_name) {
+		return nor_name + SIGN;
+	}
+
+	/**
 	 * 检查　用户名是否是豆趣类型 ( id+{@value #SIGN} )
 	 * 
 	 * @param loginName
 	 * @return
 	 */
 	public static String getGameName(String loginName) {
-		if (isZuoyueUser(loginName)) {
+		if (isDouquUser(loginName)) {
 			return loginName.substring(0, loginName.length() - SIGN.length());
 		}
 		return loginName;
@@ -301,6 +343,8 @@ public class PojoUtils {
 	 * @return 返回可使用的用户名
 	 */
 	public static String login(Context ctx, String name, String passwd) {
+		reset_last_code();
+
 		Login login = new Login();
 		login.account = name;
 		login.md5pwd = MD5Util.md5Encode(passwd);
@@ -320,9 +364,13 @@ public class PojoUtils {
 		// 检查是否成功
 		if (result != null
 				&& result.checkSign(result.account, result.time, app_key)) {
+			set_last_code(result.status);
 			if (result.status == 0) {
 				// 登录成功，自动注册
 				String zyName = auto_registe(ctx, result, name, passwd);
+				if (zyName == null) {
+					set_last_code(CODE_FAILED_ZUOYUE);
+				}
 				return zyName;
 			}
 		}

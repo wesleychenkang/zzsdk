@@ -108,6 +108,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 		loginLayout.setModifyPWListener(this);
 		loginLayout.setLoginListener(this);
 		loginLayout.setRegisterListener(this);
+
 		pushView2Stack(loginLayout);
 	}
 
@@ -138,7 +139,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 			} else {
 				Pair<Boolean, String> resultName = null;
 				if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
-					if (PojoUtils.isZuoyueUser(iLoginName)) {
+					if (PojoUtils.isDouquUser(iLoginName)) {
 						resultName = new Pair<Boolean, String>(true, iLoginName);
 					}
 				}
@@ -163,7 +164,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 			}
 			new LoginTask(this, iLoginName, iPassword).execute();
 			break;
-			
+
 		case LoginLayout.IDC_BT_QUICK_LOGIN:
 			// 快速登录
 			// 先判断用户有没有输入
@@ -376,7 +377,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 			loginCallbackInfo.statusCode = LoginCallbackInfo.STATUS_SUCCESS;
 			loginCallbackInfo.loginName = Application.loginName;
 			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
-				if (PojoUtils.isZuoyueUser(Application.loginName)) {
+				if (PojoUtils.isDouquUser(Application.loginName)) {
 					loginCallbackInfo.loginName = PojoUtils
 							.getGameName(Application.loginName);
 				}
@@ -656,20 +657,25 @@ public class LoginActivity extends Activity implements OnClickListener {
 		@Override
 		protected Result doInBackground(Void... params) {
 			GetDataImpl instance = GetDataImpl.getInstance(ctx);
-			// 自动登陆
-			Result loginResult = instance.login(user, pw, 1, ctx);
+			Result loginResult = null;
 
 			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
-				if ("1".equals(loginResult.codes)
-						&& !PojoUtils.isZuoyueUser(user)) {
-					String dqName = PojoUtils.login(ctx, user, pw);
+				if (PojoUtils.isDouquUser(user)) {
+					loginResult = new Result();
+					String newName = PojoUtils.getGameName(user);
+					String dqName = PojoUtils.login(ctx, newName, pw);
 					if (dqName != null) {
 						loginResult.codes = "0";
 						Application.loginName = dqName;
 						instance.updateLogin(dqName, pw, 1, ctx);
-					} 
+					}
 				}
 			}
+
+			// 自动登陆
+			if (loginResult == null)
+				loginResult = instance.login(user, pw, 1, ctx);
+
 			return loginResult;
 		}
 
@@ -694,7 +700,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 					if (Application.isDisplayLoginTip) {
 						String tip = "登陆成功";
 						if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
-							if (PojoUtils.isZuoyueUser(Application.loginName)) {
+							if (PojoUtils.isDouquUser(Application.loginName)) {
 								tip = "已使用 CMGE 通行证登录成功！";
 							}
 						}
