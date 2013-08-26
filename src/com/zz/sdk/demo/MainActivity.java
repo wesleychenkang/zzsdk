@@ -37,7 +37,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final String CONFIG_GAME_ROLE_ID = "007";
 	private static final String CONFIG_GAME_ROLE = "战士001";
 	private static final String CONFIG_GAME_CALLBACK_INFO = "厂商自定义参数（长度限制250个字符）";
-  
+
 	/* ID */
 	private static final int _IDC_START_ = 0;
 	private static final int IDC_BT_LOGIN = _IDC_START_ + 1;
@@ -48,8 +48,8 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final int IDC_BT_QUERY = _IDC_START_ + 6;
 	private static final int IDC_TV_LOG = _IDC_START_ + 7;
 	private static final int _IDC_END_ = _IDC_START_ + 8;
-	private static final int IDC_CK_SUCCESS =_IDC_START_+9;
-	private static final int IDC_CK_FAILL = _IDC_START_+10;
+	private static final int IDC_CK_SUCCESS = _IDC_START_ + 9;
+	private static final int IDC_CK_FAILL = _IDC_START_ + 10;
 
 	/* 自定义消息 */
 	private static final int _MSG_USER_ = 2013;
@@ -138,8 +138,9 @@ public class MainActivity extends Activity implements OnClickListener {
 			CheckBox checksucces = new CheckBox(ctx);
 			checksucces.setId(IDC_CK_SUCCESS);
 			checksucces.setText("是否提示登录成功");
-		
-			checksucces.setOnCheckedChangeListener(setonCheckedSuccessListener());
+
+			checksucces
+					.setOnCheckedChangeListener(setonCheckedSuccessListener());
 			CheckBox checkfaill = new CheckBox(ctx);
 			checkfaill.setId(IDC_CK_FAILL);
 			checkfaill.setText("是否提示登录失败");
@@ -171,50 +172,45 @@ public class MainActivity extends Activity implements OnClickListener {
 	}
 
 	private OnCheckedChangeListener setonCheckedSuccessListener() {
-		
-		return new OnCheckedChangeListener(){
+
+		return new OnCheckedChangeListener() {
 
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView,
 					boolean isChecked) {
-				
-				  if(isChecked){
-					  isDisplayLoginTip = true;
-				   }else{
-					   isDisplayLoginTip = false; 
-				   }
-				   mSDKManager.setConfigInfo(true, isDisplayLoginTip,
-							isDisplayLoginfail); 
+
+				if (isChecked) {
+					isDisplayLoginTip = true;
+				} else {
+					isDisplayLoginTip = false;
+				}
+				mSDKManager.setConfigInfo(true, isDisplayLoginTip,
+						isDisplayLoginfail);
 			}
 		};
 	}
 
 	private OnCheckedChangeListener setonCheckedFaillListener() {
-		
-		return new OnCheckedChangeListener(){
+
+		return new OnCheckedChangeListener() {
 
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView,
 					boolean isChecked) {
-				
-				  if(isChecked){
-					  isDisplayLoginfail = true;
-				  }else{
-					  isDisplayLoginfail = false; 
-				  }
-				  
-				 mSDKManager.setConfigInfo(true, isDisplayLoginTip,
-							isDisplayLoginfail); 
+
+				if (isChecked) {
+					isDisplayLoginfail = true;
+				} else {
+					isDisplayLoginfail = false;
+				}
+
+				mSDKManager.setConfigInfo(true, isDisplayLoginTip,
+						isDisplayLoginfail);
 			}
-			
-			
-			
-			
+
 		};
 	}
-	
-	
-	
+
 	@Override
 	public void onClick(View v) {
 		int id = v.getId();
@@ -237,9 +233,10 @@ public class MainActivity extends Activity implements OnClickListener {
 			}
 
 			if (mLoginCallbackInfo == null) {
-				String name = mSDKManager.getLoginName();
 				String tip = "「单机模式」 充值..." + "用户名:"
-						+ (name == null ? "(未知)" : name);
+						+ String.valueOf(mSDKManager.getAccountName())
+						+ "，游戏用户:"
+						+ String.valueOf(mSDKManager.getGameUserName());
 				pushLog(tip);
 				Toast.makeText(getBaseContext(), tip, Toast.LENGTH_LONG).show();
 			}
@@ -298,8 +295,12 @@ public class MainActivity extends Activity implements OnClickListener {
 						if (msg.obj instanceof LoginCallbackInfo) {
 							LoginCallbackInfo info = (LoginCallbackInfo) msg.obj;
 
-							String tip = " - 登录成功, 用户名: "
-									+ mSDKManager.getLoginName()
+							String tip = " - 登录成功, 用户名:"
+									+ String.valueOf(mSDKManager
+											.getAccountName())
+									+ "，游戏用户:"
+									+ String.valueOf(mSDKManager
+											.getGameUserName())
 									+ ", \n\t详细信息: " + info.toString();
 							pushLog(tip);
 

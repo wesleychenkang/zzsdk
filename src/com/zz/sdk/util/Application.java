@@ -17,6 +17,9 @@ public class Application {
 	 */
 	public static String loginName;
 
+	/** 游戏用户名 */
+	private static String sGameUserName;
+
 	public static String password;
 	/**
 	 * 支付渠道信息
@@ -45,7 +48,7 @@ public class Application {
 	/** 固定支付金额的通道索引, -1为空 */
 	public static int staticAmountIndex;
 	public static int payStatusCancel = 0;
-	/**冲值完成后是否关闭充值平台*/
+	/** 冲值完成后是否关闭充值平台 */
 	public static boolean isCloseWindow;
 	public static int isAlreadyCB = 0;
 	public static int isMessagePage = 0;
@@ -60,8 +63,21 @@ public class Application {
 		return loginName;
 	}
 
-	public static synchronized void SetLoginName(String name) {
+	public static synchronized void setLoginName(String name) {
 		isLogin = (name != null);
 		loginName = name;
+		sGameUserName = null;
+	}
+
+	public static synchronized void setLoginName(String name,
+			String gameUserName) {
+		setLoginName(name);
+		sGameUserName = gameUserName;
+	}
+
+	public static synchronized String getGameUserName() {
+		if (sGameUserName == null)
+			return loginName;
+		return sGameUserName;
 	}
 }

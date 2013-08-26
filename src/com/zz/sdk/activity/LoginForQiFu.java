@@ -166,7 +166,7 @@ public class LoginForQiFu extends Activity {
 								Logger.d("执行了登录回调");
 							}
 
-							Application.SetLoginName(loginName);
+							Application.setLoginName(loginName);
 
 							LoginCallbackInfo loginCBInfo = new LoginCallbackInfo();
 							loginCBInfo.loginName = loginName;

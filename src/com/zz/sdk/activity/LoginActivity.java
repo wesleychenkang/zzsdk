@@ -375,13 +375,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 				&& Application.loginName != null) {
 			LoginCallbackInfo loginCallbackInfo = new LoginCallbackInfo();
 			loginCallbackInfo.statusCode = LoginCallbackInfo.STATUS_SUCCESS;
-			loginCallbackInfo.loginName = Application.loginName;
-			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
-				if (PojoUtils.isDouquUser(Application.loginName)) {
-					loginCallbackInfo.loginName = PojoUtils
-							.getGameName(Application.loginName);
-				}
-			}
+			loginCallbackInfo.loginName = Application.getGameUserName();
 			tryNotify(MSG_STATUS.SUCCESS, loginCallbackInfo);
 			Logger.d("has run send message-------------");
 		}
@@ -662,12 +656,18 @@ public class LoginActivity extends Activity implements OnClickListener {
 			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
 				if (PojoUtils.isDouquUser(user)) {
 					loginResult = new Result();
-					String newName = PojoUtils.getGameName(user);
+					String newName = PojoUtils.getDouquBaseName(user);
 					String dqName = PojoUtils.login(ctx, newName, pw);
-					if (dqName != null) {
+					int err = PojoUtils.get_last_code();
+					int userid = PojoUtils.get_login_user_id();
+					if (err == PojoUtils.CODE_SUCCESS && dqName != null) {
 						loginResult.codes = "0";
-						Application.loginName = dqName;
-						instance.updateLogin(dqName, pw, 1, ctx);
+						Application.setLoginName(user, String.valueOf(userid));
+						instance.updateLogin(user, pw, userid, 1, ctx);
+						// } else if (err == PojoUtils.CODE_FAILED_ZUOYUE) {
+						// } else if (err == PojoUtils.CODE_FAILED) {
+					} else {
+						loginResult.codes = "1";
 					}
 				}
 			}

@@ -42,9 +42,12 @@ public class PojoUtils {
 
 	/** CMGE 通行证 */
 	private static final String SIGN = ".cmge";
-
 	/** 转换卓越账户的规则 ( id+{@value #SIGN} ) */
 	private static final String SIGN_ID_PATTERN = "\\d+\\.cmge$";
+
+	/** 逗趣用户 */
+	private static final String SIGN_DOUQU = "\ndouqu";
+	private static final String SIGN_NAME_DOUQU_PATTERN = "[a-z][_a-z0-9]{5,19}\ndouqu$";// "[a-z][a-z0-9]{5,19}\\.cmge$";
 
 	/** 压缩 */
 	private static final int CONFIG_COMPRESS = 1;
@@ -72,6 +75,7 @@ public class PojoUtils {
 	/** 卓越服务器连接错误 */
 	public static final int CODE_FAILED_ZUOYUE = -3;
 	private static int sLastCode;
+	private static int sLoginUserID;
 
 	private static void reset_last_code() {
 		set_last_code(CODE_UNSET);
@@ -81,9 +85,28 @@ public class PojoUtils {
 		sLastCode = code;
 	}
 
-	/** 0成功；-1失败；-2可显示结果描述 -3向卓越注册或登录失败 */
-	public static int get_last_code(int code) {
+	/**
+	 * 
+	 * @return 0成功；-1失败；-2可显示结果描述 -3向卓越注册或登录失败
+	 * @see #CODE_SUCCESS
+	 * @see #CODE_FAILED
+	 * @see #CODE_FAILED_OTHER
+	 * @see #CODE_FAILED_ZUOYUE
+	 * @see #CODE_UNSET
+	 */
+	public static int get_last_code() {
 		return sLastCode;
+	}
+
+	private static void set_login_user_id(int id) {
+		sLoginUserID = id;
+	}
+
+	/***
+	 * @return 获取登录的用户ID
+	 */
+	public static int get_login_user_id() {
+		return sLoginUserID;
 	}
 
 	//
@@ -91,10 +114,6 @@ public class PojoUtils {
 	//
 	// - 用户操作
 	//
-
-	private static String cmgeID2ZZUse(int cmgeId) {
-		return cmgeId + SIGN;
-	}
 
 	/**
 	 * 判断当前用户是否已写入SD卡
@@ -130,7 +149,7 @@ public class PojoUtils {
 	 */
 	private static String auto_registe(Context ctx, Result result,
 			String account, String passwd) {
-		String loginName = cmgeID2ZZUse(result.userid);
+		String loginName = result.userid + SIGN;
 		if (checkLoginNameExist(ctx, loginName, passwd)) {
 			// 向服务器注册， codes=0成功|1失败|2用户名已经存在
 			com.zz.sdk.entity.Result r = GetDataImpl.getInstance(ctx).register(
@@ -167,7 +186,7 @@ public class PojoUtils {
 	}
 
 	/** 获取　数据库　中的 CMGE 用户 */
-	public static Pair<String, String> checkCmgeUse_DB(Context ctx) {
+	public static Pair<String, String> checkDouquUser_DB(Context ctx) {
 		TSession ts = TSession.getInstance(ctx);
 		Session s = ts.getSessionByAutoLogin();
 		if (s == null) {
@@ -177,15 +196,21 @@ public class PojoUtils {
 			}
 		}
 		if (s != null) {
-			return new Pair<String, String>(
-			/* cmgeID2ZZUse(s.sessionId) */s.userName, s.password);
+			// int userid = s.sessionId;
+			return new Pair<String, String>(getDouquName(s.userName),
+					s.password);
 		}
 		return null;
 	}
 
 	/** 从 SD 卡中获取 CMGE 用户信息 */
-	public static Pair<String, String> checkCmgeUse_SDCard() {
-		return Utils.getAccountFromSDcard();
+	public static Pair<String, String> checkDouquUser_SDCard() {
+		Pair<String, String> user = Utils.getAccountFromSDcard();
+		if (user != null) {
+			return new Pair<String, String>(getDouquName(user.first),
+					user.second);
+		}
+		return null;
 	}
 
 	//
@@ -270,23 +295,24 @@ public class PojoUtils {
 		return null;
 	}
 
+	//
 	// ////////////////////////////////////////////////////////////////////////
 	//
-	// - 对外接口
+	// - 账号转换接口
 	//
 
-	private final static Pattern DEF_DOUQU_ZUOYUE_ID = Pattern
+	/** 数字通行证账户规则，{@value #SIGN_ID_PATTERN} */
+	private final static Pattern DEF_PATTERN_CMGE_ID = Pattern
 			.compile(SIGN_ID_PATTERN);
 
 	/**
-	 * 判断　目标账户　是否符合豆趣转卓越账号的规则： 数字ID+{@value #SIGN}
-	 * 
 	 * @param name
-	 * @return
+	 *            用户名
+	 * @return 判断　目标账户　是否符合卓越数字通行证账号的规则：{@value #SIGN_ID_PATTERN}
 	 */
-	public static boolean isDouquUser(String name) {
+	public static boolean isCMGEUser(String name) {
 		if (name != null) {
-			Matcher m = DEF_DOUQU_ZUOYUE_ID.matcher(name);
+			Matcher m = DEF_PATTERN_CMGE_ID.matcher(name);
 			if (m != null && m.matches()) {
 				return true;
 			}
@@ -295,28 +321,75 @@ public class PojoUtils {
 	}
 
 	/**
-	 * 将普通用户名拼接成代表 逗趣 用户名的格式， "NAME"+{@value #SIGN}
-	 * 
 	 * @param nor_name
 	 *            普通用户名
-	 * @return
+	 * @return 将普通用户名拼接成代表 逗趣 用户名的格式， "NAME"+{@value #SIGN}
 	 */
-	public static String getDouquName(String nor_name) {
+	public static String getCMGEName(String nor_name) {
 		return nor_name + SIGN;
 	}
 
 	/**
-	 * 检查　用户名是否是豆趣类型 ( id+{@value #SIGN} )
+	 * @param account
+	 *            用户名
+	 * @return 截掉尾巴（{@value #SIGN}）后的用户名
+	 */
+	public static String getCMGEBaseName(String account) {
+		if (account != null && account.endsWith(SIGN)) {
+			/* isCMGEUser(loginName) */
+			return account.substring(0, account.length() - SIGN.length());
+		}
+		return account;
+	}
+
+	/** 逗趣账户规则，{@value #SIGN_NAME_DOUQU_PATTERN} */
+	private final static Pattern DEF_PATTERN_DOUQU_NAME = Pattern
+			.compile(SIGN_NAME_DOUQU_PATTERN);
+
+	/**
+	 * 判断　目标账户　是否符合豆趣账号的规则：{@value #SIGN_ID_PATTERN}
 	 * 
-	 * @param loginName
+	 * @param name
 	 * @return
 	 */
-	public static String getGameName(String loginName) {
-		if (isDouquUser(loginName)) {
-			return loginName.substring(0, loginName.length() - SIGN.length());
+	public static boolean isDouquUser(String name) {
+		if (name != null) {
+			Matcher m = DEF_PATTERN_DOUQU_NAME.matcher(name);
+			if (m != null && m.matches()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * @param nor_name
+	 *            普通用户名
+	 * @return 将普通用户名拼接成代表 逗趣 用户名的格式， "NAME"+{@value #SIGN_DOUQU}
+	 */
+	public static String getDouquName(String nor_name) {
+		return nor_name + SIGN_DOUQU;
+	}
+
+	/**
+	 * @param loginName
+	 *            用户名
+	 * @return 截掉尾巴（{@value #SIGN_DOUQU}）后的用户名
+	 */
+	public static String getDouquBaseName(String loginName) {
+		if (loginName != null && loginName.endsWith(SIGN_DOUQU)) {
+			/* isDouquUser(loginName) */
+			return loginName.substring(0,
+					loginName.length() - SIGN_DOUQU.length());
 		}
 		return loginName;
 	}
+
+	//
+	// ////////////////////////////////////////////////////////////////////////
+	//
+	// - 对外接口
+	//
 
 	private static void _test(Context ctx, String name, String passwd) {
 		if (BuildConfig.DEBUG) {
@@ -365,6 +438,7 @@ public class PojoUtils {
 		if (result != null
 				&& result.checkSign(result.account, result.time, app_key)) {
 			set_last_code(result.status);
+			set_login_user_id(result.userid);
 			if (result.status == 0) {
 				// 登录成功，自动注册
 				String zyName = auto_registe(ctx, result, name, passwd);

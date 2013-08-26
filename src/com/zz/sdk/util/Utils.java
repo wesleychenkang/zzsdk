@@ -37,6 +37,7 @@ import android.telephony.TelephonyManager;
 import android.util.Pair;
 import android.widget.Toast;
 
+import com.zz.lib.pojo.PojoUtils;
 import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.UserAction;
@@ -308,6 +309,14 @@ public class Utils {
 		if (user == null || pw == null) {
 			return;
 		}
+
+		if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+			if (PojoUtils.isDouquUser(user)) {
+				// 不将逗趣的账户储存到sd卡
+				return;
+			}
+		}
+
 		// 账号与密码用||分开
 		String data = user + "||" + pw;
 		String encodeData = encode(data);

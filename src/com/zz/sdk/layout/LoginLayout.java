@@ -1,5 +1,7 @@
 package com.zz.sdk.layout;
 
+import java.util.Arrays;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -47,17 +49,17 @@ public class LoginLayout extends AbstractLayout implements OnClickListener,
 
 	/** 单选按钮组 */
 	private static final int IDC_RG_ACCOUNT_TYPE = 120;
-	/** 逗趣 */
-	private static final int IDC_RB_ACCOUNT_DOUQU = 121;
-	/** 普通卓越账户 */
-	private static final int IDC_RB_ACCOUNT_NORMAL = 122;
-
+	private static final int _IDGROUP_ACCOUNT_TYPE[] = new int[] { -1,
+			IDC_RG_ACCOUNT_TYPE + 1, /** 普通卓越账户 */
+			IDC_RG_ACCOUNT_TYPE + 2, /** 逗趣 */
+	};
 	/** 账户类型：未知 */
 	private static final int ACCOUNT_TYPE_UNKNOW = 0;
 	/** 账户类型：普通卓越 */
 	private static final int ACCOUNT_TYPE_NORMAL = 1;
 	/** 账户类型：逗趣 */
-	private static final int ACCOUNT_TYPE_DOUQU = 1;
+	private static final int ACCOUNT_TYPE_DOUQU = 2;
+	private static final int _DEF_ACCOUNT_TYPE = ACCOUNT_TYPE_NORMAL;
 
 	/** 注册按钮 */
 	private Button btnRegister;
@@ -103,7 +105,7 @@ public class LoginLayout extends AbstractLayout implements OnClickListener,
 	public void setAccount(String account) {
 		if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
 			if (PojoUtils.isDouquUser(account)) {
-				account = PojoUtils.getGameName(account);
+				account = PojoUtils.getDouquBaseName(account);
 				setAccountType(ACCOUNT_TYPE_DOUQU);
 			}
 		}
@@ -171,33 +173,35 @@ public class LoginLayout extends AbstractLayout implements OnClickListener,
 		this.modifyPWListener = modifyPWListener;
 	}
 
-	/** 返回账户类型：0为普通卓越账号 */
-	public int getAccountType() {
+	/**
+	 * @return 返回账户类型
+	 * @see #ACCOUNT_TYPE_UNKNOW
+	 * @see #ACCOUNT_TYPE_NORMAL
+	 * @see #ACCOUNT_TYPE_DOUQU
+	 */
+	private int getAccountType() {
 		if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
 			if (mRgAccountType != null) {
 				int id = mRgAccountType.getCheckedRadioButtonId();
-				if (id == IDC_RB_ACCOUNT_DOUQU) {
-					return ACCOUNT_TYPE_DOUQU;
-				} else if (id == IDC_RB_ACCOUNT_NORMAL) {
-					return ACCOUNT_TYPE_NORMAL;
-				} else {
+				int pos = Arrays.binarySearch(_IDGROUP_ACCOUNT_TYPE, id);
+				if (pos <= 0) {
 					if (BuildConfig.DEBUG) {
 						Logger.d("LOGIN: unknow getAccountType, id=" + id);
 					}
 					return ACCOUNT_TYPE_UNKNOW;
 				}
+				return pos;
 			}
 		}
-		return 0;
+		return _DEF_ACCOUNT_TYPE;
 	}
 
 	public void setAccountType(int account_type) {
 		if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
 			if (mRgAccountType != null) {
-				if (account_type == ACCOUNT_TYPE_NORMAL) {
-					mRgAccountType.check(IDC_RB_ACCOUNT_NORMAL);
-				} else if (account_type == ACCOUNT_TYPE_DOUQU) {
-					mRgAccountType.check(IDC_RB_ACCOUNT_DOUQU);
+				if (account_type >= 0
+						&& account_type < _IDGROUP_ACCOUNT_TYPE.length) {
+					mRgAccountType.check(_IDGROUP_ACCOUNT_TYPE[account_type]);
 				} else {
 					if (BuildConfig.DEBUG) {
 						Logger.d("LOGIN: unknow setAccountType=" + account_type);
@@ -347,41 +351,46 @@ public class LoginLayout extends AbstractLayout implements OnClickListener,
 			}
 
 			if (hasAccount) {
-				RadioGroup rg = new RadioGroup(ctx);
-				rg.setId(IDC_RG_ACCOUNT_TYPE);
-				LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-				lp.setMargins(dp2px(10), 0, 0, 0);
-				wrap3.addView(rg, lp);
-				mRgAccountType = rg;
-
-				rg.setVerticalGravity(Gravity.CENTER_VERTICAL);
-
-				{
-					RadioButton rb1 = new RadioButton(ctx);
-					rb1.setId(IDC_RB_ACCOUNT_DOUQU);
-					rg.addView(rb1, LayoutParams.WRAP_CONTENT,
+				if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+					RadioGroup rg = new RadioGroup(ctx);
+					rg.setId(IDC_RG_ACCOUNT_TYPE);
+					LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+							LayoutParams.WRAP_CONTENT,
 							LayoutParams.WRAP_CONTENT);
-					rb1.setText("旧账号");
-					rb1.setButtonDrawable(null);
-				}
+					lp.setMargins(dp2px(10), 0, 0, 0);
+					wrap3.addView(rg, lp);
+					mRgAccountType = rg;
 
-				{
-					RadioButton rb2 = new RadioButton(ctx);
-					rb2.setId(IDC_RB_ACCOUNT_NORMAL);
-					rg.addView(rb2, LayoutParams.WRAP_CONTENT,
-							LayoutParams.WRAP_CONTENT);
-					rb2.setText("卓越账号");
-				}
+					rg.setVerticalGravity(Gravity.CENTER_VERTICAL);
 
-				rg.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-
-					@Override
-					public void onCheckedChanged(RadioGroup group, int checkedId) {
-						// TODO Auto-generated method stub
-
+					{
+						RadioButton rb1 = new RadioButton(ctx);
+						rb1.setId(_IDGROUP_ACCOUNT_TYPE[ACCOUNT_TYPE_DOUQU]);
+						rg.addView(rb1, LayoutParams.WRAP_CONTENT,
+								LayoutParams.WRAP_CONTENT);
+						rb1.setText("老用户");
+						rb1.setButtonDrawable(null);
 					}
-				});
+
+					{
+						RadioButton rb2 = new RadioButton(ctx);
+						rb2.setId(_IDGROUP_ACCOUNT_TYPE[ACCOUNT_TYPE_NORMAL]);
+						rg.addView(rb2, LayoutParams.WRAP_CONTENT,
+								LayoutParams.WRAP_CONTENT);
+						rb2.setText("卓越通行证");
+					}
+
+					rg.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+
+						@Override
+						public void onCheckedChanged(RadioGroup group,
+								int checkedId) {
+							// TODO Auto-generated method stub
+
+						}
+					});
+					rg.check(_DEF_ACCOUNT_TYPE);
+				}
 			} else {
 				// 判断本地是否已经保存有帐号信息
 

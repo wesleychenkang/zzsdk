@@ -318,17 +318,28 @@ public class SDKManager {
 	 * 
 	 * @return 已经登录的用户名，如果未登录则返回 null
 	 */
-	public String getLoginName() {
+	public String getAccountName() {
 		if (Application.isLogin) {
+			String account = Application.getLoginName();
 			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
-				if (PojoUtils.isDouquUser(Application.loginName)) {
-					return PojoUtils.getGameName(Application.loginName);
+				if (PojoUtils.isDouquUser(account)) {
+					return PojoUtils.getDouquBaseName(account);
 				}
 			}
-			return Application.loginName;
+			return account;
 		} else {
 			return null;
 		}
+	}
+
+	/**
+	 * @return 获取已经登录的游戏用户名，如果未登录则返回 null
+	 */
+	public String getGameUserName() {
+		if (Application.isLogin) {
+			return Application.getGameUserName();
+		}
+		return null;
 	}
 
 	/**
@@ -398,7 +409,7 @@ public class SDKManager {
 					 * 有：　1,cmge数据库 2,cmge的SD卡 3.zz数据库 4.zz的SD卡 这４个用户信息储存点
 					 * ３→１→４→２
 					 */
-					pair = PojoUtils.checkCmgeUse_DB(ctx);
+					pair = PojoUtils.checkDouquUser_DB(ctx);
 				}
 
 				// 尝试从sdcard中读取
@@ -407,7 +418,7 @@ public class SDKManager {
 
 				if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
 					if (pair == null)
-						pair = PojoUtils.checkCmgeUse_SDCard();
+						pair = PojoUtils.checkDouquUser_SDCard();
 				}
 
 				if (pair != null) {
