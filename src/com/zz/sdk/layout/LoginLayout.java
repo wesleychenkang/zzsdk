@@ -6,9 +6,12 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -250,6 +253,58 @@ public class LoginLayout extends AbstractLayout implements OnClickListener,
 		btnQuickLogin.setBackgroundDrawable(getStateListDrawable("tiyan1.png",
 				"tiyan.png"));
 
+		// 登录方式
+		if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+			RadioGroup rg = new RadioGroup(ctx);
+			rg.setId(IDC_RG_ACCOUNT_TYPE);
+			mRgAccountType = rg;
+
+			// rg.setVerticalGravity(Gravity.CENTER_VERTICAL);
+			rg.setOrientation(VERTICAL);
+
+			{
+				RadioButton rb1 = new RadioButton(ctx);
+				rb1.setId(_IDGROUP_ACCOUNT_TYPE[ACCOUNT_TYPE_DOUQU]);
+				rg.addView(rb1, LayoutParams.WRAP_CONTENT,
+						LayoutParams.WRAP_CONTENT);
+				rb1.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+				rb1.setText("老用户");
+				Drawable d = getCheckStateListDrawable("btn_radio_pressed.png",
+						"btn_radio_pressed.png", "btn_radio_off.png");
+				rb1.setButtonDrawable(d);
+				int rb_paddingLeft = d.getIntrinsicWidth() + dp2px(8);
+				rb1.setPadding(rb_paddingLeft, 0, 0, 0);
+				rb1.setBackgroundDrawable(null);
+			}
+
+			{
+				RadioButton rb2 = new RadioButton(ctx);
+				rb2.setId(_IDGROUP_ACCOUNT_TYPE[ACCOUNT_TYPE_NORMAL]);
+				rg.addView(rb2, LayoutParams.WRAP_CONTENT,
+						LayoutParams.WRAP_CONTENT);
+				rb2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+				rb2.setTextScaleX(0.9f);
+				rb2.setText("卓越通行证");
+				Drawable d = getCheckStateListDrawable("btn_radio_pressed.png",
+						"btn_radio_pressed.png", "btn_radio_off.png");
+				rb2.setButtonDrawable(d);
+				int rb_paddingLeft = d.getIntrinsicWidth() + dp2px(8);
+				rb2.setPadding(rb_paddingLeft, 0, 0, 0);
+				rb2.setBackgroundDrawable(null);
+				// rb2.setBackgroundDrawable(getDrawable("label_zhuoyue_account.png"));
+			}
+
+			rg.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+
+				@Override
+				public void onCheckedChanged(RadioGroup group, int checkedId) {
+					// TODO Auto-generated method stub
+
+				}
+			});
+			rg.check(_IDGROUP_ACCOUNT_TYPE[_DEF_ACCOUNT_TYPE]);
+		}
+
 		// 第一层，左：账号输入，右：「快速注册」或「注册账号、修改密码」
 		if (true) {
 			LinearLayout wrap2 = new LinearLayout(ctx);
@@ -342,7 +397,8 @@ public class LoginLayout extends AbstractLayout implements OnClickListener,
 			// 水平方向
 			wrap3.setOrientation(HORIZONTAL);
 			wrap3.setPadding(0, dp2px(5), 0, 0);
-			wrap3.setGravity(Gravity.CENTER_HORIZONTAL);
+			wrap3.setGravity(Gravity.CENTER_HORIZONTAL
+					| Gravity.CENTER_VERTICAL);
 
 			// 立即登录
 			{
@@ -351,46 +407,6 @@ public class LoginLayout extends AbstractLayout implements OnClickListener,
 			}
 
 			if (hasAccount) {
-				if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
-					RadioGroup rg = new RadioGroup(ctx);
-					rg.setId(IDC_RG_ACCOUNT_TYPE);
-					LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-							LayoutParams.WRAP_CONTENT,
-							LayoutParams.WRAP_CONTENT);
-					lp.setMargins(dp2px(10), 0, 0, 0);
-					wrap3.addView(rg, lp);
-					mRgAccountType = rg;
-
-					rg.setVerticalGravity(Gravity.CENTER_VERTICAL);
-
-					{
-						RadioButton rb1 = new RadioButton(ctx);
-						rb1.setId(_IDGROUP_ACCOUNT_TYPE[ACCOUNT_TYPE_DOUQU]);
-						rg.addView(rb1, LayoutParams.WRAP_CONTENT,
-								LayoutParams.WRAP_CONTENT);
-						rb1.setText("老用户");
-						rb1.setButtonDrawable(null);
-					}
-
-					{
-						RadioButton rb2 = new RadioButton(ctx);
-						rb2.setId(_IDGROUP_ACCOUNT_TYPE[ACCOUNT_TYPE_NORMAL]);
-						rg.addView(rb2, LayoutParams.WRAP_CONTENT,
-								LayoutParams.WRAP_CONTENT);
-						rb2.setText("卓越通行证");
-					}
-
-					rg.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-
-						@Override
-						public void onCheckedChanged(RadioGroup group,
-								int checkedId) {
-							// TODO Auto-generated method stub
-
-						}
-					});
-					rg.check(_DEF_ACCOUNT_TYPE);
-				}
 			} else {
 				// 判断本地是否已经保存有帐号信息
 
@@ -401,6 +417,13 @@ public class LoginLayout extends AbstractLayout implements OnClickListener,
 				wrap3.addView(btnRegister, lpregister);
 			}
 
+			// 账号类型选择
+			if (mRgAccountType != null) {
+				LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+				lp.setMargins(dp2px(10), 0, 0, 0);
+				wrap3.addView(mRgAccountType, lp);
+			}
 		}
 
 		// 显示“自动登录”框

@@ -92,5 +92,13 @@ public class AbstractLayout extends LinearLayout {
 		listDrawable.addState(new int[]{android.R.attr.state_selected}, getDrawable(picPressed));
 		listDrawable.addState(new int[]{android.R.attr.state_enabled}, getDrawable(picNormal));
 		return listDrawable;
-	}	
+	}
+
+	protected StateListDrawable getCheckStateListDrawable(String picChecked, String picFocused, String picNormal) {
+		StateListDrawable listDrawable = new StateListDrawable();
+		listDrawable.addState(new int[]{android.R.attr.state_checked}, getDrawable(picChecked));
+		// listDrawable.addState(new int[]{android.R.attr.state_focused}, getDrawable(picFocused));
+		listDrawable.addState(new int[]{android.R.attr.state_enabled}, getDrawable(picNormal));
+		return listDrawable;
+	}
 }
