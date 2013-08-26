@@ -155,7 +155,15 @@ public class LoginActivity extends Activity implements OnClickListener {
 				toast("请输入密码");
 				return;
 			} else {
-				Pair<Boolean, String> resultPW = validPassWord(iPassword);
+				Pair<Boolean, String> resultPW = null;
+				if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+					if (PojoUtils.isDouquUser(iLoginName)) {
+						String desc = PojoUtils.isDouquPasswd(iPassword);
+						resultPW = new Pair<Boolean, String>(desc == null, desc);
+					}
+				}
+				if (resultPW == null)
+					resultPW = validPassWord(iPassword);
 				if (!resultPW.first) {
 					// 输入密码不合法
 					toast(resultPW.second);
@@ -167,6 +175,14 @@ public class LoginActivity extends Activity implements OnClickListener {
 
 		case LoginLayout.IDC_BT_QUICK_LOGIN:
 			// 快速登录
+			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+				// 只允许普通账号快速登录
+				String tip = loginLayout.resetAccountType();
+				if (tip != null) {
+					toast(tip);
+					break;
+				}
+			}
 			// 先判断用户有没有输入
 			iLoginName = loginLayout.getAccount();
 			iPassword = loginLayout.getPassWord();
@@ -201,6 +217,14 @@ public class LoginActivity extends Activity implements OnClickListener {
 			break;
 		case LoginLayout.IDC_BT_REGISTER:
 			// 注册按钮
+			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+				// 只允许普通账号快速登录
+				String tip = loginLayout.resetAccountType();
+				if (tip != null) {
+					toast(tip);
+					break;
+				}
+			}
 			// 先判断用户有没有输入
 			iLoginName = loginLayout.getAccount();
 			iPassword = loginLayout.getPassWord();
@@ -536,7 +560,6 @@ public class LoginActivity extends Activity implements OnClickListener {
 		String user;
 		String pw;
 		Context ctx;
-		Result result;
 
 		public ModifyTask(Context context, String user, String pw) {
 			check = false;
@@ -555,9 +578,33 @@ public class LoginActivity extends Activity implements OnClickListener {
 		@Override
 		protected Result doInBackground(Void... params) {
 			GetDataImpl instance = GetDataImpl.getInstance(ctx);
+
+			Result loginResult = null;
+
+			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+				if (PojoUtils.isDouquUser(user)) {
+					loginResult = new Result();
+					String newName = PojoUtils.getDouquBaseName(user);
+					String dqName = PojoUtils.login(ctx, newName, pw);
+					int err = PojoUtils.get_last_code();
+					int userid = PojoUtils.get_login_user_id();
+					if (err == PojoUtils.CODE_SUCCESS && dqName != null) {
+						loginResult.codes = "0";
+						Application.setLoginName(user, String.valueOf(userid));
+						instance.updateLogin(user, pw, userid, 1, ctx);
+						// } else if (err == PojoUtils.CODE_FAILED_ZUOYUE) {
+						// } else if (err == PojoUtils.CODE_FAILED) {
+					} else {
+						loginResult.codes = "1";
+					}
+				}
+			}
+
 			// 自动登陆
-			result = instance.login(user, pw, 1, ctx);
-			return result;
+			if (loginResult == null)
+				loginResult = instance.login(user, pw, 1, ctx);
+
+			return loginResult;
 		}
 
 		@Override
@@ -597,7 +644,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 		public void onClick(View v) {
 			switch (v.getId()) {
 			/** 修改密码页 */
-			case 262:
+			case UpdatePasswordLayout.ID_CLOSE:
 				// 用户放弃修改密码 退出登陆页面
 				// 反馈成功登陆消息
 				// onPostLogin(result);
@@ -605,10 +652,20 @@ public class LoginActivity extends Activity implements OnClickListener {
 				// finish();
 				popViewFromStack();
 				break;
-			case 261:
+			case UpdatePasswordLayout.ID_CONFIRM:
 				// 执行修改
 				final String newPW = updatePasswordLayout.getInputNewPwd();
-				Pair<Boolean, String> validPW = validPassWord(newPW);
+				Pair<Boolean, String> validPW = null;
+
+				if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+					if (PojoUtils.isDouquUser(user)) {
+						String desc = PojoUtils.isDouquPasswd(newPW);
+						validPW = new Pair<Boolean, String>(desc == null, desc);
+					}
+				}
+
+				if (validPW == null)
+					validPW = validPassWord(newPW);
 				if (!validPW.first) {
 					toast(validPW.second);
 					return;
@@ -764,7 +821,26 @@ public class LoginActivity extends Activity implements OnClickListener {
 
 		@Override
 		protected Result doInBackground(Void... params) {
-			Result result = GetDataImpl.getInstance(ctx).modifyPassword(newPW);
+			Result result = null;
+			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+				String user = Application.getLoginName();
+				if (PojoUtils.isDouquUser(Application.getLoginName())) {
+					result = new Result();
+					String newName = PojoUtils.getDouquBaseName(user);
+					boolean success = PojoUtils.updatePasswd(ctx, newName,
+							Application.password, newPW);
+					if (success) {
+						Application.password = newPW;
+						GetDataImpl.getInstance(ctx).updateLogin_passwd(newPW);
+						result.codes = "0";
+					} else {
+						result.codes = "1";
+					}
+				}
+			}
+
+			if (result == null)
+				result = GetDataImpl.getInstance(ctx).modifyPassword(newPW);
 			return result;
 		}
 

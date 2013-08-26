@@ -23,6 +23,7 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.zz.lib.pojo.PojoUtils;
 import com.zz.sdk.BuildConfig;
@@ -199,6 +200,14 @@ public class LoginLayout extends AbstractLayout implements OnClickListener,
 		return _DEF_ACCOUNT_TYPE;
 	}
 
+	/**
+	 * 设置账号类型
+	 * 
+	 * @param account_type
+	 *            类型
+	 * @see #ACCOUNT_TYPE_DOUQU
+	 * @see #ACCOUNT_TYPE_NORMAL
+	 */
 	public void setAccountType(int account_type) {
 		if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
 			if (mRgAccountType != null) {
@@ -213,6 +222,24 @@ public class LoginLayout extends AbstractLayout implements OnClickListener,
 				}
 			}
 		}
+	}
+
+	/**
+	 * 重置账号类型为普通账号
+	 * 
+	 * @return 操作描述
+	 */
+	public String resetAccountType() {
+		if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+			if (mRgAccountType != null) {
+				int type = getAccountType();
+				if (type != _DEF_ACCOUNT_TYPE) {
+					setAccountType(_DEF_ACCOUNT_TYPE);
+					return "此操作只允许使用[卓越通行证]!";
+				}
+			}
+		}
+		return null;
 	}
 
 	/**

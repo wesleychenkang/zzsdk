@@ -47,7 +47,7 @@ public class PojoUtils {
 
 	/** 逗趣用户 */
 	private static final String SIGN_DOUQU = "\ndouqu";
-	private static final String SIGN_NAME_DOUQU_PATTERN = "[a-z][_a-z0-9]{5,19}\ndouqu$";// "[a-z][a-z0-9]{5,19}\\.cmge$";
+	private static final String SIGN_NAME_DOUQU_PATTERN = ".*\ndouqu$";// "[a-z][a-z0-9]{5,19}\\.cmge$";
 
 	/** 压缩 */
 	private static final int CONFIG_COMPRESS = 1;
@@ -57,6 +57,9 @@ public class PojoUtils {
 	private static int connectCount = 1;
 
 	private static final int CONFIG_TIMEOUT = 1000 * 20;
+
+	/** 逗趣到卓越账号的默认密码 */
+	private static final String DEF_DOUQU_PASSWD = "!.douqu";
 
 	//
 	// ////////////////////////////////////////////////////////////////////////
@@ -149,6 +152,9 @@ public class PojoUtils {
 	 */
 	private static String auto_registe(Context ctx, Result result,
 			String account, String passwd) {
+		if (DEF_DOUQU_PASSWD != null) {
+			passwd = DEF_DOUQU_PASSWD;
+		}
 		String loginName = result.userid + SIGN;
 		if (checkLoginNameExist(ctx, loginName, passwd)) {
 			// 向服务器注册， codes=0成功|1失败|2用户名已经存在
@@ -385,6 +391,18 @@ public class PojoUtils {
 		return loginName;
 	}
 
+	/**
+	 * @param passwd
+	 *            待检测密码
+	 * @return 是否符合 逗趣的密码要求，若为 null 表示符合，否则为描述文本
+	 */
+	public static String isDouquPasswd(String passwd) {
+		if (passwd != null && passwd.length() > 0 && passwd.length() < 20) {
+			return null;
+		}
+		return "密码不符合要求!";
+	}
+
 	//
 	// ////////////////////////////////////////////////////////////////////////
 	//
@@ -488,8 +506,8 @@ public class PojoUtils {
 	 * @param newPasswd
 	 * @return
 	 */
-	static boolean updatePasswd(Context ctx, String name, String oldPasswd,
-			String newPasswd) {
+	public static boolean updatePasswd(Context ctx, String name,
+			String oldPasswd, String newPasswd) {
 		UpdatePwd updatePwd = new UpdatePwd();
 		updatePwd.account = name;
 		updatePwd.md5pwd = MD5Util.md5Encode(oldPasswd);

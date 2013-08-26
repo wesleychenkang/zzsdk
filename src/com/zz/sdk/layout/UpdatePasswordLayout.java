@@ -19,8 +19,8 @@ public class UpdatePasswordLayout extends AbstractLayout implements View.OnClick
 	private static final int ID_OLDPWD = 0x102;
 	private static final int ID_PWDNEWLAYOUT = 0x103;
 	private static final int ID_NEWPWD = 0x104;
-	private static final int ID_CONFIRM = 0x105; //261
-	private static final int ID_CLOSE = 0x106;   //262
+	public static final int ID_CONFIRM = 0x105; //261
+	public static final int ID_CLOSE = 0x106;   //262
 	public Activity mContext;
 	public LinearLayout mUpdatePwdLayout;
 	public RelativeLayout mContainer;

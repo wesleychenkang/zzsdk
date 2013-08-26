@@ -123,6 +123,12 @@ public class GetDataImpl {
 		syncSdkUser();
 	}
 
+	public void updateLogin_passwd(String new_passwd) {
+		Application.password = new_passwd;
+		mSdkUser.password = new_passwd;
+		syncSdkUser();
+	}
+
 	/**
 	 * 快速登录
 	 * 
