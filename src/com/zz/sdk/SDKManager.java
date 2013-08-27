@@ -285,8 +285,8 @@ public class SDKManager {
 	 * @see PaymentCallbackInfo
 	 */
 	public void showPaymentView(Handler callbackHandler, int what,
-			final String gameServerID, final String serverName,
-			final String roleId, final String gameRole, final int amount,
+			String gameServerID, final String serverName, final String roleId,
+			final String gameRole, final int amount,
 			final boolean isCloseWindow, final String callBackInfo) {
 		Application.isCloseWindow = isCloseWindow;
 		/* 固定金额设置 */
@@ -303,11 +303,13 @@ public class SDKManager {
 			Application.loginName = account.first;
 			Application.password = account.second;
 		}
-		
-		if (gameServerID!=null && gameServerID.length()>0) {
+
+		if (gameServerID != null && gameServerID.length() > 0) {
 			setGameServerId(gameServerID);
+		} else {
+			gameServerID = Utils.getGameServerId(mContext);
 		}
-		
+
 		ChargeActivity.start(callbackHandler, what, mContext, gameServerID,
 				serverName, roleId, gameRole, callBackInfo);
 	}
