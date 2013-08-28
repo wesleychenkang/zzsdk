@@ -590,7 +590,8 @@ public class LoginActivity extends Activity implements OnClickListener {
 					int userid = PojoUtils.get_login_user_id();
 					if (err == PojoUtils.CODE_SUCCESS && dqName != null) {
 						loginResult.codes = "0";
-						Application.setLoginName(user, String.valueOf(userid));
+						Application
+								.setLoginName(dqName, String.valueOf(userid));
 						instance.updateLogin(user, pw, userid, 1, ctx);
 						// } else if (err == PojoUtils.CODE_FAILED_ZUOYUE) {
 						// } else if (err == PojoUtils.CODE_FAILED) {
@@ -719,7 +720,8 @@ public class LoginActivity extends Activity implements OnClickListener {
 					int userid = PojoUtils.get_login_user_id();
 					if (err == PojoUtils.CODE_SUCCESS && dqName != null) {
 						loginResult.codes = "0";
-						Application.setLoginName(user, String.valueOf(userid));
+						Application
+								.setLoginName(dqName, String.valueOf(userid));
 						instance.updateLogin(user, pw, userid, 1, ctx);
 						// } else if (err == PojoUtils.CODE_FAILED_ZUOYUE) {
 						// } else if (err == PojoUtils.CODE_FAILED) {
@@ -757,7 +759,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 					if (Application.isDisplayLoginTip) {
 						String tip = "登陆成功";
 						if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
-							if (PojoUtils.isDouquUser(Application.loginName)) {
+							if (PojoUtils.isCMGEUser(Application.loginName)) {
 								tip = "已使用 CMGE 通行证登录成功！";
 							}
 						}
