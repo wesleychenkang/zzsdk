@@ -646,6 +646,9 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		userAction.memo = "";
 		userAction.actionType = "";
 
+		Logger.d("charge: account=" + mPayParam.loginName + " serverId="
+				+ userAction.serverId);
+
 		dialog = DialogUtil.showProgress(instance, "", true);
 		dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
 			@Override
@@ -920,7 +923,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			}
 			if (Application.isCloseWindow) {
 				this.finish();
-			}else{
+			} else {
 				mViewStack.clear();
 				pushView2Stack(mPaymentListLayout);
 			}

@@ -427,7 +427,7 @@ public class SDKManager {
 				pair = Utils.getAccountFromSDcard(ctx);
 
 			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
-				if (PojoUtils.isCMGEUser(pair.first)) {
+				if (pair != null && PojoUtils.isCMGEUser(pair.first)) {
 					pair = null;
 				}
 				if (pair == null)
