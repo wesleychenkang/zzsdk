@@ -53,7 +53,7 @@ public class SdkUserTable {
 	public SdkUser getSdkUserByName(String loginName) {
 		if (loginName == null) 
 			return null;
-		return getSkdUserBySeletion(LOGINNAME + "=?", new String[]{loginName});
+		return getSkdUserBySeletion(LOGINNAME + "=?", new String[]{Utils.encode(loginName)});
 	}
 	
 	/**
@@ -116,7 +116,7 @@ public class SdkUserTable {
 			return false;
 		ContentValues value = parseContenValues(sdkuser);
 //		System.out.println("content value -> " + value);
-		long rows = mDb.update(TABLE_NAME, value, LOGINNAME + "=?", new String[]{sdkuser.loginName});
+		long rows = mDb.update(TABLE_NAME, value, LOGINNAME + "=?", new String[]{Utils.encode(sdkuser.loginName)});
 		if (rows <= 0) {
 			rows = mDb.insert(TABLE_NAME, null, value);
 		}
@@ -131,7 +131,7 @@ public class SdkUserTable {
 	public boolean removeSdkUserByloginName(String loginName) {
 		if (mDb == null) 
 			return false;
-		return mDb.delete(TABLE_NAME, LOGINNAME + "=?", new String[]{loginName}) > 0;
+		return mDb.delete(TABLE_NAME, LOGINNAME + "=?", new String[]{Utils.encode(loginName)}) > 0;
 	}
 	
 	/**
