@@ -127,8 +127,8 @@ public class PojoUtils {
 	 */
 	private static boolean checkLoginNameExist(Context ctx, String name,
 			String passwd) {
-		Pair<String, String> p = com.zz.sdk.util.Utils
-				.getAccountFromSDcard(ctx);
+		Pair<String, String> p = com.zz.sdk.util.Utils.getAccountFromDB(ctx,
+				name);
 		if (p == null) {
 			return true;
 		} else {
@@ -163,8 +163,8 @@ public class PojoUtils {
 			if (r != null) {
 				// 已经存在(2)或注册成功(0)
 				if ("2".equals(r.codes) || "0".equals(r.codes)) {
-					com.zz.sdk.util.Utils.writeAccount2SDcard(ctx, loginName,
-							passwd);
+					com.zz.sdk.util.Utils.writeAccount2DB(ctx, loginName,
+							passwd, get_login_user_id(), 0);
 				} else {
 					loginName = null;
 				}
@@ -357,7 +357,7 @@ public class PojoUtils {
 			.compile(SIGN_NAME_DOUQU_PATTERN);
 
 	/**
-	 * 判断　目标账户　是否符合豆趣账号的规则：{@value #SIGN_ID_PATTERN}
+	 * 判断　目标账户　是否符合豆趣账号的规则：{@value #SIGN_NAME_DOUQU_PATTERN}
 	 * 
 	 * @param name
 	 * @return

@@ -50,7 +50,7 @@ public class SdkUserTable {
 	 * @param LOGINNAME 用户名
 	 * @return 用户信息
 	 */
-	public SdkUser gesSdkUserByName(String loginName) {
+	public SdkUser getSdkUserByName(String loginName) {
 		if (loginName == null) 
 			return null;
 		return getSkdUserBySeletion(LOGINNAME + "=?", new String[]{loginName});

@@ -40,6 +40,8 @@ import android.widget.Toast;
 import com.zz.lib.pojo.PojoUtils;
 import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.entity.PayChannel;
+import com.zz.sdk.entity.SdkUser;
+import com.zz.sdk.entity.SdkUserTable;
 import com.zz.sdk.entity.UserAction;
 
 /**
@@ -315,6 +317,11 @@ public class Utils {
 				// 不将逗趣的账户储存到sd卡
 				return;
 			}
+
+			if (PojoUtils.isCMGEUser(user)) {
+				// 不存组合式卓越账号
+				return;
+			}
 		}
 
 		// 账号与密码用||分开
@@ -346,6 +353,51 @@ public class Utils {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * 从数据库中查找指定的用户信息
+	 * 
+	 * @param ctx
+	 *            环境
+	 * @param account
+	 *            待查找的用户名
+	 * @return <用户名，密码>
+	 */
+	public static Pair<String, String> getAccountFromDB(Context ctx,
+			String account) {
+		SdkUserTable t = SdkUserTable.getInstance(ctx);
+		SdkUser user = t.getSdkUserByName(account);
+		if (user != null) {
+			return new Pair<String, String>(user.loginName, user.password);
+		}
+		return null;
+	}
+
+	/**
+	 * 更新用户信息到数据库
+	 * 
+	 * @param ctx
+	 *            环境
+	 * @param loginName
+	 *            用户名
+	 * @param password
+	 *            密码
+	 * @param userid
+	 *            用户ID
+	 * @param autoLogin
+	 *            是否自动登录，0否 1是
+	 * @return 更新是否成功
+	 */
+	public static boolean writeAccount2DB(Context ctx, String loginName,
+			String password, int userid, int autoLogin) {
+		SdkUser user = new SdkUser();
+		user.sdkUserId = userid;
+		user.loginName = loginName;
+		user.autoLogin = autoLogin;
+		user.password = password;
+		SdkUserTable t = SdkUserTable.getInstance(ctx);
+		return t.update(user);
 	}
 
 	/**

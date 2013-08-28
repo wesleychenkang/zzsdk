@@ -396,7 +396,15 @@ public class SDKManager {
 		if (sdkUser == null) {
 			SdkUser[] sdkUsers = t.getAllSdkUsers();
 			if (sdkUsers != null && sdkUsers.length > 0) {
-				sdkUser = sdkUsers[0];
+				if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+					for (int i = 0; i < sdkUsers.length; i++) {
+						if (PojoUtils.isCMGEUser(sdkUsers[i].loginName))
+							continue;
+						sdkUser = sdkUsers[i];
+						break;
+					}
+				} else
+					sdkUser = sdkUsers[0];
 			}
 		}
 		if (sdkUser != null) {
@@ -418,6 +426,9 @@ public class SDKManager {
 				pair = Utils.getAccountFromSDcard(ctx);
 
 			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+				if (PojoUtils.isCMGEUser(pair.first)) {
+					pair = null;
+				}
 				if (pair == null)
 					pair = PojoUtils.checkDouquUser_SDCard();
 			}
