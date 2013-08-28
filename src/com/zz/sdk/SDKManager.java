@@ -297,10 +297,9 @@ public class SDKManager {
 			Application.changeCount = 0;
 		}
 		Application.staticAmountIndex = -1;
-
-		Pair<String, String> account = Utils.getAccountFromSDcard(mContext);
-		if (account != null) {
-			Application.loginName = account.first;
+        if(Application.loginName==null){
+		    Pair<String, String> account = Utils.getAccountFromSDcard(mContext);
+		    Application.loginName = account.first;
 			Application.password = account.second;
 		}
 		
@@ -384,7 +383,7 @@ public class SDKManager {
 			SdkUser[] sdkUsers = t.getAllSdkUsers();
 			if (sdkUsers != null && sdkUsers.length > 0) {
 				sdkUser = sdkUsers[0];
-			} else {
+			}else{
 				// 尝试从sdcard中读取
 				Pair<String, String> pair = Utils.getAccountFromSDcard(ctx);
 				if (pair != null) {
