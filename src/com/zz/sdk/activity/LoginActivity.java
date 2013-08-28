@@ -139,7 +139,8 @@ public class LoginActivity extends Activity implements OnClickListener {
 			} else {
 				Pair<Boolean, String> resultName = null;
 				if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
-					if (PojoUtils.isDouquUser(iLoginName)) {
+					if (PojoUtils.isDouquUser(iLoginName)
+							|| PojoUtils.isCMGEUser(iLoginName)) {
 						resultName = new Pair<Boolean, String>(true, iLoginName);
 					}
 				}
