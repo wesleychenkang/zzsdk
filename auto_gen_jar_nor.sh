@@ -25,8 +25,8 @@ ant release
 
 cd bin
 ${D2J} ${s}.dex
-$Z -d ${j} "*" -x "com/zz/sdk*" -x "META-INF/*"
-$Z -d ${j} "com/zz/sdk/demo/MainActivity.class"
+$Z -d ${j} "*" -x "com/zz/*" -x "META-INF/*"
+$Z -d ${j} "com/zz/sdk/demo/*"
 cd ..
 $Z -ur ./bin/${j} assets/zz_res/* assets/UPPayPluginEx.apk
 cp ./bin/${j} ${t}
