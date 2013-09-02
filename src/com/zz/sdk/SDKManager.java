@@ -300,7 +300,7 @@ public class SDKManager {
 		Application.staticAmountIndex = -1;
 		if (Application.loginName == null) {
 			Pair<String, String> account = Utils.getAccountFromSDcard(mContext);
-			Application.loginName = account.first;
+			Application.setLoginName(account.first);
 			Application.password = account.second;
 		}
 
@@ -409,7 +409,7 @@ public class SDKManager {
 			}
 		}
 		if (sdkUser != null) {
-			Application.loginName = sdkUser.loginName;
+			Application.setLoginName(sdkUser.loginName);
 			Application.password = sdkUser.password;
 		}
 		if (Application.loginName == null || "".equals(Application.loginName)) {
@@ -435,7 +435,7 @@ public class SDKManager {
 			}
 
 			if (pair != null) {
-				Application.loginName = pair.first;
+				Application.setLoginName(pair.first);
 				Application.password = pair.second;
 			}
 		}

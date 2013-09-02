@@ -100,7 +100,7 @@ public class GetDataImpl {
 		}
 		if ("0".equals(result.codes)) {
 			Logger.d("LoginName ---------------- " + loginName);
-			Application.loginName = loginName;
+			Application.setLoginName(loginName);
 			Application.isLogin = true;
 			mSdkUser.autoLogin = autoLogin;
 			mSdkUser.password = password;
@@ -163,7 +163,7 @@ public class GetDataImpl {
 			Result result = (Result) JsonUtil.parseJSonObject(Result.class,
 					json);
 			if (result != null && "0".equals(result.codes)) {
-				Application.loginName = result.username;
+				Application.setLoginName(result.username);
 				Application.isLogin = true;
 				mSdkUser = new SdkUser();
 				mSdkUser.loginName = result.username;
@@ -213,7 +213,7 @@ public class GetDataImpl {
 		}
 		Logger.d("register loginName -> " + loginName);
 		if ("0".equals(result.codes)) {
-			Application.loginName = loginName;
+			Application.setLoginName(loginName);
 			Application.isLogin = true;
 			mSdkUser.autoLogin = 1;
 			mSdkUser.password = password;
@@ -258,7 +258,7 @@ public class GetDataImpl {
 		mSdkUser.password = Utils.md5Encode(oldPassword);
 
 		ArrayList<BasicNameValuePair> list = new ArrayList<BasicNameValuePair>();
-		list.add(new BasicNameValuePair("loginName", Application.loginName));
+		list.add(new BasicNameValuePair("loginName", Application.getLoginName()));
 		list.add(new BasicNameValuePair("password", oldPassword));
 		list.add(new BasicNameValuePair("newPassword", newPassword));
 		InputStream in = doRequest(Constants.MODIFY_PWD, list, 2);
@@ -611,7 +611,7 @@ public class GetDataImpl {
 		String url = Constants.URL_SERVER_SRV + payParam.part;
 		Log.d("zz_sdk", url);
 		mSdkUser = new SdkUser();
-		mSdkUser.loginName = Application.loginName;
+		mSdkUser.loginName = Application.getLoginName();
 		InputStream in = doRequest(url, all, 1);
 		if (in == null)
 			return null;
