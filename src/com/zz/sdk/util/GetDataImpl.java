@@ -265,6 +265,9 @@ public class GetDataImpl {
 	 * @return
 	 */
 	private boolean syncSdkUser() {
+		// 更新用户数据到全局变量 
+		Application.password = mSdkUser.password;
+		
 		SdkUserTable t = SdkUserTable.getInstance(mContext);
 		// 将用户名保存到sdcard
 		Utils.writeAccount2SDcard(mContext, mSdkUser.loginName, mSdkUser.password);
