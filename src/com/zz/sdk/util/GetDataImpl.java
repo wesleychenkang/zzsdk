@@ -250,15 +250,17 @@ public class GetDataImpl {
 	 * 
 	 * @param newPassword
 	 *            新密码
+	 * @param user 用户名 
+	 * @param pw 旧密码
 	 * @return 修改密码结果
 	 */
-	public Result modifyPassword(String newPassword) {
-		String oldPassword = Application.password;
+	public Result modifyPassword(String user, String pw, String newPassword) {
+		String oldPassword = pw;
 		mSdkUser.newPassword = Utils.md5Encode(newPassword);
 		mSdkUser.password = Utils.md5Encode(oldPassword);
 
 		ArrayList<BasicNameValuePair> list = new ArrayList<BasicNameValuePair>();
-		list.add(new BasicNameValuePair("loginName", Application.getLoginName()));
+		list.add(new BasicNameValuePair("loginName", user));
 		list.add(new BasicNameValuePair("password", oldPassword));
 		list.add(new BasicNameValuePair("newPassword", newPassword));
 		InputStream in = doRequest(Constants.MODIFY_PWD, list, 2);
@@ -284,6 +286,9 @@ public class GetDataImpl {
 	 * @return
 	 */
 	private boolean syncSdkUser() {
+		// 更新用户数据到全局变量 
+//		Application.password = mSdkUser.password;
+		
 		SdkUserTable t = SdkUserTable.getInstance(mContext);
 		// 将用户名保存到sdcard
 		Utils.writeAccount2SDcard(mContext, mSdkUser.loginName,

@@ -626,7 +626,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 							(Activity) ctx);
 					updatePasswordLayout.setConfirmListener(this);
 					updatePasswordLayout.setCloseListener(this);
-					updatePasswordLayout.setOldPassWord(Application.password);
+					updatePasswordLayout.setOldPassWord(pw);
 					updatePasswordLayout.setTag(TAG_MODIFY_LAYOUT);
 					// 清空view栈
 					// mViewStack.clear();
@@ -673,7 +673,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 					return;
 				}
 				// 执行修改密码
-				new DoModifyPWTask(ctx, newPW).execute();
+				new DoModifyPWTask(ctx, user, pw, newPW).execute();
 				break;
 			}
 		}
@@ -797,6 +797,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 	 * 
 	 */
 	class DoModifyPWTask extends AsyncTask<Void, Void, Result> {
+		private String user, pw; 
 		// 新密码
 		String newPW;
 		Context ctx;
@@ -807,11 +808,17 @@ public class LoginActivity extends Activity implements OnClickListener {
 		 * 修改密码
 		 * 
 		 * @param ctx
+		 * @param user 用户 
+		 * @param pw 密码
 		 * @param newPW
 		 *            新密码
+		 * @param newPW2 
+		 * @param newPW2 
 		 */
-		DoModifyPWTask(Context ctx, String newPW) {
+		DoModifyPWTask(Context ctx, String user, String pw, String newPW) {
 			check = false;
+			this.user = user;
+			this.pw = pw;
 			this.ctx = ctx;
 			this.newPW = newPW.trim();
 			mDialog = new CustomDialog(ctx);
@@ -826,12 +833,11 @@ public class LoginActivity extends Activity implements OnClickListener {
 		protected Result doInBackground(Void... params) {
 			Result result = null;
 			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
-				String user = Application.getLoginName();
-				if (PojoUtils.isDouquUser(Application.getLoginName())) {
+				if (PojoUtils.isDouquUser(user)) {
 					result = new Result();
 					String newName = PojoUtils.getDouquBaseName(user);
 					boolean success = PojoUtils.updatePasswd(ctx, newName,
-							Application.password, newPW);
+							pw, newPW);
 					if (success) {
 						Application.password = newPW;
 						GetDataImpl.getInstance(ctx).updateLogin_passwd(newPW);
@@ -843,7 +849,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 			}
 
 			if (result == null)
-				result = GetDataImpl.getInstance(ctx).modifyPassword(newPW);
+				result = GetDataImpl.getInstance(ctx).modifyPassword(user, pw, newPW);
 			return result;
 		}
 
