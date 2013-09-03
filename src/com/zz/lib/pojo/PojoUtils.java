@@ -427,8 +427,8 @@ public class PojoUtils {
 			return "密码的长度太长超过20位";
 		} else if (getChinese(passwd)) {
 			return "密码不能包含中文";
-		} else if (!passwd.matches("^(?!_)(?!.*?_$)[a-zA-Z0-9]+$")) {
-			return "密码中只能包含数字和字母";
+			// } else if (!passwd.matches("^(?!_)(?!.*?_$)[a-zA-Z0-9]+$")) {
+			// return "密码中只能包含数字和字母";
 		}
 		return null;
 	}
