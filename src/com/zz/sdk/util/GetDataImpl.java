@@ -164,6 +164,7 @@ public class GetDataImpl {
 					json);
 			if (result != null && "0".equals(result.codes)) {
 				Application.setLoginName(result.username);
+				Application.password = result.password;
 				Application.isLogin = true;
 				mSdkUser = new SdkUser();
 				mSdkUser.loginName = result.username;
@@ -214,6 +215,7 @@ public class GetDataImpl {
 		Logger.d("register loginName -> " + loginName);
 		if ("0".equals(result.codes)) {
 			Application.setLoginName(loginName);
+			Application.password = password;
 			Application.isLogin = true;
 			mSdkUser.autoLogin = 1;
 			mSdkUser.password = password;
