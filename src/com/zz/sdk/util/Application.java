@@ -18,6 +18,9 @@ public class Application {
 	public static String loginName;
 
 	public static String password;
+
+	private static String sGameUser;
+	private static String sExLoginName;
 	/**
 	 * 支付渠道信息
 	 */
@@ -45,7 +48,7 @@ public class Application {
 	/** 固定支付金额的通道索引, -1为空 */
 	public static int staticAmountIndex;
 	public static int payStatusCancel = 0;
-	/**冲值完成后是否关闭充值平台*/
+	/** 冲值完成后是否关闭充值平台 */
 	public static boolean isCloseWindow;
 	public static int isAlreadyCB = 0;
 	public static int isMessagePage = 0;
@@ -63,5 +66,52 @@ public class Application {
 	public static synchronized void SetLoginName(String name) {
 		isLogin = (name != null);
 		loginName = name;
+	}
+
+	public static synchronized boolean hasExLoginName() {
+		return sExLoginName != null;
+	}
+
+	public static synchronized String getExLoginName() {
+		return sExLoginName == null ? loginName : sExLoginName;
+	}
+
+	/** 更新密码 */
+	public static synchronized void updatePasswd(String newPasswd) {
+		setLoginInfo(loginName, newPasswd, sGameUser, sExLoginName);
+	}
+
+	/**
+	 * 设置用户登录信息
+	 * 
+	 * @param loginName
+	 *            用户名
+	 * @param passwd
+	 *            密码
+	 */
+	public static synchronized void setLoginInfo(String loginName, String passwd) {
+		setLoginInfo(loginName, passwd, null, null);
+	}
+
+	/**
+	 * 设置用户的登录信息
+	 * 
+	 * @param loginName
+	 *            用户名
+	 * @param passwd
+	 *            密码
+	 * @param gameUser
+	 *            游戏用户，一般情况下与 loginName 一致
+	 * @param exLoginName
+	 *            第三方登录名，一般情况下与 loginName 一致
+	 */
+	public static synchronized void setLoginInfo(String loginName,
+			String passwd, String gameUser, String exLoginName) {
+		Application.loginName = loginName;
+		Application.password = passwd;
+		if (sGameUser != gameUser)
+			sGameUser = gameUser;
+		if (sExLoginName != exLoginName)
+			sExLoginName = exLoginName;
 	}
 }
