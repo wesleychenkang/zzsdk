@@ -22,23 +22,22 @@
 	<!-- 导入 zzsdk 的配置  -->
 	<property file="zzsdk.config.properties"/>
 	
-	<property name="zzsdk.lib" value="${ant.project.name}-lib" />
-	<property name="zzsdk.demo" value="${ant.project.name}-demo" />
-	<property name="zzsdk.javadoc.dir" location="javadoc" />
-	
-	
 	<macrodef name="do-set-include-or-exclude" description="根据条件是否为真，分别取后缀 .i .e 的变量赋值">
 		<attribute name="key-value" />
+		<attribute name="name" />
 		<attribute name="value" />
 		<attribute name="else-value" />
-		<attribute name="name" />
 		<sequential>
-			<condition property="@{name}.i" value="@{value}" else="@{else-value}">
-			    <istrue value="@{key-value}" />
-			</condition>
-			<condition property="@{name}.e" value="@{value}" else="@{else-value}">
-			    <isfalse value="@{key-value}" />
-			</condition>
+		    <if condition="@{key-value}">
+		        <then>
+		            <property name="@{name}.i" value="@{value}" />
+		            <property name="@{name}.e" value="@{else-value}" />
+		        </then>
+		        <else>
+		            <property name="@{name}.i" value="@{else-value}" />
+		            <property name="@{name}.e" value="@{value}" />
+		        </else>
+		    </if>
 		</sequential>
 	</macrodef>
 	
@@ -94,7 +93,10 @@
 		</sequential>
 	</macrodef>
 	
+	<!-- zzsdk的编译变量配置 -->
 	<target name="-set-zzsdk-mode" depends="-set-release-mode, -release-obfuscation-check">
+	    
+	    <!-- 读取 AndroidManifest.xml 中配置 -->
 	   	<xpath input="${manifest.abs.file}" expression="/manifest/@android:versionCode"
 	   	    output="zzsdk.config.version.code" default=""/>
 	   	<xpath input="${manifest.abs.file}" expression="/manifest/@android:versionName"
@@ -107,6 +109,9 @@
 		<echo level="info">读取 [${manifest.abs.file}] 中的 versionCode=${zzsdk.config.version.code} 和 versionName=${zzsdk.config.version.name} ... </echo>
 		
 		<echo level="info">设置 sdk 的资源清单...</echo>
+		<property name="zzsdk.lib" value="${ant.project.name}-lib" />
+		<property name="zzsdk.demo" value="${ant.project.name}-demo" />
+		<property name="zzsdk.javadoc.dir" location="javadoc" />
 		<property name="zzsdk.files.asssets" value="zz_res/* UPPayPluginEx.apk" />
 		<property name="zzsdk.files.asssets.vertical" value="zz_res/v/*" />
 		<property name="zzsdk.files.asssets.360" value="pro.jar res/**" />
@@ -122,10 +127,10 @@
 		<property name="zzsdk.release.dir" location="${out.absolute.dir}" />
 		
 		<!-- 360开关 -->
-		<do-isset-property name="zzsdk.360.enabled" default="false" />
+		<property name="zzsdk.360.enabled" value="false" />
 		
 		<!-- 逗趣开关 -->
-		<do-isset-property name="zzsdk.douqu.enabled" default="false" />
+		<property name="zzsdk.douqu.enabled" value="false" />
 	</target>
 	
 	<target name="-set-zzsdk-mode-check">
@@ -212,6 +217,12 @@
 	</target>
 	
 	<target name="-zzsdk-lib-sign" depends="-obfuscate_code" description="签名库">
+	    <fail message="SDK库只可以生成一次 ${zzsdk.lib.jar.file}">
+	        <condition>
+	            <isset property="zzsdk.lib.jar.file" />
+	        </condition>
+	    </fail>
+	    
 		<property name="zzsdk.lib.jar.file" location="${out.absolute.dir}/${zzsdk.lib}.jar" />
 		<delete file="${zzsdk.lib.jar.file}"/>
 	    <do-sign-zzsdk-lib unaligned-file="${obfuscated.jar.file}" signed-file="${zzsdk.lib.jar.file}" />
@@ -409,22 +420,74 @@
 			    </zip>
 	        </sequential>
 	    </do-only-if-file-exist>
+	    
+	    <do-only-if-file-exist path="${out.final.file}" type="file">
+	        <sequential>
+	            <echo level="info">添加 apk 包</echo>
+	            <copy file="${out.final.file}" tofile="${zzsdk.config.release.dir}/${ant.project.name}-demo.apk" />
+	        </sequential>
+	    </do-only-if-file-exist>
 	</target>
 	
-	<!-- 打包 逗趣 库 -->
-	<target name="douqu" depends="-set-zzsdk-mode-douqu, tolib">
+	<target name="douqu" depends="-set-zzsdk-mode-douqu, tolib" description="打包 逗趣 库">
 	</target>
 
-	
-	<!-- 打包 360 库 -->
-	<target name="360" depends="-set-zzsdk-mode-360, tolib">
+	<target name="360" depends="-set-zzsdk-mode-360, tolib" description="打包 360 库">
 	</target>
 	
-	<target name="tolib" depends="-obfuscate_code, -zzsdk-demo-package-release" >
+	<target name="tolib" depends="-obfuscate_code, -zzsdk-demo-package-release" description="打包成 sdk 库" >
 		<echo>versionCode: ${zzsdk.config.version.code}</echo>
 		<echo>versionName: ${zzsdk.config.version.name}</echo>
 	</target>
+	
+	<!-- 打包 APK -->
+	
+	<target name="-zzsdk-dex" depends="" description="-zzsdk-lib-sign">
+		<!-- input for dex will be proguard's output -->
+		<property name="out.dex.input.absolute.dir" location="${out.absolute.dir}/original-dex.jar" />
+		<delete file="${out.dex.input.absolute.dir}" />
+		<jar destfile="${out.dex.input.absolute.dir}">
+			<zipfileset src="${zzsdk.lib.jar.file}" />
+			<fileset  dir="${out.classes.absolute.dir}" >
+				<include name="R.java.d" />
+				<include name="${zzsdk.files.class.demo}" />
+				<include name="${out.classes.zzsdk.douqu.e}" />
+				<include name="${out.classes.zzsdk.360.e}" />
+			</fileset>
+		</jar>
+		<path id="out.dex.jar.input.ref">
+			<path refid="project.all.jars.path" />
+		</path> 
+		<!-- 将 jar 转成 dex -->
+		<dex-helper />
+	</target>
+	<target name="zzsdk-apk" depends="-zzsdk-dex,-package-resources" description="打包成 debug 版本 apk">
+		<apkbuilder
+				outfolder="${out.absolute.dir}"
+				resourcefile="${resource.package.file.name}"
+				apkfilepath="${out.packaged.file}"
+				debugpackaging="true"
+				debugsigning="true"
+				verbose="${verbose}"
+				hascode="${manifest.hasCode}"
+				previousBuildType="${build.last.is.packaging.debug}/${build.last.is.signing.debug}"
+				buildType="true/true">
+			<dex path="${intermediate.dex.file}"/>
+			<sourcefolder path="${source.absolute.dir}"/>
+			<jarfile refid="project.all.jars.path" />
+			<nativefolder path="${native.libs.absolute.dir}" />
+			<nativefolder refid="project.library.native.folder.path" />
+		</apkbuilder>
+		<zipalign-helper in.package="${out.packaged.file}" out.package="${out.final.file}" />
+	</target>
 
+	
+	<target name="zzsdk" depends="tolib, zzsdk-apk, install, zzsdk-release" description="完整的发布，即 tolib, zzsdk-apk, install, zzsdk-release">	    
+	</target>
+	    
+	
+	<!-- 生成 JAVADOC -->
+	
 	<target name="javadoc" description="生成java文档">
 	    <path id="javadoc.classpath">
 			<fileset dir="libs">
