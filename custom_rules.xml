@@ -446,9 +446,7 @@
 	    <do-only-if-file-exist path="template/file_list.txt" type="file">
 	        <sequential>
 	            <echo level="info">添加文件说明</echo>
-	            <copy todir="${zzsdk.config.release.dir}" >
-	                <fileset dir="template"  includes="file_list.txt" /> 
-                </copy>
+	            <copy file="template/file_list.txt"  tofile="${zzsdk.config.release.dir}/文件说明.txt" />
 	        </sequential>
 	    </do-only-if-file-exist>
 	    
