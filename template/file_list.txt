@@ -1,0 +1,14 @@
+SDK版本发布文件清单说明
+=======================
+
+
+* zzsdk-lib.jar        - SDK 库文件。放置在游戏工程的 libs 目录下。
+
+* zzsdk-lib-assets.jar - ASSETS 资源。可以在工程目录下直接解压或放置在游戏工程的 libs 目录下。
+
+* zzsdk-lib-exlibs.zip - 第三方库文件。在工程目录下直接解压。
+* zzsdk-lib-exlibs.jar - 第三方库文件。放置在游戏工程的 libs 目录下。是 zzsdk-lib-exlibs.zip 的合集版本，两者之间只能使用一个。
+
+* zzsdk-demo.apk       - 演示示例 APK。可直接安装；
+
+* zzsdk-demo.zip       - 示例工程。可以导入 eclipse 或直接编译。
