@@ -161,15 +161,6 @@
 		<property name="zzsdk.is.mode.set" value="true"></property>
 	</target>
 	
-	<target name="-set-zzsdk-mode-360"> 
-		<echo>设置 360 的资源...</echo>
-		<property name="zzsdk.360.enabled" value="true"/>
-	</target>
-	
-	<target name="-set-zzsdk-mode-douqu">
-		<property name="zzsdk.douqu.enabled" value="true"/>
-	</target> 
-
 	<target name="-obfuscate_code" depends="-set-zzsdk-mode,-update-zzsdk-config,-post-build,-compile" description="自定义方式混淆">
 		<property name="obfuscate.absolute.dir" location="${out.absolute.dir}/proguard" />
 		<property name="preobfuscate.jar.file" value="${obfuscate.absolute.dir}/original.jar" />
@@ -474,10 +465,24 @@
 	    </do-only-if-file-exist>
 	</target>
 	
-	<target name="douqu" depends="-set-zzsdk-mode-douqu, tolib" description="打包 逗趣 库">
+	<target name="douqu" description="设置 逗趣 模式">
+		<fail message="不能重复设置 逗趣  模式！">
+		    <condition>
+		        <isset property="zzsdk.douqu.enabled" />
+		    </condition>
+		</fail>
+		<echo>设置 逗趣  模式...</echo>
+		<property name="zzsdk.douqu.enabled" value="true"/>
 	</target>
 
-	<target name="360" depends="-set-zzsdk-mode-360, tolib" description="打包 360 库">
+	<target name="360" description="设置 360 模式">
+		<fail message="不能重复设置 360 模式！">
+		    <condition>
+		        <isset property="zzsdk.360.enabled" />
+		    </condition>
+		</fail>
+		<echo>设置 360 模式...</echo>
+		<property name="zzsdk.360.enabled" value="true"/>
 	</target>
 	
 	<target name="tolib" depends="-obfuscate_code, -zzsdk-demo-package-release" description="打包成 sdk 库" >
