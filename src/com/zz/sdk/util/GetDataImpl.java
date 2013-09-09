@@ -101,6 +101,7 @@ public class GetDataImpl {
 		if ("0".equals(result.codes)) {
 			Logger.d("LoginName ---------------- " + loginName);
 			Application.setLoginName(loginName);
+			Application.password = password;
 			Application.isLogin = true;
 			mSdkUser.autoLogin = autoLogin;
 			mSdkUser.password = password;
@@ -288,9 +289,6 @@ public class GetDataImpl {
 	 * @return
 	 */
 	private boolean syncSdkUser() {
-		// 更新用户数据到全局变量 
-//		Application.password = mSdkUser.password;
-		
 		SdkUserTable t = SdkUserTable.getInstance(mContext);
 		// 将用户名保存到sdcard
 		Utils.writeAccount2SDcard(mContext, mSdkUser.loginName,
