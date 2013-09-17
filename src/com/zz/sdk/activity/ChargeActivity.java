@@ -400,9 +400,6 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 					dialog.setCancelable(false);
 				}
 				if (Application.isCloseWindow) {
-					if (resultDialog != null) {
-						resultDialog.dismiss();
-					}
 					ChargeActivity.this.finish();
 				}
 				break;
@@ -578,6 +575,11 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 
 	/** 清除所有缓存对象 */
 	private void clean() {
+		if (resultDialog != null && resultDialog.isShowing()) {
+			resultDialog.dismiss();
+			resultDialog = null;
+		}
+		
 		instance = null;
 		dialog = null;
 		mPayChannel = null;
