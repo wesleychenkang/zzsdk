@@ -207,7 +207,7 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 		mUrlGuard = null;
 		mType = -1;
 		if (mWebView != null) {
-			mWebView.destroy();
+//			mWebView.destroy();
 			mWebView = null;
 		}
 	}
