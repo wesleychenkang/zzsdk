@@ -950,14 +950,14 @@ public class LoginActivity extends Activity implements OnClickListener {
 			user = user.trim();
 		}
 		if (user == null || user.length() < 6) {
-			des = "帐号至少6位";
+			des = "帐号长度至少6位";
 		} else if (!user.matches("^(?!_)(?!.*?_$)[a-zA-Z0-9_]+$")) {
 			des = "帐号必须由字母、数字或下划线组成,并以数字或字母开头";
 			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
 				des += "；\r或使用 CMGE 通行证登录";
 			}
 		} else if (user.length() > 45) {
-			des = "账号长度太长";
+			des = "账号长度不能超过45位";
 		} else {
 			result = true;
 		}
@@ -978,13 +978,13 @@ public class LoginActivity extends Activity implements OnClickListener {
 			pw = pw.trim();
 		}
 		if (pw == null || pw.length() < 6) {
-			des = "密码不能少于6位";
+			des = "密码长度至少6位";
 		} else if (getChinese(pw)) {
 			des = "密码不能包含中文";
 		} else if (!pw.matches("^(?!_)(?!.*?_$)[a-zA-Z0-9]+$")) {
 			des = "密码中只能包含数字和字母";
 		} else if (pw.length() > 45) {
-			des = "密码的长度太长超过45位";
+			des = "密码长度不能超过45位";
 		} else {
 			result = true;
 		}

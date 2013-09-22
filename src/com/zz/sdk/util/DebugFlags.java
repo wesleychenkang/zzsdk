@@ -1,7 +1,9 @@
 package com.zz.sdk.util;
 
+import com.zz.sdk.BuildConfig;
+
 public class DebugFlags {
-	public static final boolean DEBUG = false;
+	public static final boolean DEBUG = BuildConfig.DEBUG;
 	
 	/** 测试：让支付的取消替换为成功 */
 	public static final boolean DEBUG_PAY_CANCEL_AS_SUCCESS = false;
