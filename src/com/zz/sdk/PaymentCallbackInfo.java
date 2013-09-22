@@ -2,6 +2,15 @@ package com.zz.sdk;
 
 /**
  * 充值回调信息
+ * <p>
+ * <b><font size=4 >说明</font></b>：
+ * <ul>
+ * <li>对于如充值卡等依赖<font size=4
+ * color="#c02040">第三方充值平台</font>的充值方式，SDK并不能实时判断此次交易是否有效。</li>
+ * <li>SDK告诉客户端的 {@link #statusCode} 只作为参考，SDK会返回游戏 {@link #cmgeOrderNumber}
+ * ，<font color="#00a000">拿这个到游戏服务器去确认一次</font>，这个结果才对。
+ * <li>对于单机游戏没有服务器的，请注意相关<font size=4 color="#ff0000">漏单</font>风险。</li>
+ * </ul>
  * 
  * @author nxliao
  * 
