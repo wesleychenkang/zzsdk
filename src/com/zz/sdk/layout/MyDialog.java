@@ -22,6 +22,11 @@ import android.widget.TextView;
 
 public class MyDialog extends Dialog{
 	TextView textView;
+	
+	public static final String TIP_SUCCESS = "充值正在进行中，请稍后在游戏中查看，一般1-10分钟到账，如未到账，请联系客服。"
+			+ "祝您游戏愉快！";
+	public static final String TIP_FAILED = "充值未到账！请立即联系客服解决问题。"
+			+ "祝您游戏愉快！";
 
 	public MyDialog(Activity activity, boolean isSucc) {
 		super(activity);
@@ -40,11 +45,9 @@ public class MyDialog extends Dialog{
 		textView.setAutoLinkMask(Linkify.PHONE_NUMBERS);
 		textView.setLinkTextColor(0xffeedaaf);
 		if (isSucc) {
-			textView.setText("充值正在进行中，请稍后在游戏中查看，一般1-10分钟到账，如未到账，请联系客服。"
-					+ "祝您游戏愉快！");
+			textView.setText(TIP_SUCCESS);
 		} else {
-			textView.setText("充值未到账！请立即联系客服解决问题。"
-					+ ",祝您游戏愉快！");
+			textView.setText(TIP_FAILED);
 		}
 		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-2, -2);
 		lp.rightMargin =DimensionUtil.dip2px(activity, 25);
