@@ -913,6 +913,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 				isSendMessage = true;
 			} else {
 				SMSUtil.hideDialog();
+				showPayResultDialog(success);
 				sendSmsFeedback();
 				isSendMessage = true;
 			}
