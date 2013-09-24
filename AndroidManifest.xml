@@ -103,7 +103,11 @@
             android:value="M1001A" />
         <meta-data
             android:name="PROJECT_ID"
-            android:value="P10003A" />
+            android:value="P10002" />
+       <meta-data 
+           android:name="PRODUCT_ID"
+           android:value="D10002"
+           />
         <activity android:name=".activity.PayOnlineActivity"
             android:exported="false"
             android:configChanges="orientation|keyboardHidden|screenSize"
