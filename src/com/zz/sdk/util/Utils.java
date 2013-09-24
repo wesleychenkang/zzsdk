@@ -1,16 +1,12 @@
 package com.zz.sdk.util;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
@@ -20,12 +16,12 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.codec.binary.Base64;
+import org.apaches.commons.codec.binary.Base64;
+import org.apaches.commons.codec.digest.DigestUtils;
 
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -67,6 +63,8 @@ public class Utils {
 	private static String CACHE_PROJECT_ID = null;
 
 	private static String CACHE_GAME_SERVER_ID = null;
+	
+	private static String CACHE_PRODUCT_ID = null;
 
 	static {
 		String state = Environment.getExternalStorageState();
@@ -108,7 +106,27 @@ public class Utils {
 		}
 		return s;
 	}
-
+  
+	/**
+	 * md5 簽名
+	 * @param s
+	 * @return
+	 */
+	public static String encodeHexMd5(String s) {
+		if (s == null) {
+			return "";
+		}
+		try {
+			
+			return DigestUtils.md5Hex(s);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Logger.d("md5 encode exception");
+		}
+		return s;
+	}
+	
+	
 	/**
 	 * 读取手机唯一标识
 	 * 
@@ -300,7 +318,32 @@ public class Utils {
 			return CACHE_PROJECT_ID;
 		}
 	}
-
+   public static synchronized String getProductId(Context cxt){
+	   if (null == CACHE_PRODUCT_ID) {
+			String productId = null;
+			try {
+				ApplicationInfo appInfo;
+				appInfo = cxt.getPackageManager().getApplicationInfo(
+						cxt.getPackageName(), PackageManager.GET_META_DATA);
+				if (appInfo != null && appInfo.metaData != null) {
+					productId = appInfo.metaData
+							.getString(Constants.K_PRODUCT_ID);
+				}
+				CACHE_PRODUCT_ID = productId;
+			} catch (Exception e) {
+				Logger.d("read PROJECT_ID error!");
+				e.printStackTrace();
+			}
+			return productId;
+		} else {
+			return CACHE_PRODUCT_ID;
+		}
+	  
+	
+	  
+   }
+	
+	
 	/**
 	 * 获取 游戏服务器ID
 	 * 

@@ -11,10 +11,10 @@ public final class Constants {
 		LOGIN, CTEN, CUNION, CALI, CYEE
 	}
 	/** 服务器 */
-	public static final String URL_SERVER = "http://andrs.tisgame.com/"; // 内外网正式
+	//public static final String URL_SERVER = "http://andrs.tisgame.com/"; // 内外网正式
 	// public static final String URL_SERVER = "http://testsdk.kkfun.cn:8081/";
 	// //外网测试
-	// public static final String URL_SERVER = "http://and124.sdksrv.com/";
+    public static final String URL_SERVER = "http://and124.sdksrv.com/";
 	// //内网测试
 	// public static final String URL_SERVER = "http://10.0.0.23:8080/";
 	// //文哥测试端口
@@ -28,6 +28,10 @@ public final class Constants {
 	public static final String URL_LBS = "http://ugc.map.soso.com/rgeoc/?lnglat=%s,%s&reqsrc=wb";
 
 	public static final String ASSETS_RES_PATH = "zz_res/";
+	public static final String SING = "sign";
+	public static final String E = "__e__";
+	public static final String MARKE ="12345678";
+	public static final String PRODUCTID ="productId";
 
 	/** 垂直屏幕下的资源(不一定有多套资源) */
 	public static final String ASSETS_RES_PATH_VERTICAL = ASSETS_RES_PATH
@@ -40,7 +44,7 @@ public final class Constants {
 			+ (ZZSDKConfig.SUPPORT_360SDK ? "/360" : "");
 	public static final String ACCOUNT_PASSWORD_FILE = "ZM.DAT.";
 
-	public static final String URL_SERVER_SRV = URL_SERVER + "andsrv/";
+	public static final String URL_SERVER_SRV = URL_SERVER + "srv/";
 
 	public static final String QUICK_LOGIN_REQ = URL_SERVER_SRV + "alg.lg";
 
@@ -81,7 +85,8 @@ public final class Constants {
 	 * 键: 项目ID,配置于 AndroidManifest.xml
 	 */
 	public static final String K_PROJECT_ID = "PROJECT_ID";
-
+    
+    public static final String K_PRODUCT_ID = "PRODUCT_ID";
 	/**
 	 * 键: 游戏服务ID,配置于 AndroidManifest.xml
 	 */

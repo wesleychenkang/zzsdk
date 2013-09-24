@@ -3,7 +3,6 @@ package com.zz.sdk.layout;
 import android.app.Activity;
 import android.text.Html;
 import android.text.util.Linkify;
-import android.util.Log;
 import android.view.Gravity;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -12,7 +11,6 @@ import android.widget.TextView;
 
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
-import com.zz.sdk.util.Application;
 import com.zz.sdk.util.DimensionUtil;
 import com.zz.sdk.util.Utils;
 

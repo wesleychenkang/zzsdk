@@ -16,10 +16,11 @@ public class LoginCallbackInfo {
 	public int statusCode;
 	/** 登录的用户名 */
 	public String loginName;
-
+    
+    public String sdkuserid;
 	@Override
 	public String toString() {
 		return "LoginCallbackInfo [statusCode=" + statusCode + ", loginName="
-				+ loginName + "]";
+				+ loginName +", sdkuserid="+sdkuserid+ "]";
 	}
 }

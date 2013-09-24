@@ -366,6 +366,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 			LoginCallbackInfo loginCallbackInfo = new LoginCallbackInfo();
 			loginCallbackInfo.statusCode = LoginCallbackInfo.STATUS_SUCCESS;
 			loginCallbackInfo.loginName = Application.loginName;
+			loginCallbackInfo.sdkuserid = result.sdkuserid;
 			tryNotify(MSG_STATUS.SUCCESS, loginCallbackInfo);
 			Logger.d("has run send message-------------");
 		}

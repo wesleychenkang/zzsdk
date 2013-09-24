@@ -1,13 +1,5 @@
 package com.zz.sdk.layout;
 
-import com.zz.sdk.activity.ChargeActivity;
-import com.zz.sdk.util.Application;
-import com.zz.sdk.util.BitmapCache;
-import com.zz.sdk.util.Constants;
-import com.zz.sdk.util.DialogUtil;
-import com.zz.sdk.util.DimensionUtil;
-import com.zz.sdk.util.Utils;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.graphics.Color;
@@ -19,6 +11,14 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.zz.sdk.activity.ChargeActivity;
+import com.zz.sdk.util.Application;
+import com.zz.sdk.util.BitmapCache;
+import com.zz.sdk.util.Constants;
+import com.zz.sdk.util.DialogUtil;
+import com.zz.sdk.util.DimensionUtil;
+import com.zz.sdk.util.Utils;
 
 public class MyDialog extends Dialog{
 	TextView textView;
