@@ -47,9 +47,9 @@ public class PayChannel implements JsonParseInterface {
 		CHANNEL_NAME[PAY_TYPE_ALIPAY] = "支付宝";
 		CHANNEL_NAME[PAY_TYPE_UNMPAY] = "银联卡";
 		CHANNEL_NAME[PAY_TYPE_TENPAY] = "财付通";
-		CHANNEL_NAME[PAY_TYPE_YEEPAY_LT] = "联通充值卡";
-		CHANNEL_NAME[PAY_TYPE_YEEPAY_YD] = "移动充值卡";
-		CHANNEL_NAME[PAY_TYPE_KKFUNPAY] = "话费";
+		CHANNEL_NAME[PAY_TYPE_YEEPAY_LT] = "联通卡";
+		CHANNEL_NAME[PAY_TYPE_YEEPAY_YD] = "移动卡";
+		CHANNEL_NAME[PAY_TYPE_KKFUNPAY] = "短信";
 	};
 	
 	/** 支付渠道ID */

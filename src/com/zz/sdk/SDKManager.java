@@ -13,6 +13,7 @@ import com.zz.sdk.entity.SdkUser;
 import com.zz.sdk.entity.SdkUserTable;
 import com.zz.sdk.util.Application;
 import com.zz.sdk.util.GetDataImpl;
+import com.zz.sdk.util.ResConstants;
 import com.zz.sdk.util.Utils;
 
 /**
@@ -84,6 +85,8 @@ public class SDKManager {
 		// saveProjectIdToContext();
 		// }
 		// });
+		
+		ResConstants.init(ctx);
 	}
 
 	private void init() {

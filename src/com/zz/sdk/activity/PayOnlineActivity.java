@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -265,10 +266,10 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 		}
 
 		@Override
-		protected void initUI(Activity activity) {
-			super.initUI(activity);
+		protected void initUI(Context ctx) {
+			super.initUI(ctx);
 
-			WebView v = new WebView(activity);
+			WebView v = new WebView(ctx);
 			v.setId(K_ID_WEBVIEW);
 			LayoutParams lp = new LayoutParams(-1, -1);
 			mSubject.addView(v, lp);

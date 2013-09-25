@@ -1,6 +1,7 @@
 package com.zz.sdk.layout;
 
 import android.app.Activity;
+import android.content.Context;
 import android.text.Html;
 import android.text.util.Linkify;
 import android.util.Log;
@@ -33,48 +34,48 @@ public class ChargeSMSDecLayout extends ChargeAbstractLayout {
 	}
 
 	@Override
-	protected void initUI(Activity activity) {
+	protected void initUI(Context ctx) {
 		// TODO Auto-generated method stub
-		super.initUI(activity);
-		ScrollView scrollView = new ScrollView(activity);
+		super.initUI(ctx);
+		ScrollView scrollView = new ScrollView(ctx);
 		LayoutParams lp = new LayoutParams(-1, -1);
 
 		mSubject.addView(scrollView, lp);
 
-		LinearLayout parent = new LinearLayout(activity);
+		LinearLayout parent = new LinearLayout(ctx);
 		lp = new LayoutParams(-1, -1);
-		lp.setMargins(DimensionUtil.dip2px(activity, 10),
-				DimensionUtil.dip2px(activity, 10),
-				DimensionUtil.dip2px(activity, 10),
-				DimensionUtil.dip2px(activity, 10));
+		lp.setMargins(DimensionUtil.dip2px(ctx, 10),
+				DimensionUtil.dip2px(ctx, 10),
+				DimensionUtil.dip2px(ctx, 10),
+				DimensionUtil.dip2px(ctx, 10));
 		parent.setOrientation(LinearLayout.VERTICAL);
 		scrollView.addView(parent, lp);
 
-		ChargeTypeView chargeTypeView = new ChargeTypeView(activity);
+		ChargeTypeView chargeTypeView = new ChargeTypeView(ctx);
 		chargeTypeView.mPaymentDesc.setText(Html
 				.fromHtml("你已选择<font color='#ffea00'>\""
 						+ mPayChannel.channelName + "\"</font>支付"));
 		lp = new LayoutParams(-1, -2);
-		lp.leftMargin = DimensionUtil.dip2px(activity, 20);
-		lp.rightMargin = DimensionUtil.dip2px(activity, 15);
-		lp.topMargin = DimensionUtil.dip2px(activity, 10);
+		lp.leftMargin = DimensionUtil.dip2px(ctx, 20);
+		lp.rightMargin = DimensionUtil.dip2px(ctx, 15);
+		lp.topMargin = DimensionUtil.dip2px(ctx, 10);
 		parent.addView(chargeTypeView, lp);
 
-		mSMSDec = new TextView(activity);
+		mSMSDec = new TextView(ctx);
 		mSMSDec.setTextSize(18);
 		mSMSDec.setTextColor(0xff92acbc);
 		lp = new LayoutParams(-2, -2);
-		lp.leftMargin = DimensionUtil.dip2px(activity, 30);
-		lp.rightMargin = DimensionUtil.dip2px(activity, 30);
-		lp.topMargin = DimensionUtil.dip2px(activity, 30);
+		lp.leftMargin = DimensionUtil.dip2px(ctx, 30);
+		lp.rightMargin = DimensionUtil.dip2px(ctx, 30);
+		lp.topMargin = DimensionUtil.dip2px(ctx, 30);
 		parent.addView(mSMSDec, lp);
 
-		mConfirm = new Button(activity);
+		mConfirm = new Button(ctx);
 		lp = new LayoutParams(-2, -2);
 		lp.gravity = Gravity.CENTER_HORIZONTAL;
-		lp.topMargin = DimensionUtil.dip2px(activity, 30);
+		lp.topMargin = DimensionUtil.dip2px(ctx, 30);
 		mConfirm.setId(ID_NOTE);
-		mConfirm.setBackgroundDrawable(Utils.getStateListDrawable(mActivity,
+		mConfirm.setBackgroundDrawable(Utils.getStateListDrawable(mContext,
 				"renque_confim1.png", "renque_confim.png"));
 		mConfirm.setTextSize(18);
 		parent.addView(mConfirm, lp);

@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.text.Html;
 import android.view.Gravity;
 import android.view.View;
@@ -23,6 +24,7 @@ import com.zz.sdk.entity.SMSChannelMessage;
 import com.zz.sdk.util.Application;
 import com.zz.sdk.util.DimensionUtil;
 import com.zz.sdk.util.Logger;
+import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.Utils;
 
 /**
@@ -52,30 +54,30 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 	}
 
 	@Override
-	protected void initUI(Activity activity) {
-		super.initUI(activity);
+	protected void initUI(Context ctx) {
+		super.initUI(ctx);
 
-		final boolean isVertical = Utils.isOrientationVertical(activity);
+		final boolean isVertical = Utils.isOrientationVertical(ctx);
 
 		mSubject.setOrientation(1);
 
-		ChargeTypeView chargeTypeView = new ChargeTypeView(activity);
+		ChargeTypeView chargeTypeView = new ChargeTypeView(ctx);
 		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
 		chargeTypeView.mPaymentDesc.setText(Html
 				.fromHtml("你已选择<font color='#ffea00'>\""
 						+ mChannelMsg.channelName + "\"</font>支付"));
-		lp.leftMargin = DimensionUtil.dip2px(activity, 5);
-		lp.rightMargin = DimensionUtil.dip2px(activity, 10);
-		lp.topMargin = DimensionUtil.dip2px(activity, 8);
+		lp.leftMargin = DimensionUtil.dip2px(ctx, 5);
+		lp.rightMargin = DimensionUtil.dip2px(ctx, 10);
+		lp.topMargin = DimensionUtil.dip2px(ctx, 8);
 		mSubject.addView(chargeTypeView, lp);
 
-		LinearLayout ll = new LinearLayout(activity);
+		LinearLayout ll = new LinearLayout(ctx);
 		lp = new LayoutParams(-1, -1);
 		ll.setGravity(Gravity.CENTER_HORIZONTAL);
 		ll.setOrientation(LinearLayout.VERTICAL);
 		mSubject.addView(ll, lp);
 
-		TextView tv1 = new TextView(activity);
+		TextView tv1 = new TextView(ctx);
 		if (mFlag) {
 			tv1.setText("您的话费余额充足，请选择充值金额：");
 		} else {
@@ -85,41 +87,41 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 		tv1.setTextSize(20);
 		lp = new LinearLayout.LayoutParams(-2, -2);
 		lp.gravity = Gravity.LEFT;
-		lp.topMargin = DimensionUtil.dip2px(activity, 10);
-		lp.leftMargin = DimensionUtil.dip2px(activity, isVertical ? 25 : 125);
+		lp.topMargin = DimensionUtil.dip2px(ctx, 10);
+		lp.leftMargin = DimensionUtil.dip2px(ctx, isVertical ? 25 : 125);
 		ll.addView(tv1, lp);
 
-		LinearLayout ll2 = new LinearLayout(activity);
+		LinearLayout ll2 = new LinearLayout(ctx);
 		ll2.setOrientation(VERTICAL);
 		lp = new LayoutParams(-2, -2);
 		ll2.setGravity(Gravity.CENTER);
-		lp.leftMargin = DimensionUtil.dip2px(activity, isVertical ? 25 : 125);
-		lp.rightMargin = DimensionUtil.dip2px(activity, isVertical ? 25 : 125);
-		ll2.setPadding(DimensionUtil.dip2px(activity, 20),
-				DimensionUtil.dip2px(activity, 5),
-				DimensionUtil.dip2px(activity, 10),
-				DimensionUtil.dip2px(activity, 5));
+		lp.leftMargin = DimensionUtil.dip2px(ctx, isVertical ? 25 : 125);
+		lp.rightMargin = DimensionUtil.dip2px(ctx, isVertical ? 25 : 125);
+		ll2.setPadding(DimensionUtil.dip2px(ctx, 20),
+				DimensionUtil.dip2px(ctx, 5),
+				DimensionUtil.dip2px(ctx, 10),
+				DimensionUtil.dip2px(ctx, 5));
 		ll.addView(ll2, lp);
 
-		mSelAmout = new AmountGridView(activity);
-		mSelAmout.setColumnWidth(DimensionUtil.dip2px(activity, 50));
-		mSelAmout.setVerticalSpacing(DimensionUtil.dip2px(activity, 5));
-		mSelAmout.setHorizontalSpacing(DimensionUtil.dip2px(activity, 5));
+		mSelAmout = new AmountGridView(ctx);
+		mSelAmout.setColumnWidth(DimensionUtil.dip2px(ctx, 50));
+		mSelAmout.setVerticalSpacing(DimensionUtil.dip2px(ctx, 5));
+		mSelAmout.setHorizontalSpacing(DimensionUtil.dip2px(ctx, 5));
 		mSelAmout.setNumColumns(2);
 		mSelAmout.setBackgroundDrawable(null);
 		mSelAmout.setAdapter(new AmountAdapter());
 		mSelAmout.setSelector(android.R.color.transparent);
 		lp = new LinearLayout.LayoutParams(-1, -2);
-		lp.topMargin = DimensionUtil.dip2px(activity, 20);
-		lp.bottomMargin = DimensionUtil.dip2px(activity, 20);
+		lp.topMargin = DimensionUtil.dip2px(ctx, 20);
+		lp.bottomMargin = DimensionUtil.dip2px(ctx, 20);
 		ll2.addView(mSelAmout, lp);
 		
 		
 		
-		LinearLayout lpother = new LinearLayout(activity);
+		LinearLayout lpother = new LinearLayout(ctx);
 	    lpother.setOrientation(VERTICAL);
 	    lpother.setGravity(Gravity.RIGHT);
-		mOtherPay = new TextView(activity);
+		mOtherPay = new TextView(ctx);
 		mOtherPay.setText("其他支付方式");
 		mOtherPay.setId(ID_OTHERPAY);
 		mOtherPay.getPaint().setFlags(
@@ -133,27 +135,27 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 		lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 		ll2.addView(lpother, lp);
 
-		LinearLayout ll3 = new LinearLayout(activity);
+		LinearLayout ll3 = new LinearLayout(ctx);
 		lp = new LayoutParams(-2, -2);
-		lp.topMargin = DimensionUtil.dip2px(activity, 5);
+		lp.topMargin = DimensionUtil.dip2px(ctx, 5);
 		ll3.setGravity(Gravity.CENTER);
 		ll.addView(ll3, lp);
 		// 客服熱線
-		TextView helpText = new TextView(mActivity);
+		TextView helpText = new TextView(mContext);
 		lp = new LayoutParams(-2, -2);
 		helpText.setText(Application.customerServiceHotline);
 		helpText.setTextSize(14);
 		helpText.setTextColor(0xff92acbc);
-		helpText.setLineSpacing(DimensionUtil.dip2px(activity, 1), 1);
+		helpText.setLineSpacing(DimensionUtil.dip2px(ctx, 1), 1);
 		ll3.addView(helpText, lp);
 
-		TextView helpqq = new TextView(mActivity);
+		TextView helpqq = new TextView(mContext);
 		lp = new LayoutParams(-2, -2);
 		helpqq.setText(Application.customerServiceQQ);
 		helpqq.setTextSize(14);
 		helpqq.setTextColor(0xff92acbc);
-		helpqq.setLineSpacing(DimensionUtil.dip2px(activity, 1), 1);
-		lp.leftMargin = DimensionUtil.dip2px(mActivity, 10);
+		helpqq.setLineSpacing(DimensionUtil.dip2px(ctx, 1), 1);
+		lp.leftMargin = DimensionUtil.dip2px(mContext, 10);
 		ll3.addView(helpqq, lp);
 
 	}
@@ -204,9 +206,11 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 		public View getView(int position, View convertView, ViewGroup parent) {
 			TextView holder = (TextView) convertView;
 			if (holder == null) {
-				holder = new TextView(mActivity);
-				holder.setBackgroundDrawable(Utils.getStateListDrawable(
-						mActivity, "money_dx1.png", "money_dx.png"));
+				holder = new TextView(mContext);
+				Drawable d = CCImg.getStateListDrawable(mContext, CCImg.ZF_WXZ, CCImg.ZF_XZ);
+				holder.setBackgroundDrawable(d);
+//				holder.setBackgroundDrawable(Utils.getStateListDrawable(
+//						mContext, "money_dx1.png", "money_dx.png"));
 				holder.setTextSize(18);
 				holder.setGravity(Gravity.CENTER);
 				holder.setTextColor(0xff3c2110);
