@@ -43,7 +43,7 @@ public class ResConstants {
 		/** 充值中心（游戏购买入口） */
 		CC_RECHAGRE_PRICE_DESC("道具价格"), //
 		CC_RECHAGRE_COUNT_HINT("请输入数量"), //
-		CC_RECHAGRE_RATE_DESC("(1元=10卓越币)"), //
+		CC_RECHAGRE_RATE_DESC("(1元=%s卓越币)"), //
 		CC_RECHAGRE_COST_DESC("应付金额："), //
 		/** 充值金额，使用 {@link DecimalFormat} 转换 */
 		CC_RECHAGRE_COST_UNIT("##.##元"), //
@@ -89,14 +89,14 @@ public class ResConstants {
 			CC_RECHAGR_NORMAL(Color.BLACK),
 			/** 充值界面输入文本 */
 			CC_RECHAGR_INPUT(Color.DKGRAY),
-			/** 充值界面·帮助按钮文本 */
-			CC_HELP(Color.LTGRAY),
 			/** 充值界面·应付金额文本 */
 			CC_RECHAGRE_COST(0xffccaa00),
 			/** 充值界面·支付方式子项文本 */
 			CC_PAYTYPE_ITEM(Color.BLACK),
 			/** 充值界面·确认充值按钮 文本 */
-			CC_RECHARGE_COMMIT(Color.WHITE), ;
+			CC_RECHARGE_COMMIT(Color.WHITE),
+			/** 充值界面·帮助按钮 文本 */
+			CC_RECHARGE_HELP(Color.LTGRAY), ;
 
 			private int c;
 
@@ -124,7 +124,9 @@ public class ResConstants {
 			/** 充值界面·支付方式子项文本 */
 			CC_PAYTYPE_ITEM(14),
 			/** 充值界面·确认充值按钮 文本 */
-			CC_RECHARGE_COMMIT(20), ;
+			CC_RECHARGE_COMMIT(20),
+			/** 充值界面·帮助按钮 文本 */
+			CC_RECHARGE_HELP(12), ;
 
 			private float size;
 
@@ -150,7 +152,8 @@ public class ResConstants {
 			CC_GRIDVIEW_ITEM_PADDDING_LEFT(16), //
 			CC_GRIDVIEW_ITEM_PADDDING_TOP(12), //
 			CC_GRIDVIEW_ITEM_PADDDING_RIGHT(16), //
-			CC_GRIDVIEW_ITEM_PADDDING_BOTTOM(12),
+			CC_GRIDVIEW_ITEM_PADDDING_BOTTOM(12), //
+			CC_GRIDVIEW_ITEM_HEIGHT(52), //
 
 			/** 充值界面·GridView 单元格大小 */
 			CC_GRIDVIEW_COLUMN_WIDTH(96), ;

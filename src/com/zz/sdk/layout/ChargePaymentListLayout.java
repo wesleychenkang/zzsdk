@@ -26,6 +26,7 @@ import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -53,10 +54,19 @@ import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
 import com.zz.sdk.util.Utils;
 
+/**
+ * 充值列表主界面
+ * 
+ * <p>
+ * 分<b> 充值模式 </b>和<b> 购买模式 </a>
+ * 
+ * @author nxliao
+ * 
+ */
 public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 		View.OnClickListener {
-	private static final int FONT_HELP_SIZE = 12;
-	private static final int FONT_HELP_COLOR = Color.LTGRAY;
+	/** 卓越币与RMB的兑换比例 */
+	static float ZZ_COIN_RATE = 1f;
 
 	protected static final int IDC_ACT_PAY = 201301;
 	protected static final int IDC_ACT_ERR = 201302;
@@ -160,15 +170,18 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 	private void updateRechargeCost() {
 		View v = findViewById(IDC_ED_RECHARGE_COUNT);
 		if (v instanceof EditText) {
+			float count = 0;
 			String s = ((EditText) v).getText().toString().trim();
-			try {
-				float count = Float.parseFloat(s);
-				updateRechargeCost(count);
-			} catch (NumberFormatException e) {
-				if (BuildConfig.DEBUG) {
-					Logger.d("bad count:" + s);
+			if (s != null && s.length() > 0) {
+				try {
+					count = Float.parseFloat(s);
+				} catch (NumberFormatException e) {
+					if (BuildConfig.DEBUG) {
+						Logger.d("bad count:" + s);
+					}
 				}
 			}
+			updateRechargeCost(count);
 		}
 	}
 
@@ -176,7 +189,8 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 	private void updateRechargeCost(float count) {
 		View v = findViewById(IDC_TV_RECHARGE_COST);
 		if (v instanceof TextView) {
-			((TextView) v).setText(mRechargeCostFormat.format(count * 0.1f));
+			((TextView) v).setText(mRechargeCostFormat.format(count
+					* ZZ_COIN_RATE));
 		}
 	}
 
@@ -198,6 +212,15 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 		} else {
 			if (pos == mPaymentTypeChoose)
 				return;
+		}
+
+		int type = getPaychannelType(pos);
+
+		if (type < 0) {
+			if (BuildConfig.DEBUG) {
+				Logger.d("无效索引或支付列表尚未初始化");
+			}
+			return;
 		}
 
 		if (mPaymentTypeChoose != pos) {
@@ -224,7 +247,6 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 				v = vs.getNextView();
 				if (v instanceof LinearLayout) {
 					Object tag = v.getTag();
-					int type = getPaychannelType(pos);
 					if (tag == null || !(tag instanceof Integer)
 							|| ((Integer) tag).intValue() != type) {
 						((LinearLayout) v).removeAllViews();
@@ -388,11 +410,11 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 				ll2.addView(et, new LayoutParams(LayoutParams.MATCH_PARENT,
 						LayoutParams.MATCH_PARENT, 1.0f));
 				et.setId(IDC_ED_RECHARGE_COUNT);
+				et.setBackgroundDrawable(CCImg.ZF_XZ.getDrawble(ctx));
 				et.addTextChangedListener(new MyTextWatcher(
 						IDC_ED_RECHARGE_COUNT));
 				et.setInputType(EditorInfo.TYPE_CLASS_NUMBER
 						| EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
-				et.setBackgroundDrawable(CCImg.ZF_XZ.getDrawble(ctx));
 
 				ImageButton ib = new ImageButton(ctx);
 				ll2.addView(ib, new LayoutParams(LP_WW));
@@ -402,7 +424,11 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 				ib.setScaleType(ScaleType.CENTER_INSIDE);
 				ib.setOnClickListener(this);
 
-				tv = createNormalLabel(ctx, ZZStr.CC_RECHAGRE_RATE_DESC);
+				tv = createNormalLabel(ctx, null);
+				String rate = new DecimalFormat("#.##").format(ZZ_COIN_RATE);
+				String rate_desc = String.format(
+						ZZStr.CC_RECHAGRE_RATE_DESC.toString(), rate);
+				tv.setText(rate_desc);
 				ll2.addView(tv, new LayoutParams(LP_WM));
 			}
 
@@ -545,6 +571,7 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 				View rv = createView_Charge(ctx);
 				sv.addView(rv);
 
+				updateBalance(0);
 				updateRechargeCost(0);
 				updatePayType(-1);
 			}
@@ -580,28 +607,25 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 			// footer.setBackgroundColor(0x80ff0000);
 
 			TextView tvHelp = new TextView(ctx);
-			Drawable dLeft = CCImg.HELP.getDrawble(ctx);
-			tvHelp.setCompoundDrawablesWithIntrinsicBounds(dLeft, null, null,
-					null);
+			footer.addView(tvHelp, new LayoutParams(LayoutParams.MATCH_PARENT,
+					LayoutParams.WRAP_CONTENT, 1.0f));
+			tvHelp.setCompoundDrawablesWithIntrinsicBounds(
+					CCImg.HELP.getDrawble(ctx), null, null, null);
 			tvHelp.setText(ZZStr.CC_HELP_TITLE.toString());
-			tvHelp.setTextSize(TypedValue.COMPLEX_UNIT_DIP, FONT_HELP_SIZE);
-			tvHelp.setTextColor(ZZFontColor.CC_HELP.toColor());
+			tvHelp.setTextColor(ZZFontColor.CC_RECHARGE_HELP.toColor());
 			tvHelp.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
 			tvHelp.setCompoundDrawablePadding(DimensionUtil.dip2px(ctx, 8));
 			tvHelp.setPadding(DimensionUtil.dip2px(ctx, 4), 0, 0, 0);
-			lp = new LayoutParams(LayoutParams.MATCH_PARENT,
-					LayoutParams.WRAP_CONTENT, 1.0f);
-			footer.addView(tvHelp, lp);
+			ZZFontSize.CC_RECHARGE_HELP.apply(tvHelp);
 			// tvHelp.setBackgroundColor(0x8000ff00);
 
 			TextView tvDesc = new TextView(ctx);
+			footer.addView(tvDesc, new LayoutParams(LayoutParams.MATCH_PARENT,
+					LayoutParams.WRAP_CONTENT, 1.0f));
 			tvDesc.setText(ZZStr.CC_HELP_TEL.toString());
-			tvDesc.setTextSize(TypedValue.COMPLEX_UNIT_DIP, FONT_HELP_SIZE);
-			tvDesc.setTextColor(ZZFontColor.CC_HELP.toColor());
+			tvDesc.setTextColor(ZZFontColor.CC_RECHARGE_HELP.toColor());
 			tvDesc.setGravity(Gravity.CENTER);
-			lp = new LayoutParams(LayoutParams.MATCH_PARENT,
-					LayoutParams.WRAP_CONTENT, 1.0f);
-			footer.addView(tvDesc, lp);
+			ZZFontSize.CC_RECHARGE_HELP.apply(tvDesc);
 			// tvDesc.setBackgroundColor(0x800000ff);
 		}
 	}
@@ -630,6 +654,7 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 		} else {
 			mPaymentListAdapter.updatePayChannels(channelMessages);
 		}
+		updatePayType(-1);
 	}
 
 	/**
@@ -790,6 +815,7 @@ class PaymentListAdapter extends BaseAdapter {
 
 	private int mItemPaddingLeft, mItemPaddingTop, mItemPaddingRight,
 			mItemPaddingBootom;
+	private int mItemHeight;
 
 	public PaymentListAdapter(Context ctx, PayChannel[] payChannels) {
 		mContext = ctx;
@@ -797,6 +823,7 @@ class PaymentListAdapter extends BaseAdapter {
 		mItemPaddingRight = ZZDimen.CC_GRIDVIEW_ITEM_PADDDING_RIGHT.toPx();
 		mItemPaddingTop = ZZDimen.CC_GRIDVIEW_ITEM_PADDDING_TOP.toPx();
 		mItemPaddingBootom = ZZDimen.CC_GRIDVIEW_ITEM_PADDDING_BOTTOM.toPx();
+		mItemHeight = ZZDimen.CC_GRIDVIEW_ITEM_HEIGHT.toPx();
 		mPayChannels = payChannels;
 	}
 
@@ -843,6 +870,8 @@ class PaymentListAdapter extends BaseAdapter {
 			holder.setTextColor(ZZFontColor.CC_PAYTYPE_ITEM.toColor());
 			holder.setPadding(mItemPaddingLeft, mItemPaddingTop,
 					mItemPaddingRight, mItemPaddingBootom);
+			holder.setLayoutParams(new AbsListView.LayoutParams(
+					LayoutParams.MATCH_PARENT, mItemHeight));
 			ZZFontSize.CC_PAYTYPE_ITEM.apply(holder);
 		}
 		if (position == mCurPos) {
