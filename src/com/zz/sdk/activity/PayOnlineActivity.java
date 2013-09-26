@@ -15,6 +15,8 @@ import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -207,6 +209,12 @@ public class PayOnlineActivity extends Activity implements OnClickListener {
 		mUrlGuard = null;
 		mType = -1;
 		if (mWebView != null) {
+			ViewParent p = mWebView.getParent();
+			if (p != null && p instanceof ViewGroup) {
+				ViewGroup vg = (ViewGroup) p;
+				vg.removeView(mWebView);
+			}
+			mWebView.removeAllViews();
 			mWebView.destroy();
 			mWebView = null;
 		}

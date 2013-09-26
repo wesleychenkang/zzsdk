@@ -1,0 +1,574 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="lnx_rule" default="tolib">
+	
+    <!-- 
+    
+    	* ZZSDK 打包脚本 *
+    
+       By: Jason.liao(xtulnx@126.com)
+       Date: 2013-09-05
+    
+     -->
+    
+    
+	<target name="lnx-test" depends="-set-zzsdk-mode">
+	    <!-- 
+		<do-set-include-or-exclude 
+			key-value="${zzsdk.douqu.enabled}" 
+			name="out.classes.zzsdk.douqu" 
+			value="${zzsdk.files.class.douqu}" 
+			else-value="" />
+			 -->
+			 
+			 
+			 
+		<do-set-include-or-exclude key-value="${zzsdk.360.enabled}" name="out.libs.zzsdk.360" 
+			value="${zzsdk.files.libs.360}" else-value="" />
+		<jar destfile="abcd.jar" >
+			<zipfileset dir="libs" includes="${zzsdk.files.libs.all.so}" prefix="lib" />
+			<restrict>
+				<name name="**/*.class"/>
+				<archives>
+					<zips>
+						<fileset dir="libs" includes="${zzsdk.files.libs.all.jar}  ${out.libs.zzsdk.360.i}" excludes=" ${out.libs.zzsdk.360.e}"/>
+					</zips>
+				</archives>
+			</restrict>
+			<manifest>
+				<attribute name="Main-Class" value="com.acme.checksites.Main"/>
+			</manifest>
+		</jar>
+	</target>
+	
+	<!-- 导入 zzsdk 的配置  -->
+	<property file="zzsdk.config.properties"/>
+	
+	<macrodef name="do-set-include-or-exclude" description="根据条件是否为真，分别取后缀 .i .e 的变量赋值">
+		<attribute name="key-value" />
+		<attribute name="name" />
+		<attribute name="value" />
+		<attribute name="else-value" />
+		<sequential>
+		    <if condition="@{key-value}">
+		        <then>
+		            <property name="@{name}.i" value="@{value}" />
+		            <property name="@{name}.e" value="@{else-value}" />
+		        </then>
+		        <else>
+		            <property name="@{name}.i" value="@{else-value}" />
+		            <property name="@{name}.e" value="@{value}" />
+		        </else>
+		    </if>
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="do-sign-zzsdk-lib" description="将 库 包签名，需要设置成 release 模式 ">
+		<attribute name="unaligned-file" />
+		<attribute name="signed-file" />
+		<sequential>
+	        <signapk
+		          input="@{unaligned-file}"
+		          output="@{signed-file}"
+		          keystore="${key.store}"
+		          storepass="${key.store.password}"
+		          alias="${key.alias}"
+		          keypass="${key.alias.password}"/>
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="do-update-zzsdk-config-java" description="更新 ZZSDKConfig.java 中的配置项 ">
+		<attribute name="key" />
+		<attribute name="value" />
+		<sequential>
+			<echo level="info">  @{key} = @{value} </echo>
+			<replaceregexp byline="true" encoding="${java.encoding}">  
+				<regexp pattern="(static.*@{key}.*=)[^;]*;$"/>  
+				<substitution expression="\1 @{value};"/>  
+				<fileset file="${zzsdk.config.java.file}"/>  
+			</replaceregexp>
+		</sequential>
+	</macrodef>
+	
+	<target name="-update-zzsdk-config" depends="-set-zzsdk-mode" description="更新 zzsdkconfig.java">
+		<echo level="info">更新 sdk 配置类: ${zzsdk.config.java.file}</echo>
+		<do-update-zzsdk-config-java key="SUPPORT_360SDK" value="${zzsdk.360.enabled}" />
+		<do-update-zzsdk-config-java key="SUPPORT_DOUQU_LOGIN" value="${zzsdk.douqu.enabled}" />
+		<do-update-zzsdk-config-java key="VERSION_CODE" value="${zzsdk.config.version.code}" />
+		<do-update-zzsdk-config-java key="VERSION_NAME" value='"${zzsdk.config.version.name}"' />
+		<do-update-zzsdk-config-java key="VERSION_DATE" value='"${zzsdk.config.build.date}"' />
+	</target>
+	
+	
+	<macrodef name="do-isset-property" description="如果变量未设置，则赋值">
+		<attribute name="name" />
+		<attribute name="default" />
+		<sequential>
+			<if>
+				<condition >
+			        <not><isset property="@{name}" /></not>
+				</condition>
+				<then>
+					<property name="@{name}" value="@{default}"/>
+				</then>
+			</if>
+		</sequential>
+	</macrodef>
+	
+	<!-- zzsdk的编译变量配置 -->
+	<target name="-set-zzsdk-mode" depends="-set-release-mode, -release-obfuscation-check">
+	    
+	    <!-- 读取 AndroidManifest.xml 中配置 -->
+	   	<xpath input="${manifest.abs.file}" expression="/manifest/@android:versionCode"
+	   	    output="zzsdk.config.version.code" default=""/>
+	   	<xpath input="${manifest.abs.file}" expression="/manifest/@android:versionName"
+	   	    output="zzsdk.config.version.name" default=""/>
+		<!-- 编译日期 -->
+		<tstamp>  
+	    	<format property="zzsdk.config.build.date" pattern="yyyyMMdd"/> 
+		</tstamp>
+		
+		<echo level="info">读取 [${manifest.abs.file}] 中的 versionCode=${zzsdk.config.version.code} 和 versionName=${zzsdk.config.version.name} ... </echo>
+		
+		<echo level="info">设置 sdk 的资源清单...</echo>
+		<property name="zzsdk.lib" value="${ant.project.name}-lib" />
+		<property name="zzsdk.demo" value="${ant.project.name}-demo" />
+		<property name="zzsdk.javadoc.dir" location="javadoc" />
+		<property name="zzsdk.files.asssets" value="zz_res/* UPPayPluginEx.apk" />
+		<property name="zzsdk.files.asssets.vertical" value="zz_res/v/*" />
+		<property name="zzsdk.files.asssets.360" value="pro.jar res/**" />
+		<property name="zzsdk.files.class.all" value="com/zz/**/*.class" />
+		<property name="zzsdk.files.class.demo" value="com/zz/sdk/demo/**" />
+		<property name="zzsdk.files.class.douqu" value="com/zz/lib/pojo/**" />
+		<property name="zzsdk.files.class.360" value="com/zz/sdk/activity/LoginForQiFu*" />
+		<property name="zzsdk.files.demo.project" value="AndroidManifest.xml project.properties res/** .classpath .project" />
+		<property name="zzsdk.files.demo.src" value="src/com/zz/sdk/demo/**" />
+		<property name="zzsdk.files.libs.all.so" value="**/*.so" />
+		<property name="zzsdk.files.libs.all.jar" value="**/*.jar" />
+		<property name="zzsdk.files.libs.360" value="360SDK.jar" />
+		<property name="zzsdk.config.java.file"  location="src/com/zz/sdk/ZZSDKConfig.java" />
+		<property name="zzsdk.release.dir" location="${out.absolute.dir}" />
+		
+		<!-- 360开关 -->
+		<property name="zzsdk.360.enabled" value="false" />
+		
+		<!-- 逗趣开关 -->
+		<property name="zzsdk.douqu.enabled" value="false" />
+	</target>
+	
+	<target name="-set-zzsdk-mode-check">
+		<fail if="build.is.mode.set"
+				message="不能重复初始化设置！" />
+		<property name="zzsdk.is.mode.set" value="true"></property>
+	</target>
+	
+	<target name="-obfuscate_code" depends="-set-zzsdk-mode,-update-zzsdk-config,-post-build,-compile" description="自定义方式混淆">
+		<property name="obfuscate.absolute.dir" location="${out.absolute.dir}/proguard" />
+		<property name="preobfuscate.jar.file" value="${obfuscate.absolute.dir}/original.jar" />
+		<property name="obfuscated.jar.file" value="${obfuscate.absolute.dir}/obfuscated.jar" />
+
+		<!-- Add Proguard Tasks -->
+		<property name="proguard.jar" location="${android.tools.dir}/proguard/lib/proguard.jar" />
+		<taskdef name="proguard" classname="proguard.ant.ProGuardTask" classpath="${proguard.jar}" />
+
+		<!-- Set the android classpath Path object into a single property. It'll be
+			 all the jar files separated by a platform path-separator.
+			 Each path must be quoted if it contains spaces.
+		-->
+		<pathconvert property="project.target.classpath.value" refid="project.target.class.path">
+			<firstmatchmapper>
+				<regexpmapper from='^([^ ]*)( .*)$$' to='"\1\2"'/>
+				<identitymapper/>
+			</firstmatchmapper>
+		</pathconvert>
+
+		<!-- Turn the path property ${proguard.config} from an A:B:C property
+			 into a series of includes: -include A -include B -include C
+			 suitable for processing by the ProGuard task. Note - this does
+			 not include the leading '-include "' or the closing '"'; those
+			 are added under the <proguard> call below.
+		-->
+		<path id="proguard.configpath">
+			<pathelement path="${proguard.config}"/>
+		</path>
+		<pathconvert pathsep='" -include "' property="proguard.configcmd" refid="proguard.configpath"/>
+
+		<mkdir dir="${obfuscate.absolute.dir}" />
+		<delete file="${preobfuscate.jar.file}"/>
+		<delete file="${obfuscated.jar.file}"/>
+
+		<echo level="info">打包 [${out.classes.absolute.dir}] 下 class 文件... </echo>
+
+		<do-set-include-or-exclude key-value="${zzsdk.douqu.enabled}" name="out.classes.zzsdk.douqu"
+		    value="${zzsdk.files.class.douqu}" else-value="" />
+		<do-set-include-or-exclude key-value="${zzsdk.360.enabled}" name="out.classes.zzsdk.360"
+		    value="${zzsdk.files.class.360}" else-value="" />
+
+		<jar destfile="${preobfuscate.jar.file}">
+			<fileset  dir="${out.classes.absolute.dir}" >
+			    <include name="${zzsdk.files.class.all}" />
+				<include name="${out.classes.zzsdk.douqu.i}" />
+				<include name="${out.classes.zzsdk.360.i}" />
+			    <exclude name="R.java.d" />
+			    <exclude name="${zzsdk.files.class.demo}" />
+			    <exclude name="${out.classes.zzsdk.douqu.e}" />
+			    <exclude name="${out.classes.zzsdk.360.e}" />
+			</fileset>
+		</jar>
+
+		<!-- "${out.absolute.dir}/proguard.txt": 从 AndroidManifest.xml 中分析生成的配置文件，主要是保留从 Activity 等继承而来的类的构造函数 -->
+		<proguard>
+			 -include      "${proguard.configcmd}"
+			 -include      "${out.absolute.dir}/proguard.txt"
+			 -injars       ${preobfuscate.jar.file}
+			 -outjars      "${obfuscated.jar.file}"
+			 -libraryjars  ${project.target.classpath.value}
+			 -dump         "${obfuscate.absolute.dir}/dump.txt"
+			 -printseeds   "${obfuscate.absolute.dir}/seeds.txt"
+			 -printusage   "${obfuscate.absolute.dir}/usage.txt"
+			 -printmapping "${obfuscate.absolute.dir}/mapping.txt"
+		</proguard>
+	</target>
+	
+	<target name="-zzsdk-lib-sign" depends="-obfuscate_code" description="签名库">
+	    <fail message="SDK库只可以生成一次 ${zzsdk.lib.jar.file}">
+	        <condition>
+	            <isset property="zzsdk.lib.jar.file" />
+	        </condition>
+	    </fail>
+	    
+		<property name="zzsdk.lib.jar.file" location="${out.absolute.dir}/${zzsdk.lib}.jar" />
+		<delete file="${zzsdk.lib.jar.file}"/>
+	    <do-sign-zzsdk-lib unaligned-file="${obfuscated.jar.file}" signed-file="${zzsdk.lib.jar.file}" />
+	</target>
+	
+	<target name="-zzsdk-check-lib-exist">
+		<condition property="zzsdk.check.is.zzsdklib.exist">
+			<available file="${zzsdk.lib.jar.file}" />
+		</condition>
+	</target>
+	
+	<!-- 与 -zzsdk-lib-sign 只能 二 选一 -->
+	<target name="-zzsdk-lib-package" depends="-obfuscate_code" description="合并 assets 目录，打包成 zzsdk-lib.jar">
+	    <fail message="找不到混淆结果: ${obfuscated.jar.file}">
+	        <condition>
+	            <not>
+	            	<available file="${obfuscated.jar.file}" type="file" />
+	            </not>
+	        </condition>
+	    </fail>
+	    
+		<property name="zzsdk.lib.jar.file" location="${out.absolute.dir}/${zzsdk.lib}.jar" />
+	    
+		<echo level="info">合并 assets 目录，打包成目标库: ${zzsdk.lib.jar.file} ... </echo>
+		<do-set-include-or-exclude key-value="${zzsdk.360.enabled}" name="out.assets.zzsdk.360" 
+			value="${zzsdk.files.asssets.360}" else-value="" />
+		
+	    <jar destfile="${zzsdk.lib.jar.file}" >
+	        <zipfileset src="${obfuscated.jar.file}" excludes="META-INF/**"/>
+	        <zipfileset dir="${asset.dir}" prefix="assets"  
+	            includes="${zzsdk.files.asssets} ${zzsdk.files.asssets.vertical} ${out.assets.zzsdk.360.i}" 
+	            excludes="${out.assets.zzsdk.360.e}" />
+	    </jar>
+	</target>
+	
+	
+	<target name="-zzsdk-lib-package-assets" depends="-obfuscate_code" description="打包 assets 目录">	
+		<property name="zzsdk.lib.jar.file.assets" location="${out.absolute.dir}/${zzsdk.lib}-assets.jar" />
+	    
+		<echo level="info">合并 assets 目录，打包成目标库: ${zzsdk.lib.jar.file.assets} ... </echo>
+		<do-set-include-or-exclude key-value="${zzsdk.360.enabled}" name="out.assets.zzsdk.360" 
+			value="${zzsdk.files.asssets.360}" else-value="" />
+		
+		<delete file="${zzsdk.lib.jar.file.assets}"/>
+	    <jar destfile="${zzsdk.lib.jar.file.assets}" >
+	        <zipfileset dir="${asset.dir}" prefix="assets"  
+	            includes="${zzsdk.files.asssets} ${zzsdk.files.asssets.vertical} ${out.assets.zzsdk.360.i}" 
+	            excludes="${out.assets.zzsdk.360.e}" />
+	    </jar>
+	</target>
+	
+	<target name="-zzsdk-lib-package-libs" depends="-obfuscate_code" description="打包 libs 目录">	
+		<property name="zzsdk.lib.zip.file.libs" location="${out.absolute.dir}/${zzsdk.lib}-exlibs.zip" />
+	    
+		<echo level="info">合并 libs 目录，打包成 目标库: ${zzsdk.lib.zip.file.libs} ... </echo>
+		<do-set-include-or-exclude key-value="${zzsdk.360.enabled}" name="out.libs.zzsdk.360" 
+			value="${zzsdk.files.libs.360}" else-value="" />
+		
+		<delete file="${zzsdk.lib.zip.file.libs}"/>
+	    <zip destfile="${zzsdk.lib.zip.file.libs}" >
+	        <zipfileset dir="libs" 
+	            includes="${zzsdk.files.libs.all.so} ${zzsdk.files.libs.all.jar} ${out.libs.zzsdk.360.i}" 
+	            excludes="${out.libs.zzsdk.360.e}" />
+	    </zip>
+	</target>
+	
+	<target name="-zzsdk-lib-package-libs-single" depends="-obfuscate_code" description="打包 libs 目录成单一的 jar 库">
+		<property name="zzsdk.lib.jar.file.libs" location="${out.absolute.dir}/${zzsdk.lib}-exlibs.jar" />
+		<echo level="info">合并 libs 目录，打包成单一 目标库: ${zzsdk.lib.jar.file.libs} ... </echo>
+		<do-set-include-or-exclude key-value="${zzsdk.360.enabled}" name="out.libs.zzsdk.360" 
+			value="${zzsdk.files.libs.360}" else-value="" />
+		<jar destfile="${zzsdk.lib.jar.file.libs}" >
+			<zipfileset dir="libs" includes="${zzsdk.files.libs.all.so}" prefix="lib" />
+			<restrict>
+				<name name="**/*.class"/>
+				<archives>
+					<zips>
+						<fileset dir="libs" includes="${zzsdk.files.libs.all.jar}  ${out.libs.zzsdk.360.i}" excludes=" ${out.libs.zzsdk.360.e}"/>
+					</zips>
+				</archives>
+			</restrict>
+		</jar>
+	</target>
+	
+	<target name="-zzsdk-demo-package-release" depends="-zzsdk-lib-sign,-zzsdk-lib-package-assets,-zzsdk-lib-package-libs,-zzsdk-lib-package-libs-single,-zzsdk-demo-package" description="使用签名模式的打包">
+	    <!-- 
+		<property name="zzsdk.demo.zip.file" location="${out.absolute.dir}/${zzsdk.demo}.zip" />
+		
+		<echo level="info">打包成 demo 工程: ${zzsdk.demo.zip.file} ... </echo>
+		
+		<property name="zzsdk.demo.prefix" value="zzsdk-demo" />
+		
+		<delete file="${zzsdk.demo.zip.file}"/>
+	    <zip destfile="${zzsdk.demo.zip.file}">
+	        <zipfileset dir="." 
+	            prefix="${zzsdk.demo.prefix}" 
+	            includes="${zzsdk.files.demo.project} ${zzsdk.files.demo.src}" />
+	        <zipfileset dir="${out.absolute.dir}" prefix="${zzsdk.demo.prefix}/libs" >
+				<include name="${zzsdk.lib}*.jar" />
+	        </zipfileset>
+	        <zipfileset src="${zzsdk.lib.zip.file.libs}" prefix="${zzsdk.demo.prefix}"/>
+	    </zip>
+	     -->
+	</target>
+	
+	<target name="-zzsdk-demo-package" depends="-zzsdk-lib-package-assets,-zzsdk-lib-package-libs" description="打包 demo 工程">
+	    <fail message="找不到库: ${zzsdk.lib.jar.file}">
+	        <condition>
+	            <not>
+	            	<available file="${zzsdk.lib.jar.file}" type="file" />
+	            </not>
+	        </condition>
+	    </fail>
+	    
+		<property name="zzsdk.demo.zip.file" location="${out.absolute.dir}/${zzsdk.demo}.zip" />
+	    
+		<echo level="info">打包成 demo 工程: ${zzsdk.demo.zip.file} ... </echo>
+				
+		<property name="zzsdk.demo.prefix" value="zzsdk-demo" />
+		
+	    <zip destfile="${zzsdk.demo.zip.file}">
+	        <zipfileset dir="." 
+	            prefix="${zzsdk.demo.prefix}" 
+	            includes="${zzsdk.files.demo.project} ${zzsdk.files.demo.src} " />
+	        <zipfileset dir="${out.absolute.dir}" prefix="${zzsdk.demo.prefix}/libs" includes="${zzsdk.lib}*.jar" />
+	    </zip>
+	</target>
+	
+	
+	<macrodef name="do-only-if-file-exist">
+	    <attribute name="path" />
+	    <attribute name="type" />
+		<element name="task-to-do" implicit="yes" />
+		<sequential>
+			<if>
+			    <condition>
+			        <available file="@{path}" type="@{type}" /> 
+			    </condition>
+			    <then>
+			        <task-to-do />
+			    </then>
+			    <else>
+			        <echo level="warn">找不到文件或目录 @{path}</echo>
+			    </else>
+			</if>
+		</sequential>
+	</macrodef>
+	
+	<target name="zzsdk-release" description="打包 zzsdk 版本">
+	    <fail message="必须先编译">
+	        <condition>
+	            <or>
+		            <not><isset property="zzsdk.lib.jar.file" /></not>
+		            <not><available file="${zzsdk.lib.jar.file}" type="file" /></not>
+		            <not><isset property="zzsdk.douqu.enabled" /></not>
+		            <not><isset property="zzsdk.360.enabled" /></not>
+		            <not><isset property="zzsdk.config.version.code" /></not>
+		            <not><isset property="zzsdk.config.version.name" /></not>
+		            <not><isset property="zzsdk.config.build.date" /></not>
+		            <not><isset property="out.absolute.dir" /></not>
+	            </or>
+	        </condition>
+	    </fail>
+	    
+	    <do-set-include-or-exclude key-value="${zzsdk.douqu.enabled}" name="zzsdk.release.dir.douqu" value="-{Douqu}" else-value="" />
+	    <do-set-include-or-exclude key-value="${zzsdk.360.enabled}" name="zzsdk.release.dir.360" value="-{360}" else-value="" />
+	    
+	    <!-- 版本名：zzsdk-lib+demo+doc-{日期}[{版本号}](v{版本号})-[类别开关] -->
+	    
+	    <do-isset-property name="zzsdk.release.dir" default="${out.absolute.dir}" />
+	    
+	    <property name="zzsdk.release.name" 
+	        value="${zzsdk.config.build.date}[${zzsdk.config.version.code}](v${zzsdk.config.version.name})${zzsdk.release.dir.douqu.i}${zzsdk.release.dir.360.i}"/>
+	    
+	    <property name="zzsdk.config.release.dir" 
+	        location="${zzsdk.release.dir}/zzsdk-${zzsdk.release.name}" />
+	    
+	    <delete dir="${zzsdk.config.release.dir}"/>
+	    <mkdir dir="${zzsdk.config.release.dir}" />
+	    
+	    <do-only-if-file-exist path="${zzsdk.javadoc.dir}" type="dir" >
+	        <sequential>
+	            <echo level="info">添加 javadoc</echo>
+			    <zip destfile="${zzsdk.config.release.dir}/javadoc.zip">
+			        <zipfileset dir="${zzsdk.javadoc.dir}" />
+			    </zip>
+	        </sequential>
+	    </do-only-if-file-exist>
+	    
+	    <do-only-if-file-exist path="${zzsdk.lib.jar.file}" type="file">
+	        <sequential>
+	            <echo level="info">添加库文件 ${zzsdk.lib.jar.file}</echo>
+	            <copy todir="${zzsdk.config.release.dir}" >
+	                <fileset dir="${out.absolute.dir}"  includes="${zzsdk.lib}*.jar ${zzsdk.lib}*.zip" /> 
+                </copy>
+	        </sequential>
+	    </do-only-if-file-exist>
+	    
+	    <do-only-if-file-exist path="template/file_list.txt" type="file">
+	        <sequential>
+	            <echo level="info">添加文件说明</echo>
+	            <copy file="template/file_list.txt"  tofile="${zzsdk.config.release.dir}/文件说明.txt" />
+	        </sequential>
+	    </do-only-if-file-exist>
+	    
+	    <do-only-if-file-exist path="${zzsdk.demo.zip.file}" type="file">
+	        <sequential>
+	            <echo level="info">添加demo工程 ${zzsdk.demo.zip.file}</echo>
+	            <copy file="${zzsdk.demo.zip.file}" todir="${zzsdk.config.release.dir}" />
+	        </sequential>
+	    </do-only-if-file-exist>
+	    
+	    <do-only-if-file-exist path="${obfuscate.absolute.dir}" type="dir" >
+	        <sequential>
+	            <echo level="info">添加 proguard</echo>
+			    <zip destfile="${zzsdk.config.release.dir}/proguard.zip">
+			        <zipfileset dir="${obfuscate.absolute.dir}" includes="dump.txt seeds.txt usage.txt mapping.txt" prefix="proguard"/>
+			    </zip>
+	        </sequential>
+	    </do-only-if-file-exist>
+	    
+	    <do-only-if-file-exist path="${out.final.file}" type="file">
+	        <sequential>
+	            <echo level="info">添加 apk 包</echo>
+	            <copy file="${out.final.file}" tofile="${zzsdk.config.release.dir}/${ant.project.name}-demo.apk" />
+	        </sequential>
+	    </do-only-if-file-exist>
+	</target>
+	
+	<target name="douqu" description="设置 逗趣 模式">
+		<fail message="不能重复设置 逗趣  模式！">
+		    <condition>
+		        <isset property="zzsdk.douqu.enabled" />
+		    </condition>
+		</fail>
+		<echo>设置 逗趣  模式...</echo>
+		<property name="zzsdk.douqu.enabled" value="true"/>
+	</target>
+
+	<target name="360" description="设置 360 模式">
+		<fail message="不能重复设置 360 模式！">
+		    <condition>
+		        <isset property="zzsdk.360.enabled" />
+		    </condition>
+		</fail>
+		<echo>设置 360 模式...</echo>
+		<property name="zzsdk.360.enabled" value="true"/>
+	</target>
+	
+	<target name="tolib" depends="-obfuscate_code, -zzsdk-demo-package-release" description="打包成 sdk 库" >
+		<echo>versionCode: ${zzsdk.config.version.code}</echo>
+		<echo>versionName: ${zzsdk.config.version.name}</echo>
+	</target>
+	
+	<!-- 打包 APK -->
+	
+	<target name="-zzsdk-dex" depends="" description="-zzsdk-lib-sign">
+		<!-- input for dex will be proguard's output -->
+		<property name="out.dex.input.absolute.dir" location="${out.absolute.dir}/original-dex.jar" />
+		<delete file="${out.dex.input.absolute.dir}" />
+		<jar destfile="${out.dex.input.absolute.dir}">
+			<zipfileset src="${zzsdk.lib.jar.file}" />
+			<fileset  dir="${out.classes.absolute.dir}" >
+				<include name="R.java.d" />
+				<include name="${zzsdk.files.class.demo}" />
+				<include name="${out.classes.zzsdk.douqu.e}" />
+				<include name="${out.classes.zzsdk.360.e}" />
+			</fileset>
+		</jar>
+		<path id="out.dex.jar.input.ref">
+			<path refid="project.all.jars.path" />
+		</path> 
+		<!-- 将 jar 转成 dex -->
+		<dex-helper />
+	</target>
+	<target name="zzsdk-apk" depends="-zzsdk-dex,-package-resources" description="打包成 debug 版本 apk">
+		<apkbuilder
+				outfolder="${out.absolute.dir}"
+				resourcefile="${resource.package.file.name}"
+				apkfilepath="${out.packaged.file}"
+				debugpackaging="true"
+				debugsigning="true"
+				verbose="${verbose}"
+				hascode="${manifest.hasCode}"
+				previousBuildType="${build.last.is.packaging.debug}/${build.last.is.signing.debug}"
+				buildType="true/true">
+			<dex path="${intermediate.dex.file}"/>
+			<sourcefolder path="${source.absolute.dir}"/>
+			<jarfile refid="project.all.jars.path" />
+			<nativefolder path="${native.libs.absolute.dir}" />
+			<nativefolder refid="project.library.native.folder.path" />
+		</apkbuilder>
+		<zipalign-helper in.package="${out.packaged.file}" out.package="${out.final.file}" />
+	</target>
+
+	
+	<target name="zzsdk" depends="tolib, javadoc, zzsdk-apk, zzsdk-release" description="完整的发布，即 tolib, zzsdk-apk, install, zzsdk-release">	    
+	</target>
+	    
+	
+	<!-- 生成 JAVADOC -->
+	
+	<target name="javadoc" description="生成java文档">
+	    <path id="javadoc.classpath">
+			<fileset dir="libs">
+				<include name="**/*.jar"/>
+			</fileset>
+			<pathelement path="${sdk.dir}/tools/support/annotations.jar" />
+	    </path>
+	    
+	    <delete dir="${zzsdk.javadoc.dir}" />
+	        
+		<javadoc access="public" 
+				additionalparam="-encoding utf-8 -charset utf-8" 
+				author="true" 
+				classpathref="javadoc.classpath" 
+				destdir="${zzsdk.javadoc.dir}" 
+				nodeprecated="false" 
+				nodeprecatedlist="false" 
+				noindex="false" 
+				nonavbar="false" 
+				notree="false" 
+				source="1.6" 
+				splitindex="flase"
+				use="true"
+				version="true"
+				linkoffline="http://developer.android.com/reference file:/${sdk.dir}/docs/reference" >
+			<fileset dir="src/com/zz/sdk" defaultexcludes="yes">
+				<include name="*"/>
+				<exclude name="ZZSDKConfig.java"/>
+			</fileset>
+		</javadoc>
+	</target>
+
+
+</project>

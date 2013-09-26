@@ -389,21 +389,15 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			case PayChannel.PAY_TYPE_YEEPAY_LT:
 			case PayChannel.PAY_TYPE_YEEPAY_YD:
 				if (mResult.codes == null || "1".equals(mResult.codes)) {
+					showPayResultDialog(false);
 					allPayCallBack(-1);
 				} else {
 					hideDialog();
-					resultDialog = DialogUtil.showPayResultDialog(
-							ChargeActivity.this, true);
+					showPayResultDialog(true);
 					allPayCallBack(0);
 				}
 				if (null != dialog) {
 					dialog.setCancelable(false);
-				}
-				if (Application.isCloseWindow) {
-					if (resultDialog != null) {
-						resultDialog.dismiss();
-					}
-					ChargeActivity.this.finish();
 				}
 				break;
 			// 银联
@@ -516,8 +510,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			case INDEX_CHARGE_SMSCHARGE_FEEDBACK:
 
 				SMSUtil.hideDialog();
-				resultDialog = DialogUtil.showPayResultDialog(
-						ChargeActivity.this, true);
+				showPayResultDialog(true);
 				break;
 			}
 		};
@@ -578,6 +571,11 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 
 	/** 清除所有缓存对象 */
 	private void clean() {
+		if (resultDialog != null && resultDialog.isShowing()) {
+			resultDialog.dismiss();
+			resultDialog = null;
+		}
+		
 		instance = null;
 		dialog = null;
 		mPayChannel = null;
@@ -915,6 +913,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 				isSendMessage = true;
 			} else {
 				SMSUtil.hideDialog();
+				showPayResultDialog(success);
 				sendSmsFeedback();
 				isSendMessage = true;
 			}
@@ -1051,16 +1050,10 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		if (requestCode == ACTIVITY_REQUEST_CODE_UNIONPAY) {
 			if (isRetUnionpay) {
 				if (PAY_RESULT_SUCCESS.equalsIgnoreCase(pay_result)) {
-					if (!Application.isCloseWindow) {
-						resultDialog = DialogUtil.showPayResultDialog(this,
-								true);
-					}
+					showPayResultDialog(true);
 					allPayCallBack(0);
 				} else if (PAY_RESULT_FAIL.equalsIgnoreCase(pay_result)) {
-					if (!Application.isCloseWindow) {
-						resultDialog = DialogUtil.showPayResultDialog(this,
-								false);
-					}
+					showPayResultDialog(false);
 					allPayCallBack(-1);
 				} else if (PAY_RESULT_CANCEL.equalsIgnoreCase(pay_result)) {
 					Application.payStatusCancel = PaymentCallbackInfo.STATUS_CANCEL;
@@ -1071,10 +1064,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 									.canclePay(mResult.orderNumber, "银联内取消支付");
 						}
 					}).start();
-					if (!Application.isCloseWindow) {
-						DialogUtil.showDialogErr(this, "你已取消了本次订单的支付!订单号为:"
-								+ mResult.orderNumber);
-					}
+					showDialogErr("你已取消了本次订单的支付!订单号为:" + mResult.orderNumber);
 					allPayCallBack(-2);
 
 				}
@@ -1085,10 +1075,26 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 				PayChannel pc = mPayChannel;
 				PayParam pp = mPayParam;
 				if (pc != null && pp != null) {
-					resultDialog = DialogUtil.showPayResultDialog(this, true);
+					showPayResultDialog(true);
 					allPayCallBack(0);
 				}
 			}
+		}
+	}
+
+	private void showPayResultDialog(boolean isSuccess) {
+		if (Application.isCloseWindow) {
+			Utils.toastInfo(getBaseContext(), isSuccess ? MyDialog.TIP_SUCCESS : MyDialog.TIP_FAILED);
+		} else {
+			resultDialog = DialogUtil.showPayResultDialog(this, isSuccess);
+		}
+	}
+
+	private void showDialogErr(String tip) {
+		if (Application.isCloseWindow) {
+			Utils.toastInfo(getBaseContext(), tip);
+		} else {
+			DialogUtil.showDialogErr(this, tip);
 		}
 	}
 
@@ -1117,10 +1123,9 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			break;
 		}
 		mCallbackHandler.sendMessage(msg);
-		if (Application.isCloseWindow) {
-			finish();
-		}
-
+//		if (Application.isCloseWindow) {
+//			finish();
+//		}
 	}
 
 	private void smsPayCallBack(int codes, String amount) {

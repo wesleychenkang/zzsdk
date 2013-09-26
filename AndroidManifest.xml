@@ -1,24 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.zz.sdk"
-    android:versionCode="28"
-    android:versionName="1.0.2" >
+    android:versionCode="37"
+    android:versionName="1.1.1" >
 
     <uses-sdk
         android:minSdkVersion="8"
         android:targetSdkVersion="14" />
-    
 
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.GET_TASKS" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.RECEIVE_SMS" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.READ_SMS" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.VIBRATE" />
-    <!-- 权限列表 -->
+    <!-- SDK 需要的权限列表 -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -27,12 +17,9 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.RESTART_PACKAGES" >
-    </uses-permission>
-
-    <!-- <uses-permission android:name="android.permission.READ_SMS" /> -->
-    <uses-permission android:name="android.permission.SEND_SMS" >
-    </uses-permission>
+    <uses-permission android:name="android.permission.RESTART_PACKAGES" />
+    <!-- 需要短信支付才配置 -->
+    <uses-permission android:name="android.permission.SEND_SMS" />
 
     <supports-screens
         android:anyDensity="true"
@@ -46,26 +33,18 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        <activity
-            android:name="com.zz.sdk.demo.MainActivity"
-            android:label="@string/app_name"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:launchMode="singleTask"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-            android:windowSoftInputMode="adjustPan" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name="com.zz.sdk.activity.LoginForQiFu"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:launchMode="singleTask"
-            android:screenOrientation="landscape"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-            android:windowSoftInputMode="adjustPan" />
+        <!-- 游戏服务器ID，由SDK方提供 -->
+        <meta-data
+            android:name="SERVER_ID"
+            android:value="M1001A" />
+
+        <!-- 项目ID，由SDK方提供 -->
+        <meta-data
+            android:name="PROJECT_ID"
+            android:value="P10003A" />
+
+        <!-- SDK 的窗体 -->
         <activity
             android:name="com.zz.sdk.activity.LoginActivity"
             android:configChanges="keyboardHidden|orientation"
@@ -80,7 +59,37 @@
             android:launchMode="singleTask"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" >
         </activity>
-         <activity
+        <activity
+            android:name="com.zz.sdk.activity.PayOnlineActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" >
+        </activity>
+
+        <!-- 演示窗体 -->
+        <activity
+            android:name="com.zz.sdk.demo.MainActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:windowSoftInputMode="adjustPan" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- 仅用于奇虎360平台 -->
+        <activity
+            android:name="com.zz.sdk.activity.LoginForQiFu"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
             android:name="com.qihoopay.insdk.activity.ContainerActivity"
             android:configChanges="orientation|keyboardHidden|navigation"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" >
@@ -91,16 +100,11 @@
             android:process=":remote"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" >
         </activity>
-             <meta-data android:name="QHOPENSDK_APPID" android:value="200632826" > </meta-data>
-             <meta-data android:name="QHOPENSDK_APPKEY" android:value="4ebf535fe5749b77a26cf8971733aa73" > </meta-data>
-             <meta-data android:name="QHOPENSDK_PRIVATEKEY" android:value="321eb8e6a3c4e1a0d72b5545a283319d" > </meta-data>
-             <meta-data android:name="QHOPENSDK_CHANNEL" android:value="default" ></meta-data>
-          <!--  测试124使用   <meta-data
-            android:name="PROJECT_ID"
-            android:value="P10012" /> -->
+
         <meta-data
-            android:name="SERVER_ID"
-            android:value="M1001A" />
+            android:name="QHOPENSDK_APPID"
+            android:value="200632826" >
+        </meta-data>
         <meta-data
             android:name="PROJECT_ID"
             android:value="P10002" />
@@ -108,10 +112,23 @@
            android:name="PRODUCT_ID"
            android:value="D10002"
            />
-        <activity android:name=".activity.PayOnlineActivity"
+        <activity
+            android:name=".activity.PayOnlineActivity"
             android:exported="false"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"></activity>
+
+        <meta-data  android:name="QHOPENSDK_APPKEY"
+            android:value="4ebf535fe5749b77a26cf8971733aa73" >
+        </meta-data>
+        <meta-data
+            android:name="QHOPENSDK_PRIVATEKEY"
+            android:value="321eb8e6a3c4e1a0d72b5545a283319d" >
+        </meta-data>
+        <meta-data
+            android:name="QHOPENSDK_CHANNEL"
+            android:value="default" >
+        </meta-data>
     </application>
 
 </manifest>

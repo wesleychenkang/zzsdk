@@ -98,6 +98,7 @@ public class GetDataImpl {
 		if ("0".equals(result.codes)) {
 			Logger.d("LoginName ---------------- " + loginName);
 			Application.loginName = loginName;
+			Application.password = password;
 			Application.isLogin = true;
 			mSdkUser.autoLogin = autoLogin;
 			mSdkUser.password = password;
@@ -145,6 +146,7 @@ public class GetDataImpl {
 					json);
 			if (result != null && "0".equals(result.codes)) {
 				Application.loginName = result.username;
+				Application.password = result.password;
 				Application.isLogin = true;
 				mSdkUser = new SdkUser();
 				mSdkUser.loginName = result.username;
@@ -196,6 +198,7 @@ public class GetDataImpl {
 		Logger.d("register loginName -> " + loginName);
 		if ("0".equals(result.codes)) {
 			Application.loginName = loginName;
+			Application.password = password;
 			Application.isLogin = true;
 			mSdkUser.autoLogin = 1;
 			mSdkUser.password = password;
@@ -268,7 +271,6 @@ public class GetDataImpl {
 	private boolean syncSdkUser() {
 		// 更新用户数据到全局变量
 		Application.password = mSdkUser.password;
-
 		SdkUserTable t = SdkUserTable.getInstance(mContext);
 		// 将用户名保存到sdcard
 		Utils.writeAccount2SDcard(mContext, mSdkUser.loginName,

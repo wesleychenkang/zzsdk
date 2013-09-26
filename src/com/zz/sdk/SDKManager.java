@@ -230,29 +230,29 @@ public class SDKManager {
 	 * <tr>
 	 * <tr>
 	 * <td></td>
-	 * <td>{@link MSG_TYPE#PAYMENT}</td>
-	 * <td>{@link MSG_STATUS#SUCCESS}</td>
+	 * <td>{@link MSG_TYPE#PAYMENT .PAYMENT}</td>
+	 * <td>{@link MSG_STATUS#SUCCESS .SUCCESS}</td>
 	 * <td>{@link PaymentCallbackInfo}</td>
 	 * <td>支付成功，可获取支付金额方式等</td>
 	 * </tr>
 	 * <tr>
 	 * <td></td>
 	 * <td></td>
-	 * <td>{@link MSG_STATUS#FAILED}</td>
+	 * <td>{@link MSG_STATUS#FAILED .FAILED}</td>
 	 * <td>..</td>
 	 * <td>支付失败，无其它信息</td>
 	 * </tr>
 	 * <tr>
 	 * <td></td>
 	 * <td></td>
-	 * <td>{@link MSG_STATUS#CANCEL}</td>
+	 * <td>{@link MSG_STATUS#CANCEL .CANCEL}</td>
 	 * <td>..</td>
 	 * <td>支付取消，无其它信息</td>
 	 * </tr>
 	 * <tr>
 	 * <td></td>
 	 * <td></td>
-	 * <td>{@link MSG_STATUS#EXIT_SDK}</td>
+	 * <td>{@link MSG_STATUS#EXIT_SDK .EXIT_SDK}</td>
 	 * <td>..</td>
 	 * <td>此次业务结束，或成功或失败，原因见前面的消息</td>
 	 * </tr>
@@ -297,9 +297,9 @@ public class SDKManager {
 			Application.changeCount = 0;
 		}
 		Application.staticAmountIndex = -1;
-        if(Application.loginName==null){
-		    Pair<String, String> account = Utils.getAccountFromSDcard(mContext);
-		    Application.loginName = account.first;
+		if (Application.loginName == null) {
+			Pair<String, String> account = Utils.getAccountFromSDcard(mContext);
+			Application.loginName = account.first;
 			Application.password = account.second;
 		}
 
@@ -385,7 +385,7 @@ public class SDKManager {
 			SdkUser[] sdkUsers = t.getAllSdkUsers();
 			if (sdkUsers != null && sdkUsers.length > 0) {
 				sdkUser = sdkUsers[0];
-			}else{
+			} else {
 				// 尝试从sdcard中读取
 				Pair<String, String> pair = Utils.getAccountFromSDcard(ctx);
 				if (pair != null) {
