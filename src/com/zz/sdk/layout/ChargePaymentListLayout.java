@@ -137,8 +137,7 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 	protected static final int ROOTVIEW_SPACE_RIGHT = 24;
 	protected static final int ROOTVIEW_SPACE_BOTTOM = 12;
 
-	protected GridView mPaymentType;
-
+	/** 当前的支付方式选择 */
 	private int mPaymentTypeChoose = -1;
 
 	private static final int _MSG_USER_ = 0x10000;
@@ -669,8 +668,6 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 			gv.setSelector(android.R.color.transparent);
 			gv.setColumnWidth(ZZDimen.CC_GRIDVIEW_COLUMN_WIDTH.px());
 			ll.addView(gv, new LayoutParams(LP_MW));
-			mPaymentType = gv;
-
 			OnItemClickListener listener = new AdapterView.OnItemClickListener() {
 				@Override
 				public void onItemClick(AdapterView<?> parent, View view,
@@ -678,7 +675,7 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 					updatePayType(position);
 				}
 			};
-			mPaymentType.setOnItemClickListener(listener);
+			gv.setOnItemClickListener(listener);
 
 			mPaymentListAdapter = new PaymentListAdapter(ctx, null);
 			gv.setAdapter(mPaymentListAdapter);
@@ -880,7 +877,9 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 		if (mPaymentListAdapter == null) {
 			mPaymentListAdapter = new PaymentListAdapter(mContext,
 					channelMessages);
-			mPaymentType.setAdapter(mPaymentListAdapter);
+			View v = findViewById(IDC.ACT_PAY_GRID.id());
+			if (v instanceof GridView)
+				((AbsListView) v).setAdapter(mPaymentListAdapter);
 		} else {
 			mPaymentListAdapter.updatePayChannels(channelMessages);
 		}
@@ -932,15 +931,37 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 		return new String(c);
 	}
 
+	/**
+	 * 检查用户的输入是否有效
+	 * 
+	 * @return
+	 */
+	private boolean checkInput() {
+		// TODO:
+		return true;
+	}
+
 	@Override
 	public void onClick(View v) {
 		int id = v.getId();
 		if (id == IDC.BT_RECHARGE_COMMIT.id()) {
+			if (checkInput() == false) {
+				if (BuildConfig.DEBUG) {
+					Logger.d("请重新输入");
+				}
+				return;
+			}
 			if (mPaytypeItemListener != null) {
-				mPaytypeItemListener.onItemClick(mPaymentType, null,
-						mPaymentTypeChoose, 0);
+				View gv = findViewById(IDC.ACT_PAY_GRID.id());
+				if (gv instanceof GridView) {
+					mPaytypeItemListener.onItemClick((GridView) gv, null,
+							mPaymentTypeChoose, 0);
+				}
 			}
 		} else if (id == IDC.BT_RECHARGE_PULL.id()) {
+			if (BuildConfig.DEBUG) {
+				Logger.d("显示固定的充值候选列表");
+			}
 			showPopup_ChargePull(new float[] { 100, 500, 1000, 3000, 5000,
 					10000 });
 		} else if (id == IDC.HELP.id()) {
