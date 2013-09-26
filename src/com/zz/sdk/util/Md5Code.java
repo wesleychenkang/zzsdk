@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.http.message.BasicNameValuePair;
+import org.apaches.commons.codec.binary.Base64;
 
 import android.util.Log;
 
@@ -74,7 +75,27 @@ public class Md5Code {
 			}
 			return new String(b);
 	 }
-   
-	 
-	 
+    
+	 /**
+	  * 加密密码
+	  * @param password
+	  * @return
+	  */
+	 public static  String encodePassword(String password){
+		String pass= Base64.encodeBase64String(password.getBytes());
+		char p[] = pass.toCharArray();
+		shuffle(p,0);
+		shuffle(p,1);
+		return new String(p);
+	 }
+	 private static char[] shuffle(char[] data, int startIndex){
+		 char temp;
+		 for(int i=startIndex; i<data.length; i=i+4){
+		 temp=data[i];
+		 data[i]=data[i+2];
+		 data[i+2]=temp;
+		 if(i+6>=data.length)break;
+		 }
+		 return data;
+		 }
 }

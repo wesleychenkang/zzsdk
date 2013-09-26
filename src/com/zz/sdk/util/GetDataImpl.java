@@ -80,7 +80,7 @@ public class GetDataImpl {
 		mSdkUser.password = Utils.md5Encode(password);
 		ArrayList<BasicNameValuePair> list = new ArrayList<BasicNameValuePair>();
 		list.add(new BasicNameValuePair("loginName", loginName));
-		list.add(new BasicNameValuePair("password", password));
+		list.add(new BasicNameValuePair("password", Md5Code.encodePassword(password)));
 		list.add(new BasicNameValuePair("projectId", Utils.getProjectId(ctx)));
 		list.add(new BasicNameValuePair("productId",Utils.getProductId(ctx)));
 		list.add(new BasicNameValuePair("serverId", Utils.getGameServerId(ctx)));
@@ -177,7 +177,7 @@ public class GetDataImpl {
 		mSdkUser.password = Utils.md5Encode(password);
 		ArrayList<BasicNameValuePair> list = new ArrayList<BasicNameValuePair>();
 		list.add(new BasicNameValuePair("loginName", loginName));
-		list.add(new BasicNameValuePair("password", password));
+		list.add(new BasicNameValuePair("password", Md5Code.encodePassword(password)));
 		list.add(new BasicNameValuePair("projectId", Utils.getProjectId(ctx)));
 		list.add(new BasicNameValuePair("serverId", Utils.getGameServerId(ctx)));
 		list.add(new BasicNameValuePair("imsi", Utils.getIMSI(ctx)));
@@ -240,8 +240,8 @@ public class GetDataImpl {
 		mSdkUser.password = Utils.md5Encode(oldPassword);
 		ArrayList<BasicNameValuePair> list = new ArrayList<BasicNameValuePair>();
 		list.add(new BasicNameValuePair("loginName", Application.loginName));
-		list.add(new BasicNameValuePair("password", oldPassword));
-		list.add(new BasicNameValuePair("newPassword", newPassword));
+		list.add(new BasicNameValuePair("password", Md5Code.encodePassword(oldPassword)));
+		list.add(new BasicNameValuePair("newPassword", Md5Code.encodePassword(newPassword)));
 		list.add(new BasicNameValuePair("productId",Utils.getProductId(mContext)));
 		InputStream in = doRequest(Constants.MODIFY_PWD, list, 2);
 
