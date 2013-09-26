@@ -36,29 +36,41 @@ public class ResConstants {
 	}
 
 	public static enum ZZStr {
-		CC_BALANCE_DESC("您的卓越币余额是："), //
-		/** 余额显示，使用 {@link DecimalFormat} 转换 */
-		CC_BALANCE_UNIT("##"), //
-		CC_RECHAGRE_COUNT_DESC("充值数量"), //
+		/** 价格或卓越币数的表达规则, {@link DecimalFormat} */
+		CC_PRICE_FORMAT("##.##"), //
+
+		CC_BALANCE_TITLE("您的卓越币余额是："), //
+		/** 余额显示，基于 {@link #CC_PRICE_FORMAT} */
+		CC_BALANCE_UNIT("%s"), //
+
+		CC_RECHAGRE_COUNT_TITLE("充值数量"), //
 		/** 充值中心（游戏购买入口） */
-		CC_RECHAGRE_PRICE_DESC("道具价格"), //
+		CC_RECHAGRE_COUNT_TITLE_PRICE("道具价格"), //
 		CC_RECHAGRE_COUNT_HINT("请输入数量"), //
+		CC_RECHAGRE_COUNT_DESC("卓越币"), //
+		/** RMB与卓越币的兑换比例，如 (1元=%s卓越币)，基于 {@link #CC_PRICE_FORMAT} */
 		CC_RECHAGRE_RATE_DESC("(1元=%s卓越币)"), //
 		CC_RECHAGRE_COST_DESC("应付金额："), //
-		/** 充值金额，使用 {@link DecimalFormat} 转换 */
-		CC_RECHAGRE_COST_UNIT("##.##元"), //
-		CC_PAYCHANNEL_DESC("支付方式"), //
+		/** 充值金额，基于 {@link #CC_PRICE_FORMAT} */
+		CC_RECHAGRE_COST_UNIT("%s元"), //
+
+		/** 充值数量候选列表 %s个，基于 {@link #CC_PRICE_FORMAT} */
+		CC_RECHAGRE_CANDIDATE_UNIT("%s,个"), //
+
+		CC_PAYCHANNEL_TITLE("支付方式"), //
 		CC_CARDNUM_DESC("请输入卡号"), //
 		CC_PASSWD_DESC("请输入密码"), //
 		/** 联通卡(15:19) 移动卡(17:18) */
 		CC_CARDNUM_HINT("请输入卡号（%d位）"), //
 		CC_PASSWD_HINT("请输入卡号（%d位）"), //
 		CC_PAYTYPE_DESC("请点击确认充值，进入到%s充值界面"), //
-		CC_PAYTYPE_COIN_DESC("确认后，将扣除%d卓越币，您的余额为%d"), //
+		/** 卓越币的消耗描述，基于 {@link #CC_PRICE_FORMAT} */
+		CC_PAYTYPE_COIN_DESC("确认后，将扣除%s卓越币，您的余额为%s"), //
 		CC_COMMIT_RECHARGE("确认充值"), //
 		CC_COMMIT_BUY("确认购买"), //
 		CC_COMMIT_EXCHANGE("确认兑换"), //
 		CC_PAYCHANNEL_ERROR("很抱歉！未能获取到可用的支付通道。"), //
+
 		CC_HELP_TITLE("帮助说明"), //
 		CC_HELP_TEL("客服电话: 0123-45678901"), //
 		CC_RECHARGE_LIST_NONE("不能显示候选列表"), //
@@ -70,8 +82,7 @@ public class ResConstants {
 			context = txt;
 		}
 
-		@Override
-		public String toString() {
+		public String str() {
 			return context;
 		}
 	}
@@ -146,6 +157,9 @@ public class ResConstants {
 			/** 充值界面·各面板垂直方向间隔 */
 			CC_SAPCE_PANEL_V(16),
 
+			/** 充值数量输入框的边距 */
+			CC_RECHARGE_COUNT_PADDING_H(16), CC_RECHARGE_COUNT_PADDING_V(8),
+
 			/** 充值界面·GridView 的单元格间距 */
 			CC_GRIDVIEW_SPACE_H(8), CC_GRIDVIEW_SPACE_V(4),
 			/** 充值界面·GridView 的单元格子项的边距 */
@@ -156,7 +170,10 @@ public class ResConstants {
 			CC_GRIDVIEW_ITEM_HEIGHT(52), //
 
 			/** 充值界面·GridView 单元格大小 */
-			CC_GRIDVIEW_COLUMN_WIDTH(96), ;
+			CC_GRIDVIEW_COLUMN_WIDTH(96),
+
+			/** 充值界面·充值卡输入框的高度 */
+			CC_CARD_HEIGHT(32), ;
 
 			private float dimen;
 
@@ -165,7 +182,7 @@ public class ResConstants {
 			}
 
 			/** pixels */
-			public int toPx() {
+			public int px() {
 				return (int) (dimen * mDensity + 0.5f);
 			}
 		}
@@ -263,9 +280,16 @@ public class ResConstants {
 			case PayChannel.PAY_TYPE_YEEPAY_YD:
 				ret = CCImg.TUP_YD;
 				break;
-			default:
+			case PayChannel.PAY_TYPE_YEEPAY_DX:
+				ret = CCImg.TUP_DX;
+				break;
+			case PayChannel.PAY_TYPE_ZZCOIN:
 				// 卓越币
 				ret = CCImg.TUP_ZYB;
+				break;
+
+			default:
+				ret = null;
 				break;
 			}
 			return ret;

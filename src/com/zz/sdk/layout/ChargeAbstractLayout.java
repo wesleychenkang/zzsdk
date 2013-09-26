@@ -79,7 +79,7 @@ public abstract class ChargeAbstractLayout extends LinearLayout {
 	protected static TextView createNormalLabel(Context ctx, ZZStr title) {
 		TextView tv = new TextView(ctx);
 		if (title != null)
-			tv.setText(title.toString());
+			tv.setText(title.str());
 		tv.setSingleLine();
 		tv.setTextColor(ZZFontColor.CC_RECHAGR_NORMAL.toColor());
 		tv.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
@@ -93,7 +93,7 @@ public abstract class ChargeAbstractLayout extends LinearLayout {
 		et = new EditText(ctx);
 		et.setSingleLine();
 		if (hint != null)
-			et.setHint(hint.toString());
+			et.setHint(hint.str());
 		if (color != null)
 			et.setTextColor(color.toColor());
 		et.setGravity(Gravity.CENTER_VERTICAL);
@@ -109,7 +109,7 @@ public abstract class ChargeAbstractLayout extends LinearLayout {
 		LinearLayout ll = new LinearLayout(ctx);
 		ll.setOrientation(VERTICAL);
 		LayoutParams lp = new LayoutParams(LP_MW);
-		lp.bottomMargin = ZZDimen.CC_SAPCE_PANEL_V.toPx();
+		lp.bottomMargin = ZZDimen.CC_SAPCE_PANEL_V.px();
 		rv.addView(ll, lp);
 		return ll;
 	}
