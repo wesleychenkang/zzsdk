@@ -154,6 +154,12 @@ public class ResConstants {
 		 * 尺寸配置, DIP
 		 */
 		public static enum ZZDimen {
+			/** 充值界面·主活动区的边距 */
+			CC_ROOTVIEW_PADDING_LEFT(24), //
+			CC_ROOTVIEW_PADDING_TOP(16), //
+			CC_ROOTVIEW_PADDING_RIGHT(24), //
+			CC_ROOTVIEW_PADDING_BOTTOM(12),
+			
 			/** 充值界面·各面板垂直方向间隔 */
 			CC_SAPCE_PANEL_V(16),
 

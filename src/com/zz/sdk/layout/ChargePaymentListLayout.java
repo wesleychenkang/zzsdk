@@ -59,17 +59,18 @@ import com.zz.sdk.util.Utils;
  */
 public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 		View.OnClickListener {
-	/** 卓越币与RMB的兑换比例 */
-	static float ZZ_COIN_RATE = 10f;
 
-	/** 无效的 */
-	static final int CC_MODE_INVALID = -2;
-	/** 未知 */
-	static final int CC_MODE_UNKNOW = -1;
-	/** 充值模式 */
-	static final int CC_MODE_RECHARGE = 0;
-	/** 购买模式 */
-	static final int CC_MODE_BUY = 1;
+	/** 界面模式 */
+	public static enum ChargeStyle {
+		/** 无效的 */
+		INVALID,
+		/** 未知 */
+		UNKNOW,
+		/** 充值模式 */
+		RECHARGE,
+		/** 购买模式 */
+		BUY, ;
+	}
 
 	/** 数据项 */
 	public static enum VAL {
@@ -124,18 +125,12 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 		ED_PASSWD, ;
 
 		/** ID 的起点 */
-		protected static int _id_begin_ = 201309;
+		protected static int _id_begin_ = 0x01332C6E;
 
 		public int id() {
 			return super.ordinal() + _id_begin_;
 		}
 	}
-
-	/* 设置主区域的边距，单位 dip */
-	protected static final int ROOTVIEW_SPACE_LEFT = 24;
-	protected static final int ROOTVIEW_SPACE_TOP = 16;
-	protected static final int ROOTVIEW_SPACE_RIGHT = 24;
-	protected static final int ROOTVIEW_SPACE_BOTTOM = 12;
 
 	/** 当前的支付方式选择 */
 	private int mPaymentTypeChoose = -1;
@@ -151,6 +146,17 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 
 	/** 余额 */
 	private float mCoinBalance = 0;
+
+	/** 卓越币与RMB的兑换比例 */
+	static float ZZ_COIN_RATE = 10f;
+
+	private static ChargeStyle DEBUG_CHARGE_MODE = ChargeStyle.UNKNOW;
+
+	public static void testMode(ChargeStyle style) {
+		if (BuildConfig.DEBUG) {
+			DEBUG_CHARGE_MODE = style;
+		}
+	}
 
 	private Handler mHandler = new Handler() {
 		@Override
@@ -214,14 +220,14 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 	}
 
 	/** 更改模式 */
-	private void updateUIStyle(int mode) {
-		if (mode == CC_MODE_BUY) {
+	private void updateUIStyle(ChargeStyle mode) {
+		if (mode == ChargeStyle.BUY) {
 			set_child_text(IDC.TV_RECHARGE_COUNT,
 					ZZStr.CC_RECHAGRE_COUNT_TITLE_PRICE);
 			set_child_visibility(IDC.TV_RECHARGE_COUNT_DESC, VISIBLE);
 			set_child_visibility(IDC.BT_RECHARGE_PULL, GONE);
 			set_child_text(IDC.BT_RECHARGE_COMMIT, ZZStr.CC_COMMIT_EXCHANGE);
-		} else if (mode == CC_MODE_RECHARGE) {
+		} else if (mode == ChargeStyle.RECHARGE) {
 			set_child_text(IDC.TV_RECHARGE_COUNT, ZZStr.CC_RECHAGRE_COUNT_TITLE);
 			set_child_visibility(IDC.TV_RECHARGE_COUNT_DESC, GONE);
 			set_child_visibility(IDC.BT_RECHARGE_PULL, VISIBLE);
@@ -555,10 +561,10 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 	private View createView_Charge(Context ctx) {
 		// 主视图
 		LinearLayout rv = new LinearLayout(ctx);
-		rv.setPadding(DimensionUtil.dip2px(ctx, ROOTVIEW_SPACE_LEFT),
-				DimensionUtil.dip2px(ctx, ROOTVIEW_SPACE_TOP),
-				DimensionUtil.dip2px(ctx, ROOTVIEW_SPACE_RIGHT),
-				DimensionUtil.dip2px(ctx, ROOTVIEW_SPACE_BOTTOM));
+		rv.setPadding(ZZDimen.CC_ROOTVIEW_PADDING_LEFT.px(),
+				ZZDimen.CC_ROOTVIEW_PADDING_TOP.px(),
+				ZZDimen.CC_ROOTVIEW_PADDING_RIGHT.px(),
+				ZZDimen.CC_ROOTVIEW_PADDING_BOTTOM.px());
 		rv.setOrientation(LinearLayout.VERTICAL);
 
 		LinearLayout ll;
@@ -851,7 +857,10 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 
 		if (BuildConfig.DEBUG) {
 			// XXX:
-			if (new Random(SystemClock.uptimeMillis()).nextBoolean()) {
+			if (DEBUG_CHARGE_MODE == ChargeStyle.BUY
+					|| (DEBUG_CHARGE_MODE == ChargeStyle.UNKNOW && new Random(
+							SystemClock.uptimeMillis()).nextBoolean())) {
+
 				Logger.d("DEBUG: 使用道具购买模式");
 				int len = channelMessages.length;
 				PayChannel[] tmp = new PayChannel[len + 2];
@@ -871,7 +880,6 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 
 				channelMessages = tmp;
 			}
-			updateUIStyle(CC_MODE_BUY);
 		}
 
 		if (mPaymentListAdapter == null) {
@@ -887,10 +895,10 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 
 		// 探测界面模式，规则：是否存在“卓越币”的支付
 		{
-			int mode = CC_MODE_RECHARGE;
+			ChargeStyle mode = ChargeStyle.RECHARGE;
 			for (int i = 0, c = channelMessages.length; i < c; i++) {
 				if (channelMessages[i].type == PayChannel.PAY_TYPE_ZZCOIN) {
-					mode = CC_MODE_BUY;
+					mode = ChargeStyle.BUY;
 					break;
 				}
 			}

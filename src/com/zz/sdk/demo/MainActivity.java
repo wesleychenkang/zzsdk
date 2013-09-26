@@ -24,6 +24,7 @@ import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.MSG_TYPE;
 import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.SDKManager;
+import com.zz.sdk.layout.ChargePaymentListLayout;
 
 /**
  * 演示 SDK 使用
@@ -37,7 +38,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final String CONFIG_GAME_ROLE_ID = "007";
 	private static final String CONFIG_GAME_ROLE = "战士001";
 	private static final String CONFIG_GAME_CALLBACK_INFO = "厂商自定义参数（长度限制250个字符）";
-  
+
 	/* ID */
 	private static final int _IDC_START_ = 0;
 	private static final int IDC_BT_LOGIN = _IDC_START_ + 1;
@@ -48,10 +49,10 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final int IDC_BT_QUERY = _IDC_START_ + 6;
 	private static final int IDC_TV_LOG = _IDC_START_ + 7;
 	private static final int _IDC_END_ = _IDC_START_ + 8;
-	private static final int IDC_CK_SUCCESS =_IDC_START_+9;
-	private static final int IDC_CK_FAILL = _IDC_START_+10;
-	private static final int IDC_CHARGE_AUTO_CLOSE = _IDC_START_+11;
-	
+	private static final int IDC_CK_SUCCESS = _IDC_START_ + 9;
+	private static final int IDC_CK_FAILL = _IDC_START_ + 10;
+	private static final int IDC_CHARGE_AUTO_CLOSE = _IDC_START_ + 11;
+	private static final int IDC_CHARGE_MODE_BUY = _IDC_START_ + 12;
 
 	/* 自定义消息 */
 	private static final int _MSG_USER_ = 2013;
@@ -140,8 +141,9 @@ public class MainActivity extends Activity implements OnClickListener {
 			CheckBox checksucces = new CheckBox(ctx);
 			checksucces.setId(IDC_CK_SUCCESS);
 			checksucces.setText("是否提示登录成功");
-		
-			checksucces.setOnCheckedChangeListener(setonCheckedSuccessListener());
+
+			checksucces
+					.setOnCheckedChangeListener(setonCheckedSuccessListener());
 			CheckBox checkfaill = new CheckBox(ctx);
 			checkfaill.setId(IDC_CK_FAILL);
 			checkfaill.setText("是否提示登录失败");
@@ -156,6 +158,15 @@ public class MainActivity extends Activity implements OnClickListener {
 			CheckBox checksucces = new CheckBox(ctx);
 			checksucces.setId(IDC_CHARGE_AUTO_CLOSE);
 			checksucces.setText("充值成功自动关闭窗口");
+			checkLayout.addView(checksucces);
+			rootLayout.addView(checkLayout);
+		}
+		{
+			LinearLayout checkLayout = new LinearLayout(ctx);
+			checkLayout.setOrientation(LinearLayout.HORIZONTAL);
+			CheckBox checksucces = new CheckBox(ctx);
+			checksucces.setId(IDC_CHARGE_MODE_BUY);
+			checksucces.setText("充值中心·社区入口");
 			checkLayout.addView(checksucces);
 			rootLayout.addView(checkLayout);
 		}
@@ -182,50 +193,45 @@ public class MainActivity extends Activity implements OnClickListener {
 	}
 
 	private OnCheckedChangeListener setonCheckedSuccessListener() {
-		
-		return new OnCheckedChangeListener(){
+
+		return new OnCheckedChangeListener() {
 
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView,
 					boolean isChecked) {
-				
-				  if(isChecked){
-					  isDisplayLoginTip = true;
-				   }else{
-					   isDisplayLoginTip = false; 
-				   }
-				   mSDKManager.setConfigInfo(true, isDisplayLoginTip,
-							isDisplayLoginfail); 
+
+				if (isChecked) {
+					isDisplayLoginTip = true;
+				} else {
+					isDisplayLoginTip = false;
+				}
+				mSDKManager.setConfigInfo(true, isDisplayLoginTip,
+						isDisplayLoginfail);
 			}
 		};
 	}
 
 	private OnCheckedChangeListener setonCheckedFaillListener() {
-		
-		return new OnCheckedChangeListener(){
+
+		return new OnCheckedChangeListener() {
 
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView,
 					boolean isChecked) {
-				
-				  if(isChecked){
-					  isDisplayLoginfail = true;
-				  }else{
-					  isDisplayLoginfail = false; 
-				  }
-				  
-				 mSDKManager.setConfigInfo(true, isDisplayLoginTip,
-							isDisplayLoginfail); 
+
+				if (isChecked) {
+					isDisplayLoginfail = true;
+				} else {
+					isDisplayLoginfail = false;
+				}
+
+				mSDKManager.setConfigInfo(true, isDisplayLoginTip,
+						isDisplayLoginfail);
 			}
-			
-			
-			
-			
+
 		};
 	}
-	
-	
-	
+
 	@Override
 	public void onClick(View v) {
 		int id = v.getId();
@@ -263,19 +269,25 @@ public class MainActivity extends Activity implements OnClickListener {
 			} catch (NumberFormatException e) {
 				amount = 0;
 			}
-			
+
 			boolean isCloseWindow;
 			View vCloseWindow = findViewById(IDC_CHARGE_AUTO_CLOSE);
-			if(vCloseWindow instanceof CheckBox) {
-				isCloseWindow = ((CheckBox)vCloseWindow).isChecked();
+			if (vCloseWindow instanceof CheckBox) {
+				isCloseWindow = ((CheckBox) vCloseWindow).isChecked();
 			} else {
 				isCloseWindow = false;
 			}
-			
+
+			// 设置模式
+			ChargePaymentListLayout.ChargeStyle chargeMode = ((CheckBox) findViewById(IDC_CHARGE_MODE_BUY))
+					.isChecked() ? ChargePaymentListLayout.ChargeStyle.BUY
+					: ChargePaymentListLayout.ChargeStyle.RECHARGE;
+			ChargePaymentListLayout.testMode(chargeMode);
+
 			mSDKManager.showPaymentView(mHandler, MSG_PAYMENT_CALLBACK,
 					CONFIG_GAME_SERVER_ID, CONFIG_GAME_SERVER_NAME,
-					CONFIG_GAME_ROLE_ID, CONFIG_GAME_ROLE, amount,isCloseWindow ,
-					CONFIG_GAME_CALLBACK_INFO);
+					CONFIG_GAME_ROLE_ID, CONFIG_GAME_ROLE, amount,
+					isCloseWindow, CONFIG_GAME_CALLBACK_INFO);
 		}
 			break;
 
