@@ -11,10 +11,10 @@ public final class Constants {
 		LOGIN, CTEN, CUNION, CALI, CYEE
 	}
 	/** 服务器 */
-	//public static final String URL_SERVER = "http://andrs.tisgame.com/"; // 内外网正式
+	public static final String URL_SERVER = "http://andrs.tisgame.com/"; // 内外网正式
 	// public static final String URL_SERVER = "http://testsdk.kkfun.cn:8081/";
 	// //外网测试
-    public static final String URL_SERVER = "http://and124.sdksrv.com/";
+   // public static final String URL_SERVER = "http://and124.sdksrv.com/";
 	// //内网测试
 	// public static final String URL_SERVER = "http://10.0.0.23:8080/";
 	// //文哥测试端口
@@ -44,7 +44,7 @@ public final class Constants {
 			+ (ZZSDKConfig.SUPPORT_360SDK ? "/360" : "");
 	public static final String ACCOUNT_PASSWORD_FILE = "ZM.DAT.";
 
-	public static final String URL_SERVER_SRV = URL_SERVER + "srv/";
+	public static final String URL_SERVER_SRV = URL_SERVER + "andsrv/";
 
 	public static final String QUICK_LOGIN_REQ = URL_SERVER_SRV + "alg.lg";
 

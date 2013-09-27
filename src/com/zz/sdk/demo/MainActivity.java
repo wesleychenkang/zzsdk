@@ -214,7 +214,7 @@ public class MainActivity extends Activity implements OnClickListener {
 					  isDisplayLoginfail = false; 
 				  }
 				  
-				 mSDKManager.setConfigInfo(true, isDisplayLoginTip,
+				 mSDKManager.setConfigInfo(false, isDisplayLoginTip,
 							isDisplayLoginfail); 
 			}
 			

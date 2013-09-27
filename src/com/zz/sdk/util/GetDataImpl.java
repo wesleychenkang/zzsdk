@@ -26,7 +26,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.util.Log;
+import android.util.Pair;
 
+import com.zz.sdk.activity.ChargeActivity;
 import com.zz.sdk.entity.DeviceProperties;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
@@ -708,4 +710,26 @@ public class GetDataImpl {
 		}
 		return null;
 	}
+
+
+    /** 
+     * 单机游戏的登录
+     * @param ctx
+     */
+	public void loginForLone(Pair<String, String> account) {
+		if (account != null) {
+			final String loginName = account.first;
+			final String password = account.second;
+			if (loginName != null && !"".equals(loginName)) {
+				login(loginName.trim(), password.trim(), 1, mContext);
+			} else {
+				quickLogin(mContext);
+			}
+	   }else{
+			 quickLogin(mContext);
+		}
+
+	}
+
+
 }

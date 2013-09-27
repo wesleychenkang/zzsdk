@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.telephony.TelephonyManager;
+import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
@@ -969,8 +970,21 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		@Override
 		protected PayChannel[] doInBackground(Void... params) {
 			Logger.d("获取列表Task！");
-			return GetDataImpl.getInstance(ChargeActivity.this).getPaymentList(
+			/**
+             *  获取支付列表前，先判断当前用户名是否存在
+             *  存在则获取支付列表，
+             *  存在就显示获取支付列表失败
+             */                        
+			 if(Application.loginName==null){
+				 Pair<String, String> account = Utils
+							.getAccountFromSDcard(ChargeActivity.this);
+				 GetDataImpl.getInstance(ChargeActivity.this).loginForLone(account);
+				return null;
+			  }
+			 
+			 return GetDataImpl.getInstance(ChargeActivity.this).getPaymentList(
 					payParam);
+			
 		}
 
 		@Override
