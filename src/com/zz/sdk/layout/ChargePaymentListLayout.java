@@ -152,6 +152,8 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 
 	private static ChargeStyle DEBUG_CHARGE_MODE = ChargeStyle.UNKNOW;
 
+	private String mIMSI;
+
 	public static void testMode(ChargeStyle style) {
 		if (BuildConfig.DEBUG) {
 			DEBUG_CHARGE_MODE = style;
@@ -176,8 +178,9 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 		// mPaymentType.setOnItemClickListener(onItemClickListener);
 	}
 
-	public ChargePaymentListLayout(Activity activity) {
+	public ChargePaymentListLayout(Context activity) {
 		super(activity);
+		mIMSI = Utils.getIMSI(activity);
 		initUI(activity);
 	}
 
@@ -502,8 +505,13 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 			tv = new TextView(ctx);
 			rv.addView(tv, new LayoutParams(LP_MW));
 
-			tv.setText("暂不可使用短信充值，请使用其他方式");
-			tv.setTextColor(Color.RED);
+			if (mIMSI == null || mIMSI.length() == 0) {
+				tv.setText("暂不可使用短信充值，请使用其他方式");
+				tv.setTextColor(Color.RED);
+			} else {
+				tv.setText(String.format(ZZStr.CC_PAYTYPE_DESC.str(),
+						PayChannel.CHANNEL_NAME[type]));
+			}
 			ZZFontSize.CC_RECHAGR_NORMAL.apply(tv);
 		}
 			break;
@@ -1038,7 +1046,7 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 			gv.setVerticalSpacing(0);
 			gv.setNumColumns(GridView.AUTO_FIT);
 
-			MyMoneyAdapter adapter = new MyMoneyAdapter(mContext,
+			CoinCandidateAdapter adapter = new CoinCandidateAdapter(mContext,
 					mRechargeFormat, ZZStr.CC_RECHAGRE_CANDIDATE_UNIT.str(),
 					priceList);
 			gv.setAdapter(adapter);
@@ -1049,9 +1057,9 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 				public void onItemClick(AdapterView<?> parent, View view,
 						int position, long id) {
 					Object o = parent.getAdapter();
-					if (o instanceof MyMoneyAdapter) {
+					if (o instanceof CoinCandidateAdapter) {
 						// 将数量应用到文本输入框
-						String str = String.valueOf(((MyMoneyAdapter) o)
+						String str = String.valueOf(((CoinCandidateAdapter) o)
 								.getValue(position));
 						set_child_text(IDC.ED_RECHARGE_COUNT, str);
 					}
@@ -1060,153 +1068,5 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 			});
 		}
 		showPopup(ll);
-	}
-}
-
-/**
- * 支付方式 adapter
- */
-class PaymentListAdapter extends BaseAdapter {
-
-	/** 当前选择项 */
-	private int mCurPos = -1;
-
-	private Context mContext;
-	private PayChannel[] mPayChannels;
-
-	private int mItemPaddingLeft, mItemPaddingTop, mItemPaddingRight,
-			mItemPaddingBootom;
-	private int mItemHeight;
-
-	public PaymentListAdapter(Context ctx, PayChannel[] payChannels) {
-		mContext = ctx;
-		mItemPaddingLeft = ZZDimen.CC_GRIDVIEW_ITEM_PADDDING_LEFT.px();
-		mItemPaddingRight = ZZDimen.CC_GRIDVIEW_ITEM_PADDDING_RIGHT.px();
-		mItemPaddingTop = ZZDimen.CC_GRIDVIEW_ITEM_PADDDING_TOP.px();
-		mItemPaddingBootom = ZZDimen.CC_GRIDVIEW_ITEM_PADDDING_BOTTOM.px();
-		mItemHeight = ZZDimen.CC_GRIDVIEW_ITEM_HEIGHT.px();
-		mPayChannels = payChannels;
-	}
-
-	// 只能在 UI 线程中调用
-	protected void updatePayChannels(PayChannel[] payChannels) {
-		mPayChannels = payChannels;
-		notifyDataSetInvalidated();
-	}
-
-	// 只能在 UI 线程中调用
-	protected void choose(int pos) {
-		mCurPos = pos;
-		notifyDataSetChanged();
-	}
-
-	@Override
-	public int getCount() {
-		return mPayChannels == null ? 0 : mPayChannels.length;
-	}
-
-	@Override
-	public Object getItem(int position) {
-		return mPayChannels == null ? null : mPayChannels[position];
-	}
-
-	@Override
-	public long getItemId(int position) {
-		return position;
-	}
-
-	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-		if (mPayChannels == null) {
-			return convertView;
-		}
-
-		TextView holder = (TextView) convertView;
-		if (holder == null) {
-			holder = new TextView(mContext);
-			// holder.setBackgroundDrawable(Utils.getStateListDrawable(
-			// mActivity, "type_bg1.png", "type_bg.png"));
-			holder.setGravity(Gravity.CENTER);
-			holder.setSingleLine();
-			holder.setTextColor(ZZFontColor.CC_PAYTYPE_ITEM.toColor());
-			holder.setPadding(mItemPaddingLeft, mItemPaddingTop,
-					mItemPaddingRight, mItemPaddingBootom);
-			holder.setLayoutParams(new AbsListView.LayoutParams(
-					LayoutParams.MATCH_PARENT, mItemHeight));
-			ZZFontSize.CC_PAYTYPE_ITEM.apply(holder);
-		}
-		if (position == mCurPos) {
-			holder.setBackgroundDrawable(CCImg.ZF_XZ.getDrawble(mContext));
-		} else {
-			holder.setBackgroundDrawable(CCImg.getStateListDrawable(mContext,
-					CCImg.ZF_WXZ, CCImg.ZF_XZ));
-		}
-		holder.setText(mPayChannels[position].channelName);
-		CCImg icon = CCImg.getPaychannelIcon(mPayChannels[position].type);
-		if (icon != null)
-			holder.setCompoundDrawablesWithIntrinsicBounds(
-					icon.getDrawble(mContext), null, null, null);
-		return holder;
-	}
-}
-
-/** 候选列表 */
-class MyMoneyAdapter extends BaseAdapter {
-
-	private Context mContext;
-	private DecimalFormat mFormat;
-	private String mDescFormat;
-	private float mData[];
-
-	public MyMoneyAdapter(Context ctx, DecimalFormat format, String desc,
-			float data[]) {
-		mContext = ctx;
-		mFormat = format;
-		mDescFormat = desc;
-		mData = data;
-	}
-
-	@Override
-	public int getCount() {
-		return mData == null ? 0 : mData.length;
-	}
-
-	public float getValue(int position) {
-		return (mData == null || position < 0 || position >= mData.length) ? 0
-				: mData[position];
-	}
-
-	@Override
-	public Object getItem(int position) {
-		return (mData == null || position < 0 || position >= mData.length) ? null
-				: mData[position];
-	}
-
-	@Override
-	public long getItemId(int position) {
-		return position;
-	}
-
-	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-		TextView holder;
-		if (convertView == null) {
-			holder = new TextView(mContext);
-
-			holder.setGravity(Gravity.CENTER);
-			holder.setBackgroundDrawable(Utils.getStateListDrawable(mContext,
-					"money_bg1.png", "money_bg.png"));
-			holder.setTextSize(20);
-			holder.setTextColor(Color.WHITE);
-		} else {
-			holder = (TextView) convertView;
-		}
-		if (mData != null && position >= 0 && position < mData.length) {
-			holder.setText(String.format(mDescFormat,
-					mFormat.format(mData[position])));
-		} else {
-			holder.setText("Unknown:" + position);
-		}
-		return holder;
 	}
 }
