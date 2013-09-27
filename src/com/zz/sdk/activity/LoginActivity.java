@@ -154,7 +154,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 			}
 			new LoginTask(this, iLoginName, iPassword).execute();
 			break;
-			
+
 		case LoginLayout.IDC_BT_QUICK_LOGIN:
 			// 快速登录
 			// 先判断用户有没有输入
@@ -674,7 +674,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 				default:
 					// 登陆失败
 					if (Application.isDisplayLoginfail) {
-						toast("登录失败,连接服务器失败 ");
+						toast("登录失败，错误的用户名或密码。\n请检查输入是否正确，或者直接联系客服 ");
 					}
 
 					Application.isLogin = false;
@@ -682,7 +682,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 				}
 			} else {
 				if (Application.isDisplayLoginfail) {
-					toast("登录失败");
+					toast("登录失败，不能连接服务器，请检查网络");
 				}
 				Application.isLogin = false;
 			}
