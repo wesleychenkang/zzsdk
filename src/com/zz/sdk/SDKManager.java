@@ -1,16 +1,22 @@
 package com.zz.sdk;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
+import android.sax.StartElementListener;
 import android.util.Log;
 import android.util.Pair;
 
+import com.zz.sdk.activity.BaseActivity;
 import com.zz.sdk.activity.ChargeActivity;
 import com.zz.sdk.activity.LoginActivity;
 import com.zz.sdk.activity.LoginForQiFu;
+import com.zz.sdk.activity.ParamChain;
+import com.zz.sdk.activity.ParamChain.KeyGlobal;
 import com.zz.sdk.entity.SdkUser;
 import com.zz.sdk.entity.SdkUserTable;
+import com.zz.sdk.layout.LAYOUT_TYPE;
 import com.zz.sdk.util.Application;
 import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.ResConstants;
@@ -39,6 +45,8 @@ public class SDKManager {
 
 	/** 静态实例 */
 	private static SDKManager instance;
+
+	private ParamChain mRootEnv;
 
 	/**
 	 * 获取 SDK 实例
@@ -85,7 +93,7 @@ public class SDKManager {
 		// saveProjectIdToContext();
 		// }
 		// });
-		
+
 		ResConstants.init(ctx);
 	}
 
@@ -314,6 +322,24 @@ public class SDKManager {
 
 		ChargeActivity.start(callbackHandler, what, mContext, gameServerID,
 				serverName, roleId, gameRole, callBackInfo);
+	}
+
+	public void showExchange(Handler callbackHandler, int what, String projectID) {
+		ParamChain rootEnv = ParamChain.generateUnion(mRootEnv,
+				KeyGlobal.UI_NAME);
+		startActivity(rootEnv, LAYOUT_TYPE.Exchange);
+	}
+
+	private void startActivity(ParamChain rootEnv, LAYOUT_TYPE root_layout) {
+		ParamChain env = new ParamChain(rootEnv);
+		env.add(KeyGlobal.UI_VIEW_TYPE, root_layout);
+		ParamChain.GLOBAL().add(root_layout.key(), env,
+				ParamChain.ValType.TEMPORARY);
+
+		Intent intent = new Intent(mContext, BaseActivity.class);
+		intent.putExtra(KeyGlobal.UI_NAME, root_layout.key());
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		mContext.startActivity(intent);
 	}
 
 	/**

@@ -74,6 +74,27 @@ public class ResConstants {
 		CC_HELP_TITLE("帮助说明"), //
 		CC_HELP_TEL("客服电话: 0123-45678901"), //
 		CC_RECHARGE_LIST_NONE("不能显示候选列表"), //
+
+		/** 道具兑换 */
+		CC_EXCHANGE_TITLE("道具兑换"),
+		/** 道具兑换详情 */
+		CC_EXCHANGE_DETAIL_TITLE("兑换——%s"),
+
+		/** XLISTVIEW: 下拉刷新 */
+		XLISTVIEW_HEADER_HINT_NORMAL("下拉刷新"),
+		/** XLISTVIEW: 松开刷新数据 */
+		XLISTVIEW_HEADER_HINT_READY("松开刷新数据"),
+		/** XLISTVIEW: 正在加载... */
+		XLISTVIEW_HEADER_HINT_LOADING("正在加载..."),
+		/** XLISTVIEW: 上次更新时间： */
+		XLISTVIEW_HEADER_LAST_TIME("上次更新时间："),
+		/** XLISTVIEW: 查看更多 */
+		XLISTVIEW_FOOTER_HINT_NORMAL("查看更多"),
+		/** XLISTVIEW: 松开载入更多 */
+		XLISTVIEW_FOOTER_HINT_READY("松开载入更多"),
+		/** XLISTVIEW: 正在加载更多... */
+		XLISTVIEW_FOOTER_HINT_LOADING("正在加载更多..."),
+
 		;
 
 		private String context;
@@ -159,7 +180,7 @@ public class ResConstants {
 			CC_ROOTVIEW_PADDING_TOP(16), //
 			CC_ROOTVIEW_PADDING_RIGHT(24), //
 			CC_ROOTVIEW_PADDING_BOTTOM(12),
-			
+
 			/** 充值界面·各面板垂直方向间隔 */
 			CC_SAPCE_PANEL_V(16),
 
@@ -201,8 +222,8 @@ public class ResConstants {
 		BUY_BUTTON("cc_buy_button.png"), //
 		BUY_BUTTON_CLICK("cc_buy_button_click.png"), //
 		CHARGE_PULL("cc_charge_pull.png"), //
-		EX_BUTTON("cc_ex_button.png"), //
-		EX_BUTTON_CLICK("cc_ex_button_click.png"), //
+		EX_BUTTON("cc_ex_button.9.png"), //
+		EX_BUTTON_CLICK("cc_ex_button_click.9.png"), //
 		EX_RIGHT("cc_ex_Right.png"), //
 		EX_RIGHT_CLICK("cc_ex_Right_click.png"), //
 		HELP("cc_help.png"), //
@@ -224,7 +245,12 @@ public class ResConstants {
 		TITLE_BACK_PRESSED("title_back_pressed.png"), //
 		TITLE_BG("title_bg.png"), //
 		TITLE_EXIT_DEFAULT("title_exit_default.png"), //
-		TITLE_EXIT_PRESSED("title_exit_pressed.png");
+		TITLE_EXIT_PRESSED("title_exit_pressed.png"),
+
+		/** XListView */
+		XLISTVIEW_ARROW("xlistview_arrow.png"),
+
+		;
 
 		private String context;
 

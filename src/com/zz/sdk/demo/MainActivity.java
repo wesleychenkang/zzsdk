@@ -55,6 +55,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final int IDC_CK_FAILL = _IDC_START_ + 10;
 	private static final int IDC_CHARGE_AUTO_CLOSE = _IDC_START_ + 11;
 	private static final int IDC_CHARGE_MODE_BUY = _IDC_START_ + 12;
+	private static final int IDC_BT_EXCHANGE = _IDC_START_ + 13;
 
 	/* 自定义消息 */
 	private static final int _MSG_USER_ = 2013;
@@ -172,6 +173,15 @@ public class MainActivity extends Activity implements OnClickListener {
 			checkLayout.addView(checksucces);
 			rootLayout.addView(checkLayout);
 		}
+		{
+			Button btnSetConfig = new Button(ctx);
+			btnSetConfig.setText("道具交换");
+			btnSetConfig.setId(IDC_BT_EXCHANGE);
+
+			btnSetConfig.setOnClickListener(onClickListener);
+			rootLayout.addView(btnSetConfig);
+		}
+
 		// {
 		// Button btQuery = new Button(ctx);
 		// btQuery.setText("查询订单");
@@ -307,6 +317,12 @@ public class MainActivity extends Activity implements OnClickListener {
 		case IDC_BT_QUERY: {
 			// pushLog("调用了" + ordernumber);
 			// mSDKManager.queryOrderState(mHandler, this, ordernumber);
+		}
+			break;
+
+		// 道具兑换
+		case IDC_BT_EXCHANGE: {
+			mSDKManager.showExchange(mHandler, MSG_PAYMENT_CALLBACK, null);
 		}
 			break;
 		}

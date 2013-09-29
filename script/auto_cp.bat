@@ -15,8 +15,10 @@ call :mycp 充值中心（购买道具）\recharge_ban.png recharge_ban.png
 call :mycp 充值中心（社区进入）\充值_09.png charge_pull.png
 
 set t=
-call :mycp 兑换列表\ex_button.png ex_button.png
-call :mycp 兑换列表\ex_button_click.png ex_button_click.png
+call :myRm 兑换列表\ex_button.png ex_button.png
+call :mycp 兑换列表\ex_button.9.png ex_button.9.png
+call :myRm 兑换列表\ex_button_click.png ex_button_click.png
+call :mycp 兑换列表\ex_button_click.9.png ex_button_click.9.png
 call :mycp 兑换列表\ex_Right.png ex_right.png
 call :mycp 兑换列表\ex_Right_click.png ex_right_click.png
 
@@ -60,3 +62,11 @@ if "%st:~-6%"==".9.png" (
 ) else (
    copy %ss% %st%
 )
+goto :eof
+
+:myRm
+set ss=%s%%1
+set st=%p%%pr%%t%%2
+echo 删除 %st%
+del %st%
+goto :eof

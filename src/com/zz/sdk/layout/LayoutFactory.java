@@ -1,6 +1,10 @@
 package com.zz.sdk.layout;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
+import android.view.View;
 
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
@@ -12,7 +16,8 @@ import com.zz.sdk.activity.ParamChain.KeyGlobal;
  * @version v0.1.0.20130927
  */
 public class LayoutFactory {
-	public static class KeyLayoutFactory extends KeyGlobal {
+
+	public static class KeyLayoutFactory implements KeyGlobal {
 		protected static final String _TAG_ = KeyGlobal._TAG_
 				+ "key_layout_factory" + _SEPARATOR_;
 
@@ -28,10 +33,24 @@ public class LayoutFactory {
 	}
 
 	public static interface ILayoutHost {
+
 		/**
-		 * 产生一个等待对话框（进度条）
+		 * 产生一个等待对话框（进度条），更详细的对话框构造，可通过 {@link KeyGlobal#UI_ACTIVITY} 获取
+		 * {@link Activity}
+		 * 
+		 * @param type
+		 *            类型
+		 * @param msg
+		 *            消息，可以为空(null)
+		 * @param cancelable
+		 *            是否允许用户点击对话框外部区域来关闭对话框
+		 * @param cancelListener
+		 *            关闭对话框的回调，可以为空(null)
+		 * @param cancelTag
+		 *            回调监听器的消息，可以为空(null)
 		 */
-		public void showWaitDialog(int type, String msg, boolean cancelable);
+		public void showWaitDialog(int type, String msg, boolean cancelable,
+				OnCancelListener cancelListener, Object cancelTag);
 
 		/**
 		 * 隐藏对话框
@@ -59,18 +78,35 @@ public class LayoutFactory {
 
 	public static interface ILayoutView {
 
+		/***
+		 * 进入
+		 * 
+		 * @return
+		 */
+		public boolean onEnter();
+
+		/**
+		 * 被纳入缓存
+		 * 
+		 * @return
+		 */
+		public boolean onPush();
+
+		/**
+		 * 被关闭
+		 * 
+		 * @return
+		 */
+		public boolean onClose();
+
 		/**
 		 * 对话框被关闭
 		 * 
-		 * @param dialogId
+		 * @param dialog
+		 * @param cancelTag
 		 * @return
 		 */
-		public boolean onDialogCancel(int dialogId);
-
-		/**
-		 * 销毁
-		 */
-		public void onDestory();
+		public boolean onDialogCancel(DialogInterface dialog, Object cancelTag);
 
 		/**
 		 * 获取环境变量
@@ -88,12 +124,16 @@ public class LayoutFactory {
 	 * @param params
 	 * @return
 	 */
-	public static ChargeAbstractLayout createLayout(Context ctx,
-			LAYOUT_TYPE type, ParamChain rootEnv) {
+	public static View createLayout(Context ctx, LAYOUT_TYPE type,
+			ParamChain rootEnv) {
 
 		switch (type) {
 		case PaymentList:
 			return new ChargePaymentListLayout(ctx);
+		case Exchange:
+			return new ExchangeLayout(ctx, rootEnv);
+		case ExchangeDetail:
+			return new ExchangeDetailLayout(ctx, rootEnv);
 
 		default:
 			break;

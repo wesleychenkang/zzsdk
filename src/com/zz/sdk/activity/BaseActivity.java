@@ -1,11 +1,11 @@
 package com.zz.sdk.activity;
 
-import java.util.HashMap;
 import java.util.Stack;
 
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -14,13 +14,12 @@ import android.view.Window;
 import com.zz.sdk.BuildConfig;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
 import com.zz.sdk.activity.ParamChain.ValType;
-import com.zz.sdk.layout.ChargeAbstractLayout;
 import com.zz.sdk.layout.LAYOUT_TYPE;
 import com.zz.sdk.layout.LayoutFactory;
+import com.zz.sdk.layout.LayoutFactory.ILayoutView;
 import com.zz.sdk.layout.LayoutFactory.KeyLayoutFactory;
 import com.zz.sdk.util.Application;
 import com.zz.sdk.util.DialogUtil;
-import com.zz.sdk.util.FlagControl;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.Utils;
 
@@ -32,49 +31,40 @@ import com.zz.sdk.util.Utils;
  */
 public class BaseActivity extends Activity {
 
-	protected FlagControl mFlag;
-
-	/** 提示类框，如等待进度条等 */
+	/** 提示类框，如等待进度条等，关闭窗体时需要销毁 */
 	protected Dialog mDialog;
 
 	/** 视图栈 */
 	final private Stack<View> mViewStack = new Stack<View>();
 	private View mCurrentView;
-
-	private LayoutFactory.ILayoutView mActView;
+	private ILayoutView mActView;
 
 	private String mName;
 
 	private ParamChain mRootEnv;
 
-	/** 参数缓冲区:<窗口名，参数表> */
-	private static HashMap<String, ParamChain> sMapENV;
+	static final class KeyBaseActivity implements KeyGlobal {
+		protected static final String _TAG_ = KeyGlobal._TAG_ + "base_activity"
+				+ _SEPARATOR_;
 
-	protected static synchronized ParamChain pushENV(String key, ParamChain env) {
-		return sMapENV.put(key, env);
-	}
-
-	protected static synchronized ParamChain popENV(String key) {
-		if (key == null)
-			return null;
-		return sMapENV.remove(key);
+		public static final String DIALOG_CANCEL_LISTENER = _TAG_
+				+ "dialog_cancel_listener";
+		public static final String DIALOG_CANCEL_TAG = _TAG_
+				+ "dialog_cancel_tag";
 	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		mFlag = new FlagControl();
-
+		prepare_activity(this);
 		boolean init_success = init(this);
 		if (!init_success)
 			end();
 	}
 
-	protected void init_activity(Activity activity) {
+	protected void prepare_activity(Activity activity) {
 		Utils.loack_screen_orientation(activity);
 		activity.requestWindowFeature(Window.FEATURE_NO_TITLE);
-
 	}
 
 	/**
@@ -88,20 +78,30 @@ public class BaseActivity extends Activity {
 		ParamChain env = null;
 		Intent intent = activity.getIntent();
 		if (intent != null) {
-			mName = intent.getStringExtra(KeyGlobal.K_NAME);
-			env = popENV(mName);
+			mName = intent.getStringExtra(KeyGlobal.UI_NAME);
+			if (mName != null) {
+				Object o = ParamChain.GLOBAL().remove(mName);
+				if (o instanceof ParamChain) {
+					env = (ParamChain) o;
+				}
+			}
 		}
 
-		if (env == null)
+		if (env == null) {
+			if (BuildConfig.DEBUG) {
+				Logger.e("找不到有效变量环境");
+			}
 			return false;
+		}
 
 		mRootEnv = new ParamChain(env);
-		mRootEnv.add(KeyGlobal.K_ACTIVITY, activity, ValType.TEMPORARY);
+		mRootEnv.add(KeyGlobal.UI_ACTIVITY, activity, ValType.TEMPORARY);
 		mRootEnv.add(KeyLayoutFactory.K_HOST, new LayoutFactory.ILayoutHost() {
-
 			@Override
-			public void showWaitDialog(int type, String msg, boolean cancelable) {
-				showDialog(msg, cancelable);
+			public void showWaitDialog(int type, String msg,
+					boolean cancelable, OnCancelListener cancelListener,
+					Object cancelTag) {
+				showDialog(msg, cancelable, cancelListener, cancelTag);
 			}
 
 			@Override
@@ -124,35 +124,38 @@ public class BaseActivity extends Activity {
 				// TODO Auto-generated method stub
 				tryEnterView(type, rootEnv);
 			}
+
 		}, ValType.TEMPORARY);
 
 		// 创建主视图
-		LAYOUT_TYPE type = mRootEnv.get(KeyGlobal.K_VIEW_TYPE,
+		LAYOUT_TYPE type = mRootEnv.get(KeyGlobal.UI_VIEW_TYPE,
 				LAYOUT_TYPE.class);
 		if (!tryEnterView(type, mRootEnv)) {
+			Logger.e("bad root view");
 			return false;
 		}
-
-		init_activity(activity);
 
 		return true;
 	}
 
 	private boolean tryEnterView(LAYOUT_TYPE type, ParamChain rootEnv) {
 		if (type == null) {
-			if (BuildConfig.DEBUG) {
-				Logger.d("unknow view type!");
-			}
 			return false;
 		}
 
-		ChargeAbstractLayout vl = LayoutFactory.createLayout(getBaseContext(),
-				type, rootEnv);
+		View vl = LayoutFactory.createLayout(getBaseContext(), type, rootEnv);
 		if (vl != null) {
 			pushView2Stack(vl);
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public void onBackPressed() {
+		if (popViewFromStack() != null)
+			return;
+		super.onBackPressed();
 	}
 
 	@Override
@@ -164,15 +167,33 @@ public class BaseActivity extends Activity {
 		clean();
 	}
 
-	private void showDialog(CharSequence msg, boolean cancelable) {
+	private void showDialog(CharSequence msg, boolean cancelable,
+			OnCancelListener cancelListener, Object cancelTag) {
 		hideDialog();
+
+		mRootEnv.add(KeyBaseActivity.DIALOG_CANCEL_LISTENER, cancelListener,
+				ValType.TEMPORARY);
+		mRootEnv.add(KeyBaseActivity.DIALOG_CANCEL_TAG, cancelTag,
+				ValType.TEMPORARY);
 		mDialog = DialogUtil.showProgress(this, msg, cancelable);
-		mDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+		mDialog.setOnCancelListener(new OnCancelListener() {
 			@Override
 			public void onCancel(DialogInterface dialog) {
-				// end();
-				if (mActView != null)
-					mActView.onDialogCancel(0);
+				if (mRootEnv != null) {
+					OnCancelListener l = mRootEnv.getOwned(
+							KeyBaseActivity.DIALOG_CANCEL_LISTENER,
+							OnCancelListener.class);
+					if (l != null) {
+						l.onCancel(dialog);
+					} else {
+						// end();
+						if (mActView != null) {
+							Object tag = mRootEnv
+									.getOwned(KeyBaseActivity.DIALOG_CANCEL_TAG);
+							mActView.onDialogCancel(dialog, tag);
+						}
+					}
+				}
 			}
 		});
 	}
@@ -182,6 +203,8 @@ public class BaseActivity extends Activity {
 		if (null != mDialog && mDialog.isShowing()) {
 			mDialog.dismiss();
 			mDialog = null;
+			mRootEnv.remove(KeyBaseActivity.DIALOG_CANCEL_LISTENER);
+			mRootEnv.remove(KeyBaseActivity.DIALOG_CANCEL_TAG);
 		}
 	}
 
@@ -216,7 +239,7 @@ public class BaseActivity extends Activity {
 				return null;
 			}
 			// // 弹出旧ui
-			// View pop = mViewStack.pop();
+			View pop = mViewStack.pop();
 			// if (pop instanceof SmsChannelLayout) {
 			// Application.isMessagePage = 1;
 			// }
@@ -229,7 +252,7 @@ public class BaseActivity extends Activity {
 			// smsPayCallBack(-2, null);
 			//
 			// }
-			// pop.clearFocus();
+			pop.clearFocus();
 			mCurrentView = mViewStack.peek();
 			setContentView(mCurrentView);
 			mCurrentView.requestFocus();

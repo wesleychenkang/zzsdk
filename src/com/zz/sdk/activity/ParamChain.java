@@ -21,6 +21,11 @@ import com.zz.sdk.layout.LAYOUT_TYPE;
  * @version v0.1.0.20130927
  */
 public class ParamChain {
+	private static final ParamChain GLOBAL_INSTANCE = new ParamChain();
+
+	static public ParamChain GLOBAL() {
+		return GLOBAL_INSTANCE;
+	}
 
 	/**
 	 * 全局变量名
@@ -28,53 +33,52 @@ public class ParamChain {
 	 * 子级变量名定义规则：
 	 * 
 	 * <pre>
-	 * // 示例，二级变量名类  KeyLayout，名为 layout，定义一个变量 K_YOUR_NAME  
-	 * public static class <font color="#ff0000">KeyLayout</font>extends <b>KeyGlobal</b> {
-	 *  	protected static final String _TAG_ = <b>KeyGlobal._TAG_</b> + "layout" + _SEPARATOR_;
+	 * // 示例，二级变量组  KeyLayout，名为 layout，定义一个变量 K_YOUR_NAME  
+	 * public static interface <font color="#ff0000">KeyLayout</font> extends <b>KeyGlobal</b> {
+	 *  	static final String _TAG_ = <b>KeyGlobal._TAG_</b> + "layout" + _SEPARATOR_;
 	 *  
 	 *  	<i>/** 键：自定义名, 类型 {@link String}，其它说明 *</i><i>/</i>
 	 *  	public static final String K_YOUR_NAME = _TAG_ + "myName";
-	 *  	protected KeyLayout() {}
 	 * }
 	 * </pre>
 	 * 
 	 * @author nxliao
 	 * 
 	 */
-	public static class KeyGlobal {
-		protected static final String _SEPARATOR_ = ".";
-		protected static final String _TAG_ = "global" + _SEPARATOR_;
+	public static interface KeyGlobal {
+		static final String _SEPARATOR_ = ".";
+		static final String _TAG_ = "global" + _SEPARATOR_;
 
 		/** 键：窗体名, {@link String} */
-		public static final String K_NAME = _TAG_ + "activity_name";
+		public static final String UI_NAME = _TAG_ + "ui_activity_name";
 
 		/** 键：窗体句柄, {@link Activity}，必须在销毁窗体时清理此引用 */
-		public static final String K_ACTIVITY = _TAG_ + "activity_instance";
+		public static final String UI_ACTIVITY = _TAG_ + "ui_activity_instance";
 
 		/** 键：主视图类型, {@link LAYOUT_TYPE} */
-		public static final String K_VIEW_TYPE = _TAG_ + "view_type";
+		public static final String UI_VIEW_TYPE = _TAG_ + "ui_view_type";
 
 		/** 键：价格, {@link Float}，单位 [卓越币]，精度 0.01 */
-		public static final String K_AMOUNT = _TAG_ + "amount";
+		public static final String PAY_AMOUNT = _TAG_ + "pay_amount";
 
 		/** 键：IMSI, {@link String} */
-		public static final String K_IMSI = _TAG_ + "imsi";
+		public static final String DEV_IMSI = _TAG_ + "dev_imsi";
 
 		/** 键：Handle, {@link Handler} 用于处理回调 */
-		public static final String K_CALLER_MSG_HANDLE = _TAG_
-				+ "caller_msg+_handler";
+		public static final String CALLER_MSG_HANDLE = _TAG_
+				+ "caller_msg_handler";
 
 		/** 键：消息类型, {@link Integer} 用于处理回调 */
-		public static final String K_CALLER_MSG_WHAT = _TAG_
-				+ "caller_msg_what";
+		public static final String CALLER_MSG_WHAT = _TAG_ + "caller_msg_what";
 
-		protected KeyGlobal() {
-		}
+		/** 键：帮助标题，{@link String} 用于展示给用户，内容是网页 html */
+		public static final String HELP_TITLE = _TAG_ + "help_title";
+		/** 键：帮助内容，{@link String} 用于展示给用户，内容是网页 html */
+		public static final String HELP_TOPIC = _TAG_ + "help_topic";
 	}
 
-	public static final class KeyUser extends KeyGlobal {
-		protected static final String _TAG_ = KeyGlobal._TAG_ + "user"
-				+ _SEPARATOR_;
+	public static interface KeyUser extends KeyGlobal {
+		static final String _TAG_ = KeyGlobal._TAG_ + "user" + _SEPARATOR_;
 
 		/** 登录名, {@link String} */
 		public static final String K_LOGIN_NAME = _TAG_ + "loginname";
@@ -93,9 +97,6 @@ public class ParamChain {
 
 		/** 卓越币与RMB的兑换比例，{@link Float}，格式 0.00 */
 		public static final String K_COIN_RATE = _TAG_ + "coin_rate";
-
-		protected KeyUser() {
-		}
 	}
 
 	/** 本地变量 */
@@ -360,7 +361,7 @@ public class ParamChain {
 	/**
 	 * 获取指定类型的变量（所有级），示例
 	 * <P>
-	 * Float amount = env.get({@link KeyGlobal#K_AMOUNT}, {@link Float
+	 * Float amount = env.get({@link KeyGlobal#PAY_AMOUNT}, {@link Float
 	 * Float.class});
 	 * 
 	 * @param key

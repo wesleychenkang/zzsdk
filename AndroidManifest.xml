@@ -117,6 +117,9 @@
             android:name="QHOPENSDK_CHANNEL"
             android:value="default" >
         </meta-data>
+        <activity android:name="com.zz.sdk.activity.BaseActivity"
+            android:configChanges="orientation|keyboardHidden|navigation"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"></activity>
     </application>
 
 </manifest>

@@ -35,5 +35,32 @@ public class Logger {
 			android.util.Log.d(TAG, s);
 		}
 	}
-	
+
+	public static void e(Object obj) {
+		if (DEBUG) {
+			String s ;
+			if (obj == null) {
+				s = "null";
+			} else {
+				Class<? extends Object> clz = obj.getClass();
+				if (clz.isArray()) {
+					StringBuilder sb = new StringBuilder(clz.getSimpleName());
+					sb.append(" [ ");
+					int len = Array.getLength(obj);
+					for (int i = 0; i < len; i++) {
+						if (i != 0) {
+							sb.append(", ");
+						}
+						Object tmp = Array.get(obj, i);
+						sb.append(tmp);
+					}
+					sb.append(" ]");
+					s = sb.toString();
+				} else {
+					s = "" + obj;
+				}
+			}
+			android.util.Log.e(TAG, s);
+		}
+	}
 }
