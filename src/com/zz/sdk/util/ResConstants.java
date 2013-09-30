@@ -43,9 +43,12 @@ public class ResConstants {
 		/** 余额显示，基于 {@link #CC_PRICE_FORMAT} */
 		CC_BALANCE_UNIT("%s"), //
 
-		CC_RECHAGRE_COUNT_TITLE("充值数量"), //
+		/** 充值中心 */
+		CC_RECHARGE_TITLE("充值中心"), CC_RECHARGE_TITLE_SOCIAL("充值中心(社交)"),
+
+		CC_RECHARGE_COUNT_TITLE("充值数量"), //
 		/** 充值中心（游戏购买入口） */
-		CC_RECHAGRE_COUNT_TITLE_PRICE("道具价格"), //
+		CC_RECHARGE_COUNT_TITLE_PRICE("道具价格"), //
 		CC_RECHAGRE_COUNT_HINT("请输入数量"), //
 		CC_RECHAGRE_COUNT_DESC("卓越币"), //
 		/** RMB与卓越币的兑换比例，如 (1元=%s卓越币)，基于 {@link #CC_PRICE_FORMAT} */
@@ -56,6 +59,9 @@ public class ResConstants {
 
 		/** 充值数量候选列表 %s个，基于 {@link #CC_PRICE_FORMAT} */
 		CC_RECHAGRE_CANDIDATE_UNIT("%s,个"), //
+
+		/** 拼命加载中... */
+		CC_HINT_LOADING("拼命加载中..."),
 
 		CC_PAYCHANNEL_TITLE("支付方式"), //
 		CC_CARDNUM_DESC("请输入卡号"), //

@@ -12,13 +12,13 @@ import android.view.View;
 import android.view.Window;
 
 import com.zz.sdk.BuildConfig;
+import com.zz.sdk.activity.ParamChain.KeyCaller;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
 import com.zz.sdk.activity.ParamChain.ValType;
 import com.zz.sdk.layout.LAYOUT_TYPE;
 import com.zz.sdk.layout.LayoutFactory;
 import com.zz.sdk.layout.LayoutFactory.ILayoutView;
 import com.zz.sdk.layout.LayoutFactory.KeyLayoutFactory;
-import com.zz.sdk.util.Application;
 import com.zz.sdk.util.DialogUtil;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.Utils;
@@ -35,8 +35,7 @@ public class BaseActivity extends Activity {
 	protected Dialog mDialog;
 
 	/** 视图栈 */
-	final private Stack<View> mViewStack = new Stack<View>();
-	private View mCurrentView;
+	final private Stack<ILayoutView> mViewStack = new Stack<ILayoutView>();
 	private ILayoutView mActView;
 
 	private String mName;
@@ -63,8 +62,8 @@ public class BaseActivity extends Activity {
 	}
 
 	protected void prepare_activity(Activity activity) {
-		Utils.loack_screen_orientation(activity);
-		activity.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		// Utils.loack_screen_orientation(activity);
+		// activity.requestWindowFeature(Window.FEATURE_NO_TITLE);
 	}
 
 	/**
@@ -78,7 +77,7 @@ public class BaseActivity extends Activity {
 		ParamChain env = null;
 		Intent intent = activity.getIntent();
 		if (intent != null) {
-			mName = intent.getStringExtra(KeyGlobal.UI_NAME);
+			mName = intent.getStringExtra(KeyGlobal.K_UI_NAME);
 			if (mName != null) {
 				Object o = ParamChain.GLOBAL().remove(mName);
 				if (o instanceof ParamChain) {
@@ -95,7 +94,7 @@ public class BaseActivity extends Activity {
 		}
 
 		mRootEnv = new ParamChain(env);
-		mRootEnv.add(KeyGlobal.UI_ACTIVITY, activity, ValType.TEMPORARY);
+		mRootEnv.add(KeyGlobal.K_UI_ACTIVITY, activity, ValType.TEMPORARY);
 		mRootEnv.add(KeyLayoutFactory.K_HOST, new LayoutFactory.ILayoutHost() {
 			@Override
 			public void showWaitDialog(int type, String msg,
@@ -128,7 +127,7 @@ public class BaseActivity extends Activity {
 		}, ValType.TEMPORARY);
 
 		// 创建主视图
-		LAYOUT_TYPE type = mRootEnv.get(KeyGlobal.UI_VIEW_TYPE,
+		LAYOUT_TYPE type = mRootEnv.get(KeyGlobal.K_UI_VIEW_TYPE,
 				LAYOUT_TYPE.class);
 		if (!tryEnterView(type, mRootEnv)) {
 			Logger.e("bad root view");
@@ -143,9 +142,11 @@ public class BaseActivity extends Activity {
 			return false;
 		}
 
-		View vl = LayoutFactory.createLayout(getBaseContext(), type, rootEnv);
+		ILayoutView vl = LayoutFactory.createLayout(getBaseContext(), type,
+				rootEnv);
 		if (vl != null) {
 			pushView2Stack(vl);
+			vl.onEnter();
 			return true;
 		}
 		return false;
@@ -210,22 +211,37 @@ public class BaseActivity extends Activity {
 
 	protected void clean() {
 		hideDialog();
-		mViewStack.clear();
+		if (mViewStack != null && !mViewStack.isEmpty()) {
+			ILayoutView lv; // = mViewStack.pop();
+			while (!mViewStack.isEmpty()) {
+				lv = mViewStack.pop();
+				if (lv.isAlive()) {
+					lv.onExit();
+				}
+			}
+			// mViewStack.clear();
+		}
 		mName = null;
-		mRootEnv.autoRelease();
-		mRootEnv = null;
+		if (mRootEnv != null) {
+			mRootEnv.autoRelease();
+			mRootEnv = null;
+		}
 	}
 
-	protected void pushView2Stack(View newView) {
+	protected void pushView2Stack(ILayoutView vl) {
 		if (mViewStack.size() > 0) {
-			View peek = mViewStack.peek();
-			peek.clearFocus();
-			// peek.startAnimation(mAnimLeftOut);
+			ILayoutView top = mViewStack.peek();
+			if (top.isAlive()) {
+				View peek = top.getRootView();
+				peek.clearFocus();
+				top.onPause();
+				// peek.startAnimation(mAnimLeftOut);
+			}
 		}
-		mViewStack.push(newView);
-		mCurrentView = newView;
-		setContentView(newView);
-		newView.requestFocus();
+		mViewStack.push(vl);
+		View curView = vl.getRootView();
+		setContentView(curView);
+		curView.requestFocus();
 		if (mViewStack.size() > 1) {
 			// 启动动画
 			// newView.startAnimation(mAnimRightIn);
@@ -234,30 +250,42 @@ public class BaseActivity extends Activity {
 
 	private View popViewFromStack() {
 		if (mViewStack.size() > 1) {
-			if (Application.isCloseWindow && Application.isAlreadyCB == 1) {
+			Boolean isCloseWindow = mRootEnv.get(KeyCaller.K_IS_CLOSE_WINDOW,
+					Boolean.class);
+			// if (Application.isCloseWindow && Application.isAlreadyCB == 1) {
+			if (Boolean.TRUE.equals(isCloseWindow)) {
 				this.finish();
 				return null;
 			}
 			// // 弹出旧ui
-			View pop = mViewStack.pop();
-			// if (pop instanceof SmsChannelLayout) {
-			// Application.isMessagePage = 1;
-			// }
-			// if (pop instanceof ChargeSMSDecLayout) {
-			// Application.isMessagePage = 0;
-			// }
-			// if (Application.isMessagePage == 1 && isSendMessage == false) {
-			// // 短信取消后发送取消支付请求
-			// Application.isMessagePage = 0;
-			// smsPayCallBack(-2, null);
-			//
-			// }
-			pop.clearFocus();
-			mCurrentView = mViewStack.peek();
-			setContentView(mCurrentView);
-			mCurrentView.requestFocus();
+			ILayoutView lv = mViewStack.pop();
+			if (lv.isAlive()) {
+				View pop = lv.getRootView();
+				if (pop != null) {
+					pop.clearFocus();
+				}
+				// if (pop instanceof SmsChannelLayout) {
+				// Application.isMessagePage = 1;
+				// }
+				// if (pop instanceof ChargeSMSDecLayout) {
+				// Application.isMessagePage = 0;
+				// }
+				// if (Application.isMessagePage == 1 && isSendMessage == false)
+				// {
+				// // 短信取消后发送取消支付请求
+				// Application.isMessagePage = 0;
+				// smsPayCallBack(-2, null);
+				//
+				// }
+				lv.onExit();
+			}
+			lv = mViewStack.peek();
+			View curView = lv.getRootView();
+			setContentView(curView);
+			curView.requestFocus();
+			lv.onResume();
 
-			return mCurrentView;
+			return curView;
 		} else {
 			Logger.d("ChargeActivity exit");
 			// if (Application.isAlreadyCB == 1) {

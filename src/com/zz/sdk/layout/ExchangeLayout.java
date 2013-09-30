@@ -48,7 +48,6 @@ public class ExchangeLayout extends CCBaseLayout {
 	public ExchangeLayout(Context context, ParamChain env) {
 		super(context, env);
 		initUI(context);
-		onInit(context);
 	}
 
 	protected void onInit(Context ctx) {
@@ -75,7 +74,7 @@ public class ExchangeLayout extends CCBaseLayout {
 		// lv.setSelector(imageCacheUtil.getStateListDrawable(mActivity, "",
 		// "list_selector_pressed.png"));
 
-		getSubject().addView(lv, new FrameLayout.LayoutParams(LP_MM));
+		getSubjectContainer().addView(lv, new FrameLayout.LayoutParams(LP_MM));
 		mListView = lv;
 
 		lv.setOnItemClickListener(new OnItemClickListener() {

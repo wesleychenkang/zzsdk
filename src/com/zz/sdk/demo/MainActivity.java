@@ -25,8 +25,8 @@ import com.zz.sdk.MSG_TYPE;
 import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.SDKManager;
 import com.zz.sdk.activity.ParamChain;
-import com.zz.sdk.layout.ChargePaymentListLayout;
-import com.zz.sdk.layout.ChargePaymentListLayout.ChargeStyle;
+import com.zz.sdk.layout.PaymentListLayout.ChargeStyle;
+import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
 
 /**
  * 演示 SDK 使用
@@ -293,9 +293,9 @@ public class MainActivity extends Activity implements OnClickListener {
 			// 设置模式
 			ChargeStyle chargeMode = ((CheckBox) findViewById(IDC_CHARGE_MODE_BUY))
 					.isChecked() ? ChargeStyle.BUY : ChargeStyle.RECHARGE;
-			ChargePaymentListLayout.testMode(chargeMode);
+			ParamChain.GLOBAL().add(KeyPaymentList.K_CHARGE_STYLE, chargeMode);
 
-			mSDKManager.showPaymentView(mHandler, MSG_PAYMENT_CALLBACK,
+			mSDKManager.showPaymentViewEx(mHandler, MSG_PAYMENT_CALLBACK,
 					CONFIG_GAME_SERVER_ID, CONFIG_GAME_SERVER_NAME,
 					CONFIG_GAME_ROLE_ID, CONFIG_GAME_ROLE, amount,
 					isCloseWindow, CONFIG_GAME_CALLBACK_INFO);

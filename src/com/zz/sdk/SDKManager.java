@@ -13,6 +13,7 @@ import com.zz.sdk.activity.ChargeActivity;
 import com.zz.sdk.activity.LoginActivity;
 import com.zz.sdk.activity.LoginForQiFu;
 import com.zz.sdk.activity.ParamChain;
+import com.zz.sdk.activity.ParamChain.KeyCaller;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
 import com.zz.sdk.entity.SdkUser;
 import com.zz.sdk.entity.SdkUserTable;
@@ -94,6 +95,16 @@ public class SDKManager {
 		// }
 		// });
 
+		mRootEnv = new ParamChain(ParamChain.GLOBAL());
+		mRootEnv.add(KeyGlobal.K_HELP_TITLE,
+				"<html><font color='#c06000'>在线帮助</font></html>");
+		mRootEnv.add(
+				KeyGlobal.K_HELP_TOPIC,
+				""
+						+ "1、充值成功后，<font color='#800000'>一般1-10分钟即可到账</font>，简单方便。<br/>"
+						+ "2、充值卡充值请根据充值卡面额选择正确的充值金额，并仔细核对卡号和密码。<br/>"
+						+ "3、如有疑问请联系客服，客服热线：020-85525051 客服QQ：9159。");
+		mRootEnv.add(KeyGlobal.K_PAY_COIN_RATE, 0.01f);
 		ResConstants.init(ctx);
 	}
 
@@ -324,20 +335,40 @@ public class SDKManager {
 				serverName, roleId, gameRole, callBackInfo);
 	}
 
+	public void showPaymentViewEx(Handler callbackHandler, int what,
+			String gameServerID, final String serverName, final String roleId,
+			final String gameRole, final int amount,
+			final boolean isCloseWindow, final String callBackInfo) {
+		ParamChain rootEnv;
+		rootEnv = new ParamChain(mRootEnv);
+		rootEnv.add(KeyCaller.K_MSG_HANDLE, callbackHandler);
+		rootEnv.add(KeyCaller.K_MSG_WHAT, what);
+		rootEnv.add(KeyCaller.K_GAME_SERVER_ID, gameServerID);
+		rootEnv.add(KeyCaller.K_SERVER_NAME, serverName);
+		rootEnv.add(KeyCaller.K_ROLE_ID, roleId);
+		rootEnv.add(KeyCaller.K_GAME_ROLE, gameRole);
+		rootEnv.add(KeyCaller.K_AMOUNT, amount);
+		rootEnv.add(KeyCaller.K_IS_CLOSE_WINDOW, isCloseWindow);
+		rootEnv.add(KeyCaller.K_CALL_BACK_INFO, callBackInfo);
+		startActivity(rootEnv, LAYOUT_TYPE.PaymentList);
+	}
+
 	public void showExchange(Handler callbackHandler, int what, String projectID) {
-		ParamChain rootEnv = ParamChain.generateUnion(mRootEnv,
-				KeyGlobal.UI_NAME);
+		// ParamChain rootEnv = ParamChain.generateUnion(mRootEnv,
+		// KeyGlobal.UI_NAME);
+		ParamChain rootEnv;
+		rootEnv = new ParamChain(mRootEnv);
 		startActivity(rootEnv, LAYOUT_TYPE.Exchange);
 	}
 
 	private void startActivity(ParamChain rootEnv, LAYOUT_TYPE root_layout) {
 		ParamChain env = new ParamChain(rootEnv);
-		env.add(KeyGlobal.UI_VIEW_TYPE, root_layout);
+		env.add(KeyGlobal.K_UI_VIEW_TYPE, root_layout);
 		ParamChain.GLOBAL().add(root_layout.key(), env,
 				ParamChain.ValType.TEMPORARY);
 
 		Intent intent = new Intent(mContext, BaseActivity.class);
-		intent.putExtra(KeyGlobal.UI_NAME, root_layout.key());
+		intent.putExtra(KeyGlobal.K_UI_NAME, root_layout.key());
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		mContext.startActivity(intent);
 	}

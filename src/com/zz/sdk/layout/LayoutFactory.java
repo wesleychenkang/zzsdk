@@ -35,7 +35,7 @@ public class LayoutFactory {
 	public static interface ILayoutHost {
 
 		/**
-		 * 产生一个等待对话框（进度条），更详细的对话框构造，可通过 {@link KeyGlobal#UI_ACTIVITY} 获取
+		 * 产生一个等待对话框（进度条），更详细的对话框构造，可通过 {@link KeyGlobal#K_UI_ACTIVITY} 获取
 		 * {@link Activity}
 		 * 
 		 * @param type
@@ -79,25 +79,32 @@ public class LayoutFactory {
 	public static interface ILayoutView {
 
 		/***
-		 * 进入
+		 * 进入，此时可启动初始化代码
 		 * 
 		 * @return
 		 */
 		public boolean onEnter();
 
 		/**
-		 * 被纳入缓存
+		 * 被纳入缓存，即 pause
 		 * 
 		 * @return
 		 */
-		public boolean onPush();
+		public boolean onPause();
 
 		/**
-		 * 被关闭
+		 * 即 resume
 		 * 
 		 * @return
 		 */
-		public boolean onClose();
+		public boolean onResume();
+
+		/**
+		 * 被关闭，即 resume
+		 * 
+		 * @return
+		 */
+		public boolean onExit();
 
 		/**
 		 * 对话框被关闭
@@ -114,6 +121,20 @@ public class LayoutFactory {
 		 * @return
 		 */
 		public ParamChain getEnv();
+
+		/***
+		 * 是否有效
+		 * 
+		 * @return
+		 */
+		public boolean isAlive();
+
+		/**
+		 * 获取主视图，用于窗体显示
+		 * 
+		 * @return
+		 */
+		public View getRootView();
 	}
 
 	/**
@@ -124,17 +145,16 @@ public class LayoutFactory {
 	 * @param params
 	 * @return
 	 */
-	public static View createLayout(Context ctx, LAYOUT_TYPE type,
+	public static ILayoutView createLayout(Context ctx, LAYOUT_TYPE type,
 			ParamChain rootEnv) {
 
 		switch (type) {
 		case PaymentList:
-			return new ChargePaymentListLayout(ctx);
+			return new PaymentListLayout(ctx, rootEnv);
 		case Exchange:
 			return new ExchangeLayout(ctx, rootEnv);
 		case ExchangeDetail:
 			return new ExchangeDetailLayout(ctx, rootEnv);
-
 		default:
 			break;
 		}

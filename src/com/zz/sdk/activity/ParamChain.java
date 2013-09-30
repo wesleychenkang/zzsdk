@@ -50,31 +50,63 @@ public class ParamChain {
 		static final String _TAG_ = "global" + _SEPARATOR_;
 
 		/** 键：窗体名, {@link String} */
-		public static final String UI_NAME = _TAG_ + "ui_activity_name";
+		public static final String K_UI_NAME = _TAG_ + "ui_activity_name";
 
 		/** 键：窗体句柄, {@link Activity}，必须在销毁窗体时清理此引用 */
-		public static final String UI_ACTIVITY = _TAG_ + "ui_activity_instance";
+		public static final String K_UI_ACTIVITY = _TAG_
+				+ "ui_activity_instance";
 
 		/** 键：主视图类型, {@link LAYOUT_TYPE} */
-		public static final String UI_VIEW_TYPE = _TAG_ + "ui_view_type";
+		public static final String K_UI_VIEW_TYPE = _TAG_ + "ui_view_type";
 
 		/** 键：价格, {@link Float}，单位 [卓越币]，精度 0.01 */
-		public static final String PAY_AMOUNT = _TAG_ + "pay_amount";
+		public static final String K_PAY_AMOUNT = _TAG_ + "pay_amount";
+
+		/** 键：汇率，{@link Float}，人民币与卓越币的兑换比例, 精度 0.01 */
+		public static final String K_PAY_COIN_RATE = _TAG_ + "pay_coin_rate";
+
+		/** 键：用户信息, {@link ParamChain} */
+		public static final String K_USER = _TAG_ + "user";
 
 		/** 键：IMSI, {@link String} */
-		public static final String DEV_IMSI = _TAG_ + "dev_imsi";
-
-		/** 键：Handle, {@link Handler} 用于处理回调 */
-		public static final String CALLER_MSG_HANDLE = _TAG_
-				+ "caller_msg_handler";
-
-		/** 键：消息类型, {@link Integer} 用于处理回调 */
-		public static final String CALLER_MSG_WHAT = _TAG_ + "caller_msg_what";
+		public static final String K_DEV_IMSI = _TAG_ + "dev_imsi";
 
 		/** 键：帮助标题，{@link String} 用于展示给用户，内容是网页 html */
-		public static final String HELP_TITLE = _TAG_ + "help_title";
+		public static final String K_HELP_TITLE = _TAG_ + "help_title";
+		
 		/** 键：帮助内容，{@link String} 用于展示给用户，内容是网页 html */
-		public static final String HELP_TOPIC = _TAG_ + "help_topic";
+		public static final String K_HELP_TOPIC = _TAG_ + "help_topic";
+	}
+
+	public static interface KeyCaller extends KeyGlobal {
+		static final String _TAG_ = KeyGlobal._TAG_ + "caller" + _SEPARATOR_;
+
+		/** 键：Handle, {@link Handler} 用于处理回调 */
+		public static final String K_MSG_HANDLE = _TAG_ + "msg_handler";
+
+		/** 键：消息类型, {@link Integer} 用于处理回调 */
+		public static final String K_MSG_WHAT = _TAG_ + "msg_what";
+
+		/** 键：游戏服务器名称，{@link String} */
+		static final String K_SERVER_NAME = _TAG_ + "server_name";
+
+		/** 键：游戏服务器ID，{@link String} */
+		static final String K_GAME_SERVER_ID = _TAG_ + "game_server_id";
+
+		/** 键：角色ID，{@link String} */
+		static final String K_ROLE_ID = _TAG_ + "role_id";
+
+		/** 键：角色名称，{@link String} */
+		static final String K_GAME_ROLE = _TAG_ + "game_role";
+
+		/** 键：定额价格, 单位为 [分], 如果 >0表示此次充值只能以指定的价格交易.，{@link Integer} */
+		static final String K_AMOUNT = _TAG_ + "amount";
+
+		/** 键：支付成功是否自动关闭支付SDK, 如果是 true 则在充值成功后自动退出SDK，{@link Boolean} */
+		static final String K_IS_CLOSE_WINDOW = _TAG_ + "is_close_window";
+
+		/** 键：支付结果通知，{@link String} */
+		static final String K_CALL_BACK_INFO = _TAG_ + "call_back_info";
 	}
 
 	public static interface KeyUser extends KeyGlobal {
@@ -361,7 +393,7 @@ public class ParamChain {
 	/**
 	 * 获取指定类型的变量（所有级），示例
 	 * <P>
-	 * Float amount = env.get({@link KeyGlobal#PAY_AMOUNT}, {@link Float
+	 * Float amount = env.get({@link KeyGlobal#K_PAY_AMOUNT}, {@link Float
 	 * Float.class});
 	 * 
 	 * @param key

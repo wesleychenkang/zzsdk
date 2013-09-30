@@ -226,12 +226,12 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 	private void updateUIStyle(ChargeStyle mode) {
 		if (mode == ChargeStyle.BUY) {
 			set_child_text(IDC.TV_RECHARGE_COUNT,
-					ZZStr.CC_RECHAGRE_COUNT_TITLE_PRICE);
+					ZZStr.CC_RECHARGE_COUNT_TITLE_PRICE);
 			set_child_visibility(IDC.TV_RECHARGE_COUNT_DESC, VISIBLE);
 			set_child_visibility(IDC.BT_RECHARGE_PULL, GONE);
 			set_child_text(IDC.BT_RECHARGE_COMMIT, ZZStr.CC_COMMIT_EXCHANGE);
 		} else if (mode == ChargeStyle.RECHARGE) {
-			set_child_text(IDC.TV_RECHARGE_COUNT, ZZStr.CC_RECHAGRE_COUNT_TITLE);
+			set_child_text(IDC.TV_RECHARGE_COUNT, ZZStr.CC_RECHARGE_COUNT_TITLE);
 			set_child_visibility(IDC.TV_RECHARGE_COUNT_DESC, GONE);
 			set_child_visibility(IDC.BT_RECHARGE_PULL, VISIBLE);
 			set_child_text(IDC.BT_RECHARGE_COMMIT, ZZStr.CC_COMMIT_RECHARGE);
@@ -600,7 +600,7 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 		{
 			ll = createNormalPannel(ctx, rv);
 
-			tv = createNormalLabel(ctx, ZZStr.CC_RECHAGRE_COUNT_TITLE);
+			tv = createNormalLabel(ctx, ZZStr.CC_RECHARGE_COUNT_TITLE);
 			ll.addView(tv, new LayoutParams(LP_MW));
 			tv.setId(IDC.TV_RECHARGE_COUNT.id());
 

@@ -2,7 +2,6 @@ package com.zz.sdk.layout;
 
 import java.text.DecimalFormat;
 
-import android.R.menu;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
@@ -21,16 +20,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.zz.sdk.BuildConfig;
 import com.zz.sdk.activity.ParamChain;
+import com.zz.sdk.activity.ParamChain.KeyGlobal;
 import com.zz.sdk.layout.LayoutFactory.ILayoutHost;
 import com.zz.sdk.layout.LayoutFactory.ILayoutView;
 import com.zz.sdk.layout.LayoutFactory.KeyLayoutFactory;
-import com.zz.sdk.util.Application;
 import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.DimensionUtil;
@@ -47,8 +45,8 @@ import com.zz.sdk.util.ResConstants.ZZStr;
  * @author nxliao
  * 
  */
-class CCBaseLayout extends LinearLayout implements View.OnClickListener,
-		ILayoutView {
+abstract class CCBaseLayout extends LinearLayout implements
+		View.OnClickListener, ILayoutView {
 
 	protected final static boolean DEBUG_UI = false; // BuildConfig.DEBUG;
 
@@ -60,6 +58,11 @@ class CCBaseLayout extends LinearLayout implements View.OnClickListener,
 
 		/** 余额描述文本 */
 		TV_BALANCE,
+
+		/** 页眉， {@link FrameLayout} */
+		ACT_HEADER,
+		/** 页脚， {@link FrameLayout} */
+		ACT_FOOTER,
 
 		/** 客户区，类型 {@link FrameLayout} */
 		ACT_SUBJECT,
@@ -106,6 +109,10 @@ class CCBaseLayout extends LinearLayout implements View.OnClickListener,
 	protected final static LayoutParams LP_MW = new LayoutParams(
 			LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 
+	protected static final long ANIMA_DUR_SHOW_POPUP = 300;
+	protected static final long ANIMA_DUR_SHOW_POPUP_CHILD = 400;
+	protected static final long ANIMA_DUR_HIDE_POPUP = 400;
+
 	/** 创建一个普通文本框 */
 	protected static TextView createNormalLabel(Context ctx, ZZStr title) {
 		TextView tv = new TextView(ctx);
@@ -140,15 +147,37 @@ class CCBaseLayout extends LinearLayout implements View.OnClickListener,
 		LinearLayout ll = new LinearLayout(ctx);
 		ll.setOrientation(VERTICAL);
 		LayoutParams lp = new LayoutParams(LP_MW);
-		lp.bottomMargin = ZZDimen.CC_SAPCE_PANEL_V.px();
+		lp.topMargin = ZZDimen.CC_SAPCE_PANEL_V.px();
 		rv.addView(ll, lp);
 		return ll;
 	}
+
+	// 将所有的数字、字母及标点全部转为全角字符
+	public static String ToDBC(String input) {
+		if (null == input)
+			return null;
+		char[] c = input.toCharArray();
+		for (int i = 0; i < c.length; i++) {
+			if (c[i] == 12288) {
+				c[i] = (char) 32;
+				continue;
+			}
+			if (c[i] > 65280 && c[i] < 65375)
+				c[i] = (char) (c[i] - 65248);
+		}
+		return new String(c);
+	}
+
+	// //////////////////////////////////////////////////////////////
 
 	public CCBaseLayout(Context context, ParamChain env) {
 		super(context);
 		mContext = context;
 		mEnv = new ParamChain(env);
+		initEnv(context, mEnv);
+	}
+
+	private void initEnv(Context ctx, ParamChain env) {
 	}
 
 	@Override
@@ -183,26 +212,30 @@ class CCBaseLayout extends LinearLayout implements View.OnClickListener,
 		}
 	}
 
-	// 将所有的数字、字母及标点全部转为全角字符
-	public static String ToDBC(String input) {
-		if (null == input)
-			return null;
-		char[] c = input.toCharArray();
-		for (int i = 0; i < c.length; i++) {
-			if (c[i] == 12288) {
-				c[i] = (char) 32;
-				continue;
-			}
-			if (c[i] > 65280 && c[i] < 65375)
-				c[i] = (char) (c[i] - 65248);
+	private CharSequence getHelpTitle() {
+		// return null == Application.topicTitle ? null : Html
+		// .fromHtml(Application.topicTitle);
+		String title = mEnv.get(KeyGlobal.K_HELP_TITLE, String.class);
+		if (title != null)
+			return Html.fromHtml(title);
+		return null;
+	}
+
+	private CharSequence getHelpTopic() {
+		String topic;
+		// topic = Application.topicDes;
+		topic = mEnv.get(KeyGlobal.K_HELP_TOPIC, String.class);
+		if (topic != null) {
+			return Html.fromHtml(ToDBC(topic));
 		}
-		return new String(c);
+		return null;
 	}
 
 	/** 展示帮助说明内容 */
 	protected void showPopup_Help() {
 		Context ctx = mContext;
 		LinearLayout ll = new LinearLayout(ctx);
+		ll.setOrientation(VERTICAL);
 		ll.setLayoutParams(new FrameLayout.LayoutParams(
 				LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT,
 				Gravity.BOTTOM));
@@ -216,27 +249,24 @@ class CCBaseLayout extends LinearLayout implements View.OnClickListener,
 		in.addAnimation(new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0,
 				Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 1f,
 				Animation.RELATIVE_TO_SELF, 0));
-		in.setDuration(350);
+		in.setDuration(ANIMA_DUR_SHOW_POPUP_CHILD);
 		ll.setAnimation(in);
 
-		TextView mTopicTitle;
-		TextView mTopicDes;
-		mTopicTitle = new TextView(ctx);
-		ll.addView(mTopicTitle, new LayoutParams(LP_WW));
-		mTopicTitle.setTextColor(0xffe7c5aa);
-		mTopicTitle.setTextSize(16);
-		mTopicTitle.setText(null == Application.topicTitle ? null : Html
-				.fromHtml(Application.topicTitle));
-
-		mTopicDes = new TextView(ctx);
-		mTopicDes.setTextSize(14);
-		// mTopicDes.getPaint().setFakeBoldText(true);
-		// mTopicDes.setText(Html.fromHtml("1、1元人民币=10金币，一般1-10分钟即可到账，简单方便。<br/>2、充值卡充值请根据充值卡面额选择正确的充值金额，并仔细核对卡号和密码。<br/>3、如有疑问请联系客服，客服热线：020-85525051 客服QQ：9159。"));
-		String str = ToDBC(Application.topicDes);
-		mTopicDes.setText(null == str ? null : Html.fromHtml(str));
-		// mTopicDes.setText(null == Application.topicTitle ? null
-		// : Html.fromHtml(Application.topicDes));
-		ll.addView(mTopicDes, new LayoutParams(LP_WW));
+		{
+			TextView mTopicTitle;
+			mTopicTitle = new TextView(ctx);
+			ll.addView(mTopicTitle, new LayoutParams(LP_WW));
+			mTopicTitle.setTextColor(0xffe7c5aa);
+			mTopicTitle.setTextSize(16);
+			mTopicTitle.setText(getHelpTitle());
+		}
+		{
+			TextView mTopicDes;
+			mTopicDes = new TextView(ctx);
+			ll.addView(mTopicDes, new LayoutParams(LP_WW));
+			mTopicDes.setTextSize(14);
+			mTopicDes.setText(getHelpTopic());
+		}
 		showPopup(ll);
 	}
 
@@ -249,7 +279,7 @@ class CCBaseLayout extends LinearLayout implements View.OnClickListener,
 		return mEnv.get(KeyLayoutFactory.K_HOST, ILayoutHost.class);
 	}
 
-	protected FrameLayout getSubject() {
+	protected FrameLayout getSubjectContainer() {
 		return (FrameLayout) findViewById(IDC.ACT_SUBJECT.id());
 	}
 
@@ -281,7 +311,7 @@ class CCBaseLayout extends LinearLayout implements View.OnClickListener,
 			if (bShow) {
 				if (v.getVisibility() != VISIBLE) {
 					AnimationSet in = new AnimationSet(true);
-					in.setDuration(200);
+					in.setDuration(ANIMA_DUR_SHOW_POPUP);
 					in.addAnimation(new AlphaAnimation(0.2f, 1f));
 					in.setFillBefore(true);
 					v.setVisibility(VISIBLE);
@@ -298,7 +328,7 @@ class CCBaseLayout extends LinearLayout implements View.OnClickListener,
 					}
 					if (vChild.getAnimation() == null) {
 						AnimationSet in = new AnimationSet(true);
-						in.setDuration(300);
+						in.setDuration(ANIMA_DUR_SHOW_POPUP_CHILD);
 						in.addAnimation(new AlphaAnimation(0.2f, 1f));
 						in.setFillBefore(true);
 						vChild.setAnimation(in);
@@ -309,7 +339,7 @@ class CCBaseLayout extends LinearLayout implements View.OnClickListener,
 			} else {
 				if (v.getVisibility() != GONE) {
 					AnimationSet out = new AnimationSet(true);
-					out.setDuration(400);
+					out.setDuration(ANIMA_DUR_HIDE_POPUP);
 					out.addAnimation(new AlphaAnimation(1f, 0f));
 					out.setFillBefore(true);
 					v.startAnimation(out);
@@ -373,9 +403,14 @@ class CCBaseLayout extends LinearLayout implements View.OnClickListener,
 
 		// 余额描述
 		{
-			ll = new LinearLayout(ctx);
-			rv.addView(ll, new LayoutParams(LayoutParams.MATCH_PARENT,
+			FrameLayout header = new FrameLayout(ctx);
+			header.setId(IDC.ACT_HEADER.id());
+			rv.addView(header, new LayoutParams(LayoutParams.MATCH_PARENT,
 					LayoutParams.WRAP_CONTENT));
+
+			ll = new LinearLayout(ctx);
+			header.addView(ll, new FrameLayout.LayoutParams(
+					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 			ll.setOrientation(HORIZONTAL);
 			final int pv = ZZDimen.CC_SAPCE_PANEL_V.px();
 			ll.setPadding(pv, pv, pv, pv / 4);
@@ -392,8 +427,6 @@ class CCBaseLayout extends LinearLayout implements View.OnClickListener,
 			tv.setCompoundDrawablesWithIntrinsicBounds(null, null,
 					CCImg.MONEY.getDrawble(ctx), null);
 			ZZFontSize.CC_RECHAGR_BALANCE.apply(tv);
-			// XXX: 更新余额值
-			updateBalance(0);
 		}
 
 		// 客户区
@@ -409,13 +442,16 @@ class CCBaseLayout extends LinearLayout implements View.OnClickListener,
 
 		// 帮助区
 		{
-			LinearLayout footer = new LinearLayout(ctx);
+			FrameLayout footer = new FrameLayout(ctx);
+			footer.setId(IDC.ACT_HEADER.id());
 			rv.addView(footer, new LayoutParams(LayoutParams.MATCH_PARENT,
 					DimensionUtil.dip2px(ctx, 36)));
 
-			footer.setOrientation(HORIZONTAL);
-			footer.setId(IDC.BT_HELP.id());
-			footer.setOnClickListener(this);
+			ll = new LinearLayout(ctx);
+			footer.addView(ll, new LayoutParams(LP_MM));
+			ll.setOrientation(HORIZONTAL);
+			ll.setId(IDC.BT_HELP.id());
+			ll.setOnClickListener(this);
 			if (DEBUG_UI) {
 				footer.setBackgroundColor(0x80ff0000);
 			}
@@ -540,6 +576,8 @@ class CCBaseLayout extends LinearLayout implements View.OnClickListener,
 
 	}
 
+	protected abstract void onInit(Context ctx);
+
 	protected void initUI(Context ctx) {
 		mContext = ctx;
 
@@ -573,23 +611,58 @@ class CCBaseLayout extends LinearLayout implements View.OnClickListener,
 		}
 
 		createView(ctx, this);
+
+		// XXX: 更新余额值
+		updateBalance(0);
+
+		onInit(ctx);
 	}
 
-	public void setTileTypeText(String slectiveType) {
+	public void setTileTypeText(CharSequence slectiveType) {
 		// mTileType.setText(slectiveType);
 		((TextView) findViewById(IDC.TV_TITLE.id())).setText(slectiveType);
+	}
+
+	//
+	// XXX:
+	// ////////////////////////////////////////////////////////////////////////
+	//
+	//
+
+	// TODO:
+	/**
+	 * 是否有效
+	 * 
+	 * @return
+	 */
+	@Override
+	public boolean isAlive() {
+		return true;
 	}
 
 	@Override
 	public boolean onEnter() {
 		// TODO Auto-generated method stub
-		return false;
+		if (BuildConfig.DEBUG) {
+			Logger.d("onEnter(" + getClass().getName());
+		}
+		return true;
 	}
 
 	@Override
-	public boolean onPush() {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean onPause() {
+		if (BuildConfig.DEBUG) {
+			Logger.d("onPause(" + getClass().getName());
+		}
+		return true;
+	}
+
+	@Override
+	public boolean onResume() {
+		if (BuildConfig.DEBUG) {
+			Logger.d("onResume(" + getClass().getName());
+		}
+		return true;
 	}
 
 	protected void clean() {
@@ -602,7 +675,10 @@ class CCBaseLayout extends LinearLayout implements View.OnClickListener,
 	}
 
 	@Override
-	public boolean onClose() {
+	public boolean onExit() {
+		if (BuildConfig.DEBUG) {
+			Logger.d("onExit(" + getClass().getName());
+		}
 		clean();
 		return false;
 	}
@@ -614,6 +690,9 @@ class CCBaseLayout extends LinearLayout implements View.OnClickListener,
 
 	@Override
 	public ParamChain getEnv() {
+		if (BuildConfig.DEBUG) {
+			Logger.d("getEnv(" + getClass().getName());
+		}
 		return mEnv;
 	}
 }

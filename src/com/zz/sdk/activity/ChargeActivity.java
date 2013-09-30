@@ -984,7 +984,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 	 * 用户行为请求请求
 	 * 
 	 * @author aaa
-	 * 
+	 * 	
 	 */
 	private void postRequest(String types) {
 		userAction.actionType = types;
