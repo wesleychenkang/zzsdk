@@ -136,7 +136,7 @@ public class PaymentListLayout extends CCBaseLayout {
 		_MAX_;
 
 		/** ID 的起点 */
-		protected static int __start__ = CCBaseLayout.IDC._MAX_.id();
+		protected static int __start__ = BaseLayout.IDC._MAX_.id();
 
 		public final int id() {
 			return this.ordinal() + __start__;
