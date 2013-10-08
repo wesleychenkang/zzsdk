@@ -2,13 +2,17 @@ package com.zz.sdk.layout;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.Date;
 
 import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
+import android.util.StateSet;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -27,7 +31,11 @@ import com.zz.sdk.lib.bitmapfun.ui.RecyclingImageView;
 import com.zz.sdk.lib.bitmapfun.util.ImageCache.ImageCacheParams;
 import com.zz.sdk.lib.bitmapfun.util.ImageFetcher;
 import com.zz.sdk.lib.widget.CustomListView;
+import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants.CCImg;
+import com.zz.sdk.util.ResConstants.Config.ZZDimen;
+import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
+import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
 
 class ZZPropsInfo {
@@ -59,7 +67,6 @@ public class ExchangeLayout extends CCBaseLayout {
 
 	private static final String IMAGE_CACHE_DIR = "thumbs";
 	private int mImageThumbSize;
-	private int mImageThumbSpacing;
 	private BaseAdapter mAdapter;
 	private ImageFetcher mImageFetcher;
 
@@ -71,17 +78,13 @@ public class ExchangeLayout extends CCBaseLayout {
 	protected void onInit(Context ctx) {
 		setTileTypeText(ZZStr.CC_EXCHANGE_TITLE.str());
 
-		mImageThumbSize = 128; // !getResources().getDimensionPixelSize(R.dimen.image_thumbnail_size);
-		// !mImageThumbSpacing =
-		// getResources().getDimensionPixelSize(R.dimen.image_thumbnail_spacing);
-
-		// !mAdapter = new ImageAdapter(getActivity());
+		mImageThumbSize = ZZDimen.CC_EX_ICON_W.px();
 
 		ImageCacheParams cacheParams = new ImageCacheParams(mContext,
 				IMAGE_CACHE_DIR);
 
-		cacheParams.setMemCacheSizePercent(0.25f); // Set memory cache to 25% of
-													// app memory
+		// Set memory cache to 25% of app memory
+		cacheParams.setMemCacheSizePercent(0.25f);
 
 		// The ImageFetcher takes care of loading images into our ImageView
 		// children asynchronously
@@ -106,9 +109,11 @@ public class ExchangeLayout extends CCBaseLayout {
 		lv.setOnRefreshEventListener(mRefreshEventListener);
 		lv.setPullRefreshEnable(true);
 		lv.startRefresh();
-		lv.setDividerHeight(20);
-		// lv.setSelector(imageCacheUtil.getStateListDrawable(mActivity, "",
-		// "list_selector_pressed.png"));
+		lv.setDividerHeight(16);
+		lv.setPadding(ZZDimen.CC_ROOTVIEW_PADDING_LEFT.px(),
+				ZZDimen.CC_ROOTVIEW_PADDING_TOP.px(),
+				ZZDimen.CC_ROOTVIEW_PADDING_RIGHT.px(),
+				ZZDimen.CC_ROOTVIEW_PADDING_BOTTOM.px());
 
 		getSubjectContainer().addView(lv, new FrameLayout.LayoutParams(LP_MM));
 		mListView = lv;
@@ -117,7 +122,10 @@ public class ExchangeLayout extends CCBaseLayout {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
-				enterDetail(arg2-1);
+				if (DEBUG) {
+					Logger.d("click on " + arg2);
+				}
+				enterDetail(arg2 - 1);
 			}
 		});
 
@@ -146,20 +154,29 @@ public class ExchangeLayout extends CCBaseLayout {
 		// as the GridView has stretchMode=columnWidth. The column width is used
 		// to set the height
 		// of each view so we get nice square thumbnails.
-		/**
-		 * lv.getViewTreeObserver().addOnGlobalLayoutListener( new
-		 * ViewTreeObserver.OnGlobalLayoutListener() {
-		 * 
-		 * @Override public void onGlobalLayout() { if (mAdapter.getNumColumns()
-		 *           == 0) { final int numColumns = (int) Math.floor(
-		 *           mGridView.getWidth() / (mImageThumbSize +
-		 *           mImageThumbSpacing)); if (numColumns > 0) { final int
-		 *           columnWidth = (mGridView.getWidth() / numColumns) -
-		 *           mImageThumbSpacing; mAdapter.setNumColumns(numColumns);
-		 *           mAdapter.setItemHeight(columnWidth); if (BuildConfig.DEBUG)
-		 *           { Log.d(TAG, "onCreateView - numColumns set to " +
-		 *           numColumns); } } } } });
-		 */
+
+		// lv.getViewTreeObserver().addOnGlobalLayoutListener(
+		// new ViewTreeObserver.OnGlobalLayoutListener() {
+		// @Override
+		// public void onGlobalLayout() {
+		// if (mAdapter.getNumColumns() == 0) {
+		// final int numColumns = (int) Math.floor(mGridView
+		// .getWidth()
+		// / (mImageThumbSize + mImageThumbSpacing));
+		// if (numColumns > 0) {
+		// final int columnWidth = (mGridView.getWidth() / numColumns)
+		// - mImageThumbSpacing;
+		// mAdapter.setNumColumns(numColumns);
+		// mAdapter.setItemHeight(columnWidth);
+		// if (BuildConfig.DEBUG) {
+		// Log.d(TAG,
+		// "onCreateView - numColumns set to "
+		// + numColumns);
+		// }
+		// }
+		// }
+		// }
+		// });
 
 		mAdapter = new MyAdapterExchange(ctx, new DecimalFormat("000000"),
 				"%s卓越币", new float[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 100,
@@ -253,10 +270,72 @@ public class ExchangeLayout extends CCBaseLayout {
 		private String mDescFormat;
 		private float mData[];
 
+		private int ICON_WDITH, ICON_HEIGHT;
+		private int PADDING;
+
 		private final class Holder {
-			final static int KEY = 1;
-			ImageView ivIcon;
+			int mState[];
+			ImageView ivIcon, ivRight;
 			TextView tvTitle, tvSummary;
+
+			public final void onStateChanged(int[] newState) {
+				if (newState == null) {
+					if (mState == null)
+						return;
+					mState = null;
+				} else {
+					if (mState == null || !Arrays.equals(mState, newState)) {
+						int[] s;
+						s = new int[newState.length];
+						System.arraycopy(newState, 0, s, 0, newState.length);
+						if (DEBUG) {
+							Logger.d("state changed ["
+									+ (mState == null ? "null" : StateSet
+											.dump(mState)) + "] to ["
+									+ (s == null ? "null" : StateSet.dump(s))
+									+ "]");
+						}
+
+						mState = s;
+					}
+				}
+
+				boolean bClicked = false;
+				if (mState != null) {
+					// StateSet.stateSetMatches
+					for (int i : mState) {
+						if (i == android.R.attr.state_pressed
+								|| i == android.R.attr.state_selected) {
+							bClicked = true;
+							break;
+						}
+					}
+				}
+				// ivRight.getDrawable().setState(s);
+				ZZFontColor c;
+				c = bClicked ? ZZFontColor.CC_EXCHANGE_ITEM_TITLE_PRESSED
+						: ZZFontColor.CC_EXCHANGE_ITEM_TITLE;
+				tvTitle.setTextColor(c.toColor());
+				c = bClicked ? ZZFontColor.CC_EXCHANGE_ITEM_SUMMARY_PRESSED
+						: ZZFontColor.CC_EXCHANGE_ITEM_SUMMARY;
+				tvSummary.setTextColor(c.toColor());
+			}
+		}
+
+		private final class MyPanel extends LinearLayout {
+
+			public MyPanel(Context context) {
+				super(context);
+			}
+
+			@Override
+			protected void drawableStateChanged() {
+				Object tag = getTag();
+				if (tag instanceof Holder) {
+					((Holder) tag).onStateChanged(getDrawableState());
+				}
+				super.drawableStateChanged();
+			}
 		}
 
 		public MyAdapterExchange(Context ctx, NumberFormat format, String desc,
@@ -265,6 +344,10 @@ public class ExchangeLayout extends CCBaseLayout {
 			mFormat = format;
 			mDescFormat = desc;
 			mData = data;
+
+			ICON_WDITH = ZZDimen.CC_EX_ICON_W.px();
+			ICON_HEIGHT = ZZDimen.CC_EX_ICON_H.px();
+			PADDING = ZZDimen.CC_EX_PADDING.px();
 		}
 
 		@Override
@@ -295,7 +378,9 @@ public class ExchangeLayout extends CCBaseLayout {
 				if (convertView == null)
 					return null;
 			}
-			Log.d("lnx", "pos: " + position);
+			if (DEBUG) {
+				Log.d("lnx", "pos: " + position);
+			}
 			Holder holder = (Holder) convertView.getTag();
 
 			// holder.ivIcon.setImageDrawable(null);
@@ -306,7 +391,7 @@ public class ExchangeLayout extends CCBaseLayout {
 					Images.imageThumbUrls[position - 0/* mNumColumns */],
 					holder.ivIcon);
 
-			holder.tvTitle.setText("玩具射击");
+			holder.tvTitle.setText("玩具射击" + position);
 
 			if (mData != null && position >= 0 && position < mData.length) {
 				holder.tvSummary.setText(String.format(mDescFormat,
@@ -314,26 +399,33 @@ public class ExchangeLayout extends CCBaseLayout {
 			} else {
 				holder.tvSummary.setText(null);
 			}
+			holder.onStateChanged(null);
+
 			return convertView;
 		}
 
 		private View createView(Context ctx) {
-			LinearLayout ll = new LinearLayout(ctx);
+			LinearLayout ll = new MyPanel(ctx);
 			ll.setOrientation(LinearLayout.HORIZONTAL);
 			ll.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
 					CCImg.EX_BUTTON, CCImg.EX_BUTTON_CLICK));
 			Holder holder = new Holder();
 			ll.setTag(holder);
-
+			ll.setPadding(PADDING, PADDING, PADDING, PADDING);
 			ll.setLayoutParams(new AbsListView.LayoutParams(
 					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
 			// 图标
-			ImageView iv = new RecyclingImageView(ctx);// new ImageView(ctx);
-			ll.addView(iv, new LinearLayout.LayoutParams(
-					LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
-			iv.setScaleType(ScaleType.CENTER_INSIDE);
-			holder.ivIcon = iv;
+			{
+				FrameLayout flPanel = new FrameLayout(ctx);
+				ll.addView(flPanel, new LinearLayout.LayoutParams(ICON_WDITH,
+						LayoutParams.MATCH_PARENT));
+				ImageView iv = new RecyclingImageView(ctx);
+				flPanel.addView(iv, new FrameLayout.LayoutParams(ICON_WDITH,
+						ICON_HEIGHT, Gravity.CENTER_VERTICAL));
+				iv.setScaleType(ScaleType.CENTER_CROP);
+				holder.ivIcon = iv;
+			}
 
 			// 标题及价格
 			{
@@ -342,6 +434,7 @@ public class ExchangeLayout extends CCBaseLayout {
 						LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
 						1f));
 				ll2.setOrientation(LinearLayout.VERTICAL);
+				ll2.setPadding(PADDING, 0, PADDING, 0);
 
 				// 标题位
 				TextView tv = new TextView(ctx);
@@ -349,6 +442,8 @@ public class ExchangeLayout extends CCBaseLayout {
 						new LinearLayout.LayoutParams(
 								LayoutParams.MATCH_PARENT,
 								LayoutParams.MATCH_PARENT, 3));
+				tv.setGravity(Gravity.CENTER_VERTICAL);
+				ZZFontSize.CC_EXCHANGE_ITEM_TITLE.apply(tv);
 				holder.tvTitle = tv;
 
 				tv = new TextView(ctx);
@@ -356,12 +451,26 @@ public class ExchangeLayout extends CCBaseLayout {
 						new LinearLayout.LayoutParams(
 								LayoutParams.MATCH_PARENT,
 								LayoutParams.MATCH_PARENT, 2));
+				tv.setGravity(Gravity.CENTER_VERTICAL);
+				ZZFontSize.CC_EXCHANGE_ITEM_SUMMARY.apply(tv);
 				holder.tvSummary = tv;
+			}
+
+			{
+				ImageView iv = new ImageView(ctx);
+				iv.setImageDrawable(CCImg.getStateListDrawable(ctx,
+						CCImg.EX_RIGHT, CCImg.EX_RIGHT_CLICK));
+				iv.setScaleType(ScaleType.CENTER_INSIDE);
+				ll.addView(iv, new LinearLayout.LayoutParams(
+						LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
+				if (DEBUG_UI) {
+					iv.setBackgroundColor(0xc0008000);
+				}
+				holder.ivRight = iv;
 			}
 
 			return ll;
 		}
-
 	}
 
 }

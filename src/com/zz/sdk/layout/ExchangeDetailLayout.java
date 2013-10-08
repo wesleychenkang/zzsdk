@@ -75,7 +75,7 @@ class ExchangeDetailLayout extends CCBaseLayout {
 
 			{
 				RecyclingImageView ci = new RecyclingImageView(ctx);
-				ci.setScaleType(ScaleType.CENTER_CROP);
+				ci.setScaleType(ScaleType.CENTER_INSIDE);
 				ll.addView(ci, new LayoutParams(LP_MW));
 				mImageView = ci;
 			}

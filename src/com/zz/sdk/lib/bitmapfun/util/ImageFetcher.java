@@ -25,6 +25,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.zz.sdk.BuildConfig;
+import com.zz.sdk.util.ResConstants.ZZStr;
 //import com.example.android.bitmapfun.R;
 
 import java.io.BufferedInputStream;
@@ -173,8 +174,8 @@ public class ImageFetcher extends ImageResizer {
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         final NetworkInfo networkInfo = cm.getActiveNetworkInfo();
         if (networkInfo == null || !networkInfo.isConnectedOrConnecting()) {
-        	//!
-            Toast.makeText(context, "R.string.no_network_connection_toast", Toast.LENGTH_LONG).show();
+        	//! Toast.makeText(context, "R.string.no_network_connection_toast", Toast.LENGTH_LONG).show();
+        	Toast.makeText(context, ZZStr.BITMAP_FUN_BADNETWORK.str(), Toast.LENGTH_LONG).show();
             Log.e(TAG, "checkConnection - no connection found");
         }
     }

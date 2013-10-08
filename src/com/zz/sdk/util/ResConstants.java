@@ -102,6 +102,9 @@ public class ResConstants {
 		/** XLISTVIEW: 正在加载更多... */
 		XLISTVIEW_FOOTER_HINT_LOADING("正在加载更多..."),
 
+		/** 无网络连接 */
+		BITMAP_FUN_BADNETWORK("请检查网络连接！"),
+
 		;
 
 		private String context;
@@ -135,7 +138,16 @@ public class ResConstants {
 			/** 充值界面·确认充值按钮 文本 */
 			CC_RECHARGE_COMMIT(Color.WHITE),
 			/** 充值界面·帮助按钮 文本 */
-			CC_RECHARGE_HELP(Color.LTGRAY), ;
+			CC_RECHARGE_HELP(Color.LTGRAY),
+
+			/** 兑换列表·条目 文本 */
+			CC_EXCHANGE_ITEM_TITLE(Color.BLACK), //
+			CC_EXCHANGE_ITEM_TITLE_PRESSED(Color.WHITE),
+			/** 兑换列表·条目备注 文本 */
+			CC_EXCHANGE_ITEM_SUMMARY(Color.GRAY), //
+			CC_EXCHANGE_ITEM_SUMMARY_PRESSED(Color.WHITE),
+
+			;
 
 			private int c;
 
@@ -165,7 +177,14 @@ public class ResConstants {
 			/** 充值界面·确认充值按钮 文本 */
 			CC_RECHARGE_COMMIT(20),
 			/** 充值界面·帮助按钮 文本 */
-			CC_RECHARGE_HELP(12), ;
+			CC_RECHARGE_HELP(12), 
+
+			/** 兑换列表·条目 文本 */
+			CC_EXCHANGE_ITEM_TITLE(16),
+			/** 兑换列表·条目备注 文本 */
+			CC_EXCHANGE_ITEM_SUMMARY(13),
+			
+			;
 
 			private float size;
 
@@ -207,7 +226,16 @@ public class ResConstants {
 			CC_GRIDVIEW_COLUMN_WIDTH(96),
 
 			/** 充值界面·充值卡输入框的高度 */
-			CC_CARD_HEIGHT(32), ;
+			CC_CARD_HEIGHT(32),
+
+			/** 道具兑换列表·图标宽度 */
+			CC_EX_ICON_W(48),
+			/** 道具兑换列表·图标高度 */
+			CC_EX_ICON_H(48),
+			/** 道具兑换列表·空隙 */
+			CC_EX_PADDING(8),
+
+			;
 
 			private float dimen;
 
@@ -231,8 +259,8 @@ public class ResConstants {
 		CHARGE_PULL("cc_charge_pull.png"), //
 		EX_BUTTON("cc_ex_button.9.png"), //
 		EX_BUTTON_CLICK("cc_ex_button_click.9.png"), //
-		EX_RIGHT("cc_ex_Right.png"), //
-		EX_RIGHT_CLICK("cc_ex_Right_click.png"), //
+		EX_RIGHT("cc_ex_right.png"), //
+		EX_RIGHT_CLICK("cc_ex_right_click.png"), //
 		HELP("cc_help.png"), //
 		MONEY("cc_money.png"), //
 		PAYMENT_INPUT("cc_payment_input.9.png"), //
@@ -255,8 +283,8 @@ public class ResConstants {
 		TITLE_EXIT_PRESSED("title_exit_pressed.png"),
 
 		/** XListView */
-		XLISTVIEW_ARROW("xlistview_arrow.png"), 
-		
+		XLISTVIEW_ARROW("xlistview_arrow.png"),
+
 		EMPTY_PHOTO("empty_photo.png"),
 
 		;
@@ -286,7 +314,7 @@ public class ResConstants {
 			}
 			return BitmapCache.getDrawable(ctx, path);
 		}
-		
+
 		public Bitmap getBitmap(Context ctx) {
 			String path = Constants.ASSETS_RES_PATH + PATH + File.separator
 					+ context;

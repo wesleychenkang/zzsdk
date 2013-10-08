@@ -48,6 +48,7 @@ import com.zz.sdk.util.ResConstants.ZZStr;
 abstract class CCBaseLayout extends LinearLayout implements
 		View.OnClickListener, ILayoutView {
 
+	protected final static boolean DEBUG = BuildConfig.DEBUG;
 	protected final static boolean DEBUG_UI = false; // BuildConfig.DEBUG;
 
 	static enum IDC {
