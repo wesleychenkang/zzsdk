@@ -4,6 +4,7 @@ import java.io.File;
 import java.text.DecimalFormat;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
@@ -254,7 +255,9 @@ public class ResConstants {
 		TITLE_EXIT_PRESSED("title_exit_pressed.png"),
 
 		/** XListView */
-		XLISTVIEW_ARROW("xlistview_arrow.png"),
+		XLISTVIEW_ARROW("xlistview_arrow.png"), 
+		
+		EMPTY_PHOTO("empty_photo.png"),
 
 		;
 
@@ -282,6 +285,12 @@ public class ResConstants {
 				return BitmapCache.getNinePatchDrawable(ctx, path);
 			}
 			return BitmapCache.getDrawable(ctx, path);
+		}
+		
+		public Bitmap getBitmap(Context ctx) {
+			String path = Constants.ASSETS_RES_PATH + PATH + File.separator
+					+ context;
+			return BitmapCache.getBitmap(ctx, path);
 		}
 
 		public static StateListDrawable getStateListDrawable(Context ctx,
