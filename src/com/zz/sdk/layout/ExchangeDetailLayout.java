@@ -2,11 +2,14 @@ package com.zz.sdk.layout;
 
 import android.content.Context;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.zz.sdk.activity.ParamChain;
@@ -20,6 +23,7 @@ import com.zz.sdk.util.ResConstants.ZZStr;
 class ExchangeDetailLayout extends CCBaseLayout {
 	private static final String IMAGE_CACHE_DIR = "images";
 	private ImageView mImageView;
+	private TextView mTextView;
 	private ImageFetcher mImageFetcher;
 
 	private ZZPropsInfo mPropsInfo;
@@ -59,30 +63,41 @@ class ExchangeDetailLayout extends CCBaseLayout {
 		// The ImageFetcher takes care of loading images into our ImageView
 		// children asynchronously
 		mImageFetcher = new ImageFetcher(ctx, longest);
-		mImageFetcher.addImageCache(ParamChain.GLOBAL(), cacheParams);
+		mImageFetcher.addImageCache(mEnv, cacheParams);
 		mImageFetcher.setImageFadeIn(false);
 	}
 
 	protected void onInit(Context ctx) {
-		setTileTypeText(String.format(ZZStr.CC_EXCHANGE_DETAIL_TITLE.str(),
-				mEnv.get(KeyExchange.PROPS_ID, Integer.class)));
-
 		{
 			FrameLayout fl = getSubjectContainer();
 
+			ScrollView sv = new ScrollView(ctx);
+			fl.addView(sv, new FrameLayout.LayoutParams(LP_MM));
 			LinearLayout ll = new LinearLayout(ctx);
-			fl.addView(ll, new FrameLayout.LayoutParams(LP_MW));
+			sv.addView(ll, new FrameLayout.LayoutParams(LP_MW));
 
 			{
+				FrameLayout flPanel = new FrameLayout(ctx);
+				ll.addView(flPanel, new LayoutParams(LP_MW));
+
+				ProgressBar pb = new ProgressBar(ctx);
+				flPanel.addView(pb, new FrameLayout.LayoutParams(
+						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
+						Gravity.CENTER));
+				pb.setIndeterminate(true);
+
 				RecyclingImageView ci = new RecyclingImageView(ctx);
-				ci.setScaleType(ScaleType.CENTER_INSIDE);
-				ll.addView(ci, new LayoutParams(LP_MW));
+				ci.setScaleType(ScaleType.CENTER_CROP);
+				flPanel.addView(ci, new FrameLayout.LayoutParams(
+						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
+						Gravity.CENTER));
 				mImageView = ci;
 			}
 
 			{
 				TextView tv = createNormalLabel(ctx, null);
 				ll.addView(tv, new LayoutParams(LP_MW));
+				mTextView = tv;
 			}
 		}
 
@@ -99,6 +114,9 @@ class ExchangeDetailLayout extends CCBaseLayout {
 				return false;
 			}
 
+			setTileTypeText(String.format(ZZStr.CC_EXCHANGE_DETAIL_TITLE.str(),
+					mPropsInfo.desc));
+			mTextView.setText(mPropsInfo.summary);
 			mImageFetcher.loadImage(mPropsInfo.imgUrl, mImageView);
 		}
 		return ret;
