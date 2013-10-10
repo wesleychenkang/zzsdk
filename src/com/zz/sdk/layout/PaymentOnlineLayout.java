@@ -3,12 +3,15 @@ package com.zz.sdk.layout;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Pair;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -30,6 +33,7 @@ import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.Result;
 import com.zz.sdk.layout.PaymentListLayout.ChargeStyle;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
+import com.zz.sdk.protocols.EmptyActivityControlImpl;
 import com.zz.sdk.util.Application;
 import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.DebugFlags;
@@ -98,6 +102,27 @@ class PaymentOnlineLayout extends BaseLayout {
 				return values()[id];
 			}
 			return _MAX_;
+		}
+	}
+
+	private class MyActivityControl extends EmptyActivityControlImpl {
+		@Override
+		public boolean onKeyDownControl(int keyCode, KeyEvent event) {
+			if (keyCode == KeyEvent.KEYCODE_BACK) {
+				if (mWebView.canGoBack()) {
+					mWebView.goBack();
+					return true;
+				} else {
+					// AlertDialog.Builder alert = new
+					// AlertDialog.Builder(this);
+					// alert.setTitle("温馨提示！").setMessage("是否真的取消此次交易！")
+					// .setNegativeButton("确定", setOnclick())
+					// .setPositiveButton("取消", setOnclick());
+					// alert.show();
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 
@@ -205,6 +230,7 @@ class PaymentOnlineLayout extends BaseLayout {
 			});
 			WebSettings s = v.getSettings();
 			s.setJavaScriptEnabled(true);
+			mWebView = v;
 		}
 
 		// 设置标题
@@ -278,6 +304,8 @@ class PaymentOnlineLayout extends BaseLayout {
 		boolean ret = super.onEnter();
 		if (!ret)
 			return false;
+
+		setActivityControlInterface(new MyActivityControl());
 
 		GetPayUrlMessageTask.ICallBack cb = new GetPayUrlMessageTask.ICallBack() {
 			@Override

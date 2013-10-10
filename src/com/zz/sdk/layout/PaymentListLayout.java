@@ -3,7 +3,6 @@ package com.zz.sdk.layout;
 import java.text.DecimalFormat;
 import java.util.Random;
 
-import android.R.menu;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -1132,6 +1131,7 @@ public class PaymentListLayout extends CCBaseLayout {
 
 		case PayChannel.PAY_TYPE_UNMPAY: {
 			// TODO:
+			type = LAYOUT_TYPE.PaymentUnion;
 		}
 			break;
 

@@ -14,6 +14,8 @@ public enum LAYOUT_TYPE {
 	PaymentList,
 	/** 支付·在线({@link WebView}) */
 	PaymentOnline,
+	/** 支付·银联 */
+	PaymentUnion,
 
 	/** 兑换列表，需要参数：projectID */
 	Exchange,

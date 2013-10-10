@@ -8,6 +8,7 @@ import android.view.View;
 
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
+import com.zz.sdk.protocols.ActivityControlInterface;
 
 /**
  * 视图工厂
@@ -74,6 +75,16 @@ public class LayoutFactory {
 		 * @param env
 		 */
 		public void enter(LAYOUT_TYPE type, ParamChain rootEnv);
+
+		/**
+		 * 设置窗体事件监听器，调用者自己维护生命周期
+		 * 
+		 * @param controlInterface
+		 */
+		public void addActivityControl(ActivityControlInterface controlInterface);
+
+		public void removeActivityControl(
+				ActivityControlInterface controlInterface);
 	}
 
 	public static interface ILayoutView {
@@ -160,6 +171,8 @@ public class LayoutFactory {
 			return new PaymentListLayout(ctx, rootEnv);
 		case PaymentOnline:
 			return new PaymentOnlineLayout(ctx, rootEnv);
+		case PaymentUnion:
+			return new PaymentUnionLayout(ctx, rootEnv);
 		case Exchange:
 			return new ExchangeLayout(ctx, rootEnv);
 		case ExchangeDetail:
