@@ -98,7 +98,7 @@ abstract class CCBaseLayout extends BaseLayout {
 			tvHelp.setCompoundDrawablesWithIntrinsicBounds(
 					CCImg.HELP.getDrawble(ctx), null, null, null);
 			tvHelp.setText(ZZStr.CC_HELP_TITLE.str());
-			tvHelp.setTextColor(ZZFontColor.CC_RECHARGE_HELP.toColor());
+			tvHelp.setTextColor(ZZFontColor.CC_RECHARGE_HELP.color());
 			tvHelp.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
 			tvHelp.setCompoundDrawablePadding(DimensionUtil.dip2px(ctx, 8));
 			tvHelp.setPadding(DimensionUtil.dip2px(ctx, 4), 0, 0, 0);
@@ -111,7 +111,7 @@ abstract class CCBaseLayout extends BaseLayout {
 			footer.addView(tvDesc, new LayoutParams(LayoutParams.MATCH_PARENT,
 					LayoutParams.MATCH_PARENT, 1.0f));
 			tvDesc.setText(ZZStr.CC_HELP_TEL.str());
-			tvDesc.setTextColor(ZZFontColor.CC_RECHARGE_HELP.toColor());
+			tvDesc.setTextColor(ZZFontColor.CC_RECHARGE_HELP.color());
 			tvDesc.setGravity(Gravity.CENTER);
 			ZZFontSize.CC_RECHARGE_HELP.apply(tvDesc);
 			if (DEBUG_UI) {

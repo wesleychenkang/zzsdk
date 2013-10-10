@@ -156,7 +156,7 @@ public class ResConstants {
 				this.c = c;
 			}
 
-			public int toColor() {
+			public int color() {
 				return c;
 			}
 		}

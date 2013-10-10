@@ -81,7 +81,7 @@ public abstract class ChargeAbstractLayout extends LinearLayout {
 		if (title != null)
 			tv.setText(title.str());
 		tv.setSingleLine();
-		tv.setTextColor(ZZFontColor.CC_RECHAGR_NORMAL.toColor());
+		tv.setTextColor(ZZFontColor.CC_RECHAGR_NORMAL.color());
 		tv.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
 		ZZFontSize.CC_RECHAGR_NORMAL.apply(tv);
 		return tv;
@@ -95,7 +95,7 @@ public abstract class ChargeAbstractLayout extends LinearLayout {
 		if (hint != null)
 			et.setHint(hint.str());
 		if (color != null)
-			et.setTextColor(color.toColor());
+			et.setTextColor(color.color());
 		et.setGravity(Gravity.CENTER_VERTICAL);
 		if (lenLimit > 0)
 			et.setFilters(new InputFilter[] { new InputFilter.LengthFilter(

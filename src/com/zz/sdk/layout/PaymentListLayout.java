@@ -191,10 +191,10 @@ public class PaymentListLayout extends CCBaseLayout {
 		}
 	}
 
+	private static final int _MSG_USER_ = 0x10000;
+
 	/** 当前的支付方式选择 */
 	private int mPaymentTypeChoose = -1;
-
-	private static final int _MSG_USER_ = 0x10000;
 
 	/** 价格或卓越币数的表达规则 */
 	private DecimalFormat mRechargeFormat = new DecimalFormat(
@@ -206,8 +206,11 @@ public class PaymentListLayout extends CCBaseLayout {
 	/** 余额 */
 	private float mCoinBalance = 0;
 
-	/** 卓越币与RMB的兑换比例 */
-	static float ZZ_COIN_RATE = 10f;
+	/** 默认价格，单位[元]，见 {@link KeyGlobal#K_PAY_AMOUNT} */
+	private float mDefAmount = 0f;
+
+	/** 卓越币与RMB的兑换比例, {@link #initEnv(Context, ParamChain)} */
+	private float ZZ_COIN_RATE;
 
 	private ChargeStyle mChargeStyle = ChargeStyle.UNKNOW;
 
@@ -240,6 +243,19 @@ public class PaymentListLayout extends CCBaseLayout {
 		} else {
 			if (BuildConfig.DEBUG) {
 				Logger.d("E:bad coin rate!");
+			}
+			ZZ_COIN_RATE = 1f;
+		}
+
+		Integer a = env.get(KeyCaller.K_AMOUNT, Integer.class);
+		if (a != null) {
+			mDefAmount = a.floatValue() / 100f;
+			if (DEBUG) {
+				Logger.d("assign amount " + mDefAmount);
+			}
+		} else {
+			if (DEBUG) {
+				Logger.d("no amount assign!");
 			}
 		}
 
@@ -313,6 +329,10 @@ public class PaymentListLayout extends CCBaseLayout {
 		}
 	}
 
+	private boolean isCanModifyAmount() {
+		return mDefAmount < 0.01f;
+	}
+
 	/** 更改模式 */
 	private void updateUIStyle(ChargeStyle mode) {
 		if (mode == ChargeStyle.BUY) {
@@ -324,7 +344,8 @@ public class PaymentListLayout extends CCBaseLayout {
 		} else if (mode == ChargeStyle.RECHARGE) {
 			set_child_text(IDC.TV_RECHARGE_COUNT, ZZStr.CC_RECHARGE_COUNT_TITLE);
 			set_child_visibility(IDC.TV_RECHARGE_COUNT_DESC, GONE);
-			set_child_visibility(IDC.BT_RECHARGE_PULL, VISIBLE);
+			set_child_visibility(IDC.BT_RECHARGE_PULL,
+					isCanModifyAmount() ? VISIBLE : GONE);
 			set_child_text(IDC.BT_RECHARGE_COMMIT, ZZStr.CC_COMMIT_RECHARGE);
 		}
 	}
@@ -683,9 +704,15 @@ public class PaymentListLayout extends CCBaseLayout {
 				ll2.setOrientation(HORIZONTAL);
 
 				// TODO: 如果是定额不可编辑，则这里使用 TextView 即可
-				tv = create_normal_input(ctx, ZZStr.CC_RECHAGRE_COUNT_HINT,
-						ZZFontColor.CC_RECHAGR_INPUT,
-						ZZFontSize.CC_RECHAGR_INPUT, 8);
+				if (isCanModifyAmount()) {
+					tv = create_normal_input(ctx, ZZStr.CC_RECHAGRE_COUNT_HINT,
+							ZZFontColor.CC_RECHAGR_INPUT,
+							ZZFontSize.CC_RECHAGR_INPUT, 8);
+				} else {
+					tv = create_normal_label(ctx, null);
+					tv.setText(new DecimalFormat("#.##").format(mDefAmount));
+					tv.setTextColor(ZZFontColor.CC_RECHAGR_INPUT.color());
+				}
 				ll2.addView(tv, new LayoutParams(LayoutParams.MATCH_PARENT,
 						LayoutParams.MATCH_PARENT, 1.0f));
 				tv.setId(IDC.ED_RECHARGE_COUNT.id());
@@ -731,7 +758,7 @@ public class PaymentListLayout extends CCBaseLayout {
 				tv = create_normal_label(ctx, null);
 				ll2.addView(tv, new LayoutParams(LP_WM));
 				tv.setId(IDC.TV_RECHARGE_COST.id());
-				tv.setTextColor(ZZFontColor.CC_RECHAGRE_COST.toColor());
+				tv.setTextColor(ZZFontColor.CC_RECHAGRE_COST.color());
 				ZZFontSize.CC_RECHAGR_COST.apply(tv);
 			}
 		}
@@ -801,7 +828,7 @@ public class PaymentListLayout extends CCBaseLayout {
 					CCImg.BUTTON, CCImg.BUTTON_CLICK));
 			bt.setId(IDC.BT_RECHARGE_COMMIT.id());
 			bt.setText(ZZStr.CC_COMMIT_RECHARGE.str());
-			bt.setTextColor(ZZFontColor.CC_RECHARGE_COMMIT.toColor());
+			bt.setTextColor(ZZFontColor.CC_RECHARGE_COMMIT.color());
 			bt.setPadding(24, 8, 24, 8);
 			ZZFontSize.CC_RECHARGE_COMMIT.apply(bt);
 			bt.setOnClickListener(this);
@@ -1376,9 +1403,16 @@ public class PaymentListLayout extends CCBaseLayout {
 					Object o = parent.getAdapter();
 					if (o instanceof CoinCandidateAdapter) {
 						// 将数量应用到文本输入框
-						String str = String.valueOf(((CoinCandidateAdapter) o)
-								.getValue(position));
-						set_child_text(IDC.ED_RECHARGE_COUNT, str);
+						if (isCanModifyAmount()) {
+							String str = String
+									.valueOf(((CoinCandidateAdapter) o)
+											.getValue(position));
+							set_child_text(IDC.ED_RECHARGE_COUNT, str);
+						} else {
+							if (DEBUG) {
+								Logger.d("amount is locked!");
+							}
+						}
 					}
 					tryHidePopup();
 				}

@@ -81,7 +81,7 @@ class PaymentListAdapter extends BaseAdapter {
 			// mActivity, "type_bg1.png", "type_bg.png"));
 			holder.setGravity(Gravity.CENTER);
 			holder.setSingleLine();
-			holder.setTextColor(ZZFontColor.CC_PAYTYPE_ITEM.toColor());
+			holder.setTextColor(ZZFontColor.CC_PAYTYPE_ITEM.color());
 			holder.setPadding(mItemPaddingLeft, mItemPaddingTop,
 					mItemPaddingRight, mItemPaddingBootom);
 			holder.setLayoutParams(new AbsListView.LayoutParams(

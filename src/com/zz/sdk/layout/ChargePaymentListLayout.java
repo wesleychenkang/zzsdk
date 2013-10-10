@@ -661,7 +661,7 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 				tv = createNormalLabel(ctx, null);
 				ll2.addView(tv, new LayoutParams(LP_WM));
 				tv.setId(IDC.TV_RECHARGE_COST.id());
-				tv.setTextColor(ZZFontColor.CC_RECHAGRE_COST.toColor());
+				tv.setTextColor(ZZFontColor.CC_RECHAGRE_COST.color());
 				ZZFontSize.CC_RECHAGR_COST.apply(tv);
 			}
 		}
@@ -731,7 +731,7 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 					CCImg.BUTTON, CCImg.BUTTON_CLICK));
 			bt.setId(IDC.BT_RECHARGE_COMMIT.id());
 			bt.setText(ZZStr.CC_COMMIT_RECHARGE.str());
-			bt.setTextColor(ZZFontColor.CC_RECHARGE_COMMIT.toColor());
+			bt.setTextColor(ZZFontColor.CC_RECHARGE_COMMIT.color());
 			bt.setPadding(24, 8, 24, 8);
 			ZZFontSize.CC_RECHARGE_COMMIT.apply(bt);
 			bt.setOnClickListener(this);
@@ -827,7 +827,7 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 			tvHelp.setCompoundDrawablesWithIntrinsicBounds(
 					CCImg.HELP.getDrawble(ctx), null, null, null);
 			tvHelp.setText(ZZStr.CC_HELP_TITLE.str());
-			tvHelp.setTextColor(ZZFontColor.CC_RECHARGE_HELP.toColor());
+			tvHelp.setTextColor(ZZFontColor.CC_RECHARGE_HELP.color());
 			tvHelp.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
 			tvHelp.setCompoundDrawablePadding(DimensionUtil.dip2px(ctx, 8));
 			tvHelp.setPadding(DimensionUtil.dip2px(ctx, 4), 0, 0, 0);
@@ -838,7 +838,7 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout implements
 			footer.addView(tvDesc, new LayoutParams(LayoutParams.MATCH_PARENT,
 					LayoutParams.WRAP_CONTENT, 1.0f));
 			tvDesc.setText(ZZStr.CC_HELP_TEL.str());
-			tvDesc.setTextColor(ZZFontColor.CC_RECHARGE_HELP.toColor());
+			tvDesc.setTextColor(ZZFontColor.CC_RECHARGE_HELP.color());
 			tvDesc.setGravity(Gravity.CENTER);
 			ZZFontSize.CC_RECHARGE_HELP.apply(tvDesc);
 			// tvDesc.setBackgroundColor(0x800000ff);

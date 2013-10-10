@@ -384,10 +384,10 @@ public class ExchangeLayout extends CCBaseLayout {
 				ZZFontColor c;
 				c = bClicked ? ZZFontColor.CC_EXCHANGE_ITEM_TITLE_PRESSED
 						: ZZFontColor.CC_EXCHANGE_ITEM_TITLE;
-				tvTitle.setTextColor(c.toColor());
+				tvTitle.setTextColor(c.color());
 				c = bClicked ? ZZFontColor.CC_EXCHANGE_ITEM_SUMMARY_PRESSED
 						: ZZFontColor.CC_EXCHANGE_ITEM_SUMMARY;
-				tvSummary.setTextColor(c.toColor());
+				tvSummary.setTextColor(c.color());
 			}
 		}
 

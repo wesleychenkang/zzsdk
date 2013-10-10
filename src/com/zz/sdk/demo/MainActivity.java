@@ -9,6 +9,7 @@ import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -25,6 +26,7 @@ import com.zz.sdk.MSG_TYPE;
 import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.SDKManager;
 import com.zz.sdk.activity.ParamChain;
+import com.zz.sdk.activity.ParamChain.KeyGlobal;
 import com.zz.sdk.layout.PaymentListLayout.ChargeStyle;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
 
@@ -56,6 +58,8 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final int IDC_CHARGE_AUTO_CLOSE = _IDC_START_ + 11;
 	private static final int IDC_CHARGE_MODE_BUY = _IDC_START_ + 12;
 	private static final int IDC_BT_EXCHANGE = _IDC_START_ + 13;
+	private static final int IDC_BT_RECHARGE_RATE = _IDC_START_ + 14;
+	private static final int IDC_ET_RECHARGE_RATE = _IDC_START_ + 15;
 
 	/* 自定义消息 */
 	private static final int _MSG_USER_ = 2013;
@@ -78,13 +82,30 @@ public class MainActivity extends Activity implements OnClickListener {
 		super.onCreate(savedInstanceState);
 
 		Context ctx = getBaseContext();
-		View c = setupVies(ctx, this);
 
-		ScrollView container = new ScrollView(ctx);
-		container.setVerticalScrollBarEnabled(true);
-		container.addView(c);
+		LinearLayout ll = new LinearLayout(ctx);
+		setContentView(ll);
+		ll.setOrientation(LinearLayout.VERTICAL);
 
-		setContentView(container);
+		{
+			ScrollView sv = new ScrollView(ctx);
+			ll.addView(sv, new LinearLayout.LayoutParams(
+					LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f));
+			sv.setVerticalScrollBarEnabled(true);
+			sv.addView(setupVies(ctx, this));
+		}
+
+		{
+			ScrollView sv = new ScrollView(ctx);
+			ll.addView(sv, new LinearLayout.LayoutParams(
+					LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f));
+			sv.setVerticalScrollBarEnabled(true);
+
+			TextView tvTip = new TextView(ctx);
+			tvTip.setText(" ! version:" + SDKManager.getVersionDesc());
+			tvTip.setId(IDC_TV_LOG);
+			sv.addView(tvTip);
+		}
 
 		mTvTip = (TextView) findViewById(IDC_TV_LOG);
 		mSDKManager = SDKManager.getInstance(ctx);
@@ -182,6 +203,24 @@ public class MainActivity extends Activity implements OnClickListener {
 			rootLayout.addView(btnSetConfig);
 		}
 
+		{
+			LinearLayout ll = new LinearLayout(ctx);
+			rootLayout.addView(ll);
+			ll.setOrientation(LinearLayout.HORIZONTAL);
+
+			Button bt = new Button(ctx);
+			ll.addView(bt);
+			bt.setText("汇率");
+			bt.setId(IDC_BT_RECHARGE_RATE);
+			bt.setOnClickListener(onClickListener);
+
+			EditText et = new EditText(ctx);
+			ll.addView(et);
+			et.setHint("{RMB→?卓越币，精度为0.01}");
+			et.setId(IDC_ET_RECHARGE_RATE);
+			et.setInputType(InputType.TYPE_CLASS_NUMBER
+					| InputType.TYPE_NUMBER_FLAG_DECIMAL);
+		}
 		// {
 		// Button btQuery = new Button(ctx);
 		// btQuery.setText("查询订单");
@@ -190,16 +229,6 @@ public class MainActivity extends Activity implements OnClickListener {
 		// btQuery.setOnClickListener(onClickListener);
 		// rootLayout.addView(btQuery);
 		// }
-
-		{
-			ScrollView sv = new ScrollView(this);
-			sv.setVerticalScrollBarEnabled(true);
-			TextView tvTip = new TextView(ctx);
-			tvTip.setText(" ! version:" + SDKManager.getVersionDesc());
-			tvTip.setId(IDC_TV_LOG);
-			sv.addView(tvTip);
-			rootLayout.addView(sv);
-		}
 
 		return rootLayout;
 	}
@@ -324,6 +353,29 @@ public class MainActivity extends Activity implements OnClickListener {
 		// 道具兑换
 		case IDC_BT_EXCHANGE: {
 			mSDKManager.showExchange(mHandler, MSG_PAYMENT_CALLBACK, null);
+		}
+			break;
+
+		case IDC_BT_RECHARGE_RATE: {
+
+			String str = ((TextView) findViewById(IDC_ET_RECHARGE_RATE))
+					.getText().toString().trim();
+			float rate;
+			if (str.length() > 0) {
+				try {
+					rate = Float.parseFloat(str);
+				} catch (NumberFormatException e) {
+					rate = 0;
+				}
+			} else {
+				rate = 0;
+			}
+
+			ParamChain env = mSDKManager.debug_GetParamChain();
+			if (rate > 0.01f)
+				env.add(KeyGlobal.K_PAY_COIN_RATE, rate);
+			else
+				env.remove(KeyGlobal.K_PAY_COIN_RATE);
 		}
 			break;
 		}

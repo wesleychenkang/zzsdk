@@ -95,18 +95,20 @@ public class SDKManager {
 		// saveProjectIdToContext();
 		// }
 		// });
-
-		mRootEnv = ParamChainImpl.GLOBAL().grow();
-
-		mRootEnv.add(KeyGlobal.K_HELP_TITLE,
+		
+		ParamChain rootEnv = ParamChainImpl.GLOBAL();
+		rootEnv.add(KeyGlobal.K_HELP_TITLE,
 				"<html><font color='#c06000'>在线帮助</font></html>");
-		mRootEnv.add(
+		rootEnv.add(
 				KeyGlobal.K_HELP_TOPIC,
 				""
 						+ "1、充值成功后，<font color='#800000'>一般1-10分钟即可到账</font>，简单方便。<br/>"
 						+ "2、充值卡充值请根据充值卡面额选择正确的充值金额，并仔细核对卡号和密码。<br/>"
 						+ "3、如有疑问请联系客服，客服热线：020-85525051 客服QQ：9159。");
-		mRootEnv.add(KeyGlobal.K_PAY_COIN_RATE, 0.01f);
+		rootEnv.add(KeyGlobal.K_PAY_COIN_RATE, 0.01f);
+		
+		mRootEnv = rootEnv.grow();
+		
 		ResConstants.init(ctx);
 	}
 
@@ -482,7 +484,7 @@ public class SDKManager {
 
 	public ParamChain debug_GetParamChain() {
 		if (DEBUG) {
-			return ParamChainImpl.GLOBAL();
+			return mRootEnv; // ParamChainImpl.GLOBAL();
 		}
 		return null;
 	}
