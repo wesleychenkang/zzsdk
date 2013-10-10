@@ -2,6 +2,10 @@ package com.zz.sdk.layout;
 
 import java.text.DecimalFormat;
 
+import javax.crypto.Mac;
+
+import org.apache.http.conn.scheme.HostNameResolver;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
@@ -33,6 +37,7 @@ import com.zz.sdk.activity.ParamChain.KeyGlobal;
 import com.zz.sdk.layout.LayoutFactory.ILayoutHost;
 import com.zz.sdk.layout.LayoutFactory.ILayoutView;
 import com.zz.sdk.layout.LayoutFactory.KeyLayoutFactory;
+import com.zz.sdk.protocols.ActivityControlInterface;
 import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.DimensionUtil;
@@ -141,6 +146,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	protected Context mContext;
 	protected ParamChain mEnv;
 	private AsyncTask<?, ?, ?> mTask;
+	private ActivityControlInterface mActivityControlInterface;
 
 	protected final static LayoutParams LP_WM = new LayoutParams(
 			LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
@@ -752,6 +758,9 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		if (BuildConfig.DEBUG) {
 			Logger.d("onEnter(" + getClass().getName());
 		}
+
+		enableActivityControlInterface();
+
 		return true;
 	}
 
@@ -760,6 +769,9 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		if (BuildConfig.DEBUG) {
 			Logger.d("onPause(" + getClass().getName());
 		}
+
+		disableActivityControlInterface();
+
 		return true;
 	}
 
@@ -768,16 +780,20 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		if (BuildConfig.DEBUG) {
 			Logger.d("onResume(" + getClass().getName());
 		}
+
+		enableActivityControlInterface();
+
 		return true;
 	}
 
 	protected void clean() {
+		cancelCurrentTask();
+		removeActivityControlInterface();
+
 		if (mEnv != null) {
 			mEnv.reset();
 			mEnv = null;
 		}
-
-		cancelCurrentTask();
 
 		mContext = null;
 		mRechargeFormat = null;
@@ -844,6 +860,40 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 			if (!mTask.isCancelled())
 				mTask.cancel(true);
 			mTask = null;
+		}
+	}
+
+	//
+
+	protected void setActivityControlInterface(
+			ActivityControlInterface controlInterface) {
+		removeActivityControlInterface();
+		mActivityControlInterface = controlInterface;
+		enableActivityControlInterface();
+	}
+
+	protected void removeActivityControlInterface() {
+		if (mActivityControlInterface != null) {
+			disableActivityControlInterface();
+			mActivityControlInterface = null;
+		}
+	}
+
+	protected void enableActivityControlInterface() {
+		if (mActivityControlInterface != null) {
+			ILayoutHost host = getHost();
+			if (host != null) {
+				host.addActivityControl(mActivityControlInterface);
+			}
+		}
+	}
+
+	protected void disableActivityControlInterface() {
+		if (mActivityControlInterface != null) {
+			ILayoutHost host = getHost();
+			if (host != null) {
+				host.addActivityControl(mActivityControlInterface);
+			}
 		}
 	}
 }

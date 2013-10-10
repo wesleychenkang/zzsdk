@@ -372,10 +372,13 @@ public class MainActivity extends Activity implements OnClickListener {
 			}
 
 			ParamChain env = mSDKManager.debug_GetParamChain();
-			if (rate > 0.01f)
+			if (rate > 0.01f) {
 				env.add(KeyGlobal.K_PAY_COIN_RATE, rate);
-			else
+				pushLog("设置默认汇率: " + rate);
+			} else {
 				env.remove(KeyGlobal.K_PAY_COIN_RATE);
+				pushLog("还原默认汇率!");
+			}
 		}
 			break;
 		}

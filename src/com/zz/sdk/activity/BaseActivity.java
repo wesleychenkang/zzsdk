@@ -8,8 +8,8 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
-import android.view.Window;
 
 import com.zz.sdk.BuildConfig;
 import com.zz.sdk.activity.ParamChain.KeyCaller;
@@ -19,9 +19,9 @@ import com.zz.sdk.layout.LAYOUT_TYPE;
 import com.zz.sdk.layout.LayoutFactory;
 import com.zz.sdk.layout.LayoutFactory.ILayoutView;
 import com.zz.sdk.layout.LayoutFactory.KeyLayoutFactory;
+import com.zz.sdk.protocols.ActivityControlInterface;
 import com.zz.sdk.util.DialogUtil;
 import com.zz.sdk.util.Logger;
-import com.zz.sdk.util.Utils;
 
 /**
  * 基本窗体
@@ -41,6 +41,8 @@ public class BaseActivity extends Activity {
 	private String mName;
 
 	private ParamChain mRootEnv;
+
+	private Stack<ActivityControlInterface> mInterfacesStack;
 
 	static final class KeyBaseActivity implements KeyGlobal {
 		protected static final String _TAG_ = KeyGlobal._TAG_ + "base_activity"
@@ -124,7 +126,25 @@ public class BaseActivity extends Activity {
 				tryEnterView(type, rootEnv);
 			}
 
+			@Override
+			public void addActivityControl(
+					ActivityControlInterface controlInterface) {
+				if (!mInterfacesStack.isEmpty()) {
+					mInterfacesStack.remove(controlInterface);
+				}
+				mInterfacesStack.push(controlInterface);
+			}
+
+			@Override
+			public void removeActivityControl(
+					ActivityControlInterface controlInterface) {
+				if (!mInterfacesStack.isEmpty())
+					mInterfacesStack.remove(controlInterface);
+			}
+
 		}, ValType.TEMPORARY);
+
+		mInterfacesStack = new Stack<ActivityControlInterface>();
 
 		// 创建主视图
 		LAYOUT_TYPE type = mRootEnv.get(KeyGlobal.K_UI_VIEW_TYPE,
@@ -153,7 +173,36 @@ public class BaseActivity extends Activity {
 	}
 
 	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (!mInterfacesStack.isEmpty()) {
+			ActivityControlInterface aci = mInterfacesStack.peek();
+			if (aci.onKeyDownControl(keyCode, event)) {
+				return true;
+			}
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (!mInterfacesStack.isEmpty()) {
+			ActivityControlInterface aci = mInterfacesStack.peek();
+			if (aci.onActivityResultControl(requestCode, resultCode, data)) {
+				return;
+			}
+		}
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+
+	@Override
 	public void onBackPressed() {
+		if (!mInterfacesStack.isEmpty()) {
+			ActivityControlInterface aci = mInterfacesStack.peek();
+			if (aci.onBackPressedControl()) {
+				return;
+			}
+		}
+
 		if (popViewFromStack() != null)
 			return;
 		super.onBackPressed();
