@@ -15,6 +15,7 @@ import com.zz.sdk.activity.LoginForQiFu;
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.activity.ParamChain.KeyCaller;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
+import com.zz.sdk.activity.ParamChainImpl;
 import com.zz.sdk.entity.SdkUser;
 import com.zz.sdk.entity.SdkUserTable;
 import com.zz.sdk.layout.LAYOUT_TYPE;
@@ -95,7 +96,8 @@ public class SDKManager {
 		// }
 		// });
 
-		mRootEnv = new ParamChain(ParamChain.GLOBAL());
+		mRootEnv = ParamChainImpl.GLOBAL().grow();
+
 		mRootEnv.add(KeyGlobal.K_HELP_TITLE,
 				"<html><font color='#c06000'>在线帮助</font></html>");
 		mRootEnv.add(
@@ -339,8 +341,7 @@ public class SDKManager {
 			String gameServerID, final String serverName, final String roleId,
 			final String gameRole, final int amount,
 			final boolean isCloseWindow, final String callBackInfo) {
-		ParamChain rootEnv;
-		rootEnv = new ParamChain(mRootEnv);
+		ParamChain rootEnv = mRootEnv.grow();
 		rootEnv.add(KeyCaller.K_MSG_HANDLE, callbackHandler);
 		rootEnv.add(KeyCaller.K_MSG_WHAT, what);
 		rootEnv.add(KeyCaller.K_GAME_SERVER_ID, gameServerID);
@@ -357,15 +358,14 @@ public class SDKManager {
 		// ParamChain rootEnv = ParamChain.generateUnion(mRootEnv,
 		// KeyGlobal.UI_NAME);
 		ParamChain rootEnv;
-		rootEnv = new ParamChain(mRootEnv);
+		rootEnv = mRootEnv.grow();
 		startActivity(rootEnv, LAYOUT_TYPE.Exchange);
 	}
 
 	private void startActivity(ParamChain rootEnv, LAYOUT_TYPE root_layout) {
-		ParamChain env = new ParamChain(rootEnv);
+		ParamChain env = rootEnv.grow();
 		env.add(KeyGlobal.K_UI_VIEW_TYPE, root_layout);
-		ParamChain.GLOBAL().add(root_layout.key(), env,
-				ParamChain.ValType.TEMPORARY);
+		env.getRoot().add(root_layout.key(), env, ParamChain.ValType.TEMPORARY);
 
 		Intent intent = new Intent(mContext, BaseActivity.class);
 		intent.putExtra(KeyGlobal.K_UI_NAME, root_layout.key());
@@ -473,5 +473,17 @@ public class SDKManager {
 	public static String getVersionDesc() {
 		return "Ver:" + ZZSDKConfig.VERSION_CODE + "-"
 				+ ZZSDKConfig.VERSION_NAME + "-" + ZZSDKConfig.VERSION_DATE;
+	}
+
+	// -----------------------------------------------------------------------
+	//
+	// - 调试
+	public final static boolean DEBUG = BuildConfig.DEBUG && true;
+
+	public ParamChain debug_GetParamChain() {
+		if (DEBUG) {
+			return ParamChainImpl.GLOBAL();
+		}
+		return null;
 	}
 }

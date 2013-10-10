@@ -293,7 +293,8 @@ public class MainActivity extends Activity implements OnClickListener {
 			// 设置模式
 			ChargeStyle chargeMode = ((CheckBox) findViewById(IDC_CHARGE_MODE_BUY))
 					.isChecked() ? ChargeStyle.BUY : ChargeStyle.RECHARGE;
-			ParamChain.GLOBAL().add(KeyPaymentList.K_CHARGE_STYLE, chargeMode);
+			mSDKManager.debug_GetParamChain().add(
+					KeyPaymentList.K_CHARGE_STYLE, chargeMode);
 
 			mSDKManager.showPaymentViewEx(mHandler, MSG_PAYMENT_CALLBACK,
 					CONFIG_GAME_SERVER_ID, CONFIG_GAME_SERVER_NAME,

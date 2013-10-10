@@ -77,6 +77,7 @@ public class ResConstants {
 		CC_COMMIT_BUY("确认购买"), //
 		CC_COMMIT_EXCHANGE("确认兑换"), //
 		CC_PAYCHANNEL_ERROR("很抱歉！未能获取到可用的支付通道。"), //
+		CC_PAYCHANNEL_NOCHOOSE("必须选择一个可用的支付通道！"), //
 
 		CC_HELP_TITLE("帮助说明"), //
 		CC_HELP_TEL("客服电话: 0123-45678901"), //

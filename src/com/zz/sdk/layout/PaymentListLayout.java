@@ -3,7 +3,11 @@ package com.zz.sdk.layout;
 import java.text.DecimalFormat;
 import java.util.Random;
 
+import android.R.menu;
+import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -37,9 +41,15 @@ import com.zz.sdk.BuildConfig;
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.activity.ParamChain.KeyCaller;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
+import com.zz.sdk.activity.ParamChain.KeyUser;
+import com.zz.sdk.activity.ParamChain.ValType;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
+import com.zz.sdk.entity.Result;
+import com.zz.sdk.entity.UserAction;
 import com.zz.sdk.layout.LayoutFactory.ILayoutHost;
+import com.zz.sdk.util.Constants;
+import com.zz.sdk.util.DialogUtil;
 import com.zz.sdk.util.DimensionUtil;
 import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.Logger;
@@ -67,6 +77,35 @@ public class PaymentListLayout extends CCBaseLayout {
 
 		/** 充值中心的风格，分<b> 充值模式 </b>和<b> 购买模式</b>，类型 {@link ChargeStyle} */
 		public static final String K_CHARGE_STYLE = _TAG_ + "charge_style";
+
+		/** 充值中心·支付类别，类型 {@link PayChannel} */
+		public static final String K_PAY_CHANNEL = _TAG_ + "pay_channel";
+
+		/** 充值中心·支付类别，类型 {@link PayParam} */
+		public static final String K_PAY_PARAM = _TAG_ + "pay_channel";
+
+		/** 充值中心·支付类别，类型 {@link Integer} */
+		public static final String K_PAY_CHANNELTYPE = _TAG_
+				+ "pay_channel_type";
+
+		/** 充值中心·服务器的返回值，类型 {@link Result} */
+		public static final String K_PAY_RESULT = _TAG_ + "pay_result";
+
+		/** 充值中心·服务器的返回值·订单号，类型 {@link String} */
+		public static final String K_PAY_ORDERNUMBER = _TAG_
+				+ "pay_order_number";
+
+		/** 充值中心·服务器的返回值·在线支付·初始URL地址，类型 {@link String} */
+		public static final String K_PAY_ONLINE_URL = _TAG_ + "pay_online_url";
+		/** 充值中心·服务器的返回值·在线支付·支付成功的URL地址，类型 {@link String} */
+		public static final String K_PAY_ONLINE_URL_GUARD = _TAG_
+				+ "pay_online_url_guard";
+
+		/** 充值中心·卡号，类型 {@link String} */
+		public static final String K_PAY_CARD = _TAG_ + "pay_card_no";
+		/** 充值中心·充值卡密码，类型 {@link String} */
+		public static final String K_PAY_CARD_PASSWD = _TAG_
+				+ "pay_card_passwd";
 	}
 
 	/** 界面模式 */
@@ -96,7 +135,7 @@ public class PaymentListLayout extends CCBaseLayout {
 	}
 
 	/* 自动增加的 id */
-	static enum IDC {
+	static enum IDC implements IIDC {
 		/** 等待面板 */
 		ACT_WAIT, //
 		/** 支付操作主面板 */
@@ -136,7 +175,7 @@ public class PaymentListLayout extends CCBaseLayout {
 		_MAX_;
 
 		/** ID 的起点 */
-		protected static int __start__ = BaseLayout.IDC._MAX_.id();
+		protected static int __start__ = CCBaseLayout.IDC._MAX_.id();
 
 		public final int id() {
 			return this.ordinal() + __start__;
@@ -173,7 +212,6 @@ public class PaymentListLayout extends CCBaseLayout {
 	private ChargeStyle mChargeStyle = ChargeStyle.UNKNOW;
 
 	private String mIMSI;
-	private AsyncTask<?, ?, ?> mLoadTask;
 
 	private Handler mHandler = new Handler() {
 		@Override
@@ -239,9 +277,20 @@ public class PaymentListLayout extends CCBaseLayout {
 			// }
 			// }
 			// }, null);
-			PayListTask task = new PayListTask(mContext, this);
-			task.execute();
-			mLoadTask = task;
+
+			PayListTask.ICallBack cb = new PayListTask.ICallBack() {
+				@Override
+				public void onResult(AsyncTask<?, ?, ?> task, Object token,
+						PayChannel[] result) {
+					// TODO Auto-generated method stub
+					if (isCurrentTaskFinished(task)) {
+						onPayListUpdate(result);
+					}
+				}
+			};
+			AsyncTask<?, ?, ?> task = PayListTask.createAndStart(mContext, cb,
+					this, genPayListParam(mContext, getEnv()));
+			setCurrentTask(task);
 		}
 		return ret;
 	}
@@ -249,11 +298,6 @@ public class PaymentListLayout extends CCBaseLayout {
 	@Override
 	public boolean onExit() {
 		boolean ret = super.onExit();
-
-		if (mLoadTask != null) {
-			mLoadTask.cancel(true);
-			mLoadTask = null;
-		}
 
 		if (ret) {
 
@@ -267,37 +311,6 @@ public class PaymentListLayout extends CCBaseLayout {
 			updateRechargeCost();
 		} else {
 		}
-	}
-
-	private void set_child_visibility(IDC id, int visibility) {
-		View v = findViewById(id.id());
-		if (v != null)
-			v.setVisibility(visibility);
-	}
-
-	private void set_child_text(IDC id, ZZStr str) {
-		View v = findViewById(id.id());
-		if (v instanceof TextView) {
-			((TextView) v).setText(str.str());
-		}
-	}
-
-	private void set_child_text(IDC id, String str) {
-		View v = findViewById(id.id());
-		if (v instanceof TextView) {
-			((TextView) v).setText(str);
-		}
-	}
-
-	private String get_child_text(IDC id) {
-		View v = findViewById(id.id());
-		if (v instanceof TextView) {
-			CharSequence s = ((TextView) v).getText();
-			if (s != null) {
-				return s.toString().trim();
-			}
-		}
-		return null;
 	}
 
 	/** 更改模式 */
@@ -348,12 +361,16 @@ public class PaymentListLayout extends CCBaseLayout {
 	 */
 	public Object getValue(VAL type) {
 		switch (type) {
+		case COST:
 		case PRICE: {
 			float count = 0;
 			String s = get_child_text(IDC.ED_RECHARGE_COUNT);
 			if (s != null && s.length() > 0) {
 				try {
 					count = Float.parseFloat(s);
+					if (type == VAL.COST) {
+						count /= ZZ_COIN_RATE;
+					}
 				} catch (NumberFormatException e) {
 					if (BuildConfig.DEBUG) {
 						Logger.d("bad count:" + s);
@@ -372,11 +389,11 @@ public class PaymentListLayout extends CCBaseLayout {
 		}
 
 		case CARD_NO: {
-			return get_child_text(IDC.ED_CARD);
+			return get_child_text(IDC.PANEL_CARDINPUT, IDC.ED_CARD, 1);
 		}
 
 		case CARD_PASSWD: {
-			return get_child_text(IDC.ED_PASSWD);
+			return get_child_text(IDC.PANEL_CARDINPUT, IDC.ED_PASSWD, 1);
 		}
 
 		default:
@@ -596,11 +613,11 @@ public class PaymentListLayout extends CCBaseLayout {
 	private void prepparePayType_Card(Context ctx, LinearLayout rv,
 			int limitCard, int limitPasswd) {
 		TextView tv;
-		tv = createNormalLabel(ctx, ZZStr.CC_CARDNUM_DESC);
+		tv = create_normal_label(ctx, ZZStr.CC_CARDNUM_DESC);
 		rv.addView(tv, new LayoutParams(LP_WW));
 
 		// 卡号
-		tv = createNormalInput(ctx, null, ZZFontColor.CC_RECHAGR_INPUT,
+		tv = create_normal_input(ctx, null, ZZFontColor.CC_RECHAGR_INPUT,
 				ZZFontSize.CC_RECHAGR_INPUT, limitCard);
 		rv.addView(tv, new LayoutParams(LayoutParams.MATCH_PARENT,
 				ZZDimen.CC_CARD_HEIGHT.px()));
@@ -612,11 +629,11 @@ public class PaymentListLayout extends CCBaseLayout {
 			tv.setHint(hint);
 		}
 
-		tv = createNormalLabel(ctx, ZZStr.CC_PASSWD_DESC);
+		tv = create_normal_label(ctx, ZZStr.CC_PASSWD_DESC);
 		rv.addView(tv, new LayoutParams(LP_WW));
 
 		// 密码
-		tv = createNormalInput(ctx, null, ZZFontColor.CC_RECHAGR_INPUT,
+		tv = create_normal_input(ctx, null, ZZFontColor.CC_RECHAGR_INPUT,
 				ZZFontSize.CC_RECHAGR_INPUT, limitPasswd);
 		rv.addView(tv, new LayoutParams(LayoutParams.MATCH_PARENT,
 				ZZDimen.CC_CARD_HEIGHT.px()));
@@ -651,9 +668,9 @@ public class PaymentListLayout extends CCBaseLayout {
 
 		// 充值数量输入
 		{
-			ll = createNormalPannel(ctx, rv);
+			ll = create_normal_pannel(ctx, rv);
 
-			tv = createNormalLabel(ctx, ZZStr.CC_RECHARGE_COUNT_TITLE);
+			tv = create_normal_label(ctx, ZZStr.CC_RECHARGE_COUNT_TITLE);
 			ll.addView(tv, new LayoutParams(LP_MW));
 			tv.setId(IDC.TV_RECHARGE_COUNT.id());
 
@@ -666,7 +683,7 @@ public class PaymentListLayout extends CCBaseLayout {
 				ll2.setOrientation(HORIZONTAL);
 
 				// TODO: 如果是定额不可编辑，则这里使用 TextView 即可
-				tv = createNormalInput(ctx, ZZStr.CC_RECHAGRE_COUNT_HINT,
+				tv = create_normal_input(ctx, ZZStr.CC_RECHAGRE_COUNT_HINT,
 						ZZFontColor.CC_RECHAGR_INPUT,
 						ZZFontSize.CC_RECHAGR_INPUT, 8);
 				ll2.addView(tv, new LayoutParams(LayoutParams.MATCH_PARENT,
@@ -681,7 +698,7 @@ public class PaymentListLayout extends CCBaseLayout {
 				int padding_v = ZZDimen.CC_RECHARGE_COUNT_PADDING_V.px();
 				tv.setPadding(padding_h, padding_v, padding_h, padding_v);
 
-				tv = createNormalLabel(ctx, ZZStr.CC_RECHAGRE_COUNT_DESC);
+				tv = create_normal_label(ctx, ZZStr.CC_RECHAGRE_COUNT_DESC);
 				ll2.addView(tv, new LayoutParams(LP_WM));
 				tv.setId(IDC.TV_RECHARGE_COUNT_DESC.id());
 				tv.setVisibility(GONE);
@@ -694,7 +711,7 @@ public class PaymentListLayout extends CCBaseLayout {
 				ib.setScaleType(ScaleType.CENTER_INSIDE);
 				ib.setOnClickListener(this);
 
-				tv = createNormalLabel(ctx, null);
+				tv = create_normal_label(ctx, null);
 				String rate = mRechargeFormat.format(ZZ_COIN_RATE);
 				String rate_desc = String.format(
 						ZZStr.CC_RECHAGRE_RATE_DESC.str(), rate);
@@ -708,10 +725,10 @@ public class PaymentListLayout extends CCBaseLayout {
 				ll2.setOrientation(HORIZONTAL);
 				ll.addView(ll2);
 
-				tv = createNormalLabel(ctx, ZZStr.CC_RECHAGRE_COST_DESC);
+				tv = create_normal_label(ctx, ZZStr.CC_RECHAGRE_COST_DESC);
 				ll2.addView(tv, new LayoutParams(LP_WM));
 
-				tv = createNormalLabel(ctx, null);
+				tv = create_normal_label(ctx, null);
 				ll2.addView(tv, new LayoutParams(LP_WM));
 				tv.setId(IDC.TV_RECHARGE_COST.id());
 				tv.setTextColor(ZZFontColor.CC_RECHAGRE_COST.toColor());
@@ -721,9 +738,9 @@ public class PaymentListLayout extends CCBaseLayout {
 
 		// 支付方式
 		{
-			ll = createNormalPannel(ctx, rv);
+			ll = create_normal_pannel(ctx, rv);
 
-			tv = createNormalLabel(ctx, ZZStr.CC_PAYCHANNEL_TITLE);
+			tv = create_normal_label(ctx, ZZStr.CC_PAYCHANNEL_TITLE);
 			ll.addView(tv, new LayoutParams(LP_MW));
 
 			// GridView 展示支付方式
@@ -750,7 +767,7 @@ public class PaymentListLayout extends CCBaseLayout {
 
 		// 输入面板
 		{
-			ll = createNormalPannel(ctx, rv);
+			ll = create_normal_pannel(ctx, rv);
 
 			ViewSwitcher vs = new ViewSwitcher(ctx);
 			ll.addView(vs, new LayoutParams(LP_MW));
@@ -776,7 +793,7 @@ public class PaymentListLayout extends CCBaseLayout {
 
 		// 确认充值
 		{
-			ll = createNormalPannel(ctx, rv);
+			ll = create_normal_pannel(ctx, rv);
 
 			Button bt = new Button(ctx);
 			ll.addView(bt, new LayoutParams(LP_WW));
@@ -814,7 +831,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			lp.addRule(RelativeLayout.CENTER_IN_PARENT);
 			rl.addView(pb, lp);
 
-			TextView tv = createNormalLabel(ctx, ZZStr.CC_HINT_LOADING);
+			TextView tv = create_normal_label(ctx, ZZStr.CC_HINT_LOADING);
 			tv.setGravity(Gravity.CENTER);
 			lp = new RelativeLayout.LayoutParams(LP_WW);
 			lp.addRule(RelativeLayout.CENTER_IN_PARENT);
@@ -859,12 +876,6 @@ public class PaymentListLayout extends CCBaseLayout {
 		updatePayType(-1);
 	}
 
-	private void _setChildViewVisiblity(int id, int visibility) {
-		View cv = findViewById(id);
-		if (cv != null)
-			cv.setVisibility(visibility);
-	}
-
 	public void showPayList(boolean visibility) {
 		View v = findViewById(IDC.ACT_WAIT.id());
 		if (v != null && v.getVisibility() == VISIBLE) {
@@ -874,8 +885,8 @@ public class PaymentListLayout extends CCBaseLayout {
 			}
 		}
 
-		_setChildViewVisiblity(IDC.ACT_PAY.id(), visibility ? VISIBLE : GONE);
-		_setChildViewVisiblity(IDC.ACT_ERR.id(), visibility ? GONE : VISIBLE);
+		set_child_visibility(IDC.ACT_PAY, visibility ? VISIBLE : GONE);
+		set_child_visibility(IDC.ACT_ERR, visibility ? GONE : VISIBLE);
 	}
 
 	/**
@@ -988,11 +999,283 @@ public class PaymentListLayout extends CCBaseLayout {
 	/**
 	 * 检查用户的输入是否有效
 	 * 
+	 * @param host
+	 * 
 	 * @return
 	 */
-	private boolean checkInput() {
-		// TODO:
-		return true;
+	private String checkInput(ILayoutHost host, PayChannel channel) {
+		final float amount;
+		if (channel.type == PayChannel.PAY_TYPE_ZZCOIN)
+			amount = (Float) getValue(VAL.PRICE);
+		else
+			amount = (Float) getValue(VAL.COST);
+		if (amount < 0.01f) {
+			set_child_focuse(IDC.ED_RECHARGE_COUNT);
+			return ZZStr.CC_RECHARGE_COUNT_TITLE.str();
+		}
+		mEnv.add(KeyPaymentList.K_PAY_AMOUNT, amount, ValType.TEMPORARY);
+
+		final String ret;
+		switch (channel.type) {
+		case PayChannel.PAY_TYPE_ALIPAY:
+		case PayChannel.PAY_TYPE_TENPAY:
+			ret = null;
+			break;
+
+		case PayChannel.PAY_TYPE_UNMPAY:
+			ret = null;
+			break;
+
+		case PayChannel.PAY_TYPE_YEEPAY_LT:
+		case PayChannel.PAY_TYPE_YEEPAY_YD: {
+			String card = get_child_text(IDC.PANEL_CARDINPUT, IDC.ED_CARD, 1);
+			String passwd = get_child_text(IDC.PANEL_CARDINPUT, IDC.ED_PASSWD,
+					1);
+			if (card == null || card.length() == 0) {
+				set_child_focuse(IDC.PANEL_CARDINPUT, IDC.ED_CARD);
+				ret = ZZStr.CC_CARDNUM_DESC.str();
+			} else if (passwd == null || passwd.length() == 0) {
+				set_child_focuse(IDC.PANEL_CARDINPUT, IDC.ED_PASSWD);
+				ret = ZZStr.CC_PASSWD_DESC.str();
+			} else {
+				mEnv.add(KeyPaymentList.K_PAY_CARD, card, ValType.TEMPORARY);
+				mEnv.add(KeyPaymentList.K_PAY_CARD_PASSWD, passwd,
+						ValType.TEMPORARY);
+				ret = null;
+			}
+		}
+			break;
+
+		case PayChannel.PAY_TYPE_ZZCOIN:
+			ret = null;
+			break;
+
+		case PayChannel.PAY_TYPE_KKFUNPAY:
+			ret = null;
+			break;
+
+		case PayChannel.PAY_TYPE_YEEPAY_DX:
+		default:
+			ret = "暂不支持";
+			break;
+		}
+		return ret;
+	}
+
+	private boolean enterPayDetail(ILayoutHost host, PayChannel channel,
+			Result result) {
+		ParamChain env = getEnv();
+
+		// PayParam param = new PayParam();
+		LAYOUT_TYPE type = null;
+
+		Logger.d("订单号------>" + result.orderNumber);
+		if (!result.isSuccess()) {
+			showToast(result.getDescription());
+			// hideDialog();
+			return false;
+		}
+
+		env.add(KeyPaymentList.K_PAY_CHANNELTYPE, channel.type,
+				ValType.TEMPORARY);
+		env.add(KeyPaymentList.K_PAY_ORDERNUMBER, result.orderNumber,
+				ValType.TEMPORARY);
+		env.add(KeyPaymentList.K_PAY_RESULT, result, ValType.TEMPORARY);
+
+		// param.amount = String.valueOf(((Float) getValue(VAL.PRICE))
+		// .floatValue());
+
+		switch (channel.type) {
+		case PayChannel.PAY_TYPE_ALIPAY:
+		case PayChannel.PAY_TYPE_TENPAY: {
+			String url = result.url;
+			String urlGuard;
+			if (channel.type == PayChannel.PAY_TYPE_TENPAY)
+				urlGuard = Constants.GUARD_Tenpay_callback;
+			else if (channel.type == PayChannel.PAY_TYPE_ALIPAY)
+				urlGuard = Constants.GUARD_Alipay_callback;
+			else
+				urlGuard = null;
+			mEnv.add(KeyPaymentList.K_PAY_ONLINE_URL, url, ValType.TEMPORARY);
+			mEnv.add(KeyPaymentList.K_PAY_ONLINE_URL_GUARD, urlGuard,
+					ValType.TEMPORARY);
+			type = LAYOUT_TYPE.PaymentOnline;
+		}
+			break;
+
+		case PayChannel.PAY_TYPE_UNMPAY: {
+			// TODO:
+		}
+			break;
+
+		case PayChannel.PAY_TYPE_YEEPAY_LT:
+		case PayChannel.PAY_TYPE_YEEPAY_YD:
+			// 充值卡类，没有下一界面，已经是充值成功了
+			return true;
+
+		case PayChannel.PAY_TYPE_ZZCOIN:
+			break;
+
+		case PayChannel.PAY_TYPE_YEEPAY_DX:
+			break;
+
+		case PayChannel.PAY_TYPE_KKFUNPAY:
+			break;
+
+		default:
+			break;
+		}
+
+		if (type != null) {
+			host.enter(type, env);
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * 准备进入支持的下一界面。有些支付方式并无下一界面，如充值卡类；有些则需要转第三方的窗体，等待
+	 * {@link Activity#setResult(int)}
+	 * 
+	 * @param host
+	 * @param channel
+	 * @return
+	 */
+	private boolean tryEnterPayDetail(ILayoutHost host, PayChannel channel) {
+		// 向服务器发送用户操作记录
+		final String dRequest;
+
+		switch (channel.type) {
+		case PayChannel.PAY_TYPE_ALIPAY:
+			dRequest = UserAction.PALI;
+			break;
+		case PayChannel.PAY_TYPE_TENPAY:
+			dRequest = UserAction.PTEN;
+			break;
+		case PayChannel.PAY_TYPE_YEEPAY_LT:
+			// dialog.show();
+			dRequest = UserAction.PYEE;
+			break;
+		case PayChannel.PAY_TYPE_YEEPAY_YD:
+			// dialog.show();
+			dRequest = UserAction.PYEE;
+			break;
+
+		case PayChannel.PAY_TYPE_UNMPAY:
+			dRequest = UserAction.PUNION;
+			break;
+
+		case PayChannel.PAY_TYPE_KKFUNPAY: {
+			dRequest = UserAction.PKKFUN;
+
+			// TelephonyManager tm = (TelephonyManager)
+			// getSystemService(Context.TELEPHONY_SERVICE);
+			// imsi = tm.getSubscriberId();
+			// if (imsi == null || "".equals(imsi)) {
+			// if (mFlag.getAndClear(FLAG_TRY_SMS_MODE)) {
+			// ;
+			// } else {
+			// Utils.toastInfo(instance,
+			// "对不起，手机没有插入SIM卡，无法使用话费支付，请选择其它支付方式，如需帮助请联系客服!");
+			// }
+			// return;
+			// }
+			//
+			// if (DebugFlags.DEBUG) {
+			// imsi = DebugFlags.DEF_DEBUG_IMSI;
+			// }
+			// mPayParam.smsImsi = imsi;
+			// getCommandOrChannel("{a:'" + imsi + "'}", 3);
+		}
+			return true;
+
+		case PayChannel.PAY_TYPE_YEEPAY_DX:
+		case PayChannel.PAY_TYPE_ZZCOIN:
+		default:
+			showToast("暂不支持");
+			return false;
+		}
+
+		PayParam payParam = genPayParam(mContext, getEnv(), channel.type);
+
+		final Dialog dialog = DialogUtil.showProgress(
+				mEnv.get(KeyGlobal.K_UI_ACTIVITY, Activity.class), "", true);
+		dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+			@Override
+			public void onCancel(DialogInterface dialog) {
+			}
+		});
+
+		PayTask.ICallBack cb = new PayTask.ICallBack() {
+			@Override
+			public void onResult(AsyncTask<?, ?, ?> task, Object token,
+					Result result) {
+				// TODO Auto-generated method stub
+				if (isCurrentTaskFinished(task)) {
+					enterPayDetail(getHost(), (PayChannel) token, result);
+				}
+				dialog.dismiss();
+			}
+		};
+		AsyncTask<?, ?, ?> task = PayTask.createAndStart(mContext, cb, channel,
+				channel.type, payParam);
+		setCurrentTask(task);
+		return false;
+	}
+
+	private PayParam genPayListParam(Context ctx, ParamChain env) {
+		PayParam p = new PayParam();
+		p.serverId = env.get(KeyCaller.K_GAME_SERVER_ID, String.class);
+		p.smsImsi = env.get(KeyGlobal.K_DEV_IMSI, String.class);
+		// TelephonyManager tm = (TelephonyManager)
+		// getSystemService(Context.TELEPHONY_SERVICE);
+		//
+		// imsi1 = tm.getSubscriberId();
+		// imsi = imsi1;
+		// Logger.d("imsi1-->" + imsi1);
+		// if (null == imsi1) {
+		// this.payParam.smsImsi = "";
+		// } else {
+		// this.payParam.smsImsi = imsi1;
+		// }
+		//
+		return p;
+	}
+
+	/** TODO: 构造 PayParam 数据 */
+	private PayParam genPayParam(Context ctx, ParamChain env, int payType) {
+		PayParam payParam = new PayParam();
+		payParam.loginName = env.get(KeyUser.K_LOGIN_NAME, String.class);
+		payParam.gameRole = env.get(KeyCaller.K_GAME_ROLE, String.class);
+		payParam.serverId = env.get(KeyCaller.K_GAME_SERVER_ID, String.class);
+		payParam.projectId = Utils.getProjectId(ctx);
+		payParam.amount = String.valueOf(env.get(KeyPaymentList.K_PAY_AMOUNT,
+				Float.class));
+		payParam.requestId = "";
+		switch (payType) {
+		case PayChannel.PAY_TYPE_ALIPAY:
+		case PayChannel.PAY_TYPE_UNMPAY:
+		case PayChannel.PAY_TYPE_TENPAY:
+			break;
+
+		case PayChannel.PAY_TYPE_YEEPAY_LT:
+		case PayChannel.PAY_TYPE_YEEPAY_YD:
+			payParam.type = String.valueOf(payType);
+			;
+			payParam.cardNo = env.get(KeyPaymentList.K_PAY_CARD, String.class);
+			payParam.cardPassword = env.get(KeyPaymentList.K_PAY_CARD_PASSWD,
+					String.class);
+			break;
+
+		case PayChannel.PAY_TYPE_KKFUNPAY:
+			payParam.smsImsi = env.get(KeyGlobal.K_DEV_IMSI, String.class);
+			break;
+
+		case PayChannel.PAY_TYPE_KKFUNPAY_EX:
+			payParam.smsImsi = env.get(KeyGlobal.K_DEV_IMSI, String.class);
+			break;
+		}
+		return payParam;
 	}
 
 	@Override
@@ -1000,10 +1283,35 @@ public class PaymentListLayout extends CCBaseLayout {
 		IDC idc = IDC.fromID(v.getId());
 		switch (idc) {
 		case BT_RECHARGE_COMMIT: {
-			if (checkInput() == false) {
+			ILayoutHost host = getHost();
+			if (host == null) {
+				if (DEBUG) {
+					Logger.d("host is null");
+				}
+				break;
+			}
+
+			PayChannel channel = null;
+			if (mPaymentListAdapter != null) {
+				Object o = mPaymentListAdapter.getItem(mPaymentTypeChoose);
+				if (o instanceof PayChannel) {
+					channel = (PayChannel) o;
+				}
+			}
+			if (channel == null) {
+				if (DEBUG) {
+					Logger.d("channel is null");
+				}
+				showToast(ZZStr.CC_PAYCHANNEL_NOCHOOSE);
+				break;
+			}
+
+			String err = checkInput(host, channel);
+			if (err != null) {
 				if (BuildConfig.DEBUG) {
 					Logger.d("请重新输入");
 				}
+				showToast(err);
 				return;
 			}
 			if (mPaytypeItemListener != null) {
@@ -1012,6 +1320,11 @@ public class PaymentListLayout extends CCBaseLayout {
 					mPaytypeItemListener.onItemClick((GridView) gv, null,
 							mPaymentTypeChoose, 0);
 				}
+			} else {
+				if (DEBUG) {
+					Logger.d("点击[确认充值]");
+				}
+				tryEnterPayDetail(host, channel);
 			}
 		}
 			break;
@@ -1039,7 +1352,7 @@ public class PaymentListLayout extends CCBaseLayout {
 				DimensionUtil.dip2px(ctx, 5), DimensionUtil.dip2px(ctx, 48),
 				DimensionUtil.dip2px(ctx, 30));
 		if (priceList == null || priceList.length == 0) {
-			TextView tv = createNormalLabel(ctx, ZZStr.CC_RECHARGE_LIST_NONE);
+			TextView tv = create_normal_label(ctx, ZZStr.CC_RECHARGE_LIST_NONE);
 			ll.addView(tv, new LayoutParams(LP_WW));
 		} else {
 			GridView gv = new TypeGridView(mContext);
@@ -1067,7 +1380,7 @@ public class PaymentListLayout extends CCBaseLayout {
 								.getValue(position));
 						set_child_text(IDC.ED_RECHARGE_COUNT, str);
 					}
-					showPopup(false);
+					tryHidePopup();
 				}
 			});
 		}
@@ -1075,57 +1388,88 @@ public class PaymentListLayout extends CCBaseLayout {
 	}
 }
 
-/** 获取支付列表 */
-class PayListTask extends AsyncTask<Void, Void, PayChannel[]> {
-	PaymentListLayout mHost;
-	Context mContext;
-	PayParam payParam;
+class PayTask extends AsyncTask<Object, Void, Result> {
+	protected interface ICallBack {
+		public void onResult(AsyncTask<?, ?, ?> task, Object token,
+				Result result);
+	}
 
-	public PayListTask(Context ctx, PaymentListLayout host) {
-		mContext = ctx;
-		mHost = host;
-		ParamChain env = host.getEnv();
-		PayParam p = new PayParam();
-		p.serverId = env.get(KeyCaller.K_GAME_SERVER_ID, String.class);
-		p.smsImsi = env.get(KeyGlobal.K_DEV_IMSI, String.class);
-		// TelephonyManager tm = (TelephonyManager)
-		// getSystemService(Context.TELEPHONY_SERVICE);
-		//
-		// imsi1 = tm.getSubscriberId();
-		// imsi = imsi1;
-		// Logger.d("imsi1-->" + imsi1);
-		// if (null == imsi1) {
-		// this.payParam.smsImsi = "";
-		// } else {
-		// this.payParam.smsImsi = imsi1;
-		// }
-		payParam = p;
+	protected static AsyncTask<?, ?, ?> createAndStart(Context ctx,
+			ICallBack callback, Object token, int type, PayParam charge) {
+		PayTask task = new PayTask();
+		task.execute(ctx, callback, token, type, charge);
+		return task;
+	}
+
+	private ICallBack mCallback;
+	private Object mToken;
+
+	@Override
+	protected Result doInBackground(Object... params) {
+		Context ctx = (Context) params[0];
+		ICallBack callback = (ICallBack) params[1];
+		Object token = params[2];
+
+		int type = (Integer) params[3];
+		PayParam charge = (PayParam) params[4];
+		Result ret = GetDataImpl.getInstance(ctx).charge(type, charge);
+		if (!this.isCancelled()) {
+			mCallback = callback;
+			mToken = token;
+		}
+		return ret;
 	}
 
 	@Override
-	protected PayChannel[] doInBackground(Void... params) {
-		Logger.d("获取列表Task！");
-		if (BuildConfig.DEBUG) {
-			try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+	protected void onPostExecute(Result result) {
+		if (mCallback != null) {
+			mCallback.onResult(this, mToken, result);
+			mCallback = null;
+			mToken = null;
 		}
-		return GetDataImpl.getInstance(mContext).getPaymentList(payParam);
+	}
+}
+
+/** 获取支付列表 */
+class PayListTask extends AsyncTask<Object, Void, PayChannel[]> {
+	protected interface ICallBack {
+		public void onResult(AsyncTask<?, ?, ?> task, Object token,
+				PayChannel[] result);
+	}
+
+	/** 创建并启动任务 */
+	protected static AsyncTask<?, ?, ?> createAndStart(Context ctx,
+			ICallBack callback, Object token, PayParam charge) {
+		PayListTask task = new PayListTask();
+		task.execute(ctx, callback, token, charge);
+		return task;
+	}
+
+	ICallBack mCallback;
+	Object mToken;
+
+	@Override
+	protected PayChannel[] doInBackground(Object... params) {
+		Context ctx = (Context) params[0];
+		ICallBack callback = (ICallBack) params[1];
+		Object token = params[2];
+		PayParam charge = (PayParam) params[3];
+
+		Logger.d("获取列表Task！");
+		PayChannel[] ret = GetDataImpl.getInstance(ctx).getPaymentList(charge);
+		if (!this.isCancelled()) {
+			mCallback = callback;
+			mToken = token;
+		}
+		return ret;
 	}
 
 	@Override
 	protected void onPostExecute(PayChannel[] result) {
-		if (mHost.isAlive()) {
-			mHost.onPayListUpdate(result);
+		if (mCallback != null) {
+			mCallback.onResult(this, mToken, result);
+			mCallback = null;
+			mToken = null;
 		}
-		clean();
-	}
-
-	private void clean() {
-		mHost = null;
-		mContext = null;
-		payParam = null;
 	}
 }

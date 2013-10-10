@@ -97,7 +97,7 @@ public class ExchangeLayout extends CCBaseLayout {
 		// children asynchronously
 		mImageFetcher = new ImageFetcher(mContext, mImageThumbSize);
 		mImageFetcher.setLoadingImage(CCImg.EMPTY_PHOTO.getBitmap(mContext));
-		mImageFetcher.addImageCache(ParamChain.GLOBAL(), cacheParams);
+		mImageFetcher.addImageCache(getEnv().getRoot(), cacheParams);
 	}
 
 	private synchronized void onLoad() {

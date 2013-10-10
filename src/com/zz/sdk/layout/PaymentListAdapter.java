@@ -59,7 +59,8 @@ class PaymentListAdapter extends BaseAdapter {
 
 	@Override
 	public Object getItem(int position) {
-		return mPayChannels == null ? null : mPayChannels[position];
+		return (mPayChannels == null || position < 0 || position >= mPayChannels.length) ? null
+				: mPayChannels[position];
 	}
 
 	@Override

@@ -1,12 +1,11 @@
 package com.zz.sdk.activity;
 
 import java.util.HashMap;
-import java.util.Stack;
 
 import android.app.Activity;
 import android.os.Handler;
+import android.support.v4.app.FragmentManager;
 
-import com.zz.sdk.BuildConfig;
 import com.zz.sdk.layout.LAYOUT_TYPE;
 
 /**
@@ -20,12 +19,12 @@ import com.zz.sdk.layout.LAYOUT_TYPE;
  * @author nxliao
  * @version v0.1.0.20130927
  */
-public class ParamChain {
-	private static final ParamChain GLOBAL_INSTANCE = new ParamChain();
-
-	static public ParamChain GLOBAL() {
-		return GLOBAL_INSTANCE;
-	}
+public interface ParamChain {
+	// private static final ParamChain GLOBAL_INSTANCE = new ParamChain();
+	//
+	// static public ParamChain GLOBAL() {
+	// return GLOBAL_INSTANCE;
+	// }
 
 	/**
 	 * 全局变量名
@@ -59,7 +58,7 @@ public class ParamChain {
 		/** 键：主视图类型, {@link LAYOUT_TYPE} */
 		public static final String K_UI_VIEW_TYPE = _TAG_ + "ui_view_type";
 
-		/** 键：价格, {@link Float}，单位 [卓越币]，精度 0.01 */
+		/** 键：价格, {@link Float}，单位 [卓越币]或[人民币]，与支付方式有关，精度 0.01 */
 		public static final String K_PAY_AMOUNT = _TAG_ + "pay_amount";
 
 		/** 键：汇率，{@link Float}，人民币与卓越币的兑换比例, 精度 0.01 */
@@ -73,7 +72,7 @@ public class ParamChain {
 
 		/** 键：帮助标题，{@link String} 用于展示给用户，内容是网页 html */
 		public static final String K_HELP_TITLE = _TAG_ + "help_title";
-		
+
 		/** 键：帮助内容，{@link String} 用于展示给用户，内容是网页 html */
 		public static final String K_HELP_TOPIC = _TAG_ + "help_topic";
 	}
@@ -131,17 +130,6 @@ public class ParamChain {
 		public static final String K_COIN_RATE = _TAG_ + "coin_rate";
 	}
 
-	/** 本地变量 */
-	private HashMap<String, Object> mData;
-	/** 临时变量 */
-	private HashMap<String, Object> mDataTmp;
-
-	/** 上一级环境 */
-	private ParamChain mParent;
-
-	/** 层级 */
-	private int mLevel;
-
 	public static enum ValType {
 		/** 普通变量 */
 		NORMAL,
@@ -149,50 +137,28 @@ public class ParamChain {
 		TEMPORARY;
 	}
 
-	public ParamChain() {
-		this(null);
-	}
+	/**
+	 * 构造出一个子级变量环境
+	 * 
+	 * @return
+	 */
+	public ParamChain grow();
 
-	public ParamChain(ParamChain base) {
-		this(base, null);
-	}
-
-	public ParamChain(ParamChain base, HashMap<String, Object> data) {
-		mParent = base;
-		mLevel = base != null ? (base.mLevel + 1) : 0;
-
-		if (data == null) {
-			mData = new HashMap<String, Object>(8);
-		} else {
-			mData = new HashMap<String, Object>(data);
-		}
-
-		mDataTmp = new HashMap<String, Object>();
-	}
+	/**
+	 * 构造出一个子级变量环境
+	 * 
+	 * @param data
+	 *            附加的变量表
+	 * @return
+	 */
+	public ParamChain grow(HashMap<String, Object> data);
 
 	/**
 	 * 合并整个环境链为一级环境
 	 * 
-	 * @param base
 	 * @return
 	 */
-	public static ParamChain generateUnion(ParamChain base) {
-		ParamChain c = new ParamChain();
-
-		ParamChain p = base;
-		Stack<ParamChain> s = new Stack<ParamChain>();
-		while (p != null) {
-			s.push(p);
-			p = p.mParent;
-		}
-
-		while (!s.isEmpty()) {
-			p = s.pop();
-			c.mData.putAll(p.mData);
-			c.mDataTmp.putAll(p.mDataTmp);
-		}
-		return c;
-	}
+	public ParamChain generateUnion();
 
 	/**
 	 * 变量名列表抽取新的环境
@@ -201,40 +167,28 @@ public class ParamChain {
 	 * @param keyList
 	 * @return
 	 */
-	public static ParamChain generateUnion(ParamChain base, String... keyList) {
-		ParamChain c = new ParamChain();
-		if (base != null) {
-			for (int i = 0, n = keyList.length; i < n; i++) {
-				String key = keyList[i];
-				ParamChain p = base.containsKey(key);
-				if (p != null) {
-					Object val = p.getOwned(key);
-					ValType type = p.containsKeyOwn(key);
-					if (key != null && val != null)
-						c.add(key, val, type);
-				}
-			}
-		}
-		return c;
-	}
+	public ParamChain generateUnion(String... keyList);
 
 	/**
 	 * 返回层级，0 表示根级
 	 * 
 	 * @return
 	 */
-	public int getLevel() {
-		return mLevel;
-	}
+	public int getLevel();
 
 	/**
 	 * 返回父级环境
 	 * 
 	 * @return
 	 */
-	public ParamChain getParent() {
-		return mParent;
-	}
+	public ParamChain getParent();
+
+	/**
+	 * 返回根级环境
+	 * 
+	 * @return
+	 */
+	public ParamChain getRoot();
 
 	/**
 	 * 添加(当前级)
@@ -243,9 +197,7 @@ public class ParamChain {
 	 * @param val
 	 * @return 是否成功
 	 */
-	public boolean add(String key, Object val) {
-		return add(key, val, ValType.NORMAL);
-	}
+	public boolean add(String key, Object val);
 
 	/**
 	 * 添加(当前级)
@@ -258,24 +210,7 @@ public class ParamChain {
 	 *            类型
 	 * @return 是否成功
 	 */
-	public boolean add(String key, Object val, ValType type) {
-		if (BuildConfig.DEBUG) {
-			if (val == null || key == null) {
-				return false;
-			}
-		}
-
-		if (type == ValType.TEMPORARY) {
-			// if (mDataTmp.containsKey(key)) {
-			// return false;
-			// }
-			return mDataTmp.put(key, val) == val;
-		} else {
-			// if (mData.containsKey(key))
-			// return false;
-			return mData.put(key, val) == val;
-		}
-	}
+	public boolean add(String key, Object val, ValType type);
 
 	/**
 	 * 修改变量(当前级)
@@ -297,27 +232,17 @@ public class ParamChain {
 	 * @param key
 	 * @return
 	 */
-	public Object remove(String key) {
-		if (mData.containsKey(key)) {
-			return mData.remove(key);
-		}
-		return mDataTmp.remove(key);
-	}
+	public Object remove(String key);
 
 	/**
 	 * 清空(当前级)
 	 */
-	public void reset() {
-		mData.clear();
-		mDataTmp.clear();
-	}
+	public void reset();
 
 	/**
 	 * 清空(当前级)临时变量
 	 */
-	public void autoRelease() {
-		mDataTmp.clear();
-	}
+	public void autoRelease();
 
 	/**
 	 * 获取(当前级)
@@ -325,12 +250,7 @@ public class ParamChain {
 	 * @param key
 	 * @return
 	 */
-	public Object getOwned(String key) {
-		if (mData.containsKey(key)) {
-			return mData.get(key);
-		}
-		return mDataTmp.get(key);
-	}
+	public Object getOwned(String key);
 
 	/**
 	 * 是否存在(当前级)
@@ -338,13 +258,7 @@ public class ParamChain {
 	 * @param key
 	 * @return
 	 */
-	public ValType containsKeyOwn(String key) {
-		if (mData.containsKey(key))
-			return ValType.NORMAL;
-		if (mDataTmp.containsKey(key))
-			return ValType.TEMPORARY;
-		return null;
-	}
+	public ValType containsKeyOwn(String key);
 
 	//
 	// ////////////////////////////////////////////////////////////////////////
@@ -354,9 +268,7 @@ public class ParamChain {
 	//
 	//
 
-	public Object get(Enum<?> key) {
-		return get(key.toString());
-	}
+	public Object get(Enum<?> key);
 
 	/**
 	 * 获取指定类型的变量（当前级）
@@ -368,14 +280,7 @@ public class ParamChain {
 	 * @return 如果包含变量并且类型符合，则返回之，否则返回 null
 	 * 
 	 */
-	@SuppressWarnings("unchecked")
-	public <T> T getOwned(String key, Class<T> clazz) {
-		Object ret = getOwned(key);
-		if (ret != null && clazz.isInstance(ret)) {
-			return (T) ret;
-		}
-		return null;
-	}
+	public <T> T getOwned(String key, Class<T> clazz);
 
 	/**
 	 * 获取(所有级)
@@ -383,12 +288,7 @@ public class ParamChain {
 	 * @param key
 	 * @return
 	 */
-	public Object get(String key) {
-		Object ret = getOwned(key);
-		if (ret == null && mParent != null)
-			ret = mParent.get(key);
-		return ret;
-	}
+	public Object get(String key);
 
 	/**
 	 * 获取指定类型的变量（所有级），示例
@@ -403,14 +303,7 @@ public class ParamChain {
 	 * @return 如果包含变量并且类型符合，则返回之，否则返回 null
 	 * 
 	 */
-	@SuppressWarnings("unchecked")
-	public <T> T get(String key, Class<T> clazz) {
-		Object ret = get(key);
-		if (ret != null && clazz.isInstance(ret)) {
-			return (T) ret;
-		}
-		return null;
-	}
+	public <T> T get(String key, Class<T> clazz);
 
 	/**
 	 * 是否存在变量
@@ -418,13 +311,7 @@ public class ParamChain {
 	 * @param key
 	 * @return 变量所在的实例，null表示不包含此变量
 	 */
-	public ParamChain containsKey(String key) {
-		if (containsKeyOwn(key) != null)
-			return this;
-		if (mParent != null)
-			return mParent.containsKey(key);
-		return null;
-	}
+	public ParamChain containsKey(String key);
 
 	/**
 	 * 是否存在变量，从父级开始检查
@@ -432,11 +319,6 @@ public class ParamChain {
 	 * @param key
 	 * @return 变量所在的实例，null表示不包含此变量
 	 */
-	public ParamChain containsKeyReverse(String key) {
-		if (mParent != null)
-			return mParent.containsKey(key);
-		if (containsKeyOwn(key) != null)
-			return this;
-		return null;
-	}
+	public ParamChain containsKeyReverse(String key);
+
 }

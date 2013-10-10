@@ -95,7 +95,7 @@ class ExchangeDetailLayout extends CCBaseLayout {
 			}
 
 			{
-				TextView tv = createNormalLabel(ctx, null);
+				TextView tv = create_normal_label(ctx, null);
 				ll.addView(tv, new LayoutParams(LP_MW));
 				mTextView = tv;
 			}

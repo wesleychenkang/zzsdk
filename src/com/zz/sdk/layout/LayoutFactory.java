@@ -100,7 +100,14 @@ public class LayoutFactory {
 		public boolean onResume();
 
 		/**
-		 * 被关闭，即 resume
+		 * 是否允许被关闭
+		 * 
+		 * @return
+		 */
+		public boolean isExitEnabled();
+
+		/**
+		 * 被关闭
 		 * 
 		 * @return
 		 */
@@ -151,6 +158,8 @@ public class LayoutFactory {
 		switch (type) {
 		case PaymentList:
 			return new PaymentListLayout(ctx, rootEnv);
+		case PaymentOnline:
+			return new PaymentOnlineLayout(ctx, rootEnv);
 		case Exchange:
 			return new ExchangeLayout(ctx, rootEnv);
 		case ExchangeDetail:

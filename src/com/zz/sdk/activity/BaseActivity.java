@@ -79,7 +79,7 @@ public class BaseActivity extends Activity {
 		if (intent != null) {
 			mName = intent.getStringExtra(KeyGlobal.K_UI_NAME);
 			if (mName != null) {
-				Object o = ParamChain.GLOBAL().remove(mName);
+				Object o = ParamChainImpl.GLOBAL().getRoot().remove(mName);
 				if (o instanceof ParamChain) {
 					env = (ParamChain) o;
 				}
@@ -93,7 +93,7 @@ public class BaseActivity extends Activity {
 			return false;
 		}
 
-		mRootEnv = new ParamChain(env);
+		mRootEnv = env.grow();
 		mRootEnv.add(KeyGlobal.K_UI_ACTIVITY, activity, ValType.TEMPORARY);
 		mRootEnv.add(KeyLayoutFactory.K_HOST, new LayoutFactory.ILayoutHost() {
 			@Override
@@ -257,10 +257,18 @@ public class BaseActivity extends Activity {
 				this.finish();
 				return null;
 			}
-			// // 弹出旧ui
-			ILayoutView lv = mViewStack.pop();
+			ILayoutView lv;
+
+			// 弹出旧ui
+			lv = mViewStack.peek();
 			if (lv.isAlive()) {
+				// 先判断是否允许关闭
 				View pop = lv.getRootView();
+				if (pop == null || lv.isExitEnabled()) {
+					lv.onExit();
+				} else {
+					return pop;
+				}
 				if (pop != null) {
 					pop.clearFocus();
 				}
@@ -277,8 +285,9 @@ public class BaseActivity extends Activity {
 				// smsPayCallBack(-2, null);
 				//
 				// }
-				lv.onExit();
 			}
+			lv = mViewStack.pop();
+
 			lv = mViewStack.peek();
 			View curView = lv.getRootView();
 			setContentView(curView);
@@ -298,6 +307,14 @@ public class BaseActivity extends Activity {
 	}
 
 	protected void end() {
+		if (mViewStack != null && mViewStack.size() > 0) {
+			// 关闭前先判断是否允许关闭
+			ILayoutView lv = mViewStack.peek();
+			if (lv.isAlive() && !lv.isExitEnabled()) {
+				return;
+			}
+		}
+
 		finish();
 	}
 }
