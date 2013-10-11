@@ -61,6 +61,18 @@ public class ResConstants {
 		/** 充值数量候选列表 %s个，基于 {@link #CC_PRICE_FORMAT} */
 		CC_RECHAGRE_CANDIDATE_UNIT("%s,个"), //
 
+		/** 正在与服务器通信 */
+		CC_TRY_CONNECT_SERVER("正在与服务器通信..."),
+
+		/** 连接被取消！ */
+		CC_TRY_CONNECT_SERVER_CANCELD("连接被取消！"),
+
+		/** 连接服务器失败，请稍候重试！ */
+		CC_TRY_CONNECT_SERVER_FAILED("连接服务器失败，请稍候重试！"),
+
+		/** 如需中止操作，请立即再次按下[返回] */
+		CC_EXIT_LOCKED_TIP("如需中止操作，请立即再次按下[返回]"), //
+
 		/** 拼命加载中... */
 		CC_HINT_LOADING("拼命加载中..."),
 
@@ -178,13 +190,13 @@ public class ResConstants {
 			/** 充值界面·确认充值按钮 文本 */
 			CC_RECHARGE_COMMIT(20),
 			/** 充值界面·帮助按钮 文本 */
-			CC_RECHARGE_HELP(12), 
+			CC_RECHARGE_HELP(12),
 
 			/** 兑换列表·条目 文本 */
 			CC_EXCHANGE_ITEM_TITLE(16),
 			/** 兑换列表·条目备注 文本 */
 			CC_EXCHANGE_ITEM_SUMMARY(13),
-			
+
 			;
 
 			private float size;

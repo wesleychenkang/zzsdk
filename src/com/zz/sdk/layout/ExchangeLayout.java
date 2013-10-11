@@ -82,7 +82,7 @@ public class ExchangeLayout extends CCBaseLayout {
 		initUI(context);
 	}
 
-	protected void onInit(Context ctx) {
+	protected void onInitUI(Context ctx) {
 		setTileTypeText(ZZStr.CC_EXCHANGE_TITLE.str());
 
 		mImageThumbSize = ZZDimen.CC_EX_ICON_W.px();

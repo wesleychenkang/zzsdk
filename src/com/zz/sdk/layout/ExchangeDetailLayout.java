@@ -67,7 +67,7 @@ class ExchangeDetailLayout extends CCBaseLayout {
 		mImageFetcher.setImageFadeIn(false);
 	}
 
-	protected void onInit(Context ctx) {
+	protected void onInitUI(Context ctx) {
 		{
 			FrameLayout fl = getSubjectContainer();
 

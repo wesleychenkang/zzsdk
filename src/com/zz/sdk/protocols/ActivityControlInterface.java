@@ -18,6 +18,17 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
+/**
+ * 窗体事件接管，规则：
+ * <ul>
+ * <li><b>返回值:</b><br/>
+ * 所有的返回值为 {@link Object} 类型，如 {@link Boolean}等，null 表示无处理，否则表示被接管</li>
+ * <li>如果返回值为 void ({@link Void})，则表示无法接管</li>
+ * </ul>
+ * 
+ * @author nxliao
+ * 
+ */
 public abstract interface ActivityControlInterface {
 	public abstract void onRestoreInstanceStateControl(Bundle paramBundle);
 
@@ -66,7 +77,7 @@ public abstract interface ActivityControlInterface {
 	public abstract void onDestroyControl();
 
 	/** 当返回键被按下，如果返回 true 表示拦截 */
-	public abstract boolean onKeyDownControl(int keyCode, KeyEvent event);
+	public abstract Boolean onKeyDownControl(int keyCode, KeyEvent event);
 
 	public abstract void onContentChangedControl();
 
@@ -138,7 +149,8 @@ public abstract interface ActivityControlInterface {
 	public abstract boolean onSearchRequestedControl();
 
 	/** 处理子窗体的返回值，如果返回true表示拦截 */
-	public abstract boolean onActivityResultControl(int requestCode, int resultCode, Intent data);
+	public abstract boolean onActivityResultControl(int requestCode,
+			int resultCode, Intent data);
 
 	public abstract void overridePendingTransitionControl(int paramInt1,
 			int paramInt2);

@@ -7,16 +7,17 @@ import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.os.AsyncTask;
-import android.text.Html;
+import android.os.Handler;
+import android.os.Message;
+import android.os.SystemClock;
 import android.text.InputFilter;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
-import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -29,7 +30,7 @@ import android.widget.ViewAnimator;
 
 import com.zz.sdk.BuildConfig;
 import com.zz.sdk.activity.ParamChain;
-import com.zz.sdk.activity.ParamChain.KeyGlobal;
+import com.zz.sdk.activity.ParamChain.KeyCaller;
 import com.zz.sdk.layout.LayoutFactory.ILayoutHost;
 import com.zz.sdk.layout.LayoutFactory.ILayoutView;
 import com.zz.sdk.layout.LayoutFactory.KeyLayoutFactory;
@@ -45,7 +46,11 @@ import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
 
 /**
- * 基本界面界面
+ * 基本界面界面，注意：
+ * <ul>
+ * <li>必须在调用 {@link #initUI(Context)} 进行初始化，可在构造函数调用</li>
+ * <li>所有需要等待数据的异步操作，必须用 {@link AsyncTask}</li>
+ * </ul>
  * 
  * @author nxliao
  * 
@@ -90,6 +95,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	}
 
 	static enum IDC implements IIDC {
+		/* 标题区 */
 		BT_CANCEL, TV_TITLE, BT_EXIT,
 
 		/** 弹窗 */
@@ -97,19 +103,13 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 
 		TV_POPUP_WAIT_LABEL,
 
-		/** 余额描述文本 */
-		TV_BALANCE,
-
-		/** 页眉， {@link FrameLayout} */
-		ACT_HEADER,
-		/** 页脚， {@link FrameLayout} */
-		ACT_FOOTER,
+		TV_POPUP_WAIT_LABEL_SUMMARY,
 
 		/** 客户区，类型 {@link FrameLayout} */
 		ACT_SUBJECT,
 
-		/** 帮助按钮 */
-		BT_HELP, //
+		/** 等待区面板 */
+		ACT_WAIT_PANEL,
 
 		_MAX_;
 
@@ -144,13 +144,16 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	}
 
 	/** 价格或卓越币数的表达规则 */
-	private DecimalFormat mRechargeFormat = new DecimalFormat(
+	protected DecimalFormat mRechargeFormat = new DecimalFormat(
 			ZZStr.CC_PRICE_FORMAT.str());
 
 	protected static final String HELPINFO = "客服热线：020-85525051   客服QQ：915590000";
 	protected static final String ORDERIFO = "订单提交验证中，可返回游戏等待结果...";
 	protected static final String SUBMIT = "正在提交数据给运营商...";
 	protected static final int MAXAMOUNT = 10000;
+
+	/** 默认间隔，2s */
+	protected static final long DEFAULT_EXITTRIGGER_INTERVAL = 2 * 1000;
 
 	// ////////////////////////////////////////////////////////////////////////
 	//
@@ -160,6 +163,8 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	private AsyncTask<?, ?, ?> mTask;
 	private ActivityControlInterface mActivityControlInterface;
 	private RUNSTATE mRunState;
+	private long mExitTriggerLastTime, mExitTriggerInterval;
+	private String mExitTriggerTip;
 
 	protected final static LayoutParams LP_WM = new LayoutParams(
 			LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
@@ -254,12 +259,19 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		super(context);
 		mContext = context;
 		mEnv = env.grow();
-		initEnv(context, mEnv);
+		mRunState = RUNSTATE.UNINITIALIZED;
+		onInitEnv(context, mEnv);
 	}
 
-	protected void initEnv(Context ctx, ParamChain env) {
-		mRunState = RUNSTATE.UNINITIALIZED;
-	}
+	/**
+	 * 初始化环境变量。<b>注意:</b>
+	 * <p/>
+	 * 这是在构造函数中调用，优先于子类的成员变量的初始化，必须注意<strong>重复初始化的问题。</strong>
+	 * 
+	 * @param ctx
+	 * @param env
+	 */
+	abstract protected void onInitEnv(Context ctx, ParamChain env);
 
 	@Override
 	public void onClick(View v) {
@@ -267,25 +279,16 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		IDC idc = IDC.fromID(id);
 		switch (idc) {
 		case BT_CANCEL: {
-			ILayoutHost host = getHost();
-			if (host != null) {
-				host.back();
-			}
+			callHost_back();
 		}
 			break;
 		case BT_EXIT: {
-			ILayoutHost host = getHost();
-			if (host != null) {
-				host.exit();
-			}
+			callHost_exit();
 		}
 			break;
 		case ACT_POPUP: {
 			tryHidePopup();
 		}
-			break;
-		case BT_HELP:
-			showPopup_Help();
 			break;
 		case _MAX_:
 		default:
@@ -293,29 +296,69 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		}
 	}
 
-	private CharSequence getHelpTitle() {
-		// return null == Application.topicTitle ? null : Html
-		// .fromHtml(Application.topicTitle);
-		String title = mEnv.get(KeyGlobal.K_HELP_TITLE, String.class);
-		if (title != null)
-			return Html.fromHtml(title);
-		return null;
+	/***
+	 * 获取宿主句柄
+	 * 
+	 * @return
+	 */
+	protected ILayoutHost getHost() {
+		return mEnv.get(KeyLayoutFactory.K_HOST, ILayoutHost.class);
 	}
 
-	private CharSequence getHelpTopic() {
-		String topic;
-		// topic = Application.topicDes;
-		topic = mEnv.get(KeyGlobal.K_HELP_TOPIC, String.class);
-		if (topic != null) {
-			return Html.fromHtml(ToDBC(topic));
+	protected boolean callHost_back() {
+		ILayoutHost host = getHost();
+		if (host != null) {
+			host.back();
+			return true;
 		}
-		return null;
+		return false;
 	}
+
+	protected boolean callHost_exit() {
+		ILayoutHost host = getHost();
+		if (host != null) {
+			host.exit();
+			return true;
+		}
+		return false;
+	}
+
+	protected FrameLayout getSubjectContainer() {
+		return (FrameLayout) findViewById(IDC.ACT_SUBJECT.id());
+	}
+
+	// ////////////////////////////////////////////////////////////////////////
+	//
+	// - 页内 popup 处理 -
+	//
 
 	/** 弹出等待进度，此弹出视图只能主动关闭，不可通过单击关闭，其文本标签ID为 {@link IDC#TV_POPUP_WAIT_LABEL} */
 	protected void showPopup_Wait() {
+		showPopup_Wait(null, 0, 0);
+	}
+
+	protected void showPopup_Wait(CharSequence tip, int sWait, int sTimeout) {
+		showPopup_Wait(popup_get_view(), tip, sWait, sTimeout);
+	}
+
+	/**
+	 * 展示等待视图。如果 到指定时间还未关闭此视图，则开始倒计时直到关闭等待，否则调用通知
+	 * 
+	 * @param vPopup
+	 *            载体容器
+	 * @param tip
+	 *            提示语
+	 * @param sWait
+	 *            倒计时触发时间点，单位[秒]
+	 * @param sTimeout
+	 *            倒计时长，单位[秒]
+	 */
+	protected void showPopup_Wait(View vPopup, CharSequence tip,
+			final int sWait, final int sTimeout) {
+
 		Context ctx = mContext;
 		LinearLayout ll = new LinearLayout(ctx);
+		ll.setId(IDC.ACT_WAIT_PANEL.id());
 		ll.setOrientation(VERTICAL);
 		ll.setLayoutParams(new FrameLayout.LayoutParams(
 				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
@@ -336,61 +379,83 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 			ll.addView(tv, new LayoutParams(LP_MW));
 			tv.setId(IDC.TV_POPUP_WAIT_LABEL.id());
 			tv.setGravity(Gravity.CENTER);
+			if (tip != null)
+				tv.setText(tip);
 		}
-
-		show_popup(findViewById(IDC.ACT_POPUP.id()), false, ll);
-	}
-
-	/** 展示帮助说明内容 */
-	protected void showPopup_Help() {
-		Context ctx = mContext;
-		LinearLayout ll = new LinearLayout(ctx);
-		ll.setOrientation(VERTICAL);
-		ll.setLayoutParams(new FrameLayout.LayoutParams(
-				LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT,
-				Gravity.BOTTOM));
-		ll.setBackgroundDrawable(CCImg.BACKGROUND.getDrawble(ctx));
-		ll.setPadding(DimensionUtil.dip2px(ctx, 48),
-				DimensionUtil.dip2px(ctx, 5), DimensionUtil.dip2px(ctx, 48),
-				DimensionUtil.dip2px(ctx, 24));
-
-		AnimationSet in = new AnimationSet(true);
-		in.addAnimation(new AlphaAnimation(0f, 0.8f));
-		in.addAnimation(new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0,
-				Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 1f,
-				Animation.RELATIVE_TO_SELF, 0));
-		in.setDuration(ANIMA_DUR_SHOW_POPUP_CHILD);
-		ll.setAnimation(in);
 
 		{
-			TextView mTopicTitle;
-			mTopicTitle = new TextView(ctx);
-			ll.addView(mTopicTitle, new LayoutParams(LP_WW));
-			mTopicTitle.setTextColor(0xffe7c5aa);
-			mTopicTitle.setTextSize(16);
-			mTopicTitle.setText(getHelpTitle());
+			TextView tv = create_normal_label(ctx, null);
+			ll.addView(tv, new LayoutParams(LP_MW));
+			tv.setId(IDC.TV_POPUP_WAIT_LABEL_SUMMARY.id());
+			tv.setGravity(Gravity.CENTER);
 		}
-		{
-			TextView mTopicDes;
-			mTopicDes = new TextView(ctx);
-			ll.addView(mTopicDes, new LayoutParams(LP_WW));
-			mTopicDes.setTextSize(14);
-			mTopicDes.setText(getHelpTopic());
+
+		if (sTimeout > 0) {
+			ll.setTag(new Runnable() {
+				final int mWait = sWait, mTimeOut = sTimeout;
+				int tick_count = 0;
+
+				@Override
+				public void run() {
+					if (isAlive() && popup_check_active_wait(this)) {
+						tick_count++;
+						if (tick_count < mWait) {
+						} else if (tick_count == mWait) {
+						} else if (tick_count < mWait + mTimeOut) {
+							set_child_text(IDC.TV_POPUP_WAIT_LABEL_SUMMARY,
+									String.format("等待倒计时%d",
+											(mTimeOut + mWait - tick_count)));
+						} else {
+							popup_wait_timeout();
+							return;
+						}
+						cycle();
+					}
+				}
+
+				Runnable cycle() {
+					postDelayed(this, 1 * 1000);
+					return this;
+				}
+			}.cycle());
 		}
-		showPopup(ll);
+
+		show_popup(vPopup, false, ll);
 	}
 
-	/***
-	 * 获取宿主句柄
-	 * 
-	 * @return
-	 */
-	protected ILayoutHost getHost() {
-		return mEnv.get(KeyLayoutFactory.K_HOST, ILayoutHost.class);
+	protected void popup_wait_timeout() {
+		set_child_text(IDC.TV_POPUP_WAIT_LABEL_SUMMARY, "等待超时!");
 	}
 
-	protected FrameLayout getSubjectContainer() {
-		return (FrameLayout) findViewById(IDC.ACT_SUBJECT.id());
+	private View popup_get_view() {
+		return findViewById(IDC.ACT_POPUP.id());
+	}
+
+	/** 检查当前的等待弹出视图是否是指定的 */
+	protected boolean popup_check_active_wait(Object tag) {
+		View v = popup_get_wait_panel();
+		if (v != null) {
+			return tag == v.getTag();
+		}
+		return false;
+	}
+
+	/** 获取正在显示的“等待”面板 */
+	private View popup_get_wait_panel() {
+		View v = popup_get_view();
+		if (v != null && v.getVisibility() == VISIBLE) {
+			return v.findViewById(IDC.ACT_WAIT_PANEL.id());
+		}
+		return null;
+	}
+
+	/** 检查当前弹出视图是否是“等待”，若是，则关闭它 */
+	protected void tryHidePopup_Wait() {
+		View v = popup_get_wait_panel();
+		if (v != null) {
+			v.setTag(null);
+			hide_popup(popup_get_view());
+		}
 	}
 
 	/**
@@ -399,11 +464,11 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	 * @param child
 	 */
 	protected void showPopup(View child) {
-		show_popup(findViewById(IDC.ACT_POPUP.id()), true, child);
+		show_popup(popup_get_view(), true, child);
 	}
 
 	protected void tryHidePopup() {
-		View v = findViewById(IDC.ACT_POPUP.id());
+		View v = popup_get_view();
 		Object tag = v != null ? v.getTag() : null;
 		if (tag instanceof Boolean && (Boolean) tag) {
 			hide_popup(v);
@@ -415,8 +480,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	}
 
 	protected void hidePopup() {
-		View v = findViewById(IDC.ACT_POPUP.id());
-		hide_popup(v);
+		hide_popup(popup_get_view());
 	}
 
 	protected static void hide_popup(View popupView) {
@@ -427,6 +491,9 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 			out.setFillBefore(true);
 			popupView.startAnimation(out);
 			popupView.setVisibility(GONE);
+			if (popupView instanceof ViewGroup) {
+				((ViewGroup) popupView).removeAllViews();
+			}
 		}
 	}
 
@@ -450,6 +517,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 				in.setFillBefore(true);
 				vPopup.setVisibility(VISIBLE);
 				vPopup.startAnimation(in);
+				vPopup.requestFocus();
 			}
 
 			if (vChild != null && (vPopup instanceof FrameLayout)) {
@@ -474,6 +542,11 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 			vPopup.setTag(auto_close);
 		}
 	}
+
+	// ////////////////////////////////////////////////////////////////////////
+	//
+	// -
+	//
 
 	protected void set_child_visibility(IIDC id, int visibility) {
 		View v = findViewById(id.id());
@@ -593,13 +666,6 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		Toast.makeText(mContext, str, Toast.LENGTH_LONG).show();
 	}
 
-	/** 更新卓越币余额 */
-	protected void updateBalance(float count) {
-		String str = String.format(ZZStr.CC_BALANCE_UNIT.str(),
-				mRechargeFormat.format(count));
-		set_child_text(IDC.TV_BALANCE, str);
-	}
-
 	private void createView(Context ctx, LinearLayout rv) {
 		LayoutParams lp;
 
@@ -685,7 +751,10 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 				popup.setId(IDC.ACT_POPUP.id());
 				popup.setVisibility(GONE);
 				popup.setBackgroundColor(0xcc333333);
+				popup.setTag(null);
 				popup.setOnClickListener(this);
+				popup.setFocusable(true);
+				popup.setFocusableInTouchMode(true);
 			}
 		}
 
@@ -702,7 +771,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		return fl;
 	}
 
-	protected abstract void onInit(Context ctx);
+	protected abstract void onInitUI(Context ctx);
 
 	protected void initUI(Context ctx) {
 		mContext = ctx;
@@ -738,10 +807,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 
 		createView(ctx, this);
 
-		// XXX: 更新余额值
-		updateBalance(0);
-
-		onInit(ctx);
+		onInitUI(ctx);
 	}
 
 	public void setTileTypeText(CharSequence slectiveType) {
@@ -774,7 +840,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	public boolean onEnter() {
 		// TODO Auto-generated method stub
 		if (BuildConfig.DEBUG) {
-			Logger.d("onEnter(" + getClass().getName());
+			Logger.d("onEnter-" + getClass().getName());
 		}
 
 		if (mRunState != RUNSTATE.UNINITIALIZED) {
@@ -793,7 +859,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	@Override
 	public boolean onPause() {
 		if (BuildConfig.DEBUG) {
-			Logger.d("onPause(" + getClass().getName());
+			Logger.d("onPause-" + getClass().getName());
 		}
 
 		if (mRunState == RUNSTATE.ACTIVE) {
@@ -815,7 +881,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	@Override
 	public boolean onResume() {
 		if (BuildConfig.DEBUG) {
-			Logger.d("onResume(" + getClass().getName());
+			Logger.d("onResume-" + getClass().getName());
 		}
 
 		if (mRunState == RUNSTATE.ACTIVE) {
@@ -837,6 +903,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	protected void clean() {
 		cancelCurrentTask();
 		removeActivityControlInterface();
+		removeExitTrigger();
 
 		if (mEnv != null) {
 			mEnv.reset();
@@ -850,7 +917,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	@Override
 	public boolean onExit() {
 		if (BuildConfig.DEBUG) {
-			Logger.d("onExit(" + getClass().getName());
+			Logger.d("onExit-" + getClass().getName());
 		}
 
 		if (mRunState == RUNSTATE.UNINITIALIZED) {
@@ -870,7 +937,43 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	}
 
 	public boolean isExitEnabled() {
+		if (mExitTriggerInterval > 0) {
+			long tick = SystemClock.uptimeMillis();
+			if (tick > mExitTriggerLastTime + mExitTriggerInterval) {
+				mExitTriggerLastTime = tick;
+				if (mExitTriggerTip == null || mExitTriggerTip.length() == 0) {
+					showToast(ZZStr.CC_EXIT_LOCKED_TIP);
+				} else {
+					showToast(mExitTriggerTip + "\n"
+							+ ZZStr.CC_EXIT_LOCKED_TIP.str());
+				}
+				return false;
+			}
+		}
 		return true;
+	}
+
+	/**
+	 * 设置“退出”锁，防止用户意外按下返回键
+	 * 
+	 * @param interval
+	 *            用户的反应间隔，必须在此时间内连续选择“退出”的行为，注意：间隔不能太短，-1表示使用默认值
+	 * @param tip
+	 *            提示语，表示正在处理的事件，如果为空，则使用默认提示语
+	 * @see {@link ZZStr#CC_EXIT_LOCKED_TIP}
+	 * @see {@link ZZStr#CC_EXIT_LOCKED_TIP_EX}
+	 */
+	protected void setExitTrigger(long interval, String tip) {
+		mExitTriggerLastTime = 0;
+		mExitTriggerInterval = interval == -1 ? DEFAULT_EXITTRIGGER_INTERVAL
+				: interval;
+		mExitTriggerTip = tip;
+	}
+
+	protected void removeExitTrigger() {
+		mExitTriggerLastTime = 0;
+		mExitTriggerInterval = 0;
+		mExitTriggerTip = null;
 	}
 
 	@Override
@@ -880,14 +983,13 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 
 	@Override
 	public ParamChain getEnv() {
-		if (BuildConfig.DEBUG) {
-			Logger.d("getEnv(" + getClass().getName());
-		}
 		return mEnv;
 	}
 
 	// ////////////////////////////////////////////////////////////////////////
+	//
 	// - UI-Task -
+	//
 
 	/** 检查是否是当前任务完成了，如果是则清除任务记录。仅当任务完成时在UI线程中调用 */
 	protected boolean isCurrentTaskFinished(AsyncTask<?, ?, ?> task) {
@@ -959,5 +1061,45 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 				host.addActivityControl(mActivityControlInterface);
 			}
 		}
+	}
+
+	// ///////////////////////////////////////////////////////////////////////
+	//
+	// - Caller -
+	//
+
+	/** 发消息通知调用者，必须在 {@link #onExit()} 前调用，否则环境信息已经被清除 */
+	protected boolean notifyCaller(int arg1, int arg2, Object obj) {
+		ParamChain env = getEnv();
+		if (env == null) {
+			if (DEBUG) {
+				Logger.d("E: notifyCaller env==null!");
+			}
+		} else {
+			Handler handler = env.get(KeyCaller.K_MSG_HANDLE, Handler.class);
+			Integer what = env.get(KeyCaller.K_MSG_WHAT, Integer.class);
+			if (handler == null || what == null) {
+				if (DEBUG) {
+					Logger.d("E: notifyCaller handler == null || what == null!");
+				}
+			} else {
+				Message msg = handler.obtainMessage(what, arg1, arg2, obj);
+				msg.sendToTarget();
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * 通知调用者，此次操作成功了，如果有设置自动关闭，则将自动调用 {@link ILayoutHost#exit()}
+	 * 
+	 * @param arg1
+	 * @param arg2
+	 * @param obj
+	 * @return
+	 */
+	protected boolean notifyCaller_Success(int arg1, int arg2, Object obj) {
+		return false;
 	}
 }

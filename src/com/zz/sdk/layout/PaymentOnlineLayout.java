@@ -3,11 +3,9 @@ package com.zz.sdk.layout;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
-import android.app.Dialog;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
@@ -24,20 +22,19 @@ import android.widget.RelativeLayout;
 import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.MSG_TYPE;
 import com.zz.sdk.PaymentCallbackInfo;
-import com.zz.sdk.activity.ChargeActivity;
 import com.zz.sdk.activity.ParamChain;
+import com.zz.sdk.activity.ParamChain.KeyCaller;
 import com.zz.sdk.entity.PayChannel;
-import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.Result;
 import com.zz.sdk.layout.PaymentListLayout.ChargeStyle;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
 import com.zz.sdk.protocols.EmptyActivityControlImpl;
-import com.zz.sdk.util.Application;
 import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants.ZZStr;
+import com.zz.sdk.util.Utils;
 
 /***
  * Web版本在线支付。
@@ -47,31 +44,21 @@ import com.zz.sdk.util.ResConstants.ZZStr;
  * @see Constants#GUARD_Alipay_callback
  * @see Constants#GUARD_Tenpay_callback
  */
+@SuppressLint("SetJavaScriptEnabled")
 class PaymentOnlineLayout extends BaseLayout {
 
-	/** [String] */
-	static final String K_URL = "url";
-	/** [String] */
-	static final String K_URL_GUARD = "guard";
-	/** [int] */
-	static final String K_TYPE = "type";
-
-	static final String K_ORDER_NUMBER = "order_number";
-	static final String K_AMOUNT = "amount";
-	static final String K_STATUS = "status";
 	private WebView mWebView;
-
 	private String mUrl;
 	private String mUrlGuard;
 	private int mType;
+	private String mAmount;
+	public String mOrderNumber;
+	private ArrayList<Pair<String, String>> mPayMessages;
+	public String mPayMessage = "";
 
-	private Dialog dialog;
-	public static Handler hander = null;
-	private static PayParam payParam = null;
-	public String messages = "";
-	public String orderNumber = null;
-	public String currentUrl = "";
-	public Result webPayResult = null;
+	/** 支付状态 */
+	private int mPayResultState = MSG_STATUS.EXIT_SDK;
+	private PaymentCallbackInfo mCallbackInfo;
 
 	static enum IDC implements IIDC {
 		ACT_WAIT,
@@ -103,35 +90,21 @@ class PaymentOnlineLayout extends BaseLayout {
 		}
 	}
 
-	private class MyActivityControl extends EmptyActivityControlImpl {
-		@Override
-		public boolean onKeyDownControl(int keyCode, KeyEvent event) {
-			if (keyCode == KeyEvent.KEYCODE_BACK) {
-				if (mWebView.canGoBack()) {
-					mWebView.goBack();
-					return true;
-				} else {
-					// AlertDialog.Builder alert = new
-					// AlertDialog.Builder(this);
-					// alert.setTitle("温馨提示！").setMessage("是否真的取消此次交易！")
-					// .setNegativeButton("确定", setOnclick())
-					// .setPositiveButton("取消", setOnclick());
-					// alert.show();
-					return true;
-				}
-			}
-			return false;
-		}
-	}
-
-	@Override
-	protected void initEnv(Context ctx, ParamChain env) {
-		super.initEnv(ctx, env);
+	protected void onInitEnv(Context ctx, ParamChain env) {
 		mUrl = env.get(KeyPaymentList.K_PAY_ONLINE_URL, String.class);
 		mUrlGuard = env
 				.get(KeyPaymentList.K_PAY_ONLINE_URL_GUARD, String.class);
 		mType = env.get(KeyPaymentList.K_PAY_CHANNELTYPE, Integer.class);
-		orderNumber = env.get(KeyPaymentList.K_PAY_ORDERNUMBER, String.class);
+		mOrderNumber = env.get(KeyPaymentList.K_PAY_ORDERNUMBER, String.class);
+
+		Float amount = env.get(KeyPaymentList.K_PAY_AMOUNT, Float.class);
+		mAmount = amount == null ? null : Utils.price2str(amount);
+
+		mCallbackInfo = new PaymentCallbackInfo();
+		mCallbackInfo.amount = mAmount;
+		mCallbackInfo.cmgeOrderNumber = mOrderNumber;
+		mCallbackInfo.statusCode = PaymentCallbackInfo.STATUS_CANCEL;
+
 		if (mUrl == null || mUrlGuard == null || mType < 0) {
 			// finish();
 		}
@@ -140,13 +113,6 @@ class PaymentOnlineLayout extends BaseLayout {
 	public PaymentOnlineLayout(Context context, ParamChain env) {
 		super(context, env);
 		initUI(context);
-	}
-
-	private void showWaitDialog() {
-		if (dialog != null && dialog.isShowing()) {
-			dialog.dismiss();
-		}
-		// dialog = DialogUtil.showProgress(this, "加载页面中。。。", true);
 	}
 
 	public void showWebView(boolean visibility) {
@@ -162,7 +128,7 @@ class PaymentOnlineLayout extends BaseLayout {
 	}
 
 	@Override
-	protected void onInit(Context ctx) {
+	protected void onInitUI(Context ctx) {
 		FrameLayout fl = getSubjectContainer();
 
 		// 等待
@@ -203,26 +169,14 @@ class PaymentOnlineLayout extends BaseLayout {
 			v.setWebViewClient(new WebViewClient() {
 				@Override
 				public void onPageFinished(WebView view, String url) {
-					// super.onPageFinished(view, url);
-					// try {
-					// Thread.sleep(500);
-					// } catch (Exception e) {
-					// e.printStackTrace();
-					// }
-					// hideDialog();
-					hidePopup();
+					super.onPageFinished(view, url);
+					tryHidePopup_Wait();
 				}
 
 				@Override
 				public boolean shouldOverrideUrlLoading(WebView view, String url) {
-					if (url != null) {
-						if (mUrlGuard != null && url.startsWith(mUrlGuard)) {
-							onSuccess();
-						} else {
-							if (judgeContainUrl(url)) {
-							}
-							view.loadUrl(url);
-						}
+					if (checkUrl(url)) {
+						view.loadUrl(url);
 					}
 					return true;
 				}
@@ -236,58 +190,103 @@ class PaymentOnlineLayout extends BaseLayout {
 		{
 			ChargeStyle cs = getEnv().get(KeyPaymentList.K_CHARGE_STYLE,
 					ChargeStyle.class);
-			String title = String.format("%s - %s",
-					(cs == ChargeStyle.BUY ? ZZStr.CC_RECHARGE_TITLE_SOCIAL
-							: ZZStr.CC_RECHARGE_TITLE).str(),
+			ZZStr base_title = (cs == ChargeStyle.BUY) ? ZZStr.CC_RECHARGE_TITLE_SOCIAL
+					: ZZStr.CC_RECHARGE_TITLE;
+			String title = String.format("%s - %s", base_title.str(),
 					PayChannel.CHANNEL_NAME[mType]);
 			setTileTypeText(title);
 		}
 	}
 
-	private boolean judgeContainUrl(String url) {
-		if (webPayResult == null) {
-			return false;
-		}
-		ArrayList<Pair<String, String>> payMessagelist = webPayResult.payMessages;
-		if (payMessagelist == null || payMessagelist.size() == 0) {
-			return false;
-		}
-		for (int i = 0, size = payMessagelist.size(); i < size; i++) {
-			Pair<String, String> payMessage = payMessagelist.get(i);
-			String judgeUrl = payMessage.first;
-			if (url.startsWith(judgeUrl)) {
-				messages = payMessage.second;
-				return true;
+	/** 检查 url，如果是目标则返回false,表示不需要加载 */
+	private boolean checkUrl(String url) {
+		if (url != null) {
+			if (mUrlGuard != null && url.startsWith(mUrlGuard)) {
+				onPaySuccess();
+				return false;
 			} else {
-				continue;
+				if (judgeContainUrl(url)) {
+				}
+			}
+		}
+		return true;
+	}
+
+	private boolean judgeContainUrl(String url) {
+		ArrayList<Pair<String, String>> pm = mPayMessages;
+		if (url != null && pm != null) {
+			for (Pair<String, String> p : pm) {
+				if (p.first != null && url.startsWith(p.first)) {
+					mPayMessage = p.second;
+					return true;
+				}
 			}
 		}
 		return false;
 	}
 
-	private void onSuccess() {
-		if (DebugFlags.DEBUG) {
+	/** 支付成功 */
+	private void onPaySuccess() {
+		if (DEBUG) {
 			showToast("[调试]充值成功！");
 		}
-		// TODO:
-		// Intent intent = new Intent();
-		// intent.putExtra(ChargeActivity.PAY_RESULT,
-		// ChargeActivity.PAY_RESULT_SUCCESS);
-		// intent.putExtra(K_TYPE, mType);
-		// setResult(RESULT_OK, intent);
-		// finish();
+		notifyCallerResult(MSG_STATUS.SUCCESS);
 	}
 
-	private void onCancel() {
+	/** 支付取消 */
+	private void onPayCancel() {
+
 		if (DebugFlags.DEBUG_PAY_CANCEL_AS_SUCCESS) {
-			onSuccess();
+			onPaySuccess();
+			return;
 		}
-		// finish();
+
+		notifyCallerResult(MSG_STATUS.CANCEL);
 	}
 
-	// 显示是否退出的窗体
-	private void show_exit_query() {
+	/** 支付失败 */
+	private void onPayFailed() {
+		notifyCallerResult(MSG_STATUS.FAILED);
+	}
 
+	private void notifyCallerResult(int state) {
+		mPayResultState = state;
+
+		removeExitTrigger();
+
+		if (state == MSG_STATUS.SUCCESS) {
+			ParamChain env = getEnv();
+			if (env != null) {
+				Boolean autoClose = env.get(KeyCaller.K_IS_CLOSE_WINDOW,
+						Boolean.class);
+				if (autoClose != null && autoClose) {
+					callHost_exit();
+					return;
+				}
+			}
+		} else {
+			// 取消支付
+			if (mPayMessage != null && mOrderNumber != null) {
+				new Thread("cancel-pay") {
+					private final Context ctx = mContext;
+					private final String msg = mPayMessage;
+					private final String order = mOrderNumber;
+
+					@Override
+					public void run() {
+						String newmessage = "";
+						try {
+							newmessage = new String(msg.getBytes(), "utf-8");
+						} catch (UnsupportedEncodingException e1) {
+							e1.printStackTrace();
+						}
+						GetDataImpl.getInstance(ctx).canclePay(order,
+								newmessage);
+					}
+				}.start();
+			}
+		}
+		callHost_back();
 	}
 
 	@Override
@@ -299,91 +298,99 @@ class PaymentOnlineLayout extends BaseLayout {
 	}
 
 	@Override
+	public boolean onExit() {
+
+		// 发送此次充值结果
+		if (mPayResultState != MSG_STATUS.EXIT_SDK && mCallbackInfo != null) {
+			int code;
+			switch (mPayResultState) {
+			case MSG_STATUS.SUCCESS:
+				code = PaymentCallbackInfo.STATUS_SUCCESS;
+				break;
+			case MSG_STATUS.FAILED:
+				code = PaymentCallbackInfo.STATUS_FAILURE;
+				break;
+			case MSG_STATUS.CANCEL:
+			default:
+				code = PaymentCallbackInfo.STATUS_CANCEL;
+				break;
+			}
+			mCallbackInfo.statusCode = code;
+			notifyCaller(MSG_TYPE.PAYMENT, mPayResultState, mCallbackInfo);
+		}
+
+		boolean ret = super.onExit();
+		if (ret) {
+
+		}
+		return ret;
+	}
+
+	@Override
 	public boolean onEnter() {
 		boolean ret = super.onEnter();
 		if (!ret)
 			return false;
 
-		setActivityControlInterface(new MyActivityControl());
+		mPayResultState = MSG_STATUS.CANCEL;
+
+		/* 接管按键事件 */
+		setActivityControlInterface(new EmptyActivityControlImpl() {
+			@Override
+			public Boolean onKeyDownControl(int keyCode, KeyEvent event) {
+				if (keyCode == KeyEvent.KEYCODE_BACK) {
+					if (mWebView != null && mWebView.canGoBack()) {
+						mWebView.goBack();
+						return Boolean.TRUE;
+					} else {
+						return null;
+					}
+				}
+				return null;
+			}
+		});
 
 		GetPayUrlMessageTask.ICallBack cb = new GetPayUrlMessageTask.ICallBack() {
 			@Override
 			public void onResult(AsyncTask<?, ?, ?> task, Object token,
 					Result result) {
 				if (isCurrentTaskFinished(task)) {
-					webPayResult = result;
+					mPayMessages = (result != null) ? result.payMessages : null;
+
 					showWebView(true);
-					WebView v = (WebView) findViewById(IDC.WV_PAYONLINE.id());
-					v.loadUrl(mUrl);
+
+					WebView v = getWebView();
+					if (v != null) {
+						v.loadUrl(mUrl);
+						setExitTrigger(-1, "");
+					} else {
+						if (DEBUG) {
+							Logger.d("E: can't found WebView!");
+						}
+						onPayCancel();
+					}
 				}
 			}
 		};
 		AsyncTask<?, ?, ?> task = GetPayUrlMessageTask.createAndStart(mContext,
 				cb, null);
 		setCurrentTask(task);
-		showPopup_Wait();
+
+		showPopup_Wait(ZZStr.CC_TRY_CONNECT_SERVER.str(), 8, 60);
+		setExitTrigger(-1, ZZStr.CC_TRY_CONNECT_SERVER.str());
 
 		return ret;
 	}
 
 	@Override
-	public void onClick(View v) {
-		final int id = v.getId();
-		IDC idc = IDC.fromID(id);
-		switch (idc) {
-		case BT_REAL_EXIT: {
-			// TODO:
-			// hideDialog();
-			postPayResult(false, orderNumber);
-			if (Application.isCloseWindow) {
-				ChargeActivity.instance.finish();
-			}
-			// onCancel();
-			if (messages != "" && orderNumber != null) {
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						String newmessage = "";
-						try {
-							newmessage = new String(messages.getBytes(),
-									"utf-8");
-						} catch (UnsupportedEncodingException e1) {
-							e1.printStackTrace();
-						}
-						GetDataImpl.getInstance(mContext).canclePay(
-								orderNumber, newmessage);
-					}
-				}).start();
-			}
-		}
-			break;
+	protected void popup_wait_timeout() {
+		super.popup_wait_timeout();
 
-		default:
-			break;
-		}
-		super.onClick(v);
-
+		showToast(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
 	}
 
-	/** 通知「用户」回调此次支付结果 */
-	private void postPayResult(boolean success, String orderNumber) {
-		if (hander != null) {
-			PaymentCallbackInfo info = new PaymentCallbackInfo();
-			info.statusCode = PaymentCallbackInfo.STATUS_CANCEL;
-			try {
-				info.cmgeOrderNumber = orderNumber;
-				if (payParam != null) {
-					info.amount = payParam.amount;
-				}
-			} catch (NumberFormatException e) {
-			}
-			Message msg = Message.obtain(hander, ChargeActivity.mCallbackWhat,
-					info);
-			msg.arg1 = MSG_TYPE.PAYMENT;
-			msg.arg2 = MSG_STATUS.CANCEL;
-			hander.sendMessage(msg);
-			Application.isAlreadyCB = 1;
-		}
+	protected WebView getWebView() {
+		return (mWebView != null/* &&mWebView.isac */) ? mWebView : null;
 	}
 
 	@Override
@@ -402,6 +409,8 @@ class PaymentOnlineLayout extends BaseLayout {
 			mWebView.destroy();
 			mWebView = null;
 		}
+
+		mCallbackInfo = null;
 	}
 }
 
@@ -430,6 +439,9 @@ class GetPayUrlMessageTask extends AsyncTask<Object, Void, Result> {
 		Object token = params[2];
 
 		Logger.d("getPayUrlMessage");
+		if (PaymentOnlineLayout.DEBUG) {
+			Utils.debug_TrySleep(0);
+		}
 
 		Result ret = GetDataImpl.getInstance(ctx).getPayUrlMessage();
 		if (!this.isCancelled()) {

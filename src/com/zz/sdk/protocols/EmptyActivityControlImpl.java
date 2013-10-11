@@ -155,9 +155,9 @@ public class EmptyActivityControlImpl implements ActivityControlInterface {
 	}
 
 	@Override
-	public boolean onKeyDownControl(int keyCode, KeyEvent event) {
+	public Boolean onKeyDownControl(int keyCode, KeyEvent event) {
 		// TODO Auto-generated method stub
-		return false;
+		return null;
 	}
 
 	@Override

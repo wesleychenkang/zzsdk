@@ -176,8 +176,9 @@ public class BaseActivity extends Activity {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (!mInterfacesStack.isEmpty()) {
 			ActivityControlInterface aci = mInterfacesStack.peek();
-			if (aci.onKeyDownControl(keyCode, event)) {
-				return true;
+			Boolean ret = aci.onKeyDownControl(keyCode, event);
+			if (ret != null) {
+				return ret;
 			}
 		}
 		return super.onKeyDown(keyCode, event);

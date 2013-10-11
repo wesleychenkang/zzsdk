@@ -37,6 +37,8 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.zz.sdk.BuildConfig;
+import com.zz.sdk.MSG_STATUS;
+import com.zz.sdk.MSG_TYPE;
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.activity.ParamChain.KeyCaller;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
@@ -105,6 +107,9 @@ public class PaymentListLayout extends CCBaseLayout {
 		/** 充值中心·充值卡密码，类型 {@link String} */
 		public static final String K_PAY_CARD_PASSWD = _TAG_
 				+ "pay_card_passwd";
+
+		/** 最近一次的充值状态，类型{@link MSG_STATUS} */
+		public static final String K_PAY_LASTSTATE = _TAG_ + "pay_last_state";
 	}
 
 	/** 界面模式 */
@@ -193,25 +198,21 @@ public class PaymentListLayout extends CCBaseLayout {
 	private static final int _MSG_USER_ = 0x10000;
 
 	/** 当前的支付方式选择 */
-	private int mPaymentTypeChoose = -1;
+	private int mPaymentTypeChoose;
 
 	/** 价格或卓越币数的表达规则 */
-	private DecimalFormat mRechargeFormat = new DecimalFormat(
-			ZZStr.CC_PRICE_FORMAT.str());
+	private DecimalFormat mRechargeFormat;
 
 	private PaymentListAdapter mPaymentListAdapter;
 	private AdapterView.OnItemClickListener mPaytypeItemListener;
 
-	/** 余额 */
-	private float mCoinBalance = 0;
-
 	/** 默认价格，单位[元]，见 {@link KeyGlobal#K_PAY_AMOUNT} */
-	private float mDefAmount = 0f;
+	private float mDefAmount;
 
-	/** 卓越币与RMB的兑换比例, {@link #initEnv(Context, ParamChain)} */
+	/** 卓越币与RMB的兑换比例, {@link #onInitEnv(Context, ParamChain)} */
 	private float ZZ_COIN_RATE;
 
-	private ChargeStyle mChargeStyle = ChargeStyle.UNKNOW;
+	private ChargeStyle mChargeStyle;
 
 	private String mIMSI;
 
@@ -234,9 +235,10 @@ public class PaymentListLayout extends CCBaseLayout {
 	}
 
 	@Override
-	protected void initEnv(Context ctx, ParamChain env) {
-		super.initEnv(ctx, env);
-
+	protected void onInitEnv(Context ctx, ParamChain env) {
+		super.onInitEnv(ctx, env);
+		mPaymentTypeChoose = -1;
+		mRechargeFormat = new DecimalFormat(ZZStr.CC_PRICE_FORMAT.str());
 		mIMSI = Utils.getIMSI(ctx);
 
 		Float o = env.get(KeyGlobal.K_PAY_COIN_RATE, Float.class);
@@ -259,6 +261,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			if (DEBUG) {
 				Logger.d("no amount assign!");
 			}
+			mDefAmount = 0f;
 		}
 
 		ChargeStyle cs = env.get(KeyPaymentList.K_CHARGE_STYLE,
@@ -269,6 +272,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			if (BuildConfig.DEBUG) {
 				Logger.d("E:bad charge style!");
 			}
+			mChargeStyle = ChargeStyle.UNKNOW;
 		}
 	}
 
@@ -314,12 +318,15 @@ public class PaymentListLayout extends CCBaseLayout {
 
 	@Override
 	public boolean onExit() {
-		boolean ret = super.onExit();
+		// 发出退出消息
+		if (isAlive()) {
+			notifyCaller(MSG_TYPE.PAYMENT, MSG_STATUS.EXIT_SDK, null);
+		}
 
+		boolean ret = super.onExit();
 		if (ret) {
 
 		}
-
 		return ret;
 	}
 
@@ -490,7 +497,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			}
 			tv.setText(String.format(ZZStr.CC_PAYTYPE_COIN_DESC.str(),
 					mRechargeFormat.format(count),
-					mRechargeFormat.format(mCoinBalance - count)));
+					mRechargeFormat.format(getCoinBalance() - count)));
 			ZZFontSize.CC_RECHAGR_NORMAL.apply(tv);
 		}
 			break;
@@ -711,7 +718,7 @@ public class PaymentListLayout extends CCBaseLayout {
 							ZZFontSize.CC_RECHAGR_INPUT, 8);
 				} else {
 					tv = create_normal_label(ctx, null);
-					tv.setText(new DecimalFormat("#.##").format(mDefAmount));
+					tv.setText(Utils.price2str(mDefAmount));
 					tv.setTextColor(ZZFontColor.CC_RECHAGR_INPUT.color());
 				}
 				ll2.addView(tv, new LayoutParams(LayoutParams.MATCH_PARENT,
@@ -839,7 +846,7 @@ public class PaymentListLayout extends CCBaseLayout {
 	}
 
 	@Override
-	protected void onInit(Context ctx) {
+	protected void onInitUI(Context ctx) {
 		// 主活动区
 		FrameLayout actView = getSubjectContainer();
 
@@ -899,7 +906,6 @@ public class PaymentListLayout extends CCBaseLayout {
 		} else {
 			setTileTypeText(ZZStr.CC_RECHARGE_TITLE.str());
 		}
-		updateBalance(mCoinBalance);
 		updateRechargeCost();
 		updatePayType(-1);
 	}
@@ -1228,10 +1234,12 @@ public class PaymentListLayout extends CCBaseLayout {
 		PayParam payParam = genPayParam(mContext, getEnv(), channel.type);
 
 		final Dialog dialog = DialogUtil.showProgress(
-				mEnv.get(KeyGlobal.K_UI_ACTIVITY, Activity.class), "", true);
+				mEnv.get(KeyGlobal.K_UI_ACTIVITY, Activity.class),
+				ZZStr.CC_TRY_CONNECT_SERVER.str(), true);
 		dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
 			@Override
 			public void onCancel(DialogInterface dialog) {
+				showToast(ZZStr.CC_TRY_CONNECT_SERVER_CANCELD);
 			}
 		});
 
@@ -1241,7 +1249,11 @@ public class PaymentListLayout extends CCBaseLayout {
 					Result result) {
 				// TODO Auto-generated method stub
 				if (isCurrentTaskFinished(task)) {
-					enterPayDetail(getHost(), (PayChannel) token, result);
+					if (result == null || !result.isSuccess()) {
+						showToast(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
+					} else {
+						enterPayDetail(getHost(), (PayChannel) token, result);
+					}
 				}
 				dialog.dismiss();
 			}
@@ -1272,14 +1284,16 @@ public class PaymentListLayout extends CCBaseLayout {
 	}
 
 	/** TODO: 构造 PayParam 数据 */
-	private PayParam genPayParam(Context ctx, ParamChain env, int payType) {
+	private static PayParam genPayParam(Context ctx, ParamChain env, int payType) {
 		PayParam payParam = new PayParam();
 		payParam.loginName = env.get(KeyUser.K_LOGIN_NAME, String.class);
 		payParam.gameRole = env.get(KeyCaller.K_GAME_ROLE, String.class);
 		payParam.serverId = env.get(KeyCaller.K_GAME_SERVER_ID, String.class);
 		payParam.projectId = Utils.getProjectId(ctx);
-		payParam.amount = String.valueOf(env.get(KeyPaymentList.K_PAY_AMOUNT,
-				Float.class));
+
+		Float amount = env.get(KeyPaymentList.K_PAY_AMOUNT, Float.class);
+		payParam.amount = Utils.price2str(amount == null ? 0 : amount);
+		
 		payParam.requestId = "";
 		switch (payType) {
 		case PayChannel.PAY_TYPE_ALIPAY:
