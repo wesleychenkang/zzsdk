@@ -3,10 +3,8 @@ package com.zz.sdk.layout;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
@@ -126,7 +124,9 @@ class PaymentOnlineLayout extends BaseLayout {
 		}
 	}
 
-	private void initEnv(Context ctx, ParamChain env) {
+	@Override
+	protected void initEnv(Context ctx, ParamChain env) {
+		super.initEnv(ctx, env);
 		mUrl = env.get(KeyPaymentList.K_PAY_ONLINE_URL, String.class);
 		mUrlGuard = env
 				.get(KeyPaymentList.K_PAY_ONLINE_URL_GUARD, String.class);
@@ -139,7 +139,6 @@ class PaymentOnlineLayout extends BaseLayout {
 
 	public PaymentOnlineLayout(Context context, ParamChain env) {
 		super(context, env);
-		initEnv(context, getEnv());
 		initUI(context);
 	}
 

@@ -18,7 +18,7 @@ import com.zz.sdk.protocols.ActivityControlInterface;
  */
 public class LayoutFactory {
 
-	public static class KeyLayoutFactory implements KeyGlobal {
+	public static final class KeyLayoutFactory implements KeyGlobal {
 		protected static final String _TAG_ = KeyGlobal._TAG_
 				+ "key_layout_factory" + _SEPARATOR_;
 

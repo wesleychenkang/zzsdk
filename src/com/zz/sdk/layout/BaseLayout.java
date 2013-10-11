@@ -2,10 +2,6 @@ package com.zz.sdk.layout;
 
 import java.text.DecimalFormat;
 
-import javax.crypto.Mac;
-
-import org.apache.http.conn.scheme.HostNameResolver;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
@@ -49,7 +45,7 @@ import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
 
 /**
- * 充值中心的基本界面界面
+ * 基本界面界面
  * 
  * @author nxliao
  * 
@@ -131,6 +127,22 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		}
 	}
 
+	/**
+	 * 活动状态
+	 */
+	static enum RUNSTATE {
+		/** 未初始化 */
+		UNINITIALIZED,
+		/** 活动 */
+		ACTIVE,
+		/** 暂停 */
+		PAUSED,
+		/** 结束了 */
+		FINISHED,
+
+		;
+	}
+
 	/** 价格或卓越币数的表达规则 */
 	private DecimalFormat mRechargeFormat = new DecimalFormat(
 			ZZStr.CC_PRICE_FORMAT.str());
@@ -147,6 +159,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	protected ParamChain mEnv;
 	private AsyncTask<?, ?, ?> mTask;
 	private ActivityControlInterface mActivityControlInterface;
+	private RUNSTATE mRunState;
 
 	protected final static LayoutParams LP_WM = new LayoutParams(
 			LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
@@ -244,7 +257,8 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		initEnv(context, mEnv);
 	}
 
-	private void initEnv(Context ctx, ParamChain env) {
+	protected void initEnv(Context ctx, ParamChain env) {
+		mRunState = RUNSTATE.UNINITIALIZED;
 	}
 
 	@Override
@@ -749,7 +763,11 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	 */
 	@Override
 	public boolean isAlive() {
-		return true;
+		return mRunState == RUNSTATE.ACTIVE || mRunState == RUNSTATE.PAUSED;
+	}
+
+	public boolean isActive() {
+		return mRunState == RUNSTATE.ACTIVE;
 	}
 
 	@Override
@@ -758,6 +776,14 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		if (BuildConfig.DEBUG) {
 			Logger.d("onEnter(" + getClass().getName());
 		}
+
+		if (mRunState != RUNSTATE.UNINITIALIZED) {
+			if (DEBUG) {
+				Logger.d("i'm initializaed!");
+			}
+			return false;
+		}
+		mRunState = RUNSTATE.ACTIVE;
 
 		enableActivityControlInterface();
 
@@ -770,6 +796,17 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 			Logger.d("onPause(" + getClass().getName());
 		}
 
+		if (mRunState == RUNSTATE.ACTIVE) {
+			mRunState = RUNSTATE.PAUSED;
+		} else if (mRunState == RUNSTATE.PAUSED) {
+			// nothing
+		} else {
+			if (DEBUG) {
+				Logger.d("can't pause, current state is " + mRunState.name());
+			}
+			return false;
+		}
+
 		disableActivityControlInterface();
 
 		return true;
@@ -779,6 +816,17 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	public boolean onResume() {
 		if (BuildConfig.DEBUG) {
 			Logger.d("onResume(" + getClass().getName());
+		}
+
+		if (mRunState == RUNSTATE.ACTIVE) {
+		} else if (mRunState == RUNSTATE.PAUSED) {
+			mRunState = RUNSTATE.ACTIVE;
+			// nothing
+		} else {
+			if (DEBUG) {
+				Logger.d("can't resume, current state is " + mRunState.name());
+			}
+			return false;
 		}
 
 		enableActivityControlInterface();
@@ -804,8 +852,21 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		if (BuildConfig.DEBUG) {
 			Logger.d("onExit(" + getClass().getName());
 		}
+
+		if (mRunState == RUNSTATE.UNINITIALIZED) {
+			if (DEBUG) {
+				Logger.d("W: i am not initizlize!");
+			}
+		} else if (mRunState == RUNSTATE.FINISHED) {
+			if (DEBUG) {
+				Logger.d("E: i am not alive!");
+			}
+			return false;
+		}
+		mRunState = RUNSTATE.FINISHED;
+
 		clean();
-		return false;
+		return true;
 	}
 
 	public boolean isExitEnabled() {
@@ -863,6 +924,9 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		}
 	}
 
+	// ////////////////////////////////////////////////////////////////////////
+	//
+	// - 窗体事件接管 -
 	//
 
 	protected void setActivityControlInterface(

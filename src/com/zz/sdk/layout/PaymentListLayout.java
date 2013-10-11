@@ -233,7 +233,10 @@ public class PaymentListLayout extends CCBaseLayout {
 		// mPaymentType.setOnItemClickListener(onItemClickListener);
 	}
 
-	private void initEnv(Context ctx, ParamChain env) {
+	@Override
+	protected void initEnv(Context ctx, ParamChain env) {
+		super.initEnv(ctx, env);
+
 		mIMSI = Utils.getIMSI(ctx);
 
 		Float o = env.get(KeyGlobal.K_PAY_COIN_RATE, Float.class);
@@ -271,7 +274,6 @@ public class PaymentListLayout extends CCBaseLayout {
 
 	public PaymentListLayout(Context ctx, ParamChain env) {
 		super(ctx, env);
-		initEnv(ctx, getEnv());
 		initUI(ctx);
 	}
 
