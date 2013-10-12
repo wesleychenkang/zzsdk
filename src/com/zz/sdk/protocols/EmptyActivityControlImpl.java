@@ -216,9 +216,10 @@ public class EmptyActivityControlImpl implements ActivityControlInterface {
 	}
 
 	@Override
-	public void onConfigurationChangedControl(Configuration paramConfiguration) {
+	public boolean onConfigurationChangedControl(
+			Configuration paramConfiguration) {
 		// TODO Auto-generated method stub
-		
+		return false;
 	}
 
 	@Override

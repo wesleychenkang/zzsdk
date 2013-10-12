@@ -100,7 +100,8 @@ public abstract interface ActivityControlInterface {
 
 	public abstract Dialog onCreateDialogControl(int paramInt);
 
-	public abstract void onConfigurationChangedControl(
+	/** 屏幕发生旋转 */
+	public abstract boolean onConfigurationChangedControl(
 			Configuration paramConfiguration);
 
 	/** 当返回键被按下，如果返回 true 表示拦截 */

@@ -1,9 +1,9 @@
 package com.zz.sdk.layout;
 
-import android.app.Activity;
+import java.lang.reflect.Constructor;
+
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
 import android.view.View;
 
 import com.zz.sdk.activity.ParamChain;
@@ -50,8 +50,8 @@ public class LayoutFactory {
 		 * @param cancelTag
 		 *            回调监听器的消息，可以为空(null)
 		 */
-		public void showWaitDialog(int type, String msg, boolean cancelable,
-				OnCancelListener cancelListener, Object cancelTag);
+		// public void showWaitDialog(int type, String msg, boolean cancelable,
+		// OnCancelListener cancelListener, Object cancelTag);
 
 		/**
 		 * 隐藏对话框
@@ -75,6 +75,19 @@ public class LayoutFactory {
 		 * @param env
 		 */
 		public void enter(LAYOUT_TYPE type, ParamChain rootEnv);
+
+		/**
+		 * 进入新界面
+		 * 
+		 * @param classLoader
+		 *            类加载器，null表示使用默认
+		 * @param className
+		 *            类名
+		 * @param rootEnv
+		 *            环境变量
+		 */
+		public void enter(ClassLoader classLoader, String className,
+				ParamChain rootEnv);
 
 		/**
 		 * 设置窗体事件监听器，调用者自己维护生命周期
@@ -169,10 +182,6 @@ public class LayoutFactory {
 		switch (type) {
 		case PaymentList:
 			return new PaymentListLayout(ctx, rootEnv);
-		case PaymentOnline:
-			return new PaymentOnlineLayout(ctx, rootEnv);
-		case PaymentUnion:
-			return new PaymentUnionLayout(ctx, rootEnv);
 		case Exchange:
 			return new ExchangeLayout(ctx, rootEnv);
 		case ExchangeDetail:
@@ -184,4 +193,31 @@ public class LayoutFactory {
 		return null;
 	}
 
+	/**
+	 * 构造指定类名
+	 * 
+	 * @param ctx
+	 * @param className
+	 *            类名
+	 * @param classLoader
+	 *            加载器，若为null表示使用虚拟机的默认类加载器
+	 * @param rootEnv
+	 * @return
+	 */
+	public static ILayoutView createLayout(Context ctx, String className,
+			ClassLoader classLoader, ParamChain rootEnv) {
+		try {
+			Class<?> lFactoryClass = Class
+					.forName(className, true, classLoader);
+			if (ILayoutView.class.isAssignableFrom(lFactoryClass)) {
+				Constructor<?> c = lFactoryClass.getConstructor(Context.class,
+						ParamChain.class);
+				return (ILayoutView) c.newInstance(ctx, rootEnv);
+				// return (ILayoutView) lFactoryClass.newInstance();
+			}
+		} catch (Exception e) {
+			System.err.println("Cannot instanciate layout [" + className + "]");
+		}
+		return null;
+	}
 }

@@ -12,10 +12,6 @@ class _TMP_KEY_ implements KeyGlobal {
 public enum LAYOUT_TYPE {
 	/** 支付主列表 */
 	PaymentList,
-	/** 支付·在线({@link WebView}) */
-	PaymentOnline,
-	/** 支付·银联 */
-	PaymentUnion,
 
 	/** 兑换列表，需要参数：projectID */
 	Exchange,

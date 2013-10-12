@@ -7,6 +7,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -98,12 +99,12 @@ public class BaseActivity extends Activity {
 		mRootEnv = env.grow();
 		mRootEnv.add(KeyGlobal.K_UI_ACTIVITY, activity, ValType.TEMPORARY);
 		mRootEnv.add(KeyLayoutFactory.K_HOST, new LayoutFactory.ILayoutHost() {
-			@Override
-			public void showWaitDialog(int type, String msg,
-					boolean cancelable, OnCancelListener cancelListener,
-					Object cancelTag) {
-				showDialog(msg, cancelable, cancelListener, cancelTag);
-			}
+			// @Override
+			// public void showWaitDialog(int type, String msg,
+			// boolean cancelable, OnCancelListener cancelListener,
+			// Object cancelTag) {
+			// showDialog(msg, cancelable, cancelListener, cancelTag);
+			// }
 
 			@Override
 			public void hideWaitDialog() {
@@ -124,6 +125,12 @@ public class BaseActivity extends Activity {
 			public void enter(LAYOUT_TYPE type, ParamChain rootEnv) {
 				// TODO Auto-generated method stub
 				tryEnterView(type, rootEnv);
+			}
+
+			@Override
+			public void enter(ClassLoader classLoader, String className,
+					ParamChain rootEnv) {
+				tryEnterView(classLoader, className, rootEnv);
 			}
 
 			@Override
@@ -158,12 +165,19 @@ public class BaseActivity extends Activity {
 	}
 
 	private boolean tryEnterView(LAYOUT_TYPE type, ParamChain rootEnv) {
-		if (type == null) {
-			return false;
-		}
-
 		ILayoutView vl = LayoutFactory.createLayout(getBaseContext(), type,
 				rootEnv);
+		return tryEnterView(vl);
+	}
+
+	private boolean tryEnterView(ClassLoader classLoader, String className,
+			ParamChain rootEnv) {
+		ILayoutView vl = LayoutFactory.createLayout(getBaseContext(),
+				className, classLoader, rootEnv);
+		return tryEnterView(vl);
+	}
+
+	private boolean tryEnterView(ILayoutView vl) {
 		if (vl != null) {
 			pushView2Stack(vl);
 			vl.onEnter();
@@ -193,6 +207,24 @@ public class BaseActivity extends Activity {
 			}
 		}
 		super.onActivityResult(requestCode, resultCode, data);
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+
+		if (!mInterfacesStack.isEmpty()) {
+			ActivityControlInterface aci = mInterfacesStack.peek();
+			if (aci.onConfigurationChangedControl(newConfig)) {
+				return;
+			}
+		}
+
+		if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+			// Nothing need to be done here
+		} else {
+			// Nothing need to be done here
+		}
 	}
 
 	@Override

@@ -51,7 +51,6 @@ import com.zz.sdk.entity.UserAction;
 import com.zz.sdk.layout.LayoutFactory.ILayoutHost;
 import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.DialogUtil;
-import com.zz.sdk.util.DimensionUtil;
 import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants.CCImg;
@@ -1100,8 +1099,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			Result result) {
 		ParamChain env = getEnv();
 
-		// PayParam param = new PayParam();
-		LAYOUT_TYPE type = null;
+		Class<?> clazz = null;
 
 		Logger.d("订单号------>" + result.orderNumber);
 		if (!result.isSuccess()) {
@@ -1133,13 +1131,13 @@ public class PaymentListLayout extends CCBaseLayout {
 			mEnv.add(KeyPaymentList.K_PAY_ONLINE_URL, url, ValType.TEMPORARY);
 			mEnv.add(KeyPaymentList.K_PAY_ONLINE_URL_GUARD, urlGuard,
 					ValType.TEMPORARY);
-			type = LAYOUT_TYPE.PaymentOnline;
+			clazz = PaymentOnlineLayout.class;
 		}
 			break;
 
 		case PayChannel.PAY_TYPE_UNMPAY: {
 			// TODO:
-			type = LAYOUT_TYPE.PaymentUnion;
+			clazz = PaymentUnionLayout.class;
 		}
 			break;
 
@@ -1161,10 +1159,10 @@ public class PaymentListLayout extends CCBaseLayout {
 			break;
 		}
 
-		if (type != null) {
-			host.enter(type, env);
-			return true;
+		if (clazz != null) {
+			host.enter(getClass().getClassLoader(), clazz.getName(), env);
 		}
+
 		return false;
 	}
 
