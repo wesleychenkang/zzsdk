@@ -144,6 +144,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			etPayAmount.setHint("{支付金额(单位:元)}");
 			etPayAmount.setId(IDC_ET_PAY_AMOUNT);
 			etPayAmount.setInputType(InputType.TYPE_CLASS_NUMBER);
+			etPayAmount.setText("1234");
 			amountLayout.addView(etPayAmount);
 
 			btPayAmount.setOnClickListener(onClickListener);

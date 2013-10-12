@@ -6,31 +6,50 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.zz.sdk.PaymentCallbackInfo;
+import com.unionpay.UPPayAssistEx;
+import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
+import com.zz.sdk.activity.ParamChain.ValType;
 import com.zz.sdk.entity.PayChannel;
-import com.zz.sdk.entity.Result;
-import com.zz.sdk.entity.UnionpayImpl;
 import com.zz.sdk.layout.PaymentListLayout.ChargeStyle;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
 import com.zz.sdk.protocols.EmptyActivityControlImpl;
-import com.zz.sdk.util.Application;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.GetDataImpl;
+import com.zz.sdk.util.ResConstants.CCImg;
+import com.zz.sdk.util.ResConstants.Config.ZZDimen;
+import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
+import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
 
 /***
  * 银联支付
+ * <p/>
+ * <b>输入:</b>
+ * <ul>
+ * <li>{@link KeyPaymentList#K_PAY_ORDERNUMBER}</li>
+ * <li>{@link KeyPaymentList#K_PAY_UNION_TN}</li>
+ * </ul>
+ * <p/>
+ * <b>输出:</b>
+ * <ul>
+ * <li>{@link KeyPaymentList#K_PAY_RESULT}</li>
+ * </ul>
+ * <p/>
  * 
  * @author nxliao
  * @version 0.1.20131010
  */
 class PaymentUnionLayout extends BaseLayout {
+	// "00" – 银联正式环境
+	// "01" – 银联测试环境,该环境中不发生真实交易
+	final static String serverMode = DEBUG ? "01" : "00";
 
 	static enum IDC implements IIDC {
 		ACT_WAIT,
@@ -70,14 +89,14 @@ class PaymentUnionLayout extends BaseLayout {
 	}
 
 	private int mType;
-	private Result mPayResult;
-
 	private String mTN;
+	private String mOrderNumber;
+	private int mPayState = MSG_STATUS.EXIT_SDK;
 
 	@Override
 	protected void onInitEnv(Context ctx, ParamChain env) {
 		mType = env.get(KeyPaymentList.K_PAY_CHANNELTYPE, Integer.class);
-		// mPayResult = env.get(KeyPaymentList.K_PAY_RESULT, Result.class);
+		mOrderNumber = env.get(KeyPaymentList.K_PAY_ORDERNUMBER, String.class);
 		mTN = env.get(KeyPaymentList.K_PAY_UNION_TN, String.class);
 	}
 
@@ -125,17 +144,56 @@ class PaymentUnionLayout extends BaseLayout {
 		}
 	}
 
-	// 显示是否退出的窗体
-	private void show_exit_query() {
-
-	}
-
 	@Override
 	public boolean isExitEnabled() {
 		boolean ret = super.isExitEnabled();
 		if (ret) {// ! TODO: 如果提示用户是否退出
 		}
 		return ret;
+	}
+
+	/** 支付成功 */
+	private void onPaySuccess() {
+		if (DEBUG) {
+			showToast("[调试]充值成功！");
+		}
+		notifyCallerResult(MSG_STATUS.SUCCESS);
+	}
+
+	/** 支付取消 */
+	private void onPayCancel() {
+		if (DebugFlags.DEBUG_PAY_CANCEL_AS_SUCCESS) {
+			onPaySuccess();
+			return;
+		}
+		notifyCallerResult(MSG_STATUS.CANCEL);
+	}
+
+	/** 支付失败 */
+	private void onPayFailed() {
+		notifyCallerResult(MSG_STATUS.FAILED);
+	}
+
+	private void notifyCallerResult(int state) {
+		mPayState = state;
+		removeExitTrigger();
+		if (state == MSG_STATUS.SUCCESS) {
+		} else {
+			// 取消支付
+			if (mOrderNumber != null) {
+				new Thread("cancel-pay") {
+					private final Context ctx = mContext;
+					private final String order = mOrderNumber;
+
+					@Override
+					public void run() {
+						GetDataImpl.getInstance(ctx)
+								.canclePay(order, "银联内取消支付");
+					}
+				}.start();
+			}
+		}
+		callHost_back();
 	}
 
 	private class myActivityControl extends EmptyActivityControlImpl {
@@ -159,26 +217,11 @@ class PaymentUnionLayout extends BaseLayout {
 			if (requestCode == ACTIVITY_REQUEST_CODE_UNIONPAY && isAlive()) {
 				hidePopup();
 				if (PAY_RESULT_SUCCESS.equalsIgnoreCase(pay_result)) {
-					// showPayResultDialog(true);
-					// allPayCallBack(0);
+					onPaySuccess();
 				} else if (PAY_RESULT_FAIL.equalsIgnoreCase(pay_result)) {
-					// showPayResultDialog(false);
-					// allPayCallBack(-1);
+					onPayFailed();
 				} else if (PAY_RESULT_CANCEL.equalsIgnoreCase(pay_result)) {
-					Application.payStatusCancel = PaymentCallbackInfo.STATUS_CANCEL;
-					new Thread(new Runnable() {
-						Context ctx = mContext;
-						String orderNumber = mPayResult.orderNumber;
-
-						@Override
-						public void run() {
-							GetDataImpl.getInstance(ctx).canclePay(orderNumber,
-									"银联内取消支付");
-						}
-					}).start();
-					showErr("你已取消了本次订单的支付!订单号为:" + mPayResult.orderNumber);
-					// allPayCallBack(-2);
-
+					onPayCancel();
 				}
 				return true;
 			}
@@ -192,32 +235,155 @@ class PaymentUnionLayout extends BaseLayout {
 		if (!ret)
 			return false;
 
-		showPopup_Wait();
-		set_child_text(BaseLayout.IDC.TV_POPUP_WAIT_LABEL, "请等待银联的返回结果……");
-
+		mPayState = MSG_STATUS.CANCEL;
 		setActivityControlInterface(new myActivityControl());
-		Activity activity = getEnv().get(KeyGlobal.K_UI_ACTIVITY,
-				Activity.class);
-		new UnionpayImpl(activity, mPayResult).pay();
+		tryPayUnion();
 
 		return ret;
+	}
+
+	@Override
+	public boolean onExit() {
+
+		if (mPayState != MSG_STATUS.EXIT_SDK) {
+			// XXX: 记录此次充值结果在上级环境中
+			getEnv().getParent(PaymentListLayout.class.getName()).add(
+					KeyPaymentList.K_PAY_RESULT, mPayState, ValType.TEMPORARY);
+		}
+
+		boolean ret = super.onExit();
+		if (ret) {
+
+		}
+		return ret;
+	}
+
+	@Override
+	public void onClick(View v) {
+		final int id = v.getId();
+		final IDC idc = IDC.fromID(id);
+		switch (idc) {
+		case BT_INSTALL_UNIONPAYAPK: {
+			tryInstall();
+		}
+			break;
+		case BT_RETRY: {
+			tryPayUnion();
+		}
+			break;
+
+		default:
+			super.onClick(v);
+			break;
+		}
+	}
+
+	private void show_install_plugin() {
+		final int pleft = ZZDimen.CC_ROOTVIEW_PADDING_LEFT.px();
+		final int ptop = ZZDimen.CC_ROOTVIEW_PADDING_TOP.px();
+		final int pright = ZZDimen.CC_ROOTVIEW_PADDING_RIGHT.px();
+		final int pbottom = ZZDimen.CC_ROOTVIEW_PADDING_BOTTOM.px();
+
+		Context ctx = mContext;
+		LinearLayout ll = new LinearLayout(ctx);
+		{
+			ll.setOrientation(VERTICAL);
+			FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT,
+					Gravity.CENTER);
+			lp.setMargins(pleft, ptop, pright, pbottom);
+			ll.setLayoutParams(lp);
+			ll.setBackgroundDrawable(CCImg.BACKGROUND.getDrawble(ctx));
+			ll.setPadding(pleft, ptop, pright, pbottom);
+		}
+
+		{
+			TextView tv = create_normal_label(ctx, null);
+			ll.addView(tv, new LayoutParams(LP_WW));
+			tv.setSingleLine(false);
+			tv.setGravity(Gravity.CENTER);
+			tv.setText("提示");
+			tv.setCompoundDrawablesWithIntrinsicBounds(
+					CCImg.TUP_YL.getDrawble(ctx), null, null, null);
+			tv.setTextSize(24);
+			tv.setPadding(0, ptop, 0, pbottom);
+		}
+		{
+			TextView tv = create_normal_label(ctx, null);
+			ll.addView(tv, new LayoutParams(LP_MW));
+			tv.setSingleLine(false);
+			tv.setBackgroundDrawable(CCImg.ZF_XZ.getDrawble(ctx));
+			tv.setText("完成购买需要安装银联支付控件，是否安装？");
+			tv.setPadding(pleft, ptop, pright, pbottom);
+		}
+
+		{
+			FrameLayout fl = new FrameLayout(ctx);
+			ll.addView(fl, new LayoutParams(LP_MW));
+
+			LinearLayout l2 = new LinearLayout(ctx);
+			fl.addView(l2, new FrameLayout.LayoutParams(
+					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
+					Gravity.CENTER));
+			l2.setOrientation(HORIZONTAL);
+
+			Button bt;
+			{
+				bt = new Button(ctx);
+				bt.setId(IDC.BT_INSTALL_UNIONPAYAPK.id());
+				l2.addView(bt, new LayoutParams(LP_WW));
+
+				bt.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
+						CCImg.BUTTON, CCImg.BUTTON_CLICK));
+				bt.setTextColor(ZZFontColor.CC_RECHARGE_COMMIT.color());
+				bt.setPadding(pleft, ptop, pright, pbottom);
+				ZZFontSize.CC_RECHARGE_COMMIT.apply(bt);
+				bt.setOnClickListener(this);
+				bt.setText("安装");
+			}
+			{
+				bt = new Button(ctx);
+				bt.setId(IDC.BT_RETRY.id());
+				l2.addView(bt, new LayoutParams(LP_WW));
+
+				bt.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
+						CCImg.BUY_BUTTON, CCImg.BUY_BUTTON_CLICK));
+				bt.setTextColor(ZZFontColor.CC_RECHARGE_COMMIT.color());
+				bt.setPadding(pleft, ptop, pright, pbottom);
+				ZZFontSize.CC_RECHARGE_COMMIT.apply(bt);
+				bt.setOnClickListener(this);
+				bt.setText("重试");
+			}
+		}
+
+		showPopup(false, ll);
+	}
+
+	private void tryInstall() {
+		Activity activity = getEnv().get(KeyGlobal.K_UI_ACTIVITY,
+				Activity.class);
+		UPPayAssistEx.installUPPayPlugin(activity);
+	}
+
+	private void tryPayUnion() {
+		Activity activity = getEnv().get(KeyGlobal.K_UI_ACTIVITY,
+				Activity.class);
+		tryPayUnion(activity, mTN);
+	}
+
+	private void tryPayUnion(Activity activity, String tn) {
+		int ret = UPPayAssistEx.startPay(activity, null, null, tn, serverMode);
+		if (ret == UPPayAssistEx.PLUGIN_NOT_FOUND) {
+			show_install_plugin();
+		} else {
+			showPopup_Wait(ZZStr.CC_RECHARGE_WAIT_RESULT.str(), null);
+		}
 	}
 
 	public void showErr(String str) {
 		set_child_visibility(IDC.ACT_ERR, VISIBLE);
 		set_child_visibility(IDC.ACT_NORMAL, GONE);
 		set_child_text(IDC.TV_ERR_TIP, str);
-	}
-
-	@Override
-	public void onClick(View v) {
-		final int id = v.getId();
-		IDC idc = IDC.fromID(id);
-		switch (idc) {
-		default:
-			super.onClick(v);
-			break;
-		}
 	}
 
 	@Override

@@ -351,6 +351,30 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		void onTimeOut();
 	}
 
+	/** 等待 20 秒后取消 popup 锁，以免子界面加载失败而用户无法取消 popup 遮罩 */
+	protected final IWaitTimeout DEFAULT_TIMEOUT_AUTO_UNLOCK = new IWaitTimeout() {
+
+		@Override
+		public void onTimeOut() {
+			showPopup_EnableAutoClose(true);
+		}
+
+		@Override
+		public int getTimeout() {
+			return 0;
+		}
+
+		@Override
+		public String getTickCountDesc(int timeGap) {
+			return "";
+		}
+
+		@Override
+		public int getStart() {
+			return 20;
+		}
+	};
+
 	/** 弹出等待进度，此弹出视图只能主动关闭，不可通过单击关闭，其文本标签ID为 {@link IDC#TV_POPUP_WAIT_LABEL} */
 	protected void showPopup_Wait() {
 		showPopup_Wait(null, null);

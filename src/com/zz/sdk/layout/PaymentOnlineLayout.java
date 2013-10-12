@@ -20,8 +20,6 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 import com.zz.sdk.MSG_STATUS;
-import com.zz.sdk.MSG_TYPE;
-import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.activity.ParamChain.ValType;
 import com.zz.sdk.entity.PayChannel;
@@ -33,7 +31,6 @@ import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants.ZZStr;
-import com.zz.sdk.util.Utils;
 
 /***
  * Web版本在线支付。
@@ -290,7 +287,7 @@ class PaymentOnlineLayout extends BaseLayout {
 	@Override
 	public boolean isExitEnabled() {
 		boolean ret = super.isExitEnabled();
-		if (ret) {// ! TODO: 如果提示用户是否退出
+		if (ret) {
 		}
 		return ret;
 	}

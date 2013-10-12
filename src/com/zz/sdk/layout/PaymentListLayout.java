@@ -1248,30 +1248,8 @@ public class PaymentListLayout extends CCBaseLayout {
 			host.enter(getClass().getClassLoader(), clazz.getName(), env);
 		}
 
-		// 等待 20 秒后取消 popup 锁，以免子界面加载失败而用户无法取消 popup 遮罩
-		IWaitTimeout timeoutCB = new IWaitTimeout() {
-
-			@Override
-			public void onTimeOut() {
-				showPopup_EnableAutoClose(true);
-			}
-
-			@Override
-			public int getTimeout() {
-				return 0;
-			}
-
-			@Override
-			public String getTickCountDesc(int timeGap) {
-				return "";
-			}
-
-			@Override
-			public int getStart() {
-				return 20;
-			}
-		};
-		showPopup_Wait(ZZStr.CC_RECHARGE_WAIT_RESULT.str(), timeoutCB);
+		showPopup_Wait(ZZStr.CC_RECHARGE_WAIT_RESULT.str(),
+				DEFAULT_TIMEOUT_AUTO_UNLOCK);
 
 		return false;
 	}
