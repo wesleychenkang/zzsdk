@@ -34,8 +34,6 @@ public class DebugFlags {
 			try {
 				Thread.sleep(assign * 1000);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
 	}

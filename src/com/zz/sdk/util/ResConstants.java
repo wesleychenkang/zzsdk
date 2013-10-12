@@ -76,6 +76,19 @@ public class ResConstants {
 		/** 如需中止操作，请立即再次按下[返回] */
 		CC_EXIT_LOCKED_TIP("如需中止操作，请立即再次按下[返回]"), //
 
+		/** 等待充值结果…… */
+		CC_RECHARGE_WAIT_RESULT("等待充值结果……"), //
+
+		/** 充值结果：充值正在进行中，请稍后在游戏中查看 */
+		CC_RECHARGE_RESULT_SUCCESS(
+				"充值正在进行中，请稍后在游戏中查看，一般1-10分钟到账，如未到账，请联系客服。祝您游戏愉快！"),
+
+		/** 充值结果：充值操作被取消 */
+		CC_RECHARGE_RESULT_CANCEL("充值操作被取消！"),
+
+		/** 充值结果：充值未到账 */
+		CC_RECHARGE_RESULT_FAILED("充值未到账！请立即联系客服解决问题。祝您游戏愉快！"),
+
 		/** 拼命加载中... */
 		CC_HINT_LOADING("拼命加载中..."),
 

@@ -72,10 +72,13 @@ class PaymentUnionLayout extends BaseLayout {
 	private int mType;
 	private Result mPayResult;
 
+	private String mTN;
+
 	@Override
 	protected void onInitEnv(Context ctx, ParamChain env) {
 		mType = env.get(KeyPaymentList.K_PAY_CHANNELTYPE, Integer.class);
-		mPayResult = env.get(KeyPaymentList.K_PAY_RESULT, Result.class);
+		// mPayResult = env.get(KeyPaymentList.K_PAY_RESULT, Result.class);
+		mTN = env.get(KeyPaymentList.K_PAY_UNION_TN, String.class);
 	}
 
 	public PaymentUnionLayout(Context context, ParamChain env) {

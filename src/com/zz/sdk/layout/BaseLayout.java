@@ -257,7 +257,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	public BaseLayout(Context context, ParamChain env) {
 		super(context);
 		mContext = context;
-		mEnv = env.grow();
+		mEnv = env.grow(getClass().getName());
 		mRunState = RUNSTATE.UNINITIALIZED;
 		onInitEnv(context, mEnv);
 	}
@@ -394,12 +394,13 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 			pb.setIndeterminate(true);
 		}
 
-		{
+		if (timeoutCallback != null) {
 			TextView tv = create_normal_label(ctx, null);
 			ll.addView(tv, new LayoutParams(LP_MW));
 			tv.setId(IDC.TV_POPUP_WAIT_LABEL_SUMMARY.id());
 			tv.setGravity(Gravity.CENTER);
 			tv.setTextColor(ZZFontColor.CC_RECHAGRE_COST.color());
+			tv.setVisibility(GONE);
 			ZZFontSize.CC_RECHAGR_COST.apply(tv);
 		}
 
@@ -426,6 +427,11 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 						int e = s + mTimeout.getTimeout();
 						if (tick_count < s) {
 						} else if (tick_count < e) {
+							if (tick_count == s) {
+								set_child_visibility(
+										IDC.TV_POPUP_WAIT_LABEL_SUMMARY,
+										VISIBLE);
+							}
 							set_child_text(IDC.TV_POPUP_WAIT_LABEL_SUMMARY,
 									mTimeout.getTickCountDesc(e - tick_count));
 						} else {
@@ -532,7 +538,79 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 				vChild.getAnimation().start();
 			}
 
-			vPopup.setTag(auto_close);
+			show_popup_enable_auto_close(vPopup, auto_close);
+		}
+	}
+
+	/**
+	 * 弹出一个悬浮的文本提示语（框）
+	 * 
+	 * @see #showPopup_Tip(boolean, CharSequence)
+	 */
+	protected void showPopup_Tip(ZZStr str) {
+		showPopup_Tip(true, str.str());
+	}
+
+	/**
+	 * 弹出一个悬浮的文本提示语（框）
+	 * 
+	 * @see #showPopup_Tip(boolean, CharSequence)
+	 */
+	protected void showPopup_Tip(boolean autoClose, ZZStr str) {
+		showPopup_Tip(autoClose, str.str());
+	}
+
+	/**
+	 * 弹出一个悬浮的文本提示语（框）
+	 * 
+	 * @see #showPopup_Tip(boolean, CharSequence)
+	 */
+	protected void showPopup_Tip(CharSequence str) {
+		showPopup_Tip(true, str);
+	}
+
+	/**
+	 * 弹出一个悬浮的文本提示语（框）
+	 * 
+	 * @param autoClose
+	 *            是否允许单击关闭提示语
+	 * @param str
+	 *            提示语内容
+	 */
+	protected void showPopup_Tip(boolean autoClose, CharSequence str) {
+		Context ctx = mContext;
+		LinearLayout ll = new LinearLayout(ctx);
+		ll.setOrientation(VERTICAL);
+		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
+				Gravity.CENTER);
+		lp.setMargins(ZZDimen.CC_ROOTVIEW_PADDING_LEFT.px(),
+				ZZDimen.CC_ROOTVIEW_PADDING_TOP.px(),
+				ZZDimen.CC_ROOTVIEW_PADDING_RIGHT.px(),
+				ZZDimen.CC_ROOTVIEW_PADDING_BOTTOM.px());
+		ll.setLayoutParams(lp);
+		ll.setBackgroundDrawable(CCImg.BACKGROUND.getDrawble(ctx));
+		ll.setPadding(ZZDimen.CC_ROOTVIEW_PADDING_LEFT.px(),
+				ZZDimen.CC_ROOTVIEW_PADDING_TOP.px(),
+				ZZDimen.CC_ROOTVIEW_PADDING_RIGHT.px(),
+				ZZDimen.CC_ROOTVIEW_PADDING_BOTTOM.px());
+		{
+			TextView tv = create_normal_label(ctx, null);
+			ll.addView(tv, new LayoutParams(LP_MW));
+			tv.setSingleLine(false);
+			tv.setGravity(Gravity.CENTER);
+			tv.setText(str);
+		}
+		showPopup(autoClose, ll);
+	}
+
+	protected void showPopup_EnableAutoClose(boolean autoClose) {
+		show_popup_enable_auto_close(popup_get_view(), autoClose);
+	}
+
+	protected static void show_popup_enable_auto_close(View v, boolean autoClose) {
+		if (v != null) {
+			v.setTag(autoClose ? Boolean.TRUE : null);
 		}
 	}
 
@@ -779,7 +857,6 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 				popup.setFocusableInTouchMode(true);
 			}
 		}
-
 	}
 
 	protected View createView_subject(Context ctx) {
@@ -923,6 +1000,8 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	}
 
 	protected void clean() {
+		removeAllViews();
+
 		cancelCurrentTask();
 		removeActivityControlInterface();
 		removeExitTrigger();
@@ -1110,18 +1189,6 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 				return true;
 			}
 		}
-		return false;
-	}
-
-	/**
-	 * 通知调用者，此次操作成功了，如果有设置自动关闭，则将自动调用 {@link ILayoutHost#exit()}
-	 * 
-	 * @param arg1
-	 * @param arg2
-	 * @param obj
-	 * @return
-	 */
-	protected boolean notifyCaller_Success(int arg1, int arg2, Object obj) {
 		return false;
 	}
 }

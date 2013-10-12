@@ -7,7 +7,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Pair;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,13 +18,12 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.MSG_TYPE;
 import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.activity.ParamChain;
-import com.zz.sdk.activity.ParamChain.KeyCaller;
+import com.zz.sdk.activity.ParamChain.ValType;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.Result;
 import com.zz.sdk.layout.PaymentListLayout.ChargeStyle;
@@ -34,8 +32,6 @@ import com.zz.sdk.protocols.EmptyActivityControlImpl;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.Logger;
-import com.zz.sdk.util.ResConstants.CCImg;
-import com.zz.sdk.util.ResConstants.Config.ZZDimen;
 import com.zz.sdk.util.ResConstants.ZZStr;
 import com.zz.sdk.util.Utils;
 
@@ -45,14 +41,15 @@ import com.zz.sdk.util.Utils;
  * <b>输入:</b>
  * <ul>
  * <li>{@link KeyPaymentList#K_PAY_ONLINE_URL}</li>
- * <li>{@link KeyPaymentList.K_PAY_ONLINE_URL_GUARD}</li>
- * <li>{@link KeyPaymentList.K_PAY_ORDERNUMBER}</li>
- * <li>{@link KeyPaymentList.K_PAY_AMOUNT}</li>
+ * <li>{@link KeyPaymentList#K_PAY_ONLINE_URL_GUARD}</li>
+ * <li>{@link KeyPaymentList#K_PAY_ORDERNUMBER}</li>
+ * <li>{@link KeyPaymentList#K_PAY_AMOUNT}</li>
  * </ul>
  * <p/>
  * <b>输出:</b>
- * 
- * 
+ * <ul>
+ * <li>{@link KeyPaymentList#K_PAY_RESULT}</li>
+ * </ul>
  * <p/>
  * 
  * @author nxliao
@@ -71,7 +68,6 @@ class PaymentOnlineLayout extends BaseLayout {
 
 	/** 支付状态 */
 	private int mPayResultState;
-	private PaymentCallbackInfo mCallbackInfo;
 
 	static enum IDC implements IIDC {
 		ACT_WAIT,
@@ -113,11 +109,6 @@ class PaymentOnlineLayout extends BaseLayout {
 		Float amount = env.get(KeyPaymentList.K_PAY_AMOUNT, Float.class);
 
 		mPayResultState = MSG_STATUS.EXIT_SDK;
-
-		mCallbackInfo = new PaymentCallbackInfo();
-		mCallbackInfo.amount = amount == null ? null : Utils.price2str(amount);
-		mCallbackInfo.cmgeOrderNumber = mOrderNumber;
-		mCallbackInfo.statusCode = PaymentCallbackInfo.STATUS_CANCEL;
 
 		if (mUrl == null || mUrlGuard == null || mType < 0) {
 			// finish();
@@ -270,15 +261,6 @@ class PaymentOnlineLayout extends BaseLayout {
 		removeExitTrigger();
 
 		if (state == MSG_STATUS.SUCCESS) {
-			ParamChain env = getEnv();
-			if (env != null) {
-				Boolean autoClose = env.get(KeyCaller.K_IS_CLOSE_WINDOW,
-						Boolean.class);
-				if (autoClose != null && autoClose) {
-					callHost_exit();
-					return;
-				}
-			}
 		} else {
 			// 取消支付
 			if (mPayMessage != null && mOrderNumber != null) {
@@ -316,23 +298,11 @@ class PaymentOnlineLayout extends BaseLayout {
 	@Override
 	public boolean onExit() {
 
-		// 发送此次充值结果
-		if (mPayResultState != MSG_STATUS.EXIT_SDK && mCallbackInfo != null) {
-			int code;
-			switch (mPayResultState) {
-			case MSG_STATUS.SUCCESS:
-				code = PaymentCallbackInfo.STATUS_SUCCESS;
-				break;
-			case MSG_STATUS.FAILED:
-				code = PaymentCallbackInfo.STATUS_FAILURE;
-				break;
-			case MSG_STATUS.CANCEL:
-			default:
-				code = PaymentCallbackInfo.STATUS_CANCEL;
-				break;
-			}
-			mCallbackInfo.statusCode = code;
-			notifyCaller(MSG_TYPE.PAYMENT, mPayResultState, mCallbackInfo);
+		if (mPayResultState != MSG_STATUS.EXIT_SDK) {
+			// XXX: 记录此次充值结果在上级环境中
+			getEnv().getParent(PaymentListLayout.class.getName()).add(
+					KeyPaymentList.K_PAY_RESULT, mPayResultState,
+					ValType.TEMPORARY);
 		}
 
 		boolean ret = super.onExit();
@@ -396,7 +366,9 @@ class PaymentOnlineLayout extends BaseLayout {
 
 			@Override
 			public void onTimeOut() {
-				popup_wait_timeout();
+				mPayResultState = MSG_STATUS.FAILED;
+				removeExitTrigger();
+				showPopup_Tip(false, ZZStr.CC_TRY_CONNECT_SERVER_TIMEOUT);
 			}
 
 			@Override
@@ -419,52 +391,12 @@ class PaymentOnlineLayout extends BaseLayout {
 		return ret;
 	}
 
-	/** 等待超时了 */
-	private void popup_wait_timeout() {
-
-		showToast(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
-
-		mPayResultState = MSG_STATUS.FAILED;
-
-		removeExitTrigger();
-
-		Context ctx = mContext;
-
-		// 创建一个提示语
-		{
-			LinearLayout ll = new LinearLayout(ctx);
-			ll.setOrientation(VERTICAL);
-			FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
-					Gravity.CENTER);
-			lp.setMargins(ZZDimen.CC_ROOTVIEW_PADDING_LEFT.px(),
-					ZZDimen.CC_ROOTVIEW_PADDING_TOP.px(),
-					ZZDimen.CC_ROOTVIEW_PADDING_RIGHT.px(),
-					ZZDimen.CC_ROOTVIEW_PADDING_BOTTOM.px());
-			ll.setLayoutParams(lp);
-			ll.setBackgroundDrawable(CCImg.BACKGROUND.getDrawble(ctx));
-			ll.setPadding(ZZDimen.CC_ROOTVIEW_PADDING_LEFT.px(),
-					ZZDimen.CC_ROOTVIEW_PADDING_TOP.px(),
-					ZZDimen.CC_ROOTVIEW_PADDING_RIGHT.px(),
-					ZZDimen.CC_ROOTVIEW_PADDING_BOTTOM.px());
-			{
-				TextView tv = create_normal_label(ctx,
-						ZZStr.CC_TRY_CONNECT_SERVER_TIMEOUT);
-				ll.addView(tv, new LayoutParams(LP_MW));
-				tv.setSingleLine(false);
-				tv.setGravity(Gravity.CENTER);
-			}
-			showPopup(false, ll);
-		}
-	}
-
 	protected WebView getWebView() {
 		return (mWebView != null/* &&mWebView.isac */) ? mWebView : null;
 	}
 
 	@Override
 	protected void clean() {
-		super.clean();
 		mUrl = null;
 		mUrlGuard = null;
 		mType = -1;
@@ -479,7 +411,9 @@ class PaymentOnlineLayout extends BaseLayout {
 			mWebView = null;
 		}
 
-		mCallbackInfo = null;
+		mPayResultState = MSG_STATUS.EXIT_SDK;
+
+		super.clean();
 	}
 }
 

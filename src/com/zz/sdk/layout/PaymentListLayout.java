@@ -4,9 +4,7 @@ import java.text.DecimalFormat;
 import java.util.Random;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -39,6 +37,7 @@ import android.widget.ViewSwitcher;
 import com.zz.sdk.BuildConfig;
 import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.MSG_TYPE;
+import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.activity.ParamChain.KeyCaller;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
@@ -50,7 +49,6 @@ import com.zz.sdk.entity.Result;
 import com.zz.sdk.entity.UserAction;
 import com.zz.sdk.layout.LayoutFactory.ILayoutHost;
 import com.zz.sdk.util.Constants;
-import com.zz.sdk.util.DialogUtil;
 import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants.CCImg;
@@ -78,24 +76,24 @@ public class PaymentListLayout extends CCBaseLayout {
 		/** 充值中心的风格，分<b> 充值模式 </b>和<b> 购买模式</b>，类型 {@link ChargeStyle} */
 		public static final String K_CHARGE_STYLE = _TAG_ + "charge_style";
 
-		/** 充值中心·支付类别，类型 {@link PayChannel} */
-		public static final String K_PAY_CHANNEL = _TAG_ + "pay_channel";
+		// /** 充值中心·支付类别，类型 {@link PayChannel} */
+		// public static final String K_PAY_CHANNEL = _TAG_ + "pay_channel";
 
-		/** 充值中心·支付类别，类型 {@link PayParam} */
-		public static final String K_PAY_PARAM = _TAG_ + "pay_channel";
+		// /** 充值中心·支付类别，类型 {@link PayParam} */
+		// public static final String K_PAY_PARAM = _TAG_ + "pay_param";
 
-		/** 充值中心·支付类别，类型 {@link Integer} */
+		/** 充值中心·支付类别，类型 {@link Integer}，取值 {@link PayChannel#type} */
 		public static final String K_PAY_CHANNELTYPE = _TAG_
 				+ "pay_channel_type";
 
-		/** 充值中心·服务器的返回值，类型 {@link Result} */
-		public static final String K_PAY_RESULT = _TAG_ + "pay_result";
+		// /** 充值中心·服务器的返回值，类型 {@link Result} */
+		// public static final String K_PAY_RESULT = _TAG_ + "pay_result";
 
 		/** 充值中心·服务器的返回值·订单号，类型 {@link String} */
 		public static final String K_PAY_ORDERNUMBER = _TAG_
 				+ "pay_order_number";
 
-		/** 充值中心·服务器的返回值·在线支付·初始URL地址，类型 {@link String} */
+		/** 充值中心·服务器的返回值·在线支付·初始URL地址，类型 {@link String}，取值 {@link Result#url} */
 		public static final String K_PAY_ONLINE_URL = _TAG_ + "pay_online_url";
 		/** 充值中心·服务器的返回值·在线支付·支付成功的URL地址，类型 {@link String} */
 		public static final String K_PAY_ONLINE_URL_GUARD = _TAG_
@@ -107,8 +105,15 @@ public class PaymentListLayout extends CCBaseLayout {
 		public static final String K_PAY_CARD_PASSWD = _TAG_
 				+ "pay_card_passwd";
 
-		/** 最近一次的充值状态，类型{@link MSG_STATUS} */
-		public static final String K_PAY_LASTSTATE = _TAG_ + "pay_last_state";
+		/** 充值中心·用于银联，类型{@link String}，取值 {@link Result#tn} */
+		public static final String K_PAY_UNION_TN = _TAG_ + "pay_union_tn";
+
+		// /** 最近一次的充值状态，类型{@link MSG_STATUS} */
+		// public static final String K_PAY_LASTSTATE = _TAG_ +
+		// "pay_last_state";
+
+		/** 充值中心·支付结果，类型 {@link Integer}，取值{@link MSG_STATUS}，属一次性数据 */
+		public static final String K_PAY_RESULT = _TAG_ + "pay_result";
 	}
 
 	/** 界面模式 */
@@ -327,6 +332,86 @@ public class PaymentListLayout extends CCBaseLayout {
 
 		}
 		return ret;
+	}
+
+	@Override
+	public boolean onResume() {
+		boolean ret = super.onResume();
+		if (ret) {
+			// TODO: 如果是从子界面返回来的，视情况显示支付结果
+			ParamChain env = getEnv();
+			Object result = env.remove(KeyPaymentList.K_PAY_RESULT);
+			if (result != null) {
+				if (result instanceof Integer) {
+					nofityPayResult(env, (Integer) result);
+					showPayResult(env, (Integer) result);
+				}
+			}
+		}
+		return ret;
+	}
+
+	private void nofityPayResult(ParamChain env, int state) {
+		int code;
+		switch (state) {
+		case MSG_STATUS.SUCCESS:
+			code = PaymentCallbackInfo.STATUS_SUCCESS;
+			break;
+		case MSG_STATUS.FAILED:
+			code = PaymentCallbackInfo.STATUS_FAILURE;
+			break;
+		case MSG_STATUS.CANCEL:
+		default:
+			code = PaymentCallbackInfo.STATUS_CANCEL;
+			break;
+		}
+		PaymentCallbackInfo info = new PaymentCallbackInfo();
+		Float amount = env.get(KeyPaymentList.K_PAY_AMOUNT, Float.class);
+		info.amount = amount == null ? null : Utils.price2str(amount);
+		info.cmgeOrderNumber = env.get(KeyPaymentList.K_PAY_ORDERNUMBER,
+				String.class);
+		info.statusCode = code;
+		notifyCaller(MSG_TYPE.PAYMENT, state, info);
+	}
+
+	private void showPayResult(ParamChain env, int state) {
+		final ZZStr str;
+		final boolean autoclose; // 是否自动关闭
+		switch (state) {
+		case MSG_STATUS.SUCCESS: {
+			str = ZZStr.CC_RECHARGE_RESULT_SUCCESS;
+			Boolean autoClose = (env == null) ? null : env.get(
+					KeyCaller.K_IS_CLOSE_WINDOW, Boolean.class);
+			if (autoClose != null && autoClose) {
+				autoclose = true;
+			} else {
+				autoclose = false;
+			}
+		}
+			break;
+
+		case MSG_STATUS.FAILED:
+			str = ZZStr.CC_RECHARGE_RESULT_FAILED;
+			autoclose = false;
+			break;
+
+		case MSG_STATUS.CANCEL:
+		case MSG_STATUS.EXIT_SDK:
+		default:
+			str = null;
+			autoclose = false;
+			break;
+		}
+		if (str != null) {
+			if (autoclose) {
+				callHost_exit();
+				showToast(str);
+			} else {
+				showPopup_Tip(str);
+			}
+		} else {
+			hidePopup();
+		}
 	}
 
 	private void handleUIChanged(int etID) {
@@ -1104,7 +1189,6 @@ public class PaymentListLayout extends CCBaseLayout {
 		Logger.d("订单号------>" + result.orderNumber);
 		if (!result.isSuccess()) {
 			showToast(result.getDescription());
-			// hideDialog();
 			return false;
 		}
 
@@ -1112,7 +1196,7 @@ public class PaymentListLayout extends CCBaseLayout {
 				ValType.TEMPORARY);
 		env.add(KeyPaymentList.K_PAY_ORDERNUMBER, result.orderNumber,
 				ValType.TEMPORARY);
-		env.add(KeyPaymentList.K_PAY_RESULT, result, ValType.TEMPORARY);
+		// env.add(KeyPaymentList.K_PAY_RESULT, result, ValType.TEMPORARY);
 
 		// param.amount = String.valueOf(((Float) getValue(VAL.PRICE))
 		// .floatValue());
@@ -1120,7 +1204,6 @@ public class PaymentListLayout extends CCBaseLayout {
 		switch (channel.type) {
 		case PayChannel.PAY_TYPE_ALIPAY:
 		case PayChannel.PAY_TYPE_TENPAY: {
-			String url = result.url;
 			String urlGuard;
 			if (channel.type == PayChannel.PAY_TYPE_TENPAY)
 				urlGuard = Constants.GUARD_Tenpay_callback;
@@ -1128,7 +1211,8 @@ public class PaymentListLayout extends CCBaseLayout {
 				urlGuard = Constants.GUARD_Alipay_callback;
 			else
 				urlGuard = null;
-			mEnv.add(KeyPaymentList.K_PAY_ONLINE_URL, url, ValType.TEMPORARY);
+			mEnv.add(KeyPaymentList.K_PAY_ONLINE_URL, result.url,
+					ValType.TEMPORARY);
 			mEnv.add(KeyPaymentList.K_PAY_ONLINE_URL_GUARD, urlGuard,
 					ValType.TEMPORARY);
 			clazz = PaymentOnlineLayout.class;
@@ -1136,20 +1220,21 @@ public class PaymentListLayout extends CCBaseLayout {
 			break;
 
 		case PayChannel.PAY_TYPE_UNMPAY: {
-			// TODO:
+			mEnv.add(KeyPaymentList.K_PAY_UNION_TN, result.tn,
+					ValType.TEMPORARY);
 			clazz = PaymentUnionLayout.class;
 		}
 			break;
 
 		case PayChannel.PAY_TYPE_YEEPAY_LT:
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
+		case PayChannel.PAY_TYPE_YEEPAY_DX:
 			// 充值卡类，没有下一界面，已经是充值成功了
+			nofityPayResult(env, MSG_STATUS.SUCCESS);
+			showPayResult(env, MSG_STATUS.SUCCESS);
 			return true;
 
 		case PayChannel.PAY_TYPE_ZZCOIN:
-			break;
-
-		case PayChannel.PAY_TYPE_YEEPAY_DX:
 			break;
 
 		case PayChannel.PAY_TYPE_KKFUNPAY:
@@ -1162,6 +1247,31 @@ public class PaymentListLayout extends CCBaseLayout {
 		if (clazz != null) {
 			host.enter(getClass().getClassLoader(), clazz.getName(), env);
 		}
+
+		// 等待 20 秒后取消 popup 锁，以免子界面加载失败而用户无法取消 popup 遮罩
+		IWaitTimeout timeoutCB = new IWaitTimeout() {
+
+			@Override
+			public void onTimeOut() {
+				showPopup_EnableAutoClose(true);
+			}
+
+			@Override
+			public int getTimeout() {
+				return 0;
+			}
+
+			@Override
+			public String getTickCountDesc(int timeGap) {
+				return "";
+			}
+
+			@Override
+			public int getStart() {
+				return 20;
+			}
+		};
+		showPopup_Wait(ZZStr.CC_RECHARGE_WAIT_RESULT.str(), timeoutCB);
 
 		return false;
 	}
@@ -1231,13 +1341,29 @@ public class PaymentListLayout extends CCBaseLayout {
 
 		PayParam payParam = genPayParam(mContext, getEnv(), channel.type);
 
-		final Dialog dialog = DialogUtil.showProgress(
-				mEnv.get(KeyGlobal.K_UI_ACTIVITY, Activity.class),
-				ZZStr.CC_TRY_CONNECT_SERVER.str(), true);
-		dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+		setExitTrigger(-1, ZZStr.CC_TRY_CONNECT_SERVER.str());
+
+		showPopup_Wait(ZZStr.CC_TRY_CONNECT_SERVER.str(), new IWaitTimeout() {
+
 			@Override
-			public void onCancel(DialogInterface dialog) {
-				showToast(ZZStr.CC_TRY_CONNECT_SERVER_CANCELD);
+			public void onTimeOut() {
+				resetExitTrigger();
+				showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
+			}
+
+			@Override
+			public int getTimeout() {
+				return 40;
+			}
+
+			@Override
+			public String getTickCountDesc(int timeGap) {
+				return String.format("> %02d <", timeGap);
+			}
+
+			@Override
+			public int getStart() {
+				return 8;
 			}
 		});
 
@@ -1245,21 +1371,31 @@ public class PaymentListLayout extends CCBaseLayout {
 			@Override
 			public void onResult(AsyncTask<?, ?, ?> task, Object token,
 					Result result) {
-				// TODO Auto-generated method stub
 				if (isCurrentTaskFinished(task)) {
-					if (result == null || !result.isSuccess()) {
-						showToast(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
-					} else {
-						enterPayDetail(getHost(), (PayChannel) token, result);
-					}
+					tryEnterPayDetail(getHost(), (PayChannel) token, result);
 				}
-				dialog.dismiss();
 			}
 		};
 		AsyncTask<?, ?, ?> task = PayTask.createAndStart(mContext, cb, channel,
 				channel.type, payParam);
 		setCurrentTask(task);
 		return false;
+	}
+
+	private boolean tryEnterPayDetail(ILayoutHost host, PayChannel channel,
+			Result result) {
+		hidePopup();
+		if (host == null || channel == null || result == null
+				|| !result.isSuccess()) {
+			showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
+		} else {
+			return enterPayDetail(host, channel, result);
+		}
+		return false;
+	}
+
+	protected void resetExitTrigger() {
+		setExitTrigger(-1, null);
 	}
 
 	private PayParam genPayListParam(Context ctx, ParamChain env) {
@@ -1515,8 +1651,9 @@ class PayListTask extends AsyncTask<Object, Void, PayChannel[]> {
 	protected void onPostExecute(PayChannel[] result) {
 		if (mCallback != null) {
 			mCallback.onResult(this, mToken, result);
-			mCallback = null;
-			mToken = null;
 		}
+		// clean
+		mCallback = null;
+		mToken = null;
 	}
 }
