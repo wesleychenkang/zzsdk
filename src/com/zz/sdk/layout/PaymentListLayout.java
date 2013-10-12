@@ -1293,7 +1293,7 @@ public class PaymentListLayout extends CCBaseLayout {
 
 		Float amount = env.get(KeyPaymentList.K_PAY_AMOUNT, Float.class);
 		payParam.amount = Utils.price2str(amount == null ? 0 : amount);
-		
+
 		payParam.requestId = "";
 		switch (payType) {
 		case PayChannel.PAY_TYPE_ALIPAY:
@@ -1391,9 +1391,8 @@ public class PaymentListLayout extends CCBaseLayout {
 	private void showPopup_ChargePull(float priceList[]) {
 		Context ctx = mContext;
 		LinearLayout ll = new LinearLayout(ctx);
-		ll.setPadding(DimensionUtil.dip2px(ctx, 48),
-				DimensionUtil.dip2px(ctx, 5), DimensionUtil.dip2px(ctx, 48),
-				DimensionUtil.dip2px(ctx, 30));
+		ll.setPadding(ZZDimen.dip2px(48), ZZDimen.dip2px(5),
+				ZZDimen.dip2px(48), ZZDimen.dip2px(30));
 		if (priceList == null || priceList.length == 0) {
 			TextView tv = create_normal_label(ctx, ZZStr.CC_RECHARGE_LIST_NONE);
 			ll.addView(tv, new LayoutParams(LP_WW));
@@ -1401,7 +1400,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			GridView gv = new TypeGridView(mContext);
 			ll.addView(gv, new LayoutParams(LP_MW));
 			gv.setSelector(android.R.color.transparent);
-			gv.setColumnWidth(DimensionUtil.dip2px(mContext, 80));
+			gv.setColumnWidth(ZZDimen.dip2px(80));
 			gv.setHorizontalSpacing(0);
 			gv.setVerticalSpacing(0);
 			gv.setNumColumns(GridView.AUTO_FIT);

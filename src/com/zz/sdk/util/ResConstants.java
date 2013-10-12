@@ -70,6 +70,9 @@ public class ResConstants {
 		/** 连接服务器失败，请稍候重试！ */
 		CC_TRY_CONNECT_SERVER_FAILED("连接服务器失败，请稍候重试！"),
 
+		/** 连接服务器超时，请继续等待或稍候重试！ */
+		CC_TRY_CONNECT_SERVER_TIMEOUT("连接服务器超时，请继续等待或稍候重试！"),
+
 		/** 如需中止操作，请立即再次按下[返回] */
 		CC_EXIT_LOCKED_TIP("如需中止操作，请立即再次按下[返回]"), //
 
@@ -259,6 +262,10 @@ public class ResConstants {
 			/** pixels */
 			public int px() {
 				return (int) (dimen * mDensity + 0.5f);
+			}
+
+			public static int dip2px(float d) {
+				return (int) (d * mDensity + 0.5f);
 			}
 		}
 	}

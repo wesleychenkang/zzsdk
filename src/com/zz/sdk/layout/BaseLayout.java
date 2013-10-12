@@ -37,7 +37,6 @@ import com.zz.sdk.layout.LayoutFactory.KeyLayoutFactory;
 import com.zz.sdk.protocols.ActivityControlInterface;
 import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.Constants;
-import com.zz.sdk.util.DimensionUtil;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
@@ -332,13 +331,33 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	// - 页内 popup 处理 -
 	//
 
-	/** 弹出等待进度，此弹出视图只能主动关闭，不可通过单击关闭，其文本标签ID为 {@link IDC#TV_POPUP_WAIT_LABEL} */
-	protected void showPopup_Wait() {
-		showPopup_Wait(null, 0, 0);
+	protected static interface IWaitTimeout {
+		/** 倒计时触发时间点，单位[秒] */
+		int getStart();
+
+		/** 倒计时时长，单位[秒] */
+		int getTimeout();
+
+		/**
+		 * 倒计时文本描述，如"剩余[%d]秒"
+		 * 
+		 * @param timeGap
+		 *            距离 {@link #getTimeout()} 的时间差
+		 * @return
+		 */
+		String getTickCountDesc(int timeGap);
+
+		/** 已超时 */
+		void onTimeOut();
 	}
 
-	protected void showPopup_Wait(CharSequence tip, int sWait, int sTimeout) {
-		showPopup_Wait(popup_get_view(), tip, sWait, sTimeout);
+	/** 弹出等待进度，此弹出视图只能主动关闭，不可通过单击关闭，其文本标签ID为 {@link IDC#TV_POPUP_WAIT_LABEL} */
+	protected void showPopup_Wait() {
+		showPopup_Wait(null, null);
+	}
+
+	protected void showPopup_Wait(CharSequence tip, IWaitTimeout timeoutCallback) {
+		showPopup_Wait(popup_get_view(), tip, timeoutCallback);
 	}
 
 	/**
@@ -348,13 +367,13 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	 *            载体容器
 	 * @param tip
 	 *            提示语
-	 * @param sWait
-	 *            倒计时触发时间点，单位[秒]
+	 * @param timeoutCallback
+	 *            倒计时回调
 	 * @param sTimeout
 	 *            倒计时长，单位[秒]
 	 */
 	protected void showPopup_Wait(View vPopup, CharSequence tip,
-			final int sWait, final int sTimeout) {
+			final IWaitTimeout timeoutCallback) {
 
 		Context ctx = mContext;
 		LinearLayout ll = new LinearLayout(ctx);
@@ -363,15 +382,25 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		ll.setLayoutParams(new FrameLayout.LayoutParams(
 				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
 				Gravity.CENTER));
-		// ll.setBackgroundDrawable(CCImg.BACKGROUND.getDrawble(ctx));
-		ll.setPadding(DimensionUtil.dip2px(ctx, 48),
-				DimensionUtil.dip2px(ctx, 5), DimensionUtil.dip2px(ctx, 48),
-				DimensionUtil.dip2px(ctx, 24));
+		ll.setBackgroundDrawable(CCImg.BACKGROUND.getDrawble(ctx));
+		ll.setPadding(ZZDimen.CC_ROOTVIEW_PADDING_LEFT.px(),
+				ZZDimen.CC_ROOTVIEW_PADDING_TOP.px(),
+				ZZDimen.CC_ROOTVIEW_PADDING_RIGHT.px(),
+				ZZDimen.CC_ROOTVIEW_PADDING_BOTTOM.px());
 
 		{
 			ProgressBar pb = new ProgressBar(ctx);
 			ll.addView(pb, new LayoutParams(LP_MW));
 			pb.setIndeterminate(true);
+		}
+
+		{
+			TextView tv = create_normal_label(ctx, null);
+			ll.addView(tv, new LayoutParams(LP_MW));
+			tv.setId(IDC.TV_POPUP_WAIT_LABEL_SUMMARY.id());
+			tv.setGravity(Gravity.CENTER);
+			tv.setTextColor(ZZFontColor.CC_RECHAGRE_COST.color());
+			ZZFontSize.CC_RECHAGR_COST.apply(tv);
 		}
 
 		{
@@ -383,30 +412,24 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 				tv.setText(tip);
 		}
 
-		{
-			TextView tv = create_normal_label(ctx, null);
-			ll.addView(tv, new LayoutParams(LP_MW));
-			tv.setId(IDC.TV_POPUP_WAIT_LABEL_SUMMARY.id());
-			tv.setGravity(Gravity.CENTER);
-		}
-
-		if (sTimeout > 0) {
+		if (timeoutCallback != null) {
 			ll.setTag(new Runnable() {
-				final int mWait = sWait, mTimeOut = sTimeout;
 				int tick_count = 0;
+				IWaitTimeout mTimeout = timeoutCallback;
 
 				@Override
 				public void run() {
-					if (isAlive() && popup_check_active_wait(this)) {
+					if (mTimeout != null && isAlive()
+							&& popup_check_active_wait(this)) {
 						tick_count++;
-						if (tick_count < mWait) {
-						} else if (tick_count == mWait) {
-						} else if (tick_count < mWait + mTimeOut) {
+						int s = mTimeout.getStart();
+						int e = s + mTimeout.getTimeout();
+						if (tick_count < s) {
+						} else if (tick_count < e) {
 							set_child_text(IDC.TV_POPUP_WAIT_LABEL_SUMMARY,
-									String.format("等待倒计时%d",
-											(mTimeOut + mWait - tick_count)));
+									mTimeout.getTickCountDesc(e - tick_count));
 						} else {
-							popup_wait_timeout();
+							mTimeout.onTimeOut();
 							return;
 						}
 						cycle();
@@ -421,14 +444,6 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		}
 
 		show_popup(vPopup, false, ll);
-	}
-
-	protected void popup_wait_timeout() {
-		set_child_text(IDC.TV_POPUP_WAIT_LABEL_SUMMARY, "等待超时!");
-	}
-
-	private View popup_get_view() {
-		return findViewById(IDC.ACT_POPUP.id());
 	}
 
 	/** 检查当前的等待弹出视图是否是指定的 */
@@ -458,43 +473,21 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		}
 	}
 
+	private View popup_get_view() {
+		return findViewById(IDC.ACT_POPUP.id());
+	}
+
 	/**
 	 * 页内“弹窗 ”(容器是一个{@link FrameLayout})
 	 * 
 	 * @param child
 	 */
 	protected void showPopup(View child) {
-		show_popup(popup_get_view(), true, child);
+		showPopup(true, child);
 	}
 
-	protected void tryHidePopup() {
-		View v = popup_get_view();
-		Object tag = v != null ? v.getTag() : null;
-		if (tag instanceof Boolean && (Boolean) tag) {
-			hide_popup(v);
-		} else {
-			if (DEBUG) {
-				Logger.d("popup view locked!");
-			}
-		}
-	}
-
-	protected void hidePopup() {
-		hide_popup(popup_get_view());
-	}
-
-	protected static void hide_popup(View popupView) {
-		if (popupView != null && popupView.getVisibility() != GONE) {
-			AnimationSet out = new AnimationSet(true);
-			out.setDuration(ANIMA_DUR_HIDE_POPUP);
-			out.addAnimation(new AlphaAnimation(1f, 0f));
-			out.setFillBefore(true);
-			popupView.startAnimation(out);
-			popupView.setVisibility(GONE);
-			if (popupView instanceof ViewGroup) {
-				((ViewGroup) popupView).removeAllViews();
-			}
-		}
+	protected void showPopup(boolean autoClose, View child) {
+		show_popup(popup_get_view(), autoClose, child);
 	}
 
 	/**
@@ -540,6 +533,36 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 			}
 
 			vPopup.setTag(auto_close);
+		}
+	}
+
+	protected void tryHidePopup() {
+		View v = popup_get_view();
+		Object tag = v != null ? v.getTag() : null;
+		if (tag instanceof Boolean && (Boolean) tag) {
+			hide_popup(v);
+		} else {
+			if (DEBUG) {
+				Logger.d("popup view locked!");
+			}
+		}
+	}
+
+	protected void hidePopup() {
+		hide_popup(popup_get_view());
+	}
+
+	protected static void hide_popup(View popupView) {
+		if (popupView != null && popupView.getVisibility() != GONE) {
+			AnimationSet out = new AnimationSet(true);
+			out.setDuration(ANIMA_DUR_HIDE_POPUP);
+			out.addAnimation(new AlphaAnimation(1f, 0f));
+			out.setFillBefore(true);
+			popupView.startAnimation(out);
+			popupView.setVisibility(GONE);
+			if (popupView instanceof ViewGroup) {
+				((ViewGroup) popupView).removeAllViews();
+			}
 		}
 	}
 
@@ -684,8 +707,8 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 				tv = new Button(ctx);
 				tv.setId(IDC.BT_CANCEL.id());
 				lp = new LayoutParams(LP_WW);
-				lp.topMargin = DimensionUtil.dip2px(ctx, 1);
-				lp.leftMargin = DimensionUtil.dip2px(ctx, 3);
+				lp.topMargin = ZZDimen.dip2px(1);
+				lp.leftMargin = ZZDimen.dip2px(3);
 				header.addView(tv, lp);
 				tv.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
 						CCImg.TITLE_BACK_DEFAULT, CCImg.TITLE_BACK_PRESSED));
@@ -698,15 +721,14 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 				tv.setId(IDC.TV_TITLE.id());
 				lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
 						LayoutParams.WRAP_CONTENT);
-				lp.bottomMargin = DimensionUtil.dip2px(ctx, 2);
-				lp.topMargin = DimensionUtil.dip2px(ctx, 2);
+				lp.bottomMargin = ZZDimen.dip2px(2);
+				lp.topMargin = ZZDimen.dip2px(2);
 				lp.weight = 1;
 				header.addView(tv, lp);
 				tv.setTextColor(0xffffe5c5);
 				tv.setTextSize(20);
-				tv.setPadding(DimensionUtil.dip2px(ctx, 4),
-						DimensionUtil.dip2px(ctx, 2), 0,
-						DimensionUtil.dip2px(ctx, 2));
+				tv.setPadding(ZZDimen.dip2px(4), ZZDimen.dip2px(2), 0,
+						ZZDimen.dip2px(2));
 				tv.setGravity(Gravity.CENTER);
 				// mTileType = tv;
 			}
@@ -715,8 +737,8 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 			{
 				tv = new Button(ctx);
 				lp = new LayoutParams(LP_WW);
-				lp.topMargin = DimensionUtil.dip2px(ctx, 1);
-				lp.rightMargin = DimensionUtil.dip2px(ctx, 3);
+				lp.topMargin = ZZDimen.dip2px(1);
+				lp.rightMargin = ZZDimen.dip2px(3);
 				header.addView(tv, lp);
 				tv.setId(IDC.BT_EXIT.id());
 				tv.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,

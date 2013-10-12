@@ -14,7 +14,6 @@ import android.widget.TextView;
 
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
-import com.zz.sdk.util.DimensionUtil;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
 import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
@@ -108,9 +107,8 @@ abstract class CCBaseLayout extends BaseLayout {
 				LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT,
 				Gravity.BOTTOM));
 		ll.setBackgroundDrawable(CCImg.BACKGROUND.getDrawble(ctx));
-		ll.setPadding(DimensionUtil.dip2px(ctx, 48),
-				DimensionUtil.dip2px(ctx, 5), DimensionUtil.dip2px(ctx, 48),
-				DimensionUtil.dip2px(ctx, 24));
+		ll.setPadding(ZZDimen.dip2px(48), ZZDimen.dip2px(5),
+				ZZDimen.dip2px(48), ZZDimen.dip2px(24));
 
 		AnimationSet in = new AnimationSet(true);
 		in.addAnimation(new AlphaAnimation(0f, 0.8f));
@@ -219,7 +217,7 @@ abstract class CCBaseLayout extends BaseLayout {
 			FrameLayout footer = new FrameLayout(ctx);
 			footer.setId(IDC.ACT_HEADER.id());
 			rv.addView(footer, new LayoutParams(LayoutParams.MATCH_PARENT,
-					DimensionUtil.dip2px(ctx, 36)));
+					ZZDimen.dip2px(36)));
 
 			ll = new LinearLayout(ctx);
 			footer.addView(ll, new LayoutParams(LP_MM));
@@ -238,8 +236,8 @@ abstract class CCBaseLayout extends BaseLayout {
 			tvHelp.setText(ZZStr.CC_HELP_TITLE.str());
 			tvHelp.setTextColor(ZZFontColor.CC_RECHARGE_HELP.color());
 			tvHelp.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
-			tvHelp.setCompoundDrawablePadding(DimensionUtil.dip2px(ctx, 8));
-			tvHelp.setPadding(DimensionUtil.dip2px(ctx, 4), 0, 0, 0);
+			tvHelp.setCompoundDrawablePadding(ZZDimen.dip2px(8));
+			tvHelp.setPadding(ZZDimen.dip2px(4), 0, 0, 0);
 			ZZFontSize.CC_RECHARGE_HELP.apply(tvHelp);
 			if (DEBUG_UI) {
 				tvHelp.setBackgroundColor(0x8000ff00);

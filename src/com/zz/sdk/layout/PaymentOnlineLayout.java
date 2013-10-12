@@ -7,6 +7,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Pair;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.MSG_TYPE;
@@ -33,6 +35,8 @@ import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.Logger;
+import com.zz.sdk.util.ResConstants.CCImg;
+import com.zz.sdk.util.ResConstants.Config.ZZDimen;
 import com.zz.sdk.util.ResConstants.ZZStr;
 import com.zz.sdk.util.Utils;
 
@@ -44,20 +48,18 @@ import com.zz.sdk.util.Utils;
  * @see Constants#GUARD_Alipay_callback
  * @see Constants#GUARD_Tenpay_callback
  */
-@SuppressLint("SetJavaScriptEnabled")
 class PaymentOnlineLayout extends BaseLayout {
 
 	private WebView mWebView;
 	private String mUrl;
 	private String mUrlGuard;
 	private int mType;
-	private String mAmount;
-	public String mOrderNumber;
+	private String mOrderNumber;
 	private ArrayList<Pair<String, String>> mPayMessages;
-	public String mPayMessage = "";
+	private String mPayMessage;
 
 	/** 支付状态 */
-	private int mPayResultState = MSG_STATUS.EXIT_SDK;
+	private int mPayResultState;
 	private PaymentCallbackInfo mCallbackInfo;
 
 	static enum IDC implements IIDC {
@@ -98,10 +100,11 @@ class PaymentOnlineLayout extends BaseLayout {
 		mOrderNumber = env.get(KeyPaymentList.K_PAY_ORDERNUMBER, String.class);
 
 		Float amount = env.get(KeyPaymentList.K_PAY_AMOUNT, Float.class);
-		mAmount = amount == null ? null : Utils.price2str(amount);
+
+		mPayResultState = MSG_STATUS.EXIT_SDK;
 
 		mCallbackInfo = new PaymentCallbackInfo();
-		mCallbackInfo.amount = mAmount;
+		mCallbackInfo.amount = amount == null ? null : Utils.price2str(amount);
 		mCallbackInfo.cmgeOrderNumber = mOrderNumber;
 		mCallbackInfo.statusCode = PaymentCallbackInfo.STATUS_CANCEL;
 
@@ -127,6 +130,7 @@ class PaymentOnlineLayout extends BaseLayout {
 		set_child_visibility(IDC.ACT_ERR, visibility ? GONE : VISIBLE);
 	}
 
+	@SuppressLint("SetJavaScriptEnabled")
 	@Override
 	protected void onInitUI(Context ctx) {
 		FrameLayout fl = getSubjectContainer();
@@ -170,7 +174,7 @@ class PaymentOnlineLayout extends BaseLayout {
 				@Override
 				public void onPageFinished(WebView view, String url) {
 					super.onPageFinished(view, url);
-					tryHidePopup_Wait();
+					hidePopup();
 				}
 
 				@Override
@@ -272,6 +276,7 @@ class PaymentOnlineLayout extends BaseLayout {
 					private final String msg = mPayMessage;
 					private final String order = mOrderNumber;
 
+					// ?!
 					@Override
 					public void run() {
 						String newmessage = "";
@@ -376,17 +381,70 @@ class PaymentOnlineLayout extends BaseLayout {
 				cb, null);
 		setCurrentTask(task);
 
-		showPopup_Wait(ZZStr.CC_TRY_CONNECT_SERVER.str(), 8, 60);
+		showPopup_Wait(ZZStr.CC_TRY_CONNECT_SERVER.str(), new IWaitTimeout() {
+
+			@Override
+			public void onTimeOut() {
+				popup_wait_timeout();
+			}
+
+			@Override
+			public int getTimeout() {
+				return 20;
+			}
+
+			@Override
+			public String getTickCountDesc(int timeGap) {
+				return String.format("- %02d -", timeGap);
+			}
+
+			@Override
+			public int getStart() {
+				return 8;
+			}
+		});
 		setExitTrigger(-1, ZZStr.CC_TRY_CONNECT_SERVER.str());
 
 		return ret;
 	}
 
-	@Override
-	protected void popup_wait_timeout() {
-		super.popup_wait_timeout();
+	/** 等待超时了 */
+	private void popup_wait_timeout() {
 
 		showToast(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
+
+		mPayResultState = MSG_STATUS.FAILED;
+
+		removeExitTrigger();
+
+		Context ctx = mContext;
+
+		// 创建一个提示语
+		{
+			LinearLayout ll = new LinearLayout(ctx);
+			ll.setOrientation(VERTICAL);
+			FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
+					Gravity.CENTER);
+			lp.setMargins(ZZDimen.CC_ROOTVIEW_PADDING_LEFT.px(),
+					ZZDimen.CC_ROOTVIEW_PADDING_TOP.px(),
+					ZZDimen.CC_ROOTVIEW_PADDING_RIGHT.px(),
+					ZZDimen.CC_ROOTVIEW_PADDING_BOTTOM.px());
+			ll.setLayoutParams(lp);
+			ll.setBackgroundDrawable(CCImg.BACKGROUND.getDrawble(ctx));
+			ll.setPadding(ZZDimen.CC_ROOTVIEW_PADDING_LEFT.px(),
+					ZZDimen.CC_ROOTVIEW_PADDING_TOP.px(),
+					ZZDimen.CC_ROOTVIEW_PADDING_RIGHT.px(),
+					ZZDimen.CC_ROOTVIEW_PADDING_BOTTOM.px());
+			{
+				TextView tv = create_normal_label(ctx,
+						ZZStr.CC_TRY_CONNECT_SERVER_TIMEOUT);
+				ll.addView(tv, new LayoutParams(LP_MW));
+				tv.setSingleLine(false);
+				tv.setGravity(Gravity.CENTER);
+			}
+			showPopup(false, ll);
+		}
 	}
 
 	protected WebView getWebView() {
@@ -440,7 +498,7 @@ class GetPayUrlMessageTask extends AsyncTask<Object, Void, Result> {
 
 		Logger.d("getPayUrlMessage");
 		if (PaymentOnlineLayout.DEBUG) {
-			Utils.debug_TrySleep(0);
+			DebugFlags.debug_TrySleep(0, 60);
 		}
 
 		Result ret = GetDataImpl.getInstance(ctx).getPayUrlMessage();

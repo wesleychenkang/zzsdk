@@ -604,19 +604,4 @@ public class Utils {
 	public static String price2str(double price) {
 		return PRICE_FORMAT.format(price);
 	}
-
-	public static void debug_TrySleep(int second) {
-		if (BuildConfig.DEBUG) {
-			// 测试等待超时
-			if (second == 0) {
-				second = new Random().nextInt(60);
-			}
-			try {
-				Thread.sleep(second * 1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
 }
