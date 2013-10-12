@@ -31,7 +31,6 @@ import com.zz.sdk.entity.Result;
 import com.zz.sdk.layout.PaymentListLayout.ChargeStyle;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
 import com.zz.sdk.protocols.EmptyActivityControlImpl;
-import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.Logger;
@@ -42,11 +41,23 @@ import com.zz.sdk.util.Utils;
 
 /***
  * Web版本在线支付。
+ * <p/>
+ * <b>输入:</b>
+ * <ul>
+ * <li>{@link KeyPaymentList#K_PAY_ONLINE_URL}</li>
+ * <li>{@link KeyPaymentList.K_PAY_ONLINE_URL_GUARD}</li>
+ * <li>{@link KeyPaymentList.K_PAY_ORDERNUMBER}</li>
+ * <li>{@link KeyPaymentList.K_PAY_AMOUNT}</li>
+ * </ul>
+ * <p/>
+ * <b>输出:</b>
+ * 
+ * 
+ * <p/>
  * 
  * @author nxliao
  * @version 0.1.20130521
- * @see Constants#GUARD_Alipay_callback
- * @see Constants#GUARD_Tenpay_callback
+ * @version 0.2.20131010 新的 {@link BaseLayout Layout} 规则
  */
 class PaymentOnlineLayout extends BaseLayout {
 
