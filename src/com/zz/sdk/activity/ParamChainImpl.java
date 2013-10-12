@@ -26,6 +26,9 @@ public class ParamChainImpl implements ParamChain {
 	/** 上一级环境 */
 	private ParamChainImpl mParent;
 
+	/** 别名 */
+	private String mAliasName;
+
 	/** 层级 */
 	private int mLevel;
 
@@ -335,6 +338,14 @@ public class ParamChainImpl implements ParamChain {
 	}
 
 	@Override
+	public ParamChain grow(String aliasName) {
+		ParamChainImpl p = new ParamChainImpl(this);
+		if (p != null)
+			p.mAliasName = aliasName;
+		return p;
+	}
+
+	@Override
 	public ParamChain grow(HashMap<String, Object> data) {
 		return new ParamChainImpl(this, data);
 	}
@@ -348,4 +359,14 @@ public class ParamChainImpl implements ParamChain {
 	public ParamChain generateUnion(String... keyList) {
 		return generateUnion(this, keyList);
 	}
+
+	@Override
+	public ParamChain getParent(String aliasName) {
+		if (aliasName.equals(mAliasName))
+			return this;
+		if (mParent != null)
+			return mParent.getParent(aliasName);
+		return null;
+	}
+
 }

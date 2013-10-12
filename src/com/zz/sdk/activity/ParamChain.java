@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import android.app.Activity;
 import android.os.Handler;
-import android.support.v4.app.FragmentManager;
 
 import com.zz.sdk.layout.LAYOUT_TYPE;
 
@@ -147,6 +146,15 @@ public interface ParamChain {
 	/**
 	 * 构造出一个子级变量环境
 	 * 
+	 * @param aliasName
+	 *            别名
+	 * @return
+	 */
+	public ParamChain grow(String aliasName);
+
+	/**
+	 * 构造出一个子级变量环境
+	 * 
 	 * @param data
 	 *            附加的变量表
 	 * @return
@@ -182,6 +190,15 @@ public interface ParamChain {
 	 * @return
 	 */
 	public ParamChain getParent();
+
+	/**
+	 * 根据别名返回父级环境，有可能返回自己
+	 * 
+	 * @param aliasName
+	 *            别名
+	 * @return
+	 */
+	public ParamChain getParent(String aliasName);
 
 	/**
 	 * 返回根级环境
