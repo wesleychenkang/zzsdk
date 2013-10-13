@@ -19,11 +19,6 @@ import com.zz.sdk.layout.LAYOUT_TYPE;
  * @version v0.1.0.20130927
  */
 public interface ParamChain {
-	// private static final ParamChain GLOBAL_INSTANCE = new ParamChain();
-	//
-	// static public ParamChain GLOBAL() {
-	// return GLOBAL_INSTANCE;
-	// }
 
 	/**
 	 * 全局变量名
@@ -57,23 +52,30 @@ public interface ParamChain {
 		/** 键：主视图类型, {@link LAYOUT_TYPE} */
 		public static final String K_UI_VIEW_TYPE = _TAG_ + "ui_view_type";
 
-		/** 键：价格, {@link Float}，单位 [卓越币]或[人民币]，与支付方式有关，精度 0.01 */
-		public static final String K_PAY_AMOUNT = _TAG_ + "pay_amount";
-
-		/** 键：汇率，{@link Float}，人民币与卓越币的兑换比例, 精度 0.01 */
-		public static final String K_PAY_COIN_RATE = _TAG_ + "pay_coin_rate";
-
 		/** 键：用户信息, {@link ParamChain} */
 		public static final String K_USER = _TAG_ + "user";
-
-		/** 键：IMSI, {@link String} */
-		public static final String K_DEV_IMSI = _TAG_ + "dev_imsi";
 
 		/** 键：帮助标题，{@link String} 用于展示给用户，内容是网页 html */
 		public static final String K_HELP_TITLE = _TAG_ + "help_title";
 
 		/** 键：帮助内容，{@link String} 用于展示给用户，内容是网页 html */
 		public static final String K_HELP_TOPIC = _TAG_ + "help_topic";
+	}
+
+	public static interface KeyDevice extends KeyGlobal {
+		static final String _TAG_ = KeyGlobal._TAG_ + "device" + _SEPARATOR_;
+
+		/** 键：IMSI, {@link String} */
+		public static final String K_IMSI = _TAG_ + "imsi";
+
+		/** 键：IMEI, {@link String} */
+		public static final String K_IMEI = _TAG_ + "imei";
+
+		/** 键：协议版本，{@link Integer} */
+		public static final String K_VERSION = _TAG_ + "version";
+
+		/** 键：SDK版本，{@link Integer} */
+		public static final String K_SDK_VERSION = _TAG_ + "sdk_version";
 	}
 
 	public static interface KeyCaller extends KeyGlobal {
@@ -125,7 +127,7 @@ public interface ParamChain {
 		/** 余额，{@link Float}，格式 0.00 */
 		public static final String K_COIN_BALANCE = _TAG_ + "coin_balance";
 
-		/** 卓越币与RMB的兑换比例，{@link Float}，格式 0.00 */
+		/** 键：汇率，卓越币与RMB的兑换比例，{@link Float}, 精度 0.01，格式 0.00 */
 		public static final String K_COIN_RATE = _TAG_ + "coin_rate";
 	}
 
@@ -192,6 +194,22 @@ public interface ParamChain {
 	public ParamChain getParent();
 
 	/**
+	 * 设置别名，仅可设置一次
+	 * 
+	 * @param aliasName
+	 *            别名
+	 * @return 是否设置成功
+	 */
+	public boolean setAliasName(String aliasName);
+
+	/**
+	 * 获取别名
+	 * 
+	 * @return
+	 */
+	public String getAliasName();
+
+	/**
 	 * 根据别名返回父级环境，有可能返回自己
 	 * 
 	 * @param aliasName
@@ -228,20 +246,6 @@ public interface ParamChain {
 	 * @return 是否成功
 	 */
 	public boolean add(String key, Object val, ValType type);
-
-	/**
-	 * 修改变量(当前级)
-	 * 
-	 * @param key
-	 * @param val
-	 * @return
-	 */
-	// public Object put(String key, Object val) {
-	// if (mDataTmp.containsKey(key)) {
-	// return mDataTmp.put(key, val);
-	// }
-	// return mData.put(key, val);
-	// }
 
 	/**
 	 * 删除(当前级)

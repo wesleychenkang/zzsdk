@@ -14,7 +14,7 @@ import com.zz.sdk.BuildConfig;
 public class ParamChainImpl implements ParamChain {
 	private static final ParamChainImpl GLOBAL_INSTANCE = new ParamChainImpl();
 
-	static public ParamChainImpl GLOBAL() {
+	static public ParamChain GLOBAL() {
 		return GLOBAL_INSTANCE;
 	}
 
@@ -340,8 +340,7 @@ public class ParamChainImpl implements ParamChain {
 	@Override
 	public ParamChain grow(String aliasName) {
 		ParamChainImpl p = new ParamChainImpl(this);
-		if (p != null)
-			p.mAliasName = aliasName;
+		p.setAliasName(aliasName);
 		return p;
 	}
 
@@ -367,6 +366,19 @@ public class ParamChainImpl implements ParamChain {
 		if (mParent != null)
 			return mParent.getParent(aliasName);
 		return null;
+	}
+
+	@Override
+	public boolean setAliasName(String aliasName) {
+		if (mAliasName != null)
+			return false;
+		mAliasName = aliasName;
+		return true;
+	}
+
+	@Override
+	public String getAliasName() {
+		return mAliasName;
 	}
 
 }

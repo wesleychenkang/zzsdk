@@ -162,10 +162,6 @@ class PaymentUnionLayout extends BaseLayout {
 
 	/** 支付取消 */
 	private void onPayCancel() {
-		if (DebugFlags.DEBUG_PAY_CANCEL_AS_SUCCESS) {
-			onPaySuccess();
-			return;
-		}
 		notifyCallerResult(MSG_STATUS.CANCEL);
 	}
 
@@ -209,7 +205,7 @@ class PaymentUnionLayout extends BaseLayout {
 				Intent data) {
 			String pay_result = data != null ? data.getStringExtra(PAY_RESULT)
 					: null;
-			if (DebugFlags.DEBUG) {
+			if (DebugFlags.DEBUG_DEMO) {
 				showToast("[调试]充值结果： request=" + requestCode + " result="
 						+ resultCode + " data=" + data);
 			}
@@ -326,6 +322,7 @@ class PaymentUnionLayout extends BaseLayout {
 					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
 					Gravity.CENTER));
 			l2.setOrientation(HORIZONTAL);
+			l2.setPadding(pleft, ptop, pright, pbottom);
 
 			Button bt;
 			{
@@ -336,7 +333,7 @@ class PaymentUnionLayout extends BaseLayout {
 				bt.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
 						CCImg.BUTTON, CCImg.BUTTON_CLICK));
 				bt.setTextColor(ZZFontColor.CC_RECHARGE_COMMIT.color());
-				bt.setPadding(pleft, ptop, pright, pbottom);
+				bt.setPadding(pleft, 8, pright, 8);
 				ZZFontSize.CC_RECHARGE_COMMIT.apply(bt);
 				bt.setOnClickListener(this);
 				bt.setText("安装");
@@ -349,7 +346,7 @@ class PaymentUnionLayout extends BaseLayout {
 				bt.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
 						CCImg.BUY_BUTTON, CCImg.BUY_BUTTON_CLICK));
 				bt.setTextColor(ZZFontColor.CC_RECHARGE_COMMIT.color());
-				bt.setPadding(pleft, ptop, pright, pbottom);
+				bt.setPadding(pleft, 8, pright, 8);
 				ZZFontSize.CC_RECHARGE_COMMIT.apply(bt);
 				bt.setOnClickListener(this);
 				bt.setText("重试");

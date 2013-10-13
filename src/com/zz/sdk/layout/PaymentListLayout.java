@@ -19,7 +19,6 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.inputmethod.EditorInfo;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
@@ -40,15 +39,19 @@ import com.zz.sdk.MSG_TYPE;
 import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.activity.ParamChain.KeyCaller;
+import com.zz.sdk.activity.ParamChain.KeyDevice;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
 import com.zz.sdk.activity.ParamChain.KeyUser;
 import com.zz.sdk.activity.ParamChain.ValType;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.Result;
+import com.zz.sdk.entity.SMSChannelMessage;
 import com.zz.sdk.entity.UserAction;
 import com.zz.sdk.layout.LayoutFactory.ILayoutHost;
 import com.zz.sdk.util.Constants;
+import com.zz.sdk.util.DebugFlags;
+import com.zz.sdk.util.DebugFlags.KeyDebug;
 import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants.CCImg;
@@ -108,12 +111,19 @@ public class PaymentListLayout extends CCBaseLayout {
 		/** 充值中心·用于银联，类型{@link String}，取值 {@link Result#tn} */
 		public static final String K_PAY_UNION_TN = _TAG_ + "pay_union_tn";
 
+		/** 充值中心·用于话费支付，类型{@link SMSChannelMessage}，取值 {@link Result#attach2} */
+		public static final String K_PAY_SMS_CHANNELMESSAGE = _TAG_
+				+ "pay_sms_channel_message";
+
 		// /** 最近一次的充值状态，类型{@link MSG_STATUS} */
 		// public static final String K_PAY_LASTSTATE = _TAG_ +
 		// "pay_last_state";
 
 		/** 充值中心·支付结果，类型 {@link Integer}，取值{@link MSG_STATUS}，属一次性数据 */
 		public static final String K_PAY_RESULT = _TAG_ + "pay_result";
+
+		/** 键：价格, {@link Float}，单位 [卓越币]或[人民币]，与支付方式有关，精度 0.01 */
+		static final String K_PAY_AMOUNT = _TAG_ + "pay_amount";;
 	}
 
 	/** 界面模式 */
@@ -243,9 +253,9 @@ public class PaymentListLayout extends CCBaseLayout {
 		super.onInitEnv(ctx, env);
 		mPaymentTypeChoose = -1;
 		mRechargeFormat = new DecimalFormat(ZZStr.CC_PRICE_FORMAT.str());
-		mIMSI = Utils.getIMSI(ctx);
+		mIMSI = env.get(KeyDevice.K_IMSI, String.class);
 
-		Float o = env.get(KeyGlobal.K_PAY_COIN_RATE, Float.class);
+		Float o = env.get(KeyUser.K_COIN_RATE, Float.class);
 		if (o != null) {
 			ZZ_COIN_RATE = o.floatValue();
 		} else {
@@ -343,8 +353,24 @@ public class PaymentListLayout extends CCBaseLayout {
 			Object result = env.remove(KeyPaymentList.K_PAY_RESULT);
 			if (result != null) {
 				if (result instanceof Integer) {
-					nofityPayResult(env, (Integer) result);
-					showPayResult(env, (Integer) result);
+					int state = (Integer) result;
+
+					// 调试：伪装支付成功
+					if (DebugFlags.DEBUG_DEMO) {
+						if (state == MSG_STATUS.CANCEL) {
+							Boolean cs = env.get(
+									KeyDebug.K_DEBUG_PAY_CANCEL_AS_SUCCESS,
+									Boolean.class);
+							if (cs != null && cs
+									&& DebugFlags.RANDOM.nextBoolean()) {
+								Logger.d("D: debug - pay cancel as success");
+								state = MSG_STATUS.SUCCESS;
+							}
+						}
+					}
+
+					nofityPayResult(env, state);
+					showPayResult(env, state);
 				}
 			}
 		}
@@ -1015,10 +1041,6 @@ public class PaymentListLayout extends CCBaseLayout {
 	protected void onPayListUpdate(PayChannel[] result) {
 		if (!isAlive())
 			return;
-		ILayoutHost host = getHost();
-		if (host != null) {
-			host.hideWaitDialog();
-		}
 
 		if (result != null && result.length != 0) {
 			Logger.d("获取列表成功!");
@@ -1073,7 +1095,7 @@ public class PaymentListLayout extends CCBaseLayout {
 					channelMessages);
 			View v = findViewById(IDC.ACT_PAY_GRID.id());
 			if (v instanceof GridView)
-				((AbsListView) v).setAdapter(mPaymentListAdapter);
+				((GridView) v).setAdapter(mPaymentListAdapter);
 		} else {
 			mPaymentListAdapter.updatePayChannels(channelMessages);
 		}
@@ -1089,11 +1111,6 @@ public class PaymentListLayout extends CCBaseLayout {
 				}
 			}
 			updateUIStyle(mode);
-		}
-
-		ILayoutHost host = getHost();
-		if (host != null) {
-			host.hideWaitDialog();
 		}
 	}
 
@@ -1237,7 +1254,9 @@ public class PaymentListLayout extends CCBaseLayout {
 		case PayChannel.PAY_TYPE_ZZCOIN:
 			break;
 
-		case PayChannel.PAY_TYPE_KKFUNPAY:
+		case PayChannel.PAY_TYPE_KKFUNPAY: {
+			clazz = PaymentSMSLayout.class;
+		}
 			break;
 
 		default:
@@ -1266,7 +1285,9 @@ public class PaymentListLayout extends CCBaseLayout {
 		// 向服务器发送用户操作记录
 		final String dRequest;
 
-		switch (channel.type) {
+		final int type = channel.type;
+
+		switch (type) {
 		case PayChannel.PAY_TYPE_ALIPAY:
 			dRequest = UserAction.PALI;
 			break;
@@ -1274,11 +1295,9 @@ public class PaymentListLayout extends CCBaseLayout {
 			dRequest = UserAction.PTEN;
 			break;
 		case PayChannel.PAY_TYPE_YEEPAY_LT:
-			// dialog.show();
 			dRequest = UserAction.PYEE;
 			break;
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
-			// dialog.show();
 			dRequest = UserAction.PYEE;
 			break;
 
@@ -1286,29 +1305,9 @@ public class PaymentListLayout extends CCBaseLayout {
 			dRequest = UserAction.PUNION;
 			break;
 
-		case PayChannel.PAY_TYPE_KKFUNPAY: {
+		case PayChannel.PAY_TYPE_KKFUNPAY:
 			dRequest = UserAction.PKKFUN;
-
-			// TelephonyManager tm = (TelephonyManager)
-			// getSystemService(Context.TELEPHONY_SERVICE);
-			// imsi = tm.getSubscriberId();
-			// if (imsi == null || "".equals(imsi)) {
-			// if (mFlag.getAndClear(FLAG_TRY_SMS_MODE)) {
-			// ;
-			// } else {
-			// Utils.toastInfo(instance,
-			// "对不起，手机没有插入SIM卡，无法使用话费支付，请选择其它支付方式，如需帮助请联系客服!");
-			// }
-			// return;
-			// }
-			//
-			// if (DebugFlags.DEBUG) {
-			// imsi = DebugFlags.DEF_DEBUG_IMSI;
-			// }
-			// mPayParam.smsImsi = imsi;
-			// getCommandOrChannel("{a:'" + imsi + "'}", 3);
-		}
-			return true;
+			break;
 
 		case PayChannel.PAY_TYPE_YEEPAY_DX:
 		case PayChannel.PAY_TYPE_ZZCOIN:
@@ -1317,7 +1316,21 @@ public class PaymentListLayout extends CCBaseLayout {
 			return false;
 		}
 
-		PayParam payParam = genPayParam(mContext, getEnv(), channel.type);
+		PayParam payParam = genPayParam(mContext, getEnv(), type);
+
+		if (type == PayChannel.PAY_TYPE_KKFUNPAY) {
+			if (payParam == null || payParam.smsImsi == null) {
+				if (DEBUG) {
+					Logger.d("E: do not found IMSI!");
+				}
+				showPopup_Tip(ZZStr.CC_TRY_SMS_NO_IMSI);
+				return false;
+			} else {
+				if (DEBUG) {
+					Logger.d("D: use imsi = " + payParam.smsImsi);
+				}
+			}
+		}
 
 		setExitTrigger(-1, ZZStr.CC_TRY_CONNECT_SERVER.str());
 
@@ -1365,7 +1378,11 @@ public class PaymentListLayout extends CCBaseLayout {
 		hidePopup();
 		if (host == null || channel == null || result == null
 				|| !result.isSuccess()) {
-			showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
+			if (channel != null && channel.type == PayChannel.PAY_TYPE_KKFUNPAY) {
+				showPopup_Tip(ZZStr.CC_TRY_SMS_NO_CHANNEL);
+			} else {
+				showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
+			}
 		} else {
 			return enterPayDetail(host, channel, result);
 		}
@@ -1379,7 +1396,7 @@ public class PaymentListLayout extends CCBaseLayout {
 	private PayParam genPayListParam(Context ctx, ParamChain env) {
 		PayParam p = new PayParam();
 		p.serverId = env.get(KeyCaller.K_GAME_SERVER_ID, String.class);
-		p.smsImsi = env.get(KeyGlobal.K_DEV_IMSI, String.class);
+		p.smsImsi = env.get(KeyDevice.K_IMSI, String.class);
 		// TelephonyManager tm = (TelephonyManager)
 		// getSystemService(Context.TELEPHONY_SERVICE);
 		//
@@ -1423,11 +1440,11 @@ public class PaymentListLayout extends CCBaseLayout {
 			break;
 
 		case PayChannel.PAY_TYPE_KKFUNPAY:
-			payParam.smsImsi = env.get(KeyGlobal.K_DEV_IMSI, String.class);
+			payParam.smsImsi = env.get(KeyDevice.K_IMSI, String.class);
 			break;
 
 		case PayChannel.PAY_TYPE_KKFUNPAY_EX:
-			payParam.smsImsi = env.get(KeyGlobal.K_DEV_IMSI, String.class);
+			payParam.smsImsi = env.get(KeyDevice.K_IMSI, String.class);
 			break;
 		}
 		return payParam;

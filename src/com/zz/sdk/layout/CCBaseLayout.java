@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
+import com.zz.sdk.activity.ParamChain.KeyUser;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
 import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
@@ -69,7 +70,9 @@ abstract class CCBaseLayout extends BaseLayout {
 
 	@Override
 	protected void onInitEnv(Context ctx, ParamChain env) {
-		setCoinBalance(0f);
+
+		Float coinBalance = env.get(KeyUser.K_COIN_BALANCE, Float.class);
+		setCoinBalance(coinBalance == null ? 0 : coinBalance);
 	}
 
 	/** 更新卓越币余额 */

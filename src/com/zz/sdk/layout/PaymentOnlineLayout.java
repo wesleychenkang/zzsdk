@@ -75,8 +75,6 @@ class PaymentOnlineLayout extends BaseLayout {
 
 		WV_PAYONLINE,
 
-		BT_REAL_EXIT,
-
 		_MAX_;
 
 		/** ID 的起点 */
@@ -238,12 +236,6 @@ class PaymentOnlineLayout extends BaseLayout {
 
 	/** 支付取消 */
 	private void onPayCancel() {
-
-		if (DebugFlags.DEBUG_PAY_CANCEL_AS_SUCCESS) {
-			onPaySuccess();
-			return;
-		}
-
 		notifyCallerResult(MSG_STATUS.CANCEL);
 	}
 

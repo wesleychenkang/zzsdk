@@ -27,8 +27,11 @@ import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.SDKManager;
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
+import com.zz.sdk.activity.ParamChain.KeyUser;
 import com.zz.sdk.layout.PaymentListLayout.ChargeStyle;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
+import com.zz.sdk.util.DebugFlags;
+import com.zz.sdk.util.DebugFlags.KeyDebug;
 
 /**
  * 演示 SDK 使用
@@ -60,6 +63,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final int IDC_BT_EXCHANGE = _IDC_START_ + 13;
 	private static final int IDC_BT_RECHARGE_RATE = _IDC_START_ + 14;
 	private static final int IDC_ET_RECHARGE_RATE = _IDC_START_ + 15;
+	private static final int IDC_CB_CANCEL_AS_SUCCESS = _IDC_START_ + 16;
 
 	/* 自定义消息 */
 	private static final int _MSG_USER_ = 2013;
@@ -68,6 +72,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final int MSG_ORDER_CALLBACK = _MSG_USER_ + 3;
 
 	private SDKManager mSDKManager;
+	private ParamChain mDebugEnv;
 
 	private LoginCallbackInfo mLoginCallbackInfo;
 	private TextView mTvTip;
@@ -82,6 +87,8 @@ public class MainActivity extends Activity implements OnClickListener {
 		super.onCreate(savedInstanceState);
 
 		Context ctx = getBaseContext();
+
+		init(ctx);
 
 		LinearLayout ll = new LinearLayout(ctx);
 		setContentView(ll);
@@ -108,7 +115,11 @@ public class MainActivity extends Activity implements OnClickListener {
 		}
 
 		mTvTip = (TextView) findViewById(IDC_TV_LOG);
+	}
+
+	private void init(Context ctx) {
 		mSDKManager = SDKManager.getInstance(ctx);
+		mDebugEnv = DebugFlags.get_env();
 	}
 
 	/** 创建所有的视图 */
@@ -186,7 +197,8 @@ public class MainActivity extends Activity implements OnClickListener {
 			checkLayout.addView(checksucces);
 			rootLayout.addView(checkLayout);
 		}
-		{
+
+		if (mDebugEnv != null) {
 			LinearLayout checkLayout = new LinearLayout(ctx);
 			checkLayout.setOrientation(LinearLayout.HORIZONTAL);
 			CheckBox checksucces = new CheckBox(ctx);
@@ -195,6 +207,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			checkLayout.addView(checksucces);
 			rootLayout.addView(checkLayout);
 		}
+
 		{
 			Button btnSetConfig = new Button(ctx);
 			btnSetConfig.setText("道具交换");
@@ -204,7 +217,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			rootLayout.addView(btnSetConfig);
 		}
 
-		{
+		if (mDebugEnv != null) {
 			LinearLayout ll = new LinearLayout(ctx);
 			rootLayout.addView(ll);
 			ll.setOrientation(LinearLayout.HORIZONTAL);
@@ -221,6 +234,13 @@ public class MainActivity extends Activity implements OnClickListener {
 			et.setId(IDC_ET_RECHARGE_RATE);
 			et.setInputType(InputType.TYPE_CLASS_NUMBER
 					| InputType.TYPE_NUMBER_FLAG_DECIMAL);
+		}
+		if (mDebugEnv != null) {
+			CheckBox box = new CheckBox(ctx);
+			box.setId(IDC_CB_CANCEL_AS_SUCCESS);
+			rootLayout.addView(box);
+			box.setOnClickListener(onClickListener);
+			box.setText("让「取消」支付变成支付成功");
 		}
 		// {
 		// Button btQuery = new Button(ctx);
@@ -321,10 +341,11 @@ public class MainActivity extends Activity implements OnClickListener {
 			}
 
 			// 设置模式
-			ChargeStyle chargeMode = ((CheckBox) findViewById(IDC_CHARGE_MODE_BUY))
-					.isChecked() ? ChargeStyle.BUY : ChargeStyle.RECHARGE;
-			mSDKManager.debug_GetParamChain().add(
-					KeyPaymentList.K_CHARGE_STYLE, chargeMode);
+			if (mDebugEnv != null) {
+				ChargeStyle chargeMode = ((CheckBox) findViewById(IDC_CHARGE_MODE_BUY))
+						.isChecked() ? ChargeStyle.BUY : ChargeStyle.RECHARGE;
+				mDebugEnv.add(KeyPaymentList.K_CHARGE_STYLE, chargeMode);
+			}
 
 			mSDKManager.showPaymentViewEx(mHandler, MSG_PAYMENT_CALLBACK,
 					CONFIG_GAME_SERVER_ID, CONFIG_GAME_SERVER_NAME,
@@ -358,27 +379,39 @@ public class MainActivity extends Activity implements OnClickListener {
 			break;
 
 		case IDC_BT_RECHARGE_RATE: {
-
-			String str = ((TextView) findViewById(IDC_ET_RECHARGE_RATE))
-					.getText().toString().trim();
-			float rate;
-			if (str.length() > 0) {
-				try {
-					rate = Float.parseFloat(str);
-				} catch (NumberFormatException e) {
+			if (mDebugEnv != null) {
+				String str = ((TextView) findViewById(IDC_ET_RECHARGE_RATE))
+						.getText().toString().trim();
+				float rate;
+				if (str.length() > 0) {
+					try {
+						rate = Float.parseFloat(str);
+					} catch (NumberFormatException e) {
+						rate = 0;
+					}
+				} else {
 					rate = 0;
 				}
-			} else {
-				rate = 0;
+				if (rate > 0.01f) {
+					mDebugEnv.add(KeyUser.K_COIN_RATE, rate);
+					pushLog("设置默认汇率: " + rate);
+				} else {
+					mDebugEnv.remove(KeyUser.K_COIN_RATE);
+					pushLog("还原默认汇率!");
+				}
 			}
+		}
+			break;
 
-			ParamChain env = mSDKManager.debug_GetParamChain();
-			if (rate > 0.01f) {
-				env.add(KeyGlobal.K_PAY_COIN_RATE, rate);
-				pushLog("设置默认汇率: " + rate);
-			} else {
-				env.remove(KeyGlobal.K_PAY_COIN_RATE);
-				pushLog("还原默认汇率!");
+		case IDC_CB_CANCEL_AS_SUCCESS: {
+			if (mDebugEnv != null) {
+				CheckBox cb = (CheckBox) v;
+				if (cb.isChecked()) {
+					mDebugEnv.add(KeyDebug.K_DEBUG_PAY_CANCEL_AS_SUCCESS,
+							Boolean.TRUE);
+				} else {
+					mDebugEnv.remove(KeyDebug.K_DEBUG_PAY_CANCEL_AS_SUCCESS);
+				}
 			}
 		}
 			break;

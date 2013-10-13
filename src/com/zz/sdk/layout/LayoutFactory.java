@@ -34,30 +34,6 @@ public class LayoutFactory {
 	}
 
 	public static interface ILayoutHost {
-
-		/**
-		 * 产生一个等待对话框（进度条），更详细的对话框构造，可通过 {@link KeyGlobal#K_UI_ACTIVITY} 获取
-		 * {@link Activity}
-		 * 
-		 * @param type
-		 *            类型
-		 * @param msg
-		 *            消息，可以为空(null)
-		 * @param cancelable
-		 *            是否允许用户点击对话框外部区域来关闭对话框
-		 * @param cancelListener
-		 *            关闭对话框的回调，可以为空(null)
-		 * @param cancelTag
-		 *            回调监听器的消息，可以为空(null)
-		 */
-		// public void showWaitDialog(int type, String msg, boolean cancelable,
-		// OnCancelListener cancelListener, Object cancelTag);
-
-		/**
-		 * 隐藏对话框
-		 */
-		public void hideWaitDialog();
-
 		/**
 		 * 返回上一界面
 		 */

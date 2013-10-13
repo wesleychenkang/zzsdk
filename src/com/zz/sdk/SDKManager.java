@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
-import android.sax.StartElementListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Pair;
 
@@ -14,13 +14,16 @@ import com.zz.sdk.activity.LoginActivity;
 import com.zz.sdk.activity.LoginForQiFu;
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.activity.ParamChain.KeyCaller;
+import com.zz.sdk.activity.ParamChain.KeyDevice;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
-import com.zz.sdk.activity.ParamChainImpl;
+import com.zz.sdk.activity.ParamChain.KeyUser;
 import com.zz.sdk.entity.SdkUser;
 import com.zz.sdk.entity.SdkUserTable;
 import com.zz.sdk.layout.LAYOUT_TYPE;
 import com.zz.sdk.util.Application;
+import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.GetDataImpl;
+import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants;
 import com.zz.sdk.util.Utils;
 
@@ -95,21 +98,51 @@ public class SDKManager {
 		// saveProjectIdToContext();
 		// }
 		// });
-		
-		ParamChain rootEnv = ParamChainImpl.GLOBAL();
-		rootEnv.add(KeyGlobal.K_HELP_TITLE,
-				"<html><font color='#c06000'>在线帮助</font></html>");
-		rootEnv.add(
-				KeyGlobal.K_HELP_TOPIC,
-				""
-						+ "1、充值成功后，<font color='#800000'>一般1-10分钟即可到账</font>，简单方便。<br/>"
-						+ "2、充值卡充值请根据充值卡面额选择正确的充值金额，并仔细核对卡号和密码。<br/>"
-						+ "3、如有疑问请联系客服，客服热线：020-85525051 客服QQ：9159。");
-		rootEnv.add(KeyGlobal.K_PAY_COIN_RATE, 0.01f);
-		
-		mRootEnv = rootEnv.grow();
-		
+
+		ParamChain env = BaseActivity.GET_GLOBAL_PARAM_CHAIN();
+
+		// 记录调试环境
+		env = DebugFlags.create_env(ctx, env);
+
+		// 初始化设备属性
+		env = init_device(ctx, env);
+
+		// 初始化用户属性
+		env = init_user(ctx, env);
+
+		mRootEnv = env.grow(SDKManager.class.getName());
+
 		ResConstants.init(ctx);
+	}
+
+	/** 初始化「用户」信息 */
+	private ParamChain init_user(Context ctx, ParamChain rootEnv) {
+		ParamChain env = rootEnv.grow(KeyUser.class.getName());
+		return env;
+	}
+
+	private ParamChain init_device(Context ctx, ParamChain rootEnv) {
+		ParamChain env = rootEnv.grow(KeyDevice.class.getName());
+
+		String imsi = Utils.getIMSI(ctx);
+		if (DebugFlags.DEBUG_DEMO) {
+			if (!"310260000000000".equals(imsi)) {
+				Logger.d("D: emulator's IMSI");
+				env.add(KeyDevice.K_IMSI, imsi);
+			}
+		} else {
+			env.add(KeyDevice.K_IMSI, imsi);
+		}
+
+		Object service = ctx.getSystemService(Context.TELEPHONY_SERVICE);
+		if (service instanceof TelephonyManager) {
+			TelephonyManager tm = (TelephonyManager) service;
+			String imei = tm.getDeviceId();
+			if (imei != null) {
+				env.add(KeyDevice.K_IMEI, imei);
+			}
+		}
+		return env;
 	}
 
 	private void init() {
@@ -343,31 +376,28 @@ public class SDKManager {
 			String gameServerID, final String serverName, final String roleId,
 			final String gameRole, final int amount,
 			final boolean isCloseWindow, final String callBackInfo) {
-		ParamChain rootEnv = mRootEnv.grow();
-		rootEnv.add(KeyCaller.K_MSG_HANDLE, callbackHandler);
-		rootEnv.add(KeyCaller.K_MSG_WHAT, what);
-		rootEnv.add(KeyCaller.K_GAME_SERVER_ID, gameServerID);
-		rootEnv.add(KeyCaller.K_SERVER_NAME, serverName);
-		rootEnv.add(KeyCaller.K_ROLE_ID, roleId);
-		rootEnv.add(KeyCaller.K_GAME_ROLE, gameRole);
-		rootEnv.add(KeyCaller.K_AMOUNT, amount);
-		rootEnv.add(KeyCaller.K_IS_CLOSE_WINDOW, isCloseWindow);
-		rootEnv.add(KeyCaller.K_CALL_BACK_INFO, callBackInfo);
-		startActivity(rootEnv, LAYOUT_TYPE.PaymentList);
+		ParamChain env = mRootEnv.grow(KeyCaller.class.getName());
+		env.add(KeyCaller.K_MSG_HANDLE, callbackHandler);
+		env.add(KeyCaller.K_MSG_WHAT, what);
+		env.add(KeyCaller.K_GAME_SERVER_ID, gameServerID);
+		env.add(KeyCaller.K_SERVER_NAME, serverName);
+		env.add(KeyCaller.K_ROLE_ID, roleId);
+		env.add(KeyCaller.K_GAME_ROLE, gameRole);
+		env.add(KeyCaller.K_AMOUNT, amount);
+		env.add(KeyCaller.K_IS_CLOSE_WINDOW, isCloseWindow);
+		env.add(KeyCaller.K_CALL_BACK_INFO, callBackInfo);
+		startActivity(env, LAYOUT_TYPE.PaymentList);
 	}
 
 	public void showExchange(Handler callbackHandler, int what, String projectID) {
-		// ParamChain rootEnv = ParamChain.generateUnion(mRootEnv,
-		// KeyGlobal.UI_NAME);
-		ParamChain rootEnv;
-		rootEnv = mRootEnv.grow();
-		startActivity(rootEnv, LAYOUT_TYPE.Exchange);
+		startActivity(mRootEnv.grow(KeyCaller.class.getName()),
+				LAYOUT_TYPE.Exchange);
 	}
 
-	private void startActivity(ParamChain rootEnv, LAYOUT_TYPE root_layout) {
-		ParamChain env = rootEnv.grow();
+	private void startActivity(ParamChain env, LAYOUT_TYPE root_layout) {
 		env.add(KeyGlobal.K_UI_VIEW_TYPE, root_layout);
-		env.getRoot().add(root_layout.key(), env, ParamChain.ValType.TEMPORARY);
+		env.getParent(BaseActivity.class.getName()).add(root_layout.key(), env,
+				ParamChain.ValType.TEMPORARY);
 
 		Intent intent = new Intent(mContext, BaseActivity.class);
 		intent.putExtra(KeyGlobal.K_UI_NAME, root_layout.key());
@@ -475,17 +505,5 @@ public class SDKManager {
 	public static String getVersionDesc() {
 		return "Ver:" + ZZSDKConfig.VERSION_CODE + "-"
 				+ ZZSDKConfig.VERSION_NAME + "-" + ZZSDKConfig.VERSION_DATE;
-	}
-
-	// -----------------------------------------------------------------------
-	//
-	// - 调试
-	public final static boolean DEBUG = BuildConfig.DEBUG && true;
-
-	public ParamChain debug_GetParamChain() {
-		if (DEBUG) {
-			return mRootEnv; // ParamChainImpl.GLOBAL();
-		}
-		return null;
 	}
 }

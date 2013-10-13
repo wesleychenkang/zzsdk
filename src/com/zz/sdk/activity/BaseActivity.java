@@ -3,9 +3,6 @@ package com.zz.sdk.activity;
 import java.util.Stack;
 
 import android.app.Activity;
-import android.app.Dialog;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -21,7 +18,6 @@ import com.zz.sdk.layout.LayoutFactory;
 import com.zz.sdk.layout.LayoutFactory.ILayoutView;
 import com.zz.sdk.layout.LayoutFactory.KeyLayoutFactory;
 import com.zz.sdk.protocols.ActivityControlInterface;
-import com.zz.sdk.util.DialogUtil;
 import com.zz.sdk.util.Logger;
 
 /**
@@ -32,12 +28,8 @@ import com.zz.sdk.util.Logger;
  */
 public class BaseActivity extends Activity {
 
-	/** 提示类框，如等待进度条等，关闭窗体时需要销毁 */
-	protected Dialog mDialog;
-
 	/** 视图栈 */
 	final private Stack<ILayoutView> mViewStack = new Stack<ILayoutView>();
-	private ILayoutView mActView;
 
 	private String mName;
 
@@ -45,14 +37,19 @@ public class BaseActivity extends Activity {
 
 	private Stack<ActivityControlInterface> mInterfacesStack;
 
+	private static ParamChain ROOT_ENV;
+
+	public static final synchronized ParamChain GET_GLOBAL_PARAM_CHAIN() {
+		if (ROOT_ENV == null) {
+			ROOT_ENV = ParamChainImpl.GLOBAL().grow(
+					BaseActivity.class.getName());
+		}
+		return ROOT_ENV;
+	}
+
 	static final class KeyBaseActivity implements KeyGlobal {
 		protected static final String _TAG_ = KeyGlobal._TAG_ + "base_activity"
 				+ _SEPARATOR_;
-
-		public static final String DIALOG_CANCEL_LISTENER = _TAG_
-				+ "dialog_cancel_listener";
-		public static final String DIALOG_CANCEL_TAG = _TAG_
-				+ "dialog_cancel_tag";
 	}
 
 	@Override
@@ -82,7 +79,8 @@ public class BaseActivity extends Activity {
 		if (intent != null) {
 			mName = intent.getStringExtra(KeyGlobal.K_UI_NAME);
 			if (mName != null) {
-				Object o = ParamChainImpl.GLOBAL().getRoot().remove(mName);
+				Object o = GET_GLOBAL_PARAM_CHAIN().getParent(
+						BaseActivity.class.getName()).remove(mName);
 				if (o instanceof ParamChain) {
 					env = (ParamChain) o;
 				}
@@ -99,18 +97,6 @@ public class BaseActivity extends Activity {
 		mRootEnv = env.grow();
 		mRootEnv.add(KeyGlobal.K_UI_ACTIVITY, activity, ValType.TEMPORARY);
 		mRootEnv.add(KeyLayoutFactory.K_HOST, new LayoutFactory.ILayoutHost() {
-			// @Override
-			// public void showWaitDialog(int type, String msg,
-			// boolean cancelable, OnCancelListener cancelListener,
-			// Object cancelTag) {
-			// showDialog(msg, cancelable, cancelListener, cancelTag);
-			// }
-
-			@Override
-			public void hideWaitDialog() {
-				hideDialog();
-			}
-
 			@Override
 			public void exit() {
 				end();
@@ -123,7 +109,6 @@ public class BaseActivity extends Activity {
 
 			@Override
 			public void enter(LAYOUT_TYPE type, ParamChain rootEnv) {
-				// TODO Auto-generated method stub
 				tryEnterView(type, rootEnv);
 			}
 
@@ -250,49 +235,7 @@ public class BaseActivity extends Activity {
 		clean();
 	}
 
-	private void showDialog(CharSequence msg, boolean cancelable,
-			OnCancelListener cancelListener, Object cancelTag) {
-		hideDialog();
-
-		mRootEnv.add(KeyBaseActivity.DIALOG_CANCEL_LISTENER, cancelListener,
-				ValType.TEMPORARY);
-		mRootEnv.add(KeyBaseActivity.DIALOG_CANCEL_TAG, cancelTag,
-				ValType.TEMPORARY);
-		mDialog = DialogUtil.showProgress(this, msg, cancelable);
-		mDialog.setOnCancelListener(new OnCancelListener() {
-			@Override
-			public void onCancel(DialogInterface dialog) {
-				if (mRootEnv != null) {
-					OnCancelListener l = mRootEnv.getOwned(
-							KeyBaseActivity.DIALOG_CANCEL_LISTENER,
-							OnCancelListener.class);
-					if (l != null) {
-						l.onCancel(dialog);
-					} else {
-						// end();
-						if (mActView != null) {
-							Object tag = mRootEnv
-									.getOwned(KeyBaseActivity.DIALOG_CANCEL_TAG);
-							mActView.onDialogCancel(dialog, tag);
-						}
-					}
-				}
-			}
-		});
-	}
-
-	/** 关闭提示框，如「等待框」等 */
-	protected void hideDialog() {
-		if (null != mDialog && mDialog.isShowing()) {
-			mDialog.dismiss();
-			mDialog = null;
-			mRootEnv.remove(KeyBaseActivity.DIALOG_CANCEL_LISTENER);
-			mRootEnv.remove(KeyBaseActivity.DIALOG_CANCEL_TAG);
-		}
-	}
-
 	protected void clean() {
-		hideDialog();
 		if (mViewStack != null && !mViewStack.isEmpty()) {
 			ILayoutView lv; // = mViewStack.pop();
 			while (!mViewStack.isEmpty()) {
