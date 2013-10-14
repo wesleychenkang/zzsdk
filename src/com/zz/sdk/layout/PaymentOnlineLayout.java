@@ -22,9 +22,7 @@ import android.widget.RelativeLayout;
 import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.activity.ParamChain.ValType;
-import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.Result;
-import com.zz.sdk.layout.PaymentListLayout.ChargeStyle;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
 import com.zz.sdk.protocols.EmptyActivityControlImpl;
 import com.zz.sdk.util.DebugFlags;
@@ -59,6 +57,7 @@ class PaymentOnlineLayout extends BaseLayout {
 	private String mUrl;
 	private String mUrlGuard;
 	private int mType;
+	private String mTypeName;
 	private String mOrderNumber;
 	private ArrayList<Pair<String, String>> mPayMessages;
 	private String mPayMessage;
@@ -99,6 +98,7 @@ class PaymentOnlineLayout extends BaseLayout {
 		mUrlGuard = env
 				.get(KeyPaymentList.K_PAY_ONLINE_URL_GUARD, String.class);
 		mType = env.get(KeyPaymentList.K_PAY_CHANNELTYPE, Integer.class);
+		mTypeName = env.get(KeyPaymentList.K_PAY_CHANNELNAME, String.class);
 		mOrderNumber = env.get(KeyPaymentList.K_PAY_ORDERNUMBER, String.class);
 
 		Float amount = env.get(KeyPaymentList.K_PAY_AMOUNT, Float.class);
@@ -189,13 +189,16 @@ class PaymentOnlineLayout extends BaseLayout {
 
 		// 设置标题
 		{
-			ChargeStyle cs = getEnv().get(KeyPaymentList.K_CHARGE_STYLE,
-					ChargeStyle.class);
-			ZZStr base_title = (cs == ChargeStyle.BUY) ? ZZStr.CC_RECHARGE_TITLE_SOCIAL
-					: ZZStr.CC_RECHARGE_TITLE;
-			String title = String.format("%s - %s", base_title.str(),
-					PayChannel.CHANNEL_NAME[mType]);
-			setTileTypeText(title);
+			ZZStr str = getEnv().getOwned(KeyPaymentList.K_PAY_TITLE,
+					ZZStr.class);
+			if (str != null) {
+				String title;
+				if (mTypeName != null) {
+					title = String.format("%s - %s", str.str(), mTypeName);
+				} else
+					title = str.str();
+				setTileTypeText(title);
+			}
 		}
 	}
 
@@ -400,6 +403,10 @@ class PaymentOnlineLayout extends BaseLayout {
 			mWebView = null;
 		}
 
+		mPayMessages = null;
+		mPayMessage = null;
+		mOrderNumber = null;
+		mTypeName = null;
 		mPayResultState = MSG_STATUS.EXIT_SDK;
 
 		super.clean();

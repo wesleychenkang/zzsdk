@@ -414,7 +414,9 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 
 		{
 			ProgressBar pb = new ProgressBar(ctx);
-			ll.addView(pb, new LayoutParams(LP_MW));
+			LayoutParams lp = new LayoutParams(LP_MW);
+			lp.gravity = Gravity.CENTER;
+			ll.addView(pb, lp);
 			pb.setIndeterminate(true);
 		}
 
@@ -706,7 +708,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		}
 	}
 
-	protected void set_child_text(IIDC id, String str) {
+	protected void set_child_text(IIDC id, CharSequence str) {
 		View v = findViewById(id.id());
 		if (v instanceof TextView) {
 			((TextView) v).setText(str);

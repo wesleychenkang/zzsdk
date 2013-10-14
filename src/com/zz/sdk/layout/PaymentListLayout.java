@@ -83,9 +83,22 @@ public class PaymentListLayout extends CCBaseLayout {
 		/** 充值中心·支付结果，类型 {@link Integer}，取值{@link MSG_STATUS}，属一次性数据 */
 		public static final String K_PAY_RESULT = _TAG_ + "pay_result";
 
+		/**
+		 * 充值中心·支付结果·真正成交金额，类型 {@link Float}，属一次性数据，一般金额在调用前已经确定 ，类似于
+		 * {@link #K_PAY_AMOUNT}
+		 */
+		public static final String K_PAY_RESULT_PRICE = _TAG_
+				+ "pay_result_price";
+
+		/** 充值中心的标题，类型 {@link String} */
+		public static final String K_PAY_TITLE = _TAG_ + "pay_title";
+
 		/** 充值中心·支付类别，类型 {@link Integer}，取值 {@link PayChannel#type} */
 		public static final String K_PAY_CHANNELTYPE = _TAG_
 				+ "pay_channel_type";
+		/** 充值中心·支付名称，类型 {@link Integer}，取值 {@link PayChannel#channelName} */
+		public static final String K_PAY_CHANNELNAME = _TAG_
+				+ "pay_channel_name";
 
 		/** 键：价格, {@link Float}，单位 [卓越币]或[人民币]，与支付方式有关，精度 0.01 */
 		static final String K_PAY_AMOUNT = _TAG_ + "pay_amount";;
@@ -282,6 +295,14 @@ public class PaymentListLayout extends CCBaseLayout {
 			}
 			mChargeStyle = ChargeStyle.UNKNOW;
 		}
+
+		ZZStr title;
+		if (mChargeStyle == ChargeStyle.BUY) {
+			title = ZZStr.CC_RECHARGE_TITLE_SOCIAL;
+		} else {
+			title = ZZStr.CC_RECHARGE_TITLE;
+		}
+		env.add(KeyPaymentList.K_PAY_TITLE, title, ValType.TEMPORARY);
 	}
 
 	public PaymentListLayout(Context ctx, ParamChain env) {
@@ -385,9 +406,14 @@ public class PaymentListLayout extends CCBaseLayout {
 			code = PaymentCallbackInfo.STATUS_CANCEL;
 			break;
 		}
+
 		PaymentCallbackInfo info = new PaymentCallbackInfo();
-		Float amount = env.get(KeyPaymentList.K_PAY_AMOUNT, Float.class);
+
+		Object price = env.remove(KeyPaymentList.K_PAY_RESULT_PRICE);
+		Float amount = (price instanceof Float) ? (Float) price : env.get(
+				KeyPaymentList.K_PAY_AMOUNT, Float.class);
 		info.amount = amount == null ? null : Utils.price2str(amount);
+
 		info.cmgeOrderNumber = env.get(KeyPaymentList.K_PAY_ORDERNUMBER,
 				String.class);
 		info.statusCode = code;
@@ -1005,11 +1031,9 @@ public class PaymentListLayout extends CCBaseLayout {
 			mErr.setGravity(Gravity.CENTER);
 		}
 
-		if (mChargeStyle == ChargeStyle.BUY) {
-			setTileTypeText(ZZStr.CC_RECHARGE_TITLE_SOCIAL.str());
-		} else {
-			setTileTypeText(ZZStr.CC_RECHARGE_TITLE.str());
-		}
+		setTileTypeText(getEnv().getOwned(KeyPaymentList.K_PAY_TITLE,
+				ZZStr.class).str());
+
 		updateRechargeCost();
 		updatePayType(-1);
 	}
@@ -1111,7 +1135,7 @@ public class PaymentListLayout extends CCBaseLayout {
 	/**
 	 * 自定义的 GridView
 	 */
-	class TypeGridView extends GridView {
+	static final class TypeGridView extends GridView {
 
 		public TypeGridView(Context context) {
 			super(context);
@@ -1139,8 +1163,13 @@ public class PaymentListLayout extends CCBaseLayout {
 		else
 			amount = (Float) getValue(VAL.COST);
 		if (amount < 0.01f) {
-			set_child_focuse(IDC.ED_RECHARGE_COUNT);
-			return ZZStr.CC_RECHARGE_COUNT_TITLE.str();
+			if (DebugFlags.DEBUG_DEMO
+					&& channel.type == PayChannel.PAY_TYPE_KKFUNPAY) {
+				// 演示模式，允许话费支付任意金额
+			} else {
+				set_child_focuse(IDC.ED_RECHARGE_COUNT);
+				return ZZStr.CC_RECHARGE_COUNT_TITLE.str();
+			}
 		}
 		mEnv.add(KeyPaymentList.K_PAY_AMOUNT, amount, ValType.TEMPORARY);
 
@@ -1204,6 +1233,8 @@ public class PaymentListLayout extends CCBaseLayout {
 		}
 
 		env.add(KeyPaymentList.K_PAY_CHANNELTYPE, channel.type,
+				ValType.TEMPORARY);
+		env.add(KeyPaymentList.K_PAY_CHANNELNAME, channel.channelName,
 				ValType.TEMPORARY);
 		env.add(KeyPaymentList.K_PAY_ORDERNUMBER, result.orderNumber,
 				ValType.TEMPORARY);

@@ -16,7 +16,6 @@ import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
 import com.zz.sdk.activity.ParamChain.ValType;
-import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.layout.PaymentListLayout.ChargeStyle;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
 import com.zz.sdk.protocols.EmptyActivityControlImpl;
@@ -89,6 +88,7 @@ class PaymentUnionLayout extends BaseLayout {
 	}
 
 	private int mType;
+	private String mTypeName;
 	private String mTN;
 	private String mOrderNumber;
 	private int mPayState = MSG_STATUS.EXIT_SDK;
@@ -96,6 +96,7 @@ class PaymentUnionLayout extends BaseLayout {
 	@Override
 	protected void onInitEnv(Context ctx, ParamChain env) {
 		mType = env.get(KeyPaymentList.K_PAY_CHANNELTYPE, Integer.class);
+		mTypeName = env.get(KeyPaymentList.K_PAY_CHANNELNAME, String.class);
 		mOrderNumber = env.get(KeyPaymentList.K_PAY_ORDERNUMBER, String.class);
 		mTN = env.get(KeyPaymentList.K_PAY_UNION_TN, String.class);
 	}
@@ -134,13 +135,16 @@ class PaymentUnionLayout extends BaseLayout {
 
 		// 设置标题
 		{
-			ChargeStyle cs = getEnv().get(KeyPaymentList.K_CHARGE_STYLE,
-					ChargeStyle.class);
-			String title = String.format("%s - %s",
-					(cs == ChargeStyle.BUY ? ZZStr.CC_RECHARGE_TITLE_SOCIAL
-							: ZZStr.CC_RECHARGE_TITLE).str(),
-					PayChannel.CHANNEL_NAME[mType]);
-			setTileTypeText(title);
+			ZZStr str = getEnv().getOwned(KeyPaymentList.K_PAY_TITLE,
+					ZZStr.class);
+			if (str != null) {
+				String title;
+				if (mTypeName != null) {
+					title = String.format("%s - %s", str.str(), mTypeName);
+				} else
+					title = str.str();
+				setTileTypeText(title);
+			}
 		}
 	}
 
@@ -387,5 +391,8 @@ class PaymentUnionLayout extends BaseLayout {
 	protected void clean() {
 		super.clean();
 		mType = -1;
+		mTypeName = null;
+		mOrderNumber = null;
+		mTN = null;
 	}
 }
