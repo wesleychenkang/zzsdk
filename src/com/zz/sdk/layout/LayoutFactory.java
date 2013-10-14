@@ -9,6 +9,7 @@ import android.view.View;
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
 import com.zz.sdk.protocols.ActivityControlInterface;
+import com.zz.sdk.util.Logger;
 
 /**
  * 视图工厂
@@ -192,7 +193,7 @@ public class LayoutFactory {
 				// return (ILayoutView) lFactoryClass.newInstance();
 			}
 		} catch (Exception e) {
-			System.err.println("Cannot instanciate layout [" + className + "]");
+			Logger.d("Cannot instanciate layout [" + className + "]");
 		}
 		return null;
 	}

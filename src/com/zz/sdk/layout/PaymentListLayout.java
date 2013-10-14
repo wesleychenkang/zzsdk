@@ -1445,7 +1445,7 @@ public class PaymentListLayout extends CCBaseLayout {
 		payParam.loginName = env.get(KeyUser.K_LOGIN_NAME, String.class);
 		payParam.gameRole = env.get(KeyCaller.K_GAME_ROLE, String.class);
 		payParam.serverId = env.get(KeyCaller.K_GAME_SERVER_ID, String.class);
-		payParam.projectId = Utils.getProjectId(ctx);
+		payParam.projectId = env.get(KeyDevice.K_PROJECT_ID, String.class);
 
 		Float amount = env.get(KeyPaymentList.K_PAY_AMOUNT, Float.class);
 		payParam.amount = Utils.price2str(amount == null ? 0 : amount);

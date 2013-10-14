@@ -209,7 +209,7 @@ class PaymentUnionLayout extends BaseLayout {
 				Intent data) {
 			String pay_result = data != null ? data.getStringExtra(PAY_RESULT)
 					: null;
-			if (DebugFlags.DEBUG_DEMO) {
+			if (DebugFlags.DEBUG) {
 				showToast("[调试]充值结果： request=" + requestCode + " result="
 						+ resultCode + " data=" + data);
 			}

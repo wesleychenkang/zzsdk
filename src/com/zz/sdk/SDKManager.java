@@ -142,6 +142,9 @@ public class SDKManager {
 				env.add(KeyDevice.K_IMEI, imei);
 			}
 		}
+
+		env.add(KeyDevice.K_PROJECT_ID, Utils.getProjectId(ctx));
+
 		return env;
 	}
 
@@ -386,23 +389,30 @@ public class SDKManager {
 		env.add(KeyCaller.K_AMOUNT, amount);
 		env.add(KeyCaller.K_IS_CLOSE_WINDOW, isCloseWindow);
 		env.add(KeyCaller.K_CALL_BACK_INFO, callBackInfo);
-		startActivity(env, LAYOUT_TYPE.PaymentList);
+		startActivity(mContext, env, LAYOUT_TYPE.PaymentList);
 	}
 
 	public void showExchange(Handler callbackHandler, int what, String projectID) {
-		startActivity(mRootEnv.grow(KeyCaller.class.getName()),
+		startActivity(mContext, mRootEnv.grow(KeyCaller.class.getName()),
 				LAYOUT_TYPE.Exchange);
 	}
 
-	private void startActivity(ParamChain env, LAYOUT_TYPE root_layout) {
+	private static void startActivity(Context ctx, ParamChain env,
+			LAYOUT_TYPE root_layout) {
 		env.add(KeyGlobal.K_UI_VIEW_TYPE, root_layout);
 		env.getParent(BaseActivity.class.getName()).add(root_layout.key(), env,
 				ParamChain.ValType.TEMPORARY);
 
-		Intent intent = new Intent(mContext, BaseActivity.class);
+		// TODO:
+		{
+			env.getParent(KeyUser.class.getName()).add(KeyUser.K_LOGIN_NAME,
+					Application.loginName);
+		}
+
+		Intent intent = new Intent(ctx, BaseActivity.class);
 		intent.putExtra(KeyGlobal.K_UI_NAME, root_layout.key());
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		mContext.startActivity(intent);
+		ctx.startActivity(intent);
 	}
 
 	/**
