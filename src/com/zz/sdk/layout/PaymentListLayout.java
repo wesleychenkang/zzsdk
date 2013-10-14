@@ -53,6 +53,7 @@ import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.DebugFlags.KeyDebug;
 import com.zz.sdk.util.GetDataImpl;
+import com.zz.sdk.util.JsonUtil;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
@@ -79,18 +80,15 @@ public class PaymentListLayout extends CCBaseLayout {
 		/** 充值中心的风格，分<b> 充值模式 </b>和<b> 购买模式</b>，类型 {@link ChargeStyle} */
 		public static final String K_CHARGE_STYLE = _TAG_ + "charge_style";
 
-		// /** 充值中心·支付类别，类型 {@link PayChannel} */
-		// public static final String K_PAY_CHANNEL = _TAG_ + "pay_channel";
-
-		// /** 充值中心·支付类别，类型 {@link PayParam} */
-		// public static final String K_PAY_PARAM = _TAG_ + "pay_param";
+		/** 充值中心·支付结果，类型 {@link Integer}，取值{@link MSG_STATUS}，属一次性数据 */
+		public static final String K_PAY_RESULT = _TAG_ + "pay_result";
 
 		/** 充值中心·支付类别，类型 {@link Integer}，取值 {@link PayChannel#type} */
 		public static final String K_PAY_CHANNELTYPE = _TAG_
 				+ "pay_channel_type";
 
-		// /** 充值中心·服务器的返回值，类型 {@link Result} */
-		// public static final String K_PAY_RESULT = _TAG_ + "pay_result";
+		/** 键：价格, {@link Float}，单位 [卓越币]或[人民币]，与支付方式有关，精度 0.01 */
+		static final String K_PAY_AMOUNT = _TAG_ + "pay_amount";;
 
 		/** 充值中心·服务器的返回值·订单号，类型 {@link String} */
 		public static final String K_PAY_ORDERNUMBER = _TAG_
@@ -114,16 +112,12 @@ public class PaymentListLayout extends CCBaseLayout {
 		/** 充值中心·用于话费支付，类型{@link SMSChannelMessage}，取值 {@link Result#attach2} */
 		public static final String K_PAY_SMS_CHANNELMESSAGE = _TAG_
 				+ "pay_sms_channel_message";
-
-		// /** 最近一次的充值状态，类型{@link MSG_STATUS} */
-		// public static final String K_PAY_LASTSTATE = _TAG_ +
-		// "pay_last_state";
-
-		/** 充值中心·支付结果，类型 {@link Integer}，取值{@link MSG_STATUS}，属一次性数据 */
-		public static final String K_PAY_RESULT = _TAG_ + "pay_result";
-
-		/** 键：价格, {@link Float}，单位 [卓越币]或[人民币]，与支付方式有关，精度 0.01 */
-		static final String K_PAY_AMOUNT = _TAG_ + "pay_amount";;
+		/**
+		 * 充值中心·用于话费支付，类型{@link Boolean}，取值 {@link Result#enablePayConfirm}
+		 * ，是否需用户二次确认以完成最终交易
+		 */
+		public static final String K_PAY_SMS_CONFIRM_ENABLED = _TAG_
+				+ "pay_sms_confirm_enabled";
 	}
 
 	/** 界面模式 */
@@ -1213,10 +1207,6 @@ public class PaymentListLayout extends CCBaseLayout {
 				ValType.TEMPORARY);
 		env.add(KeyPaymentList.K_PAY_ORDERNUMBER, result.orderNumber,
 				ValType.TEMPORARY);
-		// env.add(KeyPaymentList.K_PAY_RESULT, result, ValType.TEMPORARY);
-
-		// param.amount = String.valueOf(((Float) getValue(VAL.PRICE))
-		// .floatValue());
 
 		switch (channel.type) {
 		case PayChannel.PAY_TYPE_ALIPAY:
@@ -1256,6 +1246,12 @@ public class PaymentListLayout extends CCBaseLayout {
 
 		case PayChannel.PAY_TYPE_KKFUNPAY: {
 			clazz = PaymentSMSLayout.class;
+			SMSChannelMessage[] m = (SMSChannelMessage[]) JsonUtil
+					.parseJSonArray(SMSChannelMessage.class, result.attach2);
+			mEnv.add(KeyPaymentList.K_PAY_SMS_CONFIRM_ENABLED,
+					result.enablePayConfirm, ValType.TEMPORARY);
+			mEnv.add(KeyPaymentList.K_PAY_SMS_CHANNELMESSAGE, m,
+					ValType.TEMPORARY);
 		}
 			break;
 
