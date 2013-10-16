@@ -458,6 +458,7 @@ public class PaymentListLayout extends CCBaseLayout {
 				showToast(str);
 				hidePopup();
 			} else {
+				resetExitTrigger();
 				showPopup_Tip(str);
 			}
 		} else {
@@ -1396,6 +1397,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			public void onResult(AsyncTask<?, ?, ?> task, Object token,
 					Result result) {
 				if (isCurrentTaskFinished(task)) {
+					resetExitTrigger();
 					tryEnterPayDetail(getHost(), (PayChannel) token, result);
 				}
 			}
