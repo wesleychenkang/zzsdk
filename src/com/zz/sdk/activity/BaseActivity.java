@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Toast;
 
 import com.zz.sdk.BuildConfig;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
@@ -293,23 +292,33 @@ public class BaseActivity extends Activity {
 		}
 	}
 
-	private View popViewFromStack() {
-		if (mViewStack.size() > 1) {
-			{
-				ILayoutView lvTop = mViewStack.peek();
-				if (lvTop.isAlive()) {
-					View top = lvTop.getMainView();
-					if (top == null || lvTop.isExitEnabled(true)) {
-						if (top != null) {
-							top.clearFocus();
-						}
-						lvTop.onExit();
-					} else {
-						return top;
-					}
+	private View checkPopExitInStack(boolean isBack) {
+		if (mViewStack != null && mViewStack.size() > 0) {
+			ILayoutView lvTop = mViewStack.peek();
+			if (lvTop.isAlive() && !lvTop.isExitEnabled(isBack)) {
+				View top = lvTop.getMainView();
+				if (top != null) {
+					// 不关闭
+					return top;
 				}
-				lvTop = mViewStack.pop();
 			}
+		}
+		return null;
+	}
+
+	private View popViewFromStack() {
+		View v = checkPopExitInStack(true);
+		if (v != null) {
+			return v;
+		}
+
+		if (mViewStack != null && mViewStack.size() > 1) {
+			{
+				ILayoutView lvTop = mViewStack.pop();
+				if (lvTop.isAlive())
+					lvTop.onExit();
+			}
+
 			{
 				ILayoutView lvNew = mViewStack.peek();
 				lvNew.onResume();
@@ -326,12 +335,8 @@ public class BaseActivity extends Activity {
 	}
 
 	protected void end() {
-		if (mViewStack != null && mViewStack.size() > 0) {
-			// 关闭前先判断是否允许关闭
-			ILayoutView lv = mViewStack.peek();
-			if (lv.isAlive() && !lv.isExitEnabled(false)) {
-				return;
-			}
+		if (checkPopExitInStack(false) != null) {
+			return;
 		}
 
 		finish();

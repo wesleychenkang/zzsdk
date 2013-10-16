@@ -318,6 +318,8 @@ public class PaymentListLayout extends CCBaseLayout {
 			if (host == null) {
 				return false;
 			}
+
+			resetExitTrigger();
 			// host.showWaitDialog(0, "", false, new OnCancelListener() {
 			// @Override
 			// public void onCancel(DialogInterface dialog) {
@@ -346,15 +348,16 @@ public class PaymentListLayout extends CCBaseLayout {
 	}
 
 	@Override
-	public boolean onExit() {
+	protected void clean() {
 		// 发出退出消息
-		if (isAlive()) {
-			notifyCaller(MSG_TYPE.PAYMENT, MSG_STATUS.EXIT_SDK, null);
-		}
+		notifyCaller(MSG_TYPE.PAYMENT, MSG_STATUS.EXIT_SDK, null);
+		super.clean();
+	}
 
+	@Override
+	public boolean onExit() {
 		boolean ret = super.onExit();
 		if (ret) {
-
 		}
 		return ret;
 	}
@@ -939,6 +942,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			ViewSwitcher vs = new ViewSwitcher(ctx);
 			ll.addView(vs, new LayoutParams(LP_MW));
 			vs.setId(IDC.PANEL_CARDINPUT.id());
+			vs.setMeasureAllChildren(false);
 
 			// TODO: 设置动画
 			AnimationSet in = new AnimationSet(true);

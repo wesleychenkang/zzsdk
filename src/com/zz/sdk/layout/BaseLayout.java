@@ -419,7 +419,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 			RotateAnimation anim = new RotateAnimation(0, 360,
 					Animation.RELATIVE_TO_SELF, 0.5f,
 					Animation.RELATIVE_TO_SELF, 0.5f);
-			anim.setDuration(2000);
+			anim.setDuration(1500);
 			anim.setRepeatCount(Animation.INFINITE);
 			// anim.setFillAfter(true);
 			anim.setInterpolator(new LinearInterpolator());
@@ -660,16 +660,26 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		}
 	}
 
-	protected void tryHidePopup() {
+	protected boolean tryHidePopup() {
 		View v = popup_get_view();
-		Object tag = v != null ? v.getTag() : null;
-		if (tag instanceof Boolean && (Boolean) tag) {
-			hide_popup(v);
+		if (v != null && v.getVisibility() == VISIBLE) {
+			Object tag = v.getTag();
+			if (tag instanceof Boolean && (Boolean) tag) {
+				hide_popup(v);
+				return true;
+			} else {
+				if (DEBUG) {
+					Logger.d("popup view locked!");
+
+				}
+			}
 		} else {
 			if (DEBUG) {
-				Logger.d("popup view locked!");
+				Logger.d("popup view gone!");
+
 			}
 		}
+		return false;
 	}
 
 	protected void hidePopup() {
@@ -1089,6 +1099,10 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 
 	@Override
 	public boolean isExitEnabled(boolean isBack) {
+		if (isBack && tryHidePopup()) {
+			return false;
+		}
+
 		if (mExitTriggerInterval > 0) {
 			long tick = SystemClock.uptimeMillis();
 			if (tick > mExitTriggerLastTime + mExitTriggerInterval) {
