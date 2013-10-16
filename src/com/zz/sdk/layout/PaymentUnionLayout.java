@@ -16,7 +16,6 @@ import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
 import com.zz.sdk.activity.ParamChain.ValType;
-import com.zz.sdk.layout.PaymentListLayout.ChargeStyle;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
 import com.zz.sdk.protocols.EmptyActivityControlImpl;
 import com.zz.sdk.util.DebugFlags;
@@ -149,8 +148,8 @@ class PaymentUnionLayout extends BaseLayout {
 	}
 
 	@Override
-	public boolean isExitEnabled() {
-		boolean ret = super.isExitEnabled();
+	public boolean isExitEnabled(boolean isBack) {
+		boolean ret = super.isExitEnabled(isBack);
 		if (ret) {// ! TODO: 如果提示用户是否退出
 		}
 		return ret;
@@ -177,23 +176,31 @@ class PaymentUnionLayout extends BaseLayout {
 	private void notifyCallerResult(int state) {
 		mPayState = state;
 		removeExitTrigger();
-		if (state == MSG_STATUS.SUCCESS) {
-		} else {
-			// 取消支付
-			if (mOrderNumber != null) {
-				new Thread("cancel-pay") {
-					private final Context ctx = mContext;
-					private final String order = mOrderNumber;
+		callHost_back();
+	}
 
-					@Override
-					public void run() {
-						GetDataImpl.getInstance(ctx)
-								.canclePay(order, "银联内取消支付");
-					}
-				}.start();
+	private void notifyCallerResult() {
+		if (mPayState != MSG_STATUS.EXIT_SDK) {
+			// 记录此次充值结果在上级环境中
+			getEnv().getParent(PaymentListLayout.class.getName()).add(
+					KeyPaymentList.K_PAY_RESULT, mPayState, ValType.TEMPORARY);
+
+			if (mPayState != MSG_STATUS.SUCCESS) {
+				// 取消支付
+				if (mOrderNumber != null) {
+					new Thread("cancel-pay") {
+						private final Context ctx = mContext;
+						private final String order = mOrderNumber;
+
+						@Override
+						public void run() {
+							GetDataImpl.getInstance(ctx).canclePay(order,
+									"银联内取消支付");
+						}
+					}.start();
+				}
 			}
 		}
-		callHost_back();
 	}
 
 	private class myActivityControl extends EmptyActivityControlImpl {
@@ -239,22 +246,6 @@ class PaymentUnionLayout extends BaseLayout {
 		setActivityControlInterface(new myActivityControl());
 		tryPayUnion();
 
-		return ret;
-	}
-
-	@Override
-	public boolean onExit() {
-
-		if (mPayState != MSG_STATUS.EXIT_SDK) {
-			// XXX: 记录此次充值结果在上级环境中
-			getEnv().getParent(PaymentListLayout.class.getName()).add(
-					KeyPaymentList.K_PAY_RESULT, mPayState, ValType.TEMPORARY);
-		}
-
-		boolean ret = super.onExit();
-		if (ret) {
-
-		}
 		return ret;
 	}
 
@@ -332,12 +323,14 @@ class PaymentUnionLayout extends BaseLayout {
 			{
 				bt = new Button(ctx);
 				bt.setId(IDC.BT_INSTALL_UNIONPAYAPK.id());
-				l2.addView(bt, new LayoutParams(LP_WW));
+				LayoutParams lp = new LayoutParams(LP_WW);
+				lp.setMargins(0, 0, pright, 0);
+				l2.addView(bt, lp);
 
 				bt.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
 						CCImg.BUTTON, CCImg.BUTTON_CLICK));
 				bt.setTextColor(ZZFontColor.CC_RECHARGE_COMMIT.color());
-				bt.setPadding(pleft, 8, pright, 8);
+				bt.setPadding(pleft, 6, pright, 6);
 				ZZFontSize.CC_RECHARGE_COMMIT.apply(bt);
 				bt.setOnClickListener(this);
 				bt.setText("安装");
@@ -350,7 +343,7 @@ class PaymentUnionLayout extends BaseLayout {
 				bt.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
 						CCImg.BUY_BUTTON, CCImg.BUY_BUTTON_CLICK));
 				bt.setTextColor(ZZFontColor.CC_RECHARGE_COMMIT.color());
-				bt.setPadding(pleft, 8, pright, 8);
+				bt.setPadding(pleft, 6, pright, 6);
 				ZZFontSize.CC_RECHARGE_COMMIT.apply(bt);
 				bt.setOnClickListener(this);
 				bt.setText("重试");
@@ -389,6 +382,7 @@ class PaymentUnionLayout extends BaseLayout {
 
 	@Override
 	protected void clean() {
+		notifyCallerResult();
 		super.clean();
 		mType = -1;
 		mTypeName = null;

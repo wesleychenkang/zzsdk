@@ -249,57 +249,47 @@ class PaymentOnlineLayout extends BaseLayout {
 
 	private void notifyCallerResult(int state) {
 		mPayResultState = state;
-
 		removeExitTrigger();
-
-		if (state == MSG_STATUS.SUCCESS) {
-		} else {
-			// 取消支付
-			if (mPayMessage != null && mOrderNumber != null) {
-				new Thread("cancel-pay") {
-					private final Context ctx = mContext;
-					private final String msg = mPayMessage;
-					private final String order = mOrderNumber;
-
-					// ?!
-					@Override
-					public void run() {
-						String newmessage = "";
-						try {
-							newmessage = new String(msg.getBytes(), "utf-8");
-						} catch (UnsupportedEncodingException e1) {
-							e1.printStackTrace();
-						}
-						GetDataImpl.getInstance(ctx).canclePay(order,
-								newmessage);
-					}
-				}.start();
-			}
-		}
 		callHost_back();
 	}
 
-	@Override
-	public boolean isExitEnabled() {
-		boolean ret = super.isExitEnabled();
-		if (ret) {
-		}
-		return ret;
-	}
-
-	@Override
-	public boolean onExit() {
-
+	private void notifyCallerResult() {
 		if (mPayResultState != MSG_STATUS.EXIT_SDK) {
-			// XXX: 记录此次充值结果在上级环境中
+			// 记录此次充值结果在上级环境中
 			getEnv().getParent(PaymentListLayout.class.getName()).add(
 					KeyPaymentList.K_PAY_RESULT, mPayResultState,
 					ValType.TEMPORARY);
+
+			if (mPayResultState != MSG_STATUS.SUCCESS) {
+				// 取消支付
+				if (mPayMessage != null && mOrderNumber != null) {
+					new Thread("cancel-pay") {
+						private final Context ctx = mContext;
+						private final String msg = mPayMessage;
+						private final String order = mOrderNumber;
+
+						// ?!
+						@Override
+						public void run() {
+							String newmessage = "";
+							try {
+								newmessage = new String(msg.getBytes(), "utf-8");
+							} catch (UnsupportedEncodingException e1) {
+								e1.printStackTrace();
+							}
+							GetDataImpl.getInstance(ctx).canclePay(order,
+									newmessage);
+						}
+					}.start();
+				}
+			}
 		}
+	}
 
-		boolean ret = super.onExit();
+	@Override
+	public boolean isExitEnabled(boolean isBack) {
+		boolean ret = super.isExitEnabled(isBack);
 		if (ret) {
-
 		}
 		return ret;
 	}
@@ -389,9 +379,8 @@ class PaymentOnlineLayout extends BaseLayout {
 
 	@Override
 	protected void clean() {
-		mUrl = null;
-		mUrlGuard = null;
-		mType = -1;
+		notifyCallerResult();
+
 		if (mWebView != null) {
 			ViewParent p = mWebView.getParent();
 			if (p != null && p instanceof ViewGroup) {
@@ -403,13 +392,16 @@ class PaymentOnlineLayout extends BaseLayout {
 			mWebView = null;
 		}
 
+		super.clean();
+
+		mUrl = null;
+		mUrlGuard = null;
+		mType = -1;
 		mPayMessages = null;
 		mPayMessage = null;
 		mOrderNumber = null;
 		mTypeName = null;
 		mPayResultState = MSG_STATUS.EXIT_SDK;
-
-		super.clean();
 	}
 }
 

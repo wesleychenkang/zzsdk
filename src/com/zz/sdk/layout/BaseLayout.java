@@ -17,13 +17,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewAnimator;
@@ -413,11 +416,28 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 				ZZDimen.CC_ROOTVIEW_PADDING_BOTTOM.px());
 
 		{
-			ProgressBar pb = new ProgressBar(ctx);
+			RotateAnimation anim = new RotateAnimation(0, 360,
+					Animation.RELATIVE_TO_SELF, 0.5f,
+					Animation.RELATIVE_TO_SELF, 0.5f);
+			anim.setDuration(2000);
+			anim.setRepeatCount(Animation.INFINITE);
+			// anim.setFillAfter(true);
+			anim.setInterpolator(new LinearInterpolator());
+			anim.setRepeatMode(Animation.RESTART);
+			ImageView iv = new ImageView(ctx);
+			iv.setImageDrawable(BitmapCache.getDrawable(ctx,
+					Constants.ASSETS_RES_PATH + "loading_icon.png"));
+			iv.setScaleType(ScaleType.CENTER_INSIDE);
+			iv.startAnimation(anim);
 			LayoutParams lp = new LayoutParams(LP_MW);
 			lp.gravity = Gravity.CENTER;
-			ll.addView(pb, lp);
-			pb.setIndeterminate(true);
+			ll.addView(iv, lp);
+
+			// ProgressBar pb = new ProgressBar(ctx);
+			// LayoutParams lp = new LayoutParams(LP_MW);
+			// lp.gravity = Gravity.CENTER;
+			// ll.addView(pb, lp);
+			// pb.setIndeterminate(true);
 		}
 
 		if (timeoutCallback != null) {
@@ -1041,6 +1061,10 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		mRechargeFormat = null;
 	}
 
+	public View getMainView() {
+		return this;
+	}
+
 	@Override
 	public boolean onExit() {
 		if (BuildConfig.DEBUG) {
@@ -1063,7 +1087,8 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		return true;
 	}
 
-	public boolean isExitEnabled() {
+	@Override
+	public boolean isExitEnabled(boolean isBack) {
 		if (mExitTriggerInterval > 0) {
 			long tick = SystemClock.uptimeMillis();
 			if (tick > mExitTriggerLastTime + mExitTriggerInterval) {

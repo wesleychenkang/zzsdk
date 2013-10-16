@@ -450,8 +450,10 @@ public class PaymentListLayout extends CCBaseLayout {
 		}
 		if (str != null) {
 			if (autoclose) {
+				removeExitTrigger();
 				callHost_exit();
 				showToast(str);
+				hidePopup();
 			} else {
 				showPopup_Tip(str);
 			}

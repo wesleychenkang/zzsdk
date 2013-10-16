@@ -25,8 +25,10 @@ call :mycp 兑换列表\ex_Right_click.png ex_right_click.png
 set t=
 @rem call :mycp 兑换详情\Background.png background.png
 call :mycp 兑换详情\Background.9.png background.9.png
-call :mycp 兑换详情\buy_button.png buy_button.png
-call :mycp 兑换详情\buy_button_click.png buy_button_click.png
+call :myRm 兑换详情\buy_button.png buy_button.png
+call :myRm 兑换详情\buy_button_click.png buy_button_click.png
+call :mycp 兑换详情\buy_button.9.png buy_button.9.png
+call :mycp 兑换详情\buy_button_click.9.png buy_button_click.9.png
 
 set t=
 @rem call :mycp 公共资源\button.png button.png

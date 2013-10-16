@@ -3,14 +3,17 @@ package com.zz.sdk.activity;
 import java.util.Stack;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 import com.zz.sdk.BuildConfig;
-import com.zz.sdk.activity.ParamChain.KeyCaller;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
 import com.zz.sdk.activity.ParamChain.ValType;
 import com.zz.sdk.layout.LAYOUT_TYPE;
@@ -165,7 +168,6 @@ public class BaseActivity extends Activity {
 	private boolean tryEnterView(ILayoutView vl) {
 		if (vl != null) {
 			pushView2Stack(vl);
-			vl.onEnter();
 			return true;
 		}
 		return false;
@@ -253,79 +255,71 @@ public class BaseActivity extends Activity {
 		}
 	}
 
-	protected void pushView2Stack(ILayoutView vl) {
+	/** 有时这样关不掉输入法，最好是通过弹出 {@link Dialog} 关闭 */
+	private void hide_soft_input_method() {
+		View vFocus = getCurrentFocus();
+		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		if (vFocus != null) {
+			imm.hideSoftInputFromInputMethod(
+					vFocus.getApplicationWindowToken(), 0);
+		} else if (imm.isActive()) {
+			imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
+		}
+	}
+
+	protected void pushView2Stack(ILayoutView lvNew) {
 		if (mViewStack.size() > 0) {
-			ILayoutView top = mViewStack.peek();
-			if (top.isAlive()) {
-				View peek = top.getRootView();
-				peek.clearFocus();
-				top.onPause();
-				// peek.startAnimation(mAnimLeftOut);
+			ILayoutView lvOld = mViewStack.peek();
+			if (lvOld.isAlive()) {
+				View old = lvOld.getMainView();
+				if (old != null) {
+					old.clearFocus();
+				}
+				lvOld.onPause();
+				// old.startAnimation(mAnimLeftOut);
 			}
 		}
-		mViewStack.push(vl);
-		View curView = vl.getRootView();
-		setContentView(curView);
-		curView.requestFocus();
+
+		hide_soft_input_method();
+
+		mViewStack.push(lvNew);
+		lvNew.onEnter();
+		View cur = lvNew.getMainView();
+		setContentView(cur);
+		cur.requestFocus();
 		if (mViewStack.size() > 1) {
 			// 启动动画
-			// newView.startAnimation(mAnimRightIn);
+			// cur.startAnimation(mAnimRightIn);
 		}
 	}
 
 	private View popViewFromStack() {
 		if (mViewStack.size() > 1) {
-			Boolean isCloseWindow = mRootEnv.get(KeyCaller.K_IS_CLOSE_WINDOW,
-					Boolean.class);
-			// if (Application.isCloseWindow && Application.isAlreadyCB == 1) {
-			if (Boolean.TRUE.equals(isCloseWindow)) {
-				this.finish();
-				return null;
-			}
-			ILayoutView lv;
-
-			// 弹出旧ui
-			lv = mViewStack.peek();
-			if (lv.isAlive()) {
-				// 先判断是否允许关闭
-				View pop = lv.getRootView();
-				if (pop == null || lv.isExitEnabled()) {
-					lv.onExit();
-				} else {
-					return pop;
+			{
+				ILayoutView lvTop = mViewStack.peek();
+				if (lvTop.isAlive()) {
+					View top = lvTop.getMainView();
+					if (top == null || lvTop.isExitEnabled(true)) {
+						if (top != null) {
+							top.clearFocus();
+						}
+						lvTop.onExit();
+					} else {
+						return top;
+					}
 				}
-				if (pop != null) {
-					pop.clearFocus();
-				}
-				// if (pop instanceof SmsChannelLayout) {
-				// Application.isMessagePage = 1;
-				// }
-				// if (pop instanceof ChargeSMSDecLayout) {
-				// Application.isMessagePage = 0;
-				// }
-				// if (Application.isMessagePage == 1 && isSendMessage == false)
-				// {
-				// // 短信取消后发送取消支付请求
-				// Application.isMessagePage = 0;
-				// smsPayCallBack(-2, null);
-				//
-				// }
+				lvTop = mViewStack.pop();
 			}
-			lv = mViewStack.pop();
-
-			lv = mViewStack.peek();
-			View curView = lv.getRootView();
-			setContentView(curView);
-			curView.requestFocus();
-			lv.onResume();
-
-			return curView;
+			{
+				ILayoutView lvNew = mViewStack.peek();
+				lvNew.onResume();
+				View cur = lvNew.getMainView();
+				setContentView(cur);
+				cur.requestFocus();
+				return cur;
+			}
 		} else {
 			Logger.d("ChargeActivity exit");
-			// if (Application.isAlreadyCB == 1) {
-			// allPayCallBack(-2);
-			// Application.isAlreadyCB = 0;
-			// }
 			finish();
 			return null;
 		}
@@ -335,7 +329,7 @@ public class BaseActivity extends Activity {
 		if (mViewStack != null && mViewStack.size() > 0) {
 			// 关闭前先判断是否允许关闭
 			ILayoutView lv = mViewStack.peek();
-			if (lv.isAlive() && !lv.isExitEnabled()) {
+			if (lv.isAlive() && !lv.isExitEnabled(false)) {
 				return;
 			}
 		}

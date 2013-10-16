@@ -103,9 +103,11 @@ public class LayoutFactory {
 		/**
 		 * 是否允许被关闭
 		 * 
-		 * @return
+		 * @param isBack
+		 *            true表示仅返回， false表示想要完全退出
+		 * @return true 表示允许关闭， false 表示继续停留在这个界面
 		 */
-		public boolean isExitEnabled();
+		public boolean isExitEnabled(boolean isBack);
 
 		/**
 		 * 被关闭
@@ -142,7 +144,7 @@ public class LayoutFactory {
 		 * 
 		 * @return
 		 */
-		public View getRootView();
+		public View getMainView();
 	}
 
 	/**

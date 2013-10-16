@@ -301,8 +301,8 @@ public class ResConstants {
 		BACKGROUND("cc_background.9.png"), //
 		BUTTON("cc_button.9.png"), //
 		BUTTON_CLICK("cc_button_click.9.png"), //
-		BUY_BUTTON("cc_buy_button.png"), //
-		BUY_BUTTON_CLICK("cc_buy_button_click.png"), //
+		BUY_BUTTON("cc_buy_button.9.png"), //
+		BUY_BUTTON_CLICK("cc_buy_button_click.9.png"), //
 		CHARGE_PULL("cc_charge_pull.png"), //
 		EX_BUTTON("cc_ex_button.9.png"), //
 		EX_BUTTON_CLICK("cc_ex_button_click.9.png"), //

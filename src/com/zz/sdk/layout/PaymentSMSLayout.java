@@ -25,6 +25,7 @@ import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.LinearLayout.LayoutParams;
 
 import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.activity.ParamChain;
@@ -32,6 +33,7 @@ import com.zz.sdk.activity.ParamChain.ValType;
 import com.zz.sdk.entity.SMSChannelMessage;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
 import com.zz.sdk.layout.PaymentListLayout.TypeGridView;
+import com.zz.sdk.layout.PaymentUnionLayout.IDC;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.DimensionUtil;
 import com.zz.sdk.util.Logger;
@@ -118,6 +120,8 @@ class PaymentSMSLayout extends CCBaseLayout {
 		ACT_CHOOSE,
 
 		ACT_PROMPT,
+
+		TV_TIP_TITLE,
 
 		TV_ERROR,
 
@@ -206,6 +210,41 @@ class PaymentSMSLayout extends CCBaseLayout {
 		}
 		mSmsChannelMessage = null;
 		mSmsChannelMessages = smsChannel;
+	}
+
+	private void createView_error(Context ctx, FrameLayout rv) {
+		final int pleft = ZZDimen.CC_ROOTVIEW_PADDING_LEFT.px();
+		final int ptop = ZZDimen.CC_ROOTVIEW_PADDING_TOP.px();
+		final int pright = ZZDimen.CC_ROOTVIEW_PADDING_RIGHT.px();
+		final int pbottom = ZZDimen.CC_ROOTVIEW_PADDING_BOTTOM.px();
+
+		LinearLayout ll = new LinearLayout(ctx);
+		rv.addView(ll, new LayoutParams(LP_MW));
+		ll.setOrientation(VERTICAL);
+		ll.setPadding(pleft, ptop, pright, pbottom);
+
+		{
+			TextView tv = create_normal_label(ctx, null);
+			ll.addView(tv, new LayoutParams(LP_WW));
+			tv.setSingleLine(false);
+			tv.setGravity(Gravity.CENTER);
+			tv.setText("提示");
+			CCImg img = CCImg.getPaychannelIcon(mType);
+			if (img != null) {
+				tv.setCompoundDrawablesWithIntrinsicBounds(img.getDrawble(ctx),
+						null, null, null);
+			}
+			tv.setTextSize(24);
+			tv.setPadding(0, ptop, 0, pbottom);
+		}
+		{
+			TextView tv = create_normal_label(ctx, null);
+			ll.addView(tv, new LayoutParams(LP_MW));
+			tv.setId(IDC.TV_ERROR.id());
+			tv.setSingleLine(false);
+			tv.setBackgroundDrawable(CCImg.ZF_XZ.getDrawble(ctx));
+			tv.setPadding(pleft, ptop, pright, pbottom);
+		}
 	}
 
 	private void createView_choose(Context ctx, ScrollView rv) {
@@ -328,14 +367,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 			fl.addView(flErr, new FrameLayout.LayoutParams(LP_MM));
 			flErr.setId(IDC.ACT_ERR.id());
 			flErr.setVisibility(GONE);
-
-			TextView tv = new TextView(ctx);
-			flErr.addView(tv, new FrameLayout.LayoutParams(
-					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
-					Gravity.CENTER));
-			tv.setId(IDC.TV_ERROR.id());
-			tv.setTextColor(ZZFontColor.CC_RECHAGR_NORMAL.color());
-			ZZFontSize.CC_RECHAGR_NORMAL.apply(tv);
+			createView_error(ctx, flErr);
 		}
 
 		// 金额选择面板
@@ -493,7 +525,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 
 	private void onErr(ZZStr str) {
 		isWaitPayResult = 3;
-		mPayResultState = MSG_STATUS.FAILED;
+		// mPayResultState = MSG_STATUS.FAILED;
 		changeActivePanel(IDC.ACT_ERR);
 		set_child_text(IDC.TV_ERROR, str);
 	}
@@ -529,43 +561,12 @@ class PaymentSMSLayout extends CCBaseLayout {
 	private void notifyCallerResult(int state) {
 		mPayResultState = state;
 		removeExitTrigger();
-		if (state == MSG_STATUS.SUCCESS) {
-		} else {
-			// 取消支付
-		}
 		callHost_back();
 	}
 
-	@Override
-	protected void clean() {
-		mType = -1;
-		mTypeName = null;
-		mPayResultState = MSG_STATUS.EXIT_SDK;
-		mAdapter = null;
-		mSmsChannelMessage = null;
-		mSmsChannelMessages = null;
-		if (mBroadcastReceiver != null) {
-			mContext.unregisterReceiver(mBroadcastReceiver);
-			mBroadcastReceiver = null;
-		}
-
-		super.clean();
-	}
-
-	@Override
-	public boolean isExitEnabled() {
-		if (isWaitPayResult == 1) {
-			showToast("请耐心等待结果!");
-			return false;
-		}
-		return true;
-	}
-
-	@Override
-	public boolean onExit() {
-
+	private void notifyCallerResult() {
 		if (mPayResultState != MSG_STATUS.EXIT_SDK) {
-			// XXX: 记录此次充值结果在上级环境中
+			// 记录此次充值结果在上级环境中
 			ParamChain env = getEnv().getParent(
 					PaymentListLayout.class.getName());
 			env.add(KeyPaymentList.K_PAY_RESULT, mPayResultState,
@@ -575,13 +576,43 @@ class PaymentSMSLayout extends CCBaseLayout {
 						(float) (mSmsChannelMessage.price / 100f),
 						ValType.TEMPORARY);
 			}
-		}
 
-		boolean ret = super.onExit();
-		if (ret) {
-
+			if (mPayResultState != MSG_STATUS.SUCCESS) {
+				// 取消支付
+			}
 		}
-		return ret;
+	}
+
+	@Override
+	protected void clean() {
+		notifyCallerResult();
+		if (mBroadcastReceiver != null) {
+			mContext.unregisterReceiver(mBroadcastReceiver);
+			mBroadcastReceiver = null;
+		}
+		super.clean();
+		mType = -1;
+		mTypeName = null;
+		mPayResultState = MSG_STATUS.EXIT_SDK;
+		mAdapter = null;
+		mSmsChannelMessage = null;
+		mSmsChannelMessages = null;
+	}
+
+	@Override
+	public boolean isExitEnabled(boolean isBack) {
+		if (isWaitPayResult == 1) {
+			showToast("请耐心等待结果!");
+			return false;
+		} else {
+			// TODO: 如果在二次确认界面，则返回到列表选择状态
+			if (isBack
+					&& findViewById(IDC.ACT_PROMPT.id()).getVisibility() == VISIBLE) {
+				changeActivePanel(IDC.ACT_CHOOSE);
+				return false;
+			}
+		}
+		return true;
 	}
 
 	@Override
