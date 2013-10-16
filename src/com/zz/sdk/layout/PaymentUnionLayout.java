@@ -47,7 +47,7 @@ import com.zz.sdk.util.ResConstants.ZZStr;
 class PaymentUnionLayout extends BaseLayout {
 	// "00" – 银联正式环境
 	// "01" – 银联测试环境,该环境中不发生真实交易
-	final static String serverMode = DEBUG ? "01" : "00";
+	final static String serverMode = "00";
 
 	static enum IDC implements IIDC {
 		ACT_WAIT,

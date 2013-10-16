@@ -59,7 +59,7 @@ public class ResConstants {
 		CC_RECHAGRE_COST_UNIT("%s元"), //
 
 		/** 充值数量候选列表 %s个，基于 {@link #CC_PRICE_FORMAT} */
-		CC_RECHAGRE_CANDIDATE_UNIT("%s,个"), //
+		CC_RECHAGRE_CANDIDATE_UNIT("%s个"), //
 
 		/** 正在与服务器通信 */
 		CC_TRY_CONNECT_SERVER("正在与服务器通信..."),
