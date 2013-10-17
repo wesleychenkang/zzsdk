@@ -48,8 +48,10 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final int IDC_BT_QUERY = _IDC_START_ + 6;
 	private static final int IDC_TV_LOG = _IDC_START_ + 7;
 	private static final int _IDC_END_ = _IDC_START_ + 8;
-	private static final int IDC_CK_SUCCESS = _IDC_START_ + 9;
-	private static final int IDC_CK_FAILL = _IDC_START_ + 10;
+	private static final int IDC_CK_SUCCESS =_IDC_START_+9;
+	private static final int IDC_CK_FAILL = _IDC_START_+10;
+	private static final int IDC_CHARGE_AUTO_CLOSE = _IDC_START_+11;
+	
 
 	/* 自定义消息 */
 	private static final int _MSG_USER_ = 2013;
@@ -149,6 +151,15 @@ public class MainActivity extends Activity implements OnClickListener {
 			checkLayout.addView(checkfaill);
 			rootLayout.addView(checkLayout);
 		}
+		{
+			LinearLayout checkLayout = new LinearLayout(ctx);
+			checkLayout.setOrientation(LinearLayout.HORIZONTAL);
+			CheckBox checksucces = new CheckBox(ctx);
+			checksucces.setId(IDC_CHARGE_AUTO_CLOSE);
+			checksucces.setText("充值成功自动关闭窗口");
+			checkLayout.addView(checksucces);
+			rootLayout.addView(checkLayout);
+		}
 		// {
 		// Button btQuery = new Button(ctx);
 		// btQuery.setText("查询订单");
@@ -197,15 +208,15 @@ public class MainActivity extends Activity implements OnClickListener {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView,
 					boolean isChecked) {
-
-				if (isChecked) {
-					isDisplayLoginfail = true;
-				} else {
-					isDisplayLoginfail = false;
-				}
-
-				mSDKManager.setConfigInfo(true, isDisplayLoginTip,
-						isDisplayLoginfail);
+				
+				  if(isChecked){
+					  isDisplayLoginfail = true;
+				  }else{
+					  isDisplayLoginfail = false; 
+				  }
+				  
+				 mSDKManager.setConfigInfo(false, isDisplayLoginTip,
+							isDisplayLoginfail); 
 			}
 
 		};
@@ -249,9 +260,18 @@ public class MainActivity extends Activity implements OnClickListener {
 			} catch (NumberFormatException e) {
 				amount = 0;
 			}
+			
+			boolean isCloseWindow;
+			View vCloseWindow = findViewById(IDC_CHARGE_AUTO_CLOSE);
+			if(vCloseWindow instanceof CheckBox) {
+				isCloseWindow = ((CheckBox)vCloseWindow).isChecked();
+			} else {
+				isCloseWindow = false;
+			}
+			
 			mSDKManager.showPaymentView(mHandler, MSG_PAYMENT_CALLBACK,
 					CONFIG_GAME_SERVER_ID, CONFIG_GAME_SERVER_NAME,
-					CONFIG_GAME_ROLE_ID, CONFIG_GAME_ROLE, amount, true,
+					CONFIG_GAME_ROLE_ID, CONFIG_GAME_ROLE, amount,isCloseWindow ,
 					CONFIG_GAME_CALLBACK_INFO);
 		}
 			break;

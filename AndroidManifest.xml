@@ -43,7 +43,10 @@
         <meta-data
             android:name="PROJECT_ID"
             android:value="P10003A" />
-
+        <!-- 产品ID,由SDK方提供 -->
+        <meta-data
+            android:name="PRODUCT_ID"
+            android:value="D10002" />
         <!-- SDK 的窗体 -->
         <activity
             android:name="com.zz.sdk.activity.LoginActivity"

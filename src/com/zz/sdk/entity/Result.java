@@ -1,7 +1,6 @@
 package com.zz.sdk.entity;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -44,7 +43,7 @@ public class Result implements JsonParseInterface {
 	public String payName;
 	public ArrayList<Pair<String,String>> payMessages=null;
 	public String cardAmount;
-
+    public String sdkuserid;
 	@Override
 	public String toString() {
 		return "Result [codes=" + codes + "&username=" + username
@@ -112,6 +111,7 @@ public class Result implements JsonParseInterface {
 			tn = json.isNull(K_TN) ? null : json.getString(K_TN);
 			enablePayConfirm = json.isNull(K_enablePayConfirm) ? false : json
 					.getBoolean(K_enablePayConfirm);
+			sdkuserid=json.isNull(K_SDKUSERID)?null:json.getString(K_SDKUSERID);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -134,4 +134,5 @@ public class Result implements JsonParseInterface {
 	public static final String K_URL = "url";
 	public static final String K_TN = "tn";
 	public static final String K_enablePayConfirm = "enablePayConfirm";
+	public static final String K_SDKUSERID = "sdkuserid";
 }

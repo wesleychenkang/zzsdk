@@ -4,7 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import org.apache.commons.codec.binary.Base64;
+import org.apaches.commons.codec.binary.Base64;
 
 public class MD5Util {
 	public static String md5Encode(String s) {

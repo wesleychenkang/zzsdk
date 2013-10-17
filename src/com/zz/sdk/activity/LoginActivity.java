@@ -401,6 +401,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 			LoginCallbackInfo loginCallbackInfo = new LoginCallbackInfo();
 			loginCallbackInfo.statusCode = LoginCallbackInfo.STATUS_SUCCESS;
 			loginCallbackInfo.loginName = Application.getGameUserName();
+			loginCallbackInfo.sdkuserid = result.sdkuserid;
 			tryNotify(MSG_STATUS.SUCCESS, loginCallbackInfo);
 			Logger.d("has run send message-------------");
 		}
@@ -772,8 +773,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 				default:
 					// 登陆失败
 					if (Application.isDisplayLoginfail) {
-						// toast("登录失败,连接服务器失败 ");
-						toast("登录失败，用户信息有误，请重新输入 ");
+						toast("登录失败，错误的用户名或密码。\n请检查输入是否正确，或者直接联系客服 ");
 					}
 
 					Application.isLogin = false;
@@ -781,7 +781,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 				}
 			} else {
 				if (Application.isDisplayLoginfail) {
-					toast("登录失败");
+					toast("登录失败，不能连接服务器，请检查网络");
 				}
 				Application.isLogin = false;
 			}

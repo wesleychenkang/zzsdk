@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.telephony.TelephonyManager;
+import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
@@ -389,18 +390,15 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			case PayChannel.PAY_TYPE_YEEPAY_LT:
 			case PayChannel.PAY_TYPE_YEEPAY_YD:
 				if (mResult.codes == null || "1".equals(mResult.codes)) {
+					showPayResultDialog(false);
 					allPayCallBack(-1);
 				} else {
 					hideDialog();
-					resultDialog = DialogUtil.showPayResultDialog(
-							ChargeActivity.this, true);
+					showPayResultDialog(true);
 					allPayCallBack(0);
 				}
 				if (null != dialog) {
 					dialog.setCancelable(false);
-				}
-				if (Application.isCloseWindow) {
-					ChargeActivity.this.finish();
 				}
 				break;
 			// 银联
@@ -513,8 +511,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			case INDEX_CHARGE_SMSCHARGE_FEEDBACK:
 
 				SMSUtil.hideDialog();
-				resultDialog = DialogUtil.showPayResultDialog(
-						ChargeActivity.this, true);
+				showPayResultDialog(true);
 				break;
 			}
 		};
@@ -920,6 +917,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 				isSendMessage = true;
 			} else {
 				SMSUtil.hideDialog();
+				showPayResultDialog(success);
 				sendSmsFeedback();
 				isSendMessage = true;
 			}
@@ -975,8 +973,21 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		@Override
 		protected PayChannel[] doInBackground(Void... params) {
 			Logger.d("获取列表Task！");
-			return GetDataImpl.getInstance(ChargeActivity.this).getPaymentList(
+			/**
+             *  获取支付列表前，先判断当前用户名是否存在
+             *  存在则获取支付列表，
+             *  存在就显示获取支付列表失败
+             */                        
+			 if(Application.loginName==null){
+				 Pair<String, String> account = Utils
+							.getAccountFromSDcard(ChargeActivity.this);
+				 GetDataImpl.getInstance(ChargeActivity.this).loginForLone(account);
+				return null;
+			  }
+			 
+			 return GetDataImpl.getInstance(ChargeActivity.this).getPaymentList(
 					payParam);
+			
 		}
 
 		@Override
@@ -1056,16 +1067,10 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		if (requestCode == ACTIVITY_REQUEST_CODE_UNIONPAY) {
 			if (isRetUnionpay) {
 				if (PAY_RESULT_SUCCESS.equalsIgnoreCase(pay_result)) {
-					if (!Application.isCloseWindow) {
-						resultDialog = DialogUtil.showPayResultDialog(this,
-								true);
-					}
+					showPayResultDialog(true);
 					allPayCallBack(0);
 				} else if (PAY_RESULT_FAIL.equalsIgnoreCase(pay_result)) {
-					if (!Application.isCloseWindow) {
-						resultDialog = DialogUtil.showPayResultDialog(this,
-								false);
-					}
+					showPayResultDialog(false);
 					allPayCallBack(-1);
 				} else if (PAY_RESULT_CANCEL.equalsIgnoreCase(pay_result)) {
 					Application.payStatusCancel = PaymentCallbackInfo.STATUS_CANCEL;
@@ -1076,10 +1081,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 									.canclePay(mResult.orderNumber, "银联内取消支付");
 						}
 					}).start();
-					if (!Application.isCloseWindow) {
-						DialogUtil.showDialogErr(this, "你已取消了本次订单的支付!订单号为:"
-								+ mResult.orderNumber);
-					}
+					showDialogErr("你已取消了本次订单的支付!订单号为:" + mResult.orderNumber);
 					allPayCallBack(-2);
 
 				}
@@ -1090,10 +1092,26 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 				PayChannel pc = mPayChannel;
 				PayParam pp = mPayParam;
 				if (pc != null && pp != null) {
-					resultDialog = DialogUtil.showPayResultDialog(this, true);
+					showPayResultDialog(true);
 					allPayCallBack(0);
 				}
 			}
+		}
+	}
+
+	private void showPayResultDialog(boolean isSuccess) {
+		if (Application.isCloseWindow) {
+			Utils.toastInfo(getBaseContext(), isSuccess ? MyDialog.TIP_SUCCESS : MyDialog.TIP_FAILED);
+		} else {
+			resultDialog = DialogUtil.showPayResultDialog(this, isSuccess);
+		}
+	}
+
+	private void showDialogErr(String tip) {
+		if (Application.isCloseWindow) {
+			Utils.toastInfo(getBaseContext(), tip);
+		} else {
+			DialogUtil.showDialogErr(this, tip);
 		}
 	}
 
@@ -1122,10 +1140,9 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			break;
 		}
 		mCallbackHandler.sendMessage(msg);
-		if (Application.isCloseWindow) {
-			finish();
-		}
-
+//		if (Application.isCloseWindow) {
+//			finish();
+//		}
 	}
 
 	private void smsPayCallBack(int codes, String amount) {

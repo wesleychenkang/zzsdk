@@ -130,24 +130,7 @@ public class SDKManager {
 			new Thread() {
 				@Override
 				public void run() {
-					if (account != null) {
-						final String loginName = account.first;
-						final String password = account.second;
-						if (loginName != null && !"".equals(loginName)) {
-							GetDataImpl data_impl = GetDataImpl
-									.getInstance(mContext);
-							data_impl.login(loginName.trim(), password.trim(),
-									1, mContext);
-						} else {
-							GetDataImpl data_impl = GetDataImpl
-									.getInstance(mContext);
-							data_impl.quickLogin(mContext);
-						}
-					} else {
-						GetDataImpl data_impl = GetDataImpl
-								.getInstance(mContext);
-						data_impl.quickLogin(mContext);
-					}
+					GetDataImpl.getInstance(mContext).loginForLone(account);
 				}
 			}.start();
 		}

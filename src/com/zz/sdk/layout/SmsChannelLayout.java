@@ -4,7 +4,6 @@ import java.text.DecimalFormat;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.text.Html;
 import android.view.Gravity;

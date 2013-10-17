@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.text.util.Linkify;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;

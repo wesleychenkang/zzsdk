@@ -6,18 +6,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
@@ -28,9 +26,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.util.Log;
+import android.util.Pair;
 
 import com.zz.lib.pojo.PojoUtils;
 import com.zz.sdk.ZZSDKConfig;
+import com.zz.sdk.activity.ChargeActivity;
 import com.zz.sdk.entity.DeviceProperties;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
@@ -84,8 +84,9 @@ public class GetDataImpl {
 		mSdkUser.password = Utils.md5Encode(password);
 		ArrayList<BasicNameValuePair> list = new ArrayList<BasicNameValuePair>();
 		list.add(new BasicNameValuePair("loginName", loginName));
-		list.add(new BasicNameValuePair("password", password));
+		list.add(new BasicNameValuePair("password", Md5Code.encodePassword(password)));
 		list.add(new BasicNameValuePair("projectId", Utils.getProjectId(ctx)));
+		list.add(new BasicNameValuePair("productId",Utils.getProductId(ctx)));
 		list.add(new BasicNameValuePair("serverId", Utils.getGameServerId(ctx)));
 		String url = Constants.LOGIN_REQ;
 		InputStream in = doRequest(url, list, 2);
@@ -146,6 +147,7 @@ public class GetDataImpl {
 		ArrayList<BasicNameValuePair> list = new ArrayList<BasicNameValuePair>();
 		list.add(new BasicNameValuePair("projectId", Utils.getProjectId(ctx)));
 		list.add(new BasicNameValuePair("serverId", Utils.getGameServerId(ctx)));
+		list.add(new BasicNameValuePair("productId",Utils.getProductId(ctx)));
 		if (DebugFlags.DEBUG) {
 			list.add(new BasicNameValuePair("imsi", DebugFlags.DEF_DEBUG_IMSI));
 		} else {
@@ -198,10 +200,11 @@ public class GetDataImpl {
 		mSdkUser.password = Utils.md5Encode(password);
 		ArrayList<BasicNameValuePair> list = new ArrayList<BasicNameValuePair>();
 		list.add(new BasicNameValuePair("loginName", loginName));
-		list.add(new BasicNameValuePair("password", password));
+		list.add(new BasicNameValuePair("password", Md5Code.encodePassword(password)));
 		list.add(new BasicNameValuePair("projectId", Utils.getProjectId(ctx)));
 		list.add(new BasicNameValuePair("serverId", Utils.getGameServerId(ctx)));
 		list.add(new BasicNameValuePair("imsi", Utils.getIMSI(ctx)));
+		list.add(new BasicNameValuePair("productId",Utils.getProductId(ctx)));
 		String url = Constants.REG_REQ;
 		InputStream in = doRequest(url, list, 2);
 		String json = parseJsonData(in);
@@ -261,11 +264,11 @@ public class GetDataImpl {
 		String oldPassword = pw;
 		mSdkUser.newPassword = Utils.md5Encode(newPassword);
 		mSdkUser.password = Utils.md5Encode(oldPassword);
-
 		ArrayList<BasicNameValuePair> list = new ArrayList<BasicNameValuePair>();
 		list.add(new BasicNameValuePair("loginName", user));
-		list.add(new BasicNameValuePair("password", oldPassword));
-		list.add(new BasicNameValuePair("newPassword", newPassword));
+		list.add(new BasicNameValuePair("password", Md5Code.encodePassword(oldPassword)));
+		list.add(new BasicNameValuePair("newPassword", Md5Code.encodePassword(newPassword)));
+		list.add(new BasicNameValuePair("productId",Utils.getProductId(mContext)));
 		InputStream in = doRequest(Constants.MODIFY_PWD, list, 2);
 
 		if (in == null)
@@ -289,6 +292,8 @@ public class GetDataImpl {
 	 * @return
 	 */
 	private boolean syncSdkUser() {
+		// 更新用户数据到全局变量
+		Application.password = mSdkUser.password;
 		SdkUserTable t = SdkUserTable.getInstance(mContext);
 		// 将用户名保存到sdcard
 		Utils.writeAccount2SDcard(mContext, mSdkUser.loginName,
@@ -328,6 +333,7 @@ public class GetDataImpl {
 		HttpPost httpPost = new HttpPost(url);
 		try {
 			if (nvps != null) {
+				Md5Code.addMd5Parameter(nvps);
 				httpPost.setEntity(new UrlEncodedFormEntity(nvps, "utf-8"));
 			}
 		} catch (UnsupportedEncodingException e1) {
@@ -360,7 +366,6 @@ public class GetDataImpl {
 		}
 		return null;
 	}
-
 	private String parseJsonData(InputStream in) {
 		if (in == null)
 			return null;
@@ -428,6 +433,7 @@ public class GetDataImpl {
 		ArrayList<BasicNameValuePair> nvps = new ArrayList<BasicNameValuePair>();
 		nvps.add(new BasicNameValuePair("cmgeOrderNum", OrderNum));
 		nvps.add(new BasicNameValuePair("payMsg", payMsg));
+		nvps.add(new BasicNameValuePair("productId",Utils.getProductId(mContext)));
 		doRequest(url, nvps, 1);
 	}
 
@@ -465,6 +471,7 @@ public class GetDataImpl {
 		nvps.add(new BasicNameValuePair("actionType", "" + user.actionType));
 		nvps.add(new BasicNameValuePair("loginName", user.loginName));
 		nvps.add(new BasicNameValuePair("memo", ""));
+		nvps.add(new BasicNameValuePair("productId",Utils.getProductId(ctx)));
 		String url = Constants.LOG_REQ;
 		Log.d("zz_sdk", "请求的url:" + url);
 		InputStream in = doRequest(url, nvps, 1);
@@ -526,6 +533,8 @@ public class GetDataImpl {
 				mDeviceProperties.projectId));
 		nvps.add(new BasicNameValuePair("sdkVersion",
 				mDeviceProperties.sdkVersion));
+		nvps.add(new BasicNameValuePair("productId",
+				Utils.getProductId(ctx)));
 		String url = Constants.DSYN_REQ;
 		InputStream in = doRequest(url, nvps, 1);
 		if (in == null)
@@ -560,7 +569,7 @@ public class GetDataImpl {
 		nvps.add(new BasicNameValuePair("projectId", Utils.getProjectId(ctx)));
 		nvps.add(new BasicNameValuePair("imsi", Utils.getIMSI(ctx)));
 		nvps.add(new BasicNameValuePair("actionType", UserAction.ONLINE));
-
+		nvps.add(new BasicNameValuePair("productId",Utils.getProductId(ctx)));
 		String url = Constants.LOG_REQ;
 		InputStream in = doRequest(url, nvps, 1);
 		if (in == null)
@@ -584,7 +593,7 @@ public class GetDataImpl {
 		nvps.add(new BasicNameValuePair("projectId", Utils.getProjectId(ctx)));
 		nvps.add(new BasicNameValuePair("imsi", Utils.getIMSI(ctx)));
 		nvps.add(new BasicNameValuePair("actionType", UserAction.OFFLINE));
-
+		nvps.add(new BasicNameValuePair("productId",Utils.getProductId(ctx)));
 		String url = Constants.LOG_REQ;
 
 		InputStream in = doRequest(url, nvps, 1);
@@ -607,6 +616,7 @@ public class GetDataImpl {
 			payParam.loginName = DebugFlags.DEF_LOGIN_NAME;
 		}
 		ArrayList<BasicNameValuePair> all = payParam.getChargeParameters(type);
+		all.add(new BasicNameValuePair("productId",Utils.getProductId(mContext)));
 		if (all == null) {
 			Result result1 = new Result();
 			result1.codes = "-1";
@@ -640,7 +650,7 @@ public class GetDataImpl {
 		ArrayList<BasicNameValuePair> nvps = new ArrayList<BasicNameValuePair>();
 		nvps.add(new BasicNameValuePair("requestId", ""));
 		nvps.add(new BasicNameValuePair("serverId", charge.serverId));
-
+		nvps.add(new BasicNameValuePair("productId",Utils.getProductId(mContext)));
 		String url = Constants.GPL_REQ;
 		InputStream in = doRequest(url, nvps, 2);
 		if (in == null)
@@ -731,4 +741,26 @@ public class GetDataImpl {
 		}
 		return null;
 	}
+
+
+    /** 
+     * 单机游戏的登录
+     * @param ctx
+     */
+	public void loginForLone(Pair<String, String> account) {
+		if (account != null) {
+			final String loginName = account.first;
+			final String password = account.second;
+			if (loginName != null && !"".equals(loginName)) {
+				login(loginName.trim(), password.trim(), 1, mContext);
+			} else {
+				quickLogin(mContext);
+			}
+	   }else{
+			 quickLogin(mContext);
+		}
+
+	}
+
+
 }

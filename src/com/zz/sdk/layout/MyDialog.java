@@ -1,13 +1,5 @@
 package com.zz.sdk.layout;
 
-import com.zz.sdk.activity.ChargeActivity;
-import com.zz.sdk.util.Application;
-import com.zz.sdk.util.BitmapCache;
-import com.zz.sdk.util.Constants;
-import com.zz.sdk.util.DialogUtil;
-import com.zz.sdk.util.DimensionUtil;
-import com.zz.sdk.util.Utils;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.graphics.Color;
@@ -20,8 +12,21 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.zz.sdk.activity.ChargeActivity;
+import com.zz.sdk.util.Application;
+import com.zz.sdk.util.BitmapCache;
+import com.zz.sdk.util.Constants;
+import com.zz.sdk.util.DialogUtil;
+import com.zz.sdk.util.DimensionUtil;
+import com.zz.sdk.util.Utils;
+
 public class MyDialog extends Dialog{
 	TextView textView;
+	
+	public static final String TIP_SUCCESS = "充值正在进行中，请稍后在游戏中查看，一般1-10分钟到账，如未到账，请联系客服。"
+			+ "祝您游戏愉快！";
+	public static final String TIP_FAILED = "充值未到账！请立即联系客服解决问题。"
+			+ "祝您游戏愉快！";
 
 	public MyDialog(Activity activity, boolean isSucc) {
 		super(activity);
@@ -40,11 +45,9 @@ public class MyDialog extends Dialog{
 		textView.setAutoLinkMask(Linkify.PHONE_NUMBERS);
 		textView.setLinkTextColor(0xffeedaaf);
 		if (isSucc) {
-			textView.setText("充值正在进行中，请稍后在游戏中查看，一般1-10分钟到账，如未到账，请联系客服。"
-					+ "祝您游戏愉快！");
+			textView.setText(TIP_SUCCESS);
 		} else {
-			textView.setText("充值未到账！请立即联系客服解决问题。"
-					+ ",祝您游戏愉快！");
+			textView.setText(TIP_FAILED);
 		}
 		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-2, -2);
 		lp.rightMargin =DimensionUtil.dip2px(activity, 25);

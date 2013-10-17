@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.codec.binary.Base64;
+import org.apaches.commons.codec.binary.Base64;
 
 import android.os.Environment;
 import android.util.Pair;
