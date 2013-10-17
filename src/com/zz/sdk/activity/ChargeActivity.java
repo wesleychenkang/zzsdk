@@ -277,7 +277,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			hideDialog();
 			init();
 			mPaymentListLayout.setChannelMessages(Application.mPayChannels);
-			mPaymentListLayout.showPayList(true);
+			mPaymentListLayout.showPayList(View.VISIBLE);
 
 			// 自动 调用 话费
 			if (mFlag.has(FLAG_TRY_SMS_MODE)) {
@@ -290,7 +290,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 		} else {
 			hideDialog();
 			init();
-			mPaymentListLayout.showPayList(false);
+			mPaymentListLayout.showPayList(View.GONE);
 		}
 	}
 
@@ -767,7 +767,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 			}
 			smsPayCallBack(-2, null);
 			mPaymentListLayout.setChannelMessages(Application.mPayChannels);
-			mPaymentListLayout.showPayList(true);
+			mPaymentListLayout.showPayList(View.VISIBLE);
 			return;
 			// 短信发送按钮
 		case ChargeSMSDecLayout.ID_NOTE:

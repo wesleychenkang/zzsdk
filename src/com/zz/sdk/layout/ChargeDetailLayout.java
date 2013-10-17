@@ -3,7 +3,6 @@ package com.zz.sdk.layout;
 import java.util.List;
 
 import android.app.Activity;
-import android.content.Context;
 import android.text.Html;
 import android.view.Gravity;
 import android.view.View;
@@ -95,7 +94,7 @@ public class ChargeDetailLayout extends ChargeAbstractLayout {
 	}
 
 	@Override
-	protected void initUI(Context activity) {
+	protected void initUI(Activity activity) {
 		super.initUI(activity);
 
 		// 顯示支付類型
