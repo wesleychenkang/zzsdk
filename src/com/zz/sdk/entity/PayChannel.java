@@ -36,10 +36,16 @@ public class PayChannel implements JsonParseInterface {
 	public static final int PAY_TYPE_YEEPAY_YD = 4;
 	/** 话费[短信请求] */
 	public static final int PAY_TYPE_KKFUNPAY = 5;
-	public static final int _PAY_TYPE_MAX_ = 6;
+//	public static final int _PAY_TYPE_MAX_ = 6;
+
+	/** 电信充值卡 */
+	public static final int PAY_TYPE_YEEPAY_DX = 6;
+	/** 卓越币 */
+	public static final int PAY_TYPE_ZZCOIN = 7;
+	public static final int _PAY_TYPE_MAX_ = 8;
 
 	/** 话费[短信通知] */
-	public static final int PAY_TYPE_KKFUNPAY_EX = _PAY_TYPE_MAX_ + 1;
+	public static final int PAY_TYPE_KKFUNPAY_EX = 7;// _PAY_TYPE_MAX_ + 1;
 
 	/** 标准的「充值」方式名称 */
 	public static final String CHANNEL_NAME[] = new String[_PAY_TYPE_MAX_];
@@ -47,11 +53,13 @@ public class PayChannel implements JsonParseInterface {
 		CHANNEL_NAME[PAY_TYPE_ALIPAY] = "支付宝";
 		CHANNEL_NAME[PAY_TYPE_UNMPAY] = "银联卡";
 		CHANNEL_NAME[PAY_TYPE_TENPAY] = "财付通";
-		CHANNEL_NAME[PAY_TYPE_YEEPAY_LT] = "联通充值卡";
-		CHANNEL_NAME[PAY_TYPE_YEEPAY_YD] = "移动充值卡";
-		CHANNEL_NAME[PAY_TYPE_KKFUNPAY] = "话费";
+		CHANNEL_NAME[PAY_TYPE_YEEPAY_LT] = "联通卡";
+		CHANNEL_NAME[PAY_TYPE_YEEPAY_YD] = "移动卡";
+		CHANNEL_NAME[PAY_TYPE_KKFUNPAY] = "短信";
+		CHANNEL_NAME[PAY_TYPE_YEEPAY_DX] = "电信卡";
+		CHANNEL_NAME[PAY_TYPE_ZZCOIN] = "卓越币";
 	};
-	
+
 	/** 支付渠道ID */
 	public String channelId;
 	/** 支付渠道名称，见 {@link #CHANNEL_NAME} */

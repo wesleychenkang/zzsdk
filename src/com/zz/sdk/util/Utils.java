@@ -1,6 +1,5 @@
 package com.zz.sdk.util;
 
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -9,10 +8,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,6 +36,7 @@ import android.util.Pair;
 import android.widget.Toast;
 
 import com.zz.lib.pojo.PojoUtils;
+import com.zz.sdk.BuildConfig;
 import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.SdkUser;
@@ -68,6 +71,8 @@ public class Utils {
 	private static String CACHE_GAME_SERVER_ID = null;
 	
 	private static String CACHE_PRODUCT_ID = null;
+
+	private static final NumberFormat PRICE_FORMAT = new DecimalFormat("#.##");
 
 	static {
 		String state = Environment.getExternalStorageState();
@@ -142,6 +147,7 @@ public class Utils {
 		String imsi = tm.getSubscriberId();
 		return imsi;
 	}
+
 	// /////////////////////////////////////////////////////////////////////
 	private final static String KEY = "www.daw.so";
 
@@ -696,5 +702,15 @@ public class Utils {
 			price = price.substring(0, price.length() - 2);
 		}
 		return price;
+	}
+
+	/**
+	 * 转换浮点价格值为字符串，非科学计数法，保持小数位精度，如 "1234.01"
+	 * 
+	 * @param price
+	 * @return
+	 */
+	public static String price2str(double price) {
+		return PRICE_FORMAT.format(price);
 	}
 }

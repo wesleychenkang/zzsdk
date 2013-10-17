@@ -1,19 +1,31 @@
 package com.zz.sdk;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Pair;
 
 import com.zz.lib.pojo.PojoUtils;
+import com.zz.sdk.activity.BaseActivity;
 import com.zz.sdk.activity.ChargeActivity;
 import com.zz.sdk.activity.LoginActivity;
 import com.zz.sdk.activity.LoginForQiFu;
+import com.zz.sdk.activity.ParamChain;
+import com.zz.sdk.activity.ParamChain.KeyCaller;
+import com.zz.sdk.activity.ParamChain.KeyDevice;
+import com.zz.sdk.activity.ParamChain.KeyGlobal;
+import com.zz.sdk.activity.ParamChain.KeyUser;
 import com.zz.sdk.entity.SdkUser;
 import com.zz.sdk.entity.SdkUserTable;
+import com.zz.sdk.layout.LAYOUT_TYPE;
 import com.zz.sdk.util.Application;
+import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.GetDataImpl;
+import com.zz.sdk.util.Logger;
+import com.zz.sdk.util.ResConstants;
 import com.zz.sdk.util.Utils;
 
 /**
@@ -39,6 +51,8 @@ public class SDKManager {
 
 	/** 静态实例 */
 	private static SDKManager instance;
+
+	private ParamChain mRootEnv;
 
 	/**
 	 * 获取 SDK 实例
@@ -85,6 +99,54 @@ public class SDKManager {
 		// saveProjectIdToContext();
 		// }
 		// });
+
+		ParamChain env = BaseActivity.GET_GLOBAL_PARAM_CHAIN();
+
+		// 记录调试环境
+		env = DebugFlags.create_env(ctx, env);
+
+		// 初始化设备属性
+		env = init_device(ctx, env);
+
+		// 初始化用户属性
+		env = init_user(ctx, env);
+
+		mRootEnv = env.grow(SDKManager.class.getName());
+
+		ResConstants.init(ctx);
+	}
+
+	/** 初始化「用户」信息 */
+	private ParamChain init_user(Context ctx, ParamChain rootEnv) {
+		ParamChain env = rootEnv.grow(KeyUser.class.getName());
+		return env;
+	}
+
+	private ParamChain init_device(Context ctx, ParamChain rootEnv) {
+		ParamChain env = rootEnv.grow(KeyDevice.class.getName());
+
+		String imsi = Utils.getIMSI(ctx);
+		if (DebugFlags.DEBUG_DEMO) {
+			if (!"310260000000000".equals(imsi)) {
+				Logger.d("D: emulator's IMSI");
+				env.add(KeyDevice.K_IMSI, imsi);
+			}
+		} else {
+			env.add(KeyDevice.K_IMSI, imsi);
+		}
+
+		Object service = ctx.getSystemService(Context.TELEPHONY_SERVICE);
+		if (service instanceof TelephonyManager) {
+			TelephonyManager tm = (TelephonyManager) service;
+			String imei = tm.getDeviceId();
+			if (imei != null) {
+				env.add(KeyDevice.K_IMEI, imei);
+			}
+		}
+
+		env.add(KeyDevice.K_PROJECT_ID, Utils.getProjectId(ctx));
+
+		return env;
 	}
 
 	private void init() {
@@ -295,6 +357,46 @@ public class SDKManager {
 
 		ChargeActivity.start(callbackHandler, what, mContext, gameServerID,
 				serverName, roleId, gameRole, callBackInfo);
+	}
+
+	public void showPaymentViewEx(Handler callbackHandler, int what,
+			String gameServerID, final String serverName, final String roleId,
+			final String gameRole, final int amount,
+			final boolean isCloseWindow, final String callBackInfo) {
+		ParamChain env = mRootEnv.grow(KeyCaller.class.getName());
+		env.add(KeyCaller.K_MSG_HANDLE, callbackHandler);
+		env.add(KeyCaller.K_MSG_WHAT, what);
+		env.add(KeyCaller.K_GAME_SERVER_ID, gameServerID);
+		env.add(KeyCaller.K_SERVER_NAME, serverName);
+		env.add(KeyCaller.K_ROLE_ID, roleId);
+		env.add(KeyCaller.K_GAME_ROLE, gameRole);
+		env.add(KeyCaller.K_AMOUNT, amount);
+		env.add(KeyCaller.K_IS_CLOSE_WINDOW, isCloseWindow);
+		env.add(KeyCaller.K_CALL_BACK_INFO, callBackInfo);
+		startActivity(mContext, env, LAYOUT_TYPE.PaymentList);
+	}
+
+	public void showExchange(Handler callbackHandler, int what, String projectID) {
+		startActivity(mContext, mRootEnv.grow(KeyCaller.class.getName()),
+				LAYOUT_TYPE.Exchange);
+	}
+
+	private static void startActivity(Context ctx, ParamChain env,
+			LAYOUT_TYPE root_layout) {
+		env.add(KeyGlobal.K_UI_VIEW_TYPE, root_layout);
+		env.getParent(BaseActivity.class.getName()).add(root_layout.key(), env,
+				ParamChain.ValType.TEMPORARY);
+
+		// TODO:
+		{
+			env.getParent(KeyUser.class.getName()).add(KeyUser.K_LOGIN_NAME,
+					Application.loginName);
+		}
+
+		Intent intent = new Intent(ctx, BaseActivity.class);
+		intent.putExtra(KeyGlobal.K_UI_NAME, root_layout.key());
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		ctx.startActivity(intent);
 	}
 
 	/**

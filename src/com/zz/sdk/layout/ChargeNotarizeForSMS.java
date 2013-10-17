@@ -1,6 +1,7 @@
 package com.zz.sdk.layout;
 
 import android.app.Activity;
+import android.content.Context;
 import android.text.Html;
 import android.view.Gravity;
 import android.view.View;
@@ -36,7 +37,7 @@ public class ChargeNotarizeForSMS extends ChargeAbstractLayout {
 	}
 
 	@Override
-	protected void initUI(Activity activity) {
+	protected void initUI(Context activity) {
 		super.initUI(activity);
 		ChargeTypeView chargeTypeView = new ChargeTypeView(activity);
 		chargeTypeView.mPaymentDesc.setText(Html
