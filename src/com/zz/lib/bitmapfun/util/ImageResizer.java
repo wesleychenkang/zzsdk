@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.zz.sdk.lib.bitmapfun.util;
+package com.zz.lib.bitmapfun.util;
 
 import android.annotation.TargetApi;
 import android.content.Context;

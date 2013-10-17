@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.zz.sdk.lib.bitmapfun.provider;
+package com.zz.lib.bitmapfun.provider;
 
 /**
  * Some simple test data to use for this sample app.

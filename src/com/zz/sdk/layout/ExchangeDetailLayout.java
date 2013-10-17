@@ -12,12 +12,12 @@ import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.zz.lib.bitmapfun.ui.RecyclingImageView;
+import com.zz.lib.bitmapfun.util.ImageCache;
+import com.zz.lib.bitmapfun.util.ImageFetcher;
+import com.zz.lib.bitmapfun.util.ImageWorker;
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.layout.ExchangeLayout.KeyExchange;
-import com.zz.sdk.lib.bitmapfun.ui.RecyclingImageView;
-import com.zz.sdk.lib.bitmapfun.util.ImageCache;
-import com.zz.sdk.lib.bitmapfun.util.ImageFetcher;
-import com.zz.sdk.lib.bitmapfun.util.ImageWorker;
 import com.zz.sdk.util.ResConstants.ZZStr;
 
 class ExchangeDetailLayout extends CCBaseLayout {
