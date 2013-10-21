@@ -34,13 +34,13 @@ import com.zz.sdk.entity.Result;
 import com.zz.sdk.entity.SMSChannelMessage;
 import com.zz.sdk.entity.UnionpayImpl;
 import com.zz.sdk.entity.UserAction;
-import com.zz.sdk.layout.ChargeAbstractLayout;
-import com.zz.sdk.layout.ChargeDetailLayout;
-import com.zz.sdk.layout.ChargeDetailLayoutForCard;
-import com.zz.sdk.layout.ChargePaymentListLayout;
-import com.zz.sdk.layout.ChargeSMSDecLayout;
-import com.zz.sdk.layout.MyDialog;
-import com.zz.sdk.layout.SmsChannelLayout;
+import com.zz.sdk.out.ui.ChargeAbstractLayout;
+import com.zz.sdk.out.ui.ChargeDetailLayout;
+import com.zz.sdk.out.ui.ChargeDetailLayoutForCard;
+import com.zz.sdk.out.ui.ChargePaymentListLayout;
+import com.zz.sdk.out.ui.ChargeSMSDecLayout;
+import com.zz.sdk.out.ui.MyDialog;
+import com.zz.sdk.out.ui.SmsChannelLayout;
 import com.zz.sdk.util.Application;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.DialogUtil;
@@ -165,7 +165,7 @@ public class ChargeActivity extends Activity implements View.OnClickListener {
 	// 短信通道信息體
 	private SMSChannelMessage[] mSMSChannelMessages;
 
-	public MyDialog resultDialog = null;
+	public Dialog resultDialog = null;
 
 	// ////////////////////////////////////////////////////////////////////////
 	//

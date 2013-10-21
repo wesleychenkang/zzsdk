@@ -28,7 +28,7 @@ import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.Result;
-import com.zz.sdk.layout.ChargeAbstractLayout;
+import com.zz.sdk.out.ui.ChargeAbstractLayout;
 import com.zz.sdk.util.Application;
 import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.DebugFlags;

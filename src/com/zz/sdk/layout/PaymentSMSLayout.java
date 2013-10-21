@@ -25,7 +25,6 @@ import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.LinearLayout.LayoutParams;
 
 import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.activity.ParamChain;
@@ -33,14 +32,11 @@ import com.zz.sdk.activity.ParamChain.ValType;
 import com.zz.sdk.entity.SMSChannelMessage;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
 import com.zz.sdk.layout.PaymentListLayout.TypeGridView;
-import com.zz.sdk.layout.PaymentUnionLayout.IDC;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.DimensionUtil;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
-import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
-import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
 import com.zz.sdk.util.Utils;
 

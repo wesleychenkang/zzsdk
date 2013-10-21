@@ -1,4 +1,4 @@
-package com.zz.sdk.layout;
+package com.zz.sdk.out.ui;
 
 import android.app.Activity;
 import android.app.Dialog;

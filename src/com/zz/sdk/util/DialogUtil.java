@@ -13,7 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.zz.sdk.layout.MyDialog;
+import com.zz.sdk.out.ui.MyDialog;
 
 public class DialogUtil {
 
@@ -43,8 +43,8 @@ public class DialogUtil {
 		return dialog;
 	}
 
-	public static MyDialog showPayResultDialog(Activity activity, boolean isSucc) {
-		MyDialog dialog = new MyDialog(activity, isSucc);
+	public static Dialog showPayResultDialog(Activity activity, boolean isSucc) {
+		Dialog dialog = new MyDialog(activity, isSucc);
 		dialog.setCancelable(false);
 		dialog.setCanceledOnTouchOutside(false);
 		dialog.show();
