@@ -64,6 +64,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final int IDC_BT_RECHARGE_RATE = _IDC_START_ + 14;
 	private static final int IDC_ET_RECHARGE_RATE = _IDC_START_ + 15;
 	private static final int IDC_CB_CANCEL_AS_SUCCESS = _IDC_START_ + 16;
+	private static final int IDC_BT_LOGIN_MAIN = _IDC_START_ + 17;
 
 	/* 自定义消息 */
 	private static final int _MSG_USER_ = 2013;
@@ -129,6 +130,14 @@ public class MainActivity extends Activity implements OnClickListener {
 		{
 			Button btLogin = new Button(ctx);
 			btLogin.setText("登录");
+			btLogin.setId(IDC_BT_LOGIN_MAIN);
+
+			btLogin.setOnClickListener(onClickListener);
+			rootLayout.addView(btLogin);
+		}
+		{
+			Button btLogin = new Button(ctx);
+			btLogin.setText("登录(旧）");
 			btLogin.setId(IDC_BT_LOGIN);
 
 			btLogin.setOnClickListener(onClickListener);
@@ -303,6 +312,10 @@ public class MainActivity extends Activity implements OnClickListener {
 		/* 登录 */
 		case IDC_BT_LOGIN: {
 			mSDKManager.showLoginView(mHandler, MSG_LOGIN_CALLBACK);
+		}
+			break;
+		case IDC_BT_LOGIN_MAIN: {
+			mSDKManager.showLoginViewEx(mHandler, MSG_LOGIN_CALLBACK);
 		}
 			break;
 

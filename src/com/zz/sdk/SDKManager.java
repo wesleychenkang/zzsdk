@@ -260,6 +260,13 @@ public class SDKManager {
 		}
 	}
 
+	public void showLoginViewEx(Handler callbackHandler, int what) {
+		ParamChain env = mRootEnv.grow(KeyCaller.class.getName());
+		env.add(KeyCaller.K_MSG_HANDLE, callbackHandler);
+		env.add(KeyCaller.K_MSG_WHAT, what);
+		startActivity(mContext, env, LAYOUT_TYPE.LoginMain);
+	}
+
 	/**
 	 * 调用支付功能，支付结果以回调消息形式通知游戏调用方。<br/>
 	 * <i>消息规则如下：</i>

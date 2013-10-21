@@ -69,7 +69,7 @@ public class Utils {
 	private static String CACHE_PROJECT_ID = null;
 
 	private static String CACHE_GAME_SERVER_ID = null;
-	
+
 	private static String CACHE_PRODUCT_ID = null;
 
 	private static final NumberFormat PRICE_FORMAT = new DecimalFormat("#.##");
@@ -114,9 +114,10 @@ public class Utils {
 		}
 		return s;
 	}
-  
+
 	/**
 	 * md5 簽名
+	 * 
 	 * @param s
 	 * @return
 	 */
@@ -125,7 +126,7 @@ public class Utils {
 			return "";
 		}
 		try {
-			
+
 			return DigestUtils.md5Hex(s);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -133,8 +134,7 @@ public class Utils {
 		}
 		return s;
 	}
-	
-	
+
 	/**
 	 * 读取手机唯一标识
 	 * 
@@ -385,8 +385,9 @@ public class Utils {
 			return CACHE_PROJECT_ID;
 		}
 	}
-   public static synchronized String getProductId(Context cxt){
-	   if (null == CACHE_PRODUCT_ID) {
+
+	public static synchronized String getProductId(Context cxt) {
+		if (null == CACHE_PRODUCT_ID) {
 			String productId = null;
 			try {
 				ApplicationInfo appInfo;
@@ -405,12 +406,9 @@ public class Utils {
 		} else {
 			return CACHE_PRODUCT_ID;
 		}
-	  
-	
-	  
-   }
-	
-	
+
+	}
+
 	/**
 	 * 获取 游戏服务器ID
 	 * 
@@ -532,6 +530,10 @@ public class Utils {
 						+ picPressed));
 		listDrawable.addState(
 				new int[] { android.R.attr.state_selected },
+				BitmapCache.getDrawable(context, Constants.ASSETS_RES_PATH
+						+ picPressed));
+		listDrawable.addState(
+				new int[] { android.R.attr.state_checked },
 				BitmapCache.getDrawable(context, Constants.ASSETS_RES_PATH
 						+ picPressed));
 		listDrawable.addState(

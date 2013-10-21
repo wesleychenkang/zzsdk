@@ -1,15 +1,15 @@
 package com.zz.sdk.layout;
 
-import android.webkit.WebView;
-
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
 
 class _TMP_KEY_ implements KeyGlobal {
-	final static String _TAG_ = KeyGlobal._TAG_ + "layout_name"
-			+ KeyGlobal._SEPARATOR_;
+	final static String _TAG_ = KeyGlobal._TAG_ + "layout_name" + _SEPARATOR_;
 }
 
 public enum LAYOUT_TYPE {
+	/** 主登录界面 */
+	LoginMain,
+
 	/** 支付主列表 */
 	PaymentList,
 

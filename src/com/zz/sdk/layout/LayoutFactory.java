@@ -159,6 +159,8 @@ public class LayoutFactory {
 			ParamChain rootEnv) {
 
 		switch (type) {
+		case LoginMain:
+			return new LoginMainLayout(ctx, rootEnv);
 		case PaymentList:
 			return new PaymentListLayout(ctx, rootEnv);
 		case Exchange:
