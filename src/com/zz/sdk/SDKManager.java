@@ -127,8 +127,9 @@ public class SDKManager {
 
 		String imsi = Utils.getIMSI(ctx);
 		if (DebugFlags.DEBUG_DEMO) {
-			if (!"310260000000000".equals(imsi)) {
+			if ("310260000000000".equals(imsi)) {
 				Logger.d("D: emulator's IMSI");
+			} else {
 				env.add(KeyDevice.K_IMSI, imsi);
 			}
 		} else {

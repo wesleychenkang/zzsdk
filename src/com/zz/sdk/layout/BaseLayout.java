@@ -2,6 +2,7 @@ package com.zz.sdk.layout;
 
 import java.text.DecimalFormat;
 
+import android.R.id;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
@@ -106,6 +107,9 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		TV_POPUP_WAIT_LABEL,
 
 		TV_POPUP_WAIT_LABEL_SUMMARY,
+
+		/** 标题区 */
+		ACT_TITLE,
 
 		/** 客户区，类型 {@link FrameLayout} */
 		ACT_SUBJECT,
@@ -835,6 +839,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 			header.setBackgroundDrawable(CCImg.TITLE_BG.getDrawble(ctx));
 			header.setGravity(Gravity.CENTER);
 			rv.addView(header, new LayoutParams(LP_MW));
+			header.setId(IDC.ACT_TITLE.id());
 
 			// 取消按钮
 			{
