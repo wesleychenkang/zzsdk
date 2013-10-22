@@ -24,7 +24,7 @@ public final class ZZSDKConfig {
 	public final static boolean DEBUG = BuildConfig.DEBUG;
 
 	/** 调试·服务器URL */
-	public final static boolean DEBUG_URL = DEBUG;
+	public final static boolean DEBUG_URL = false; // DEBUG;
 
 	/* 版本信息 */
 

@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
 import com.zz.sdk.activity.ParamChain.KeyUser;
+import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
 import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
@@ -70,7 +71,6 @@ abstract class CCBaseLayout extends BaseLayout {
 
 	@Override
 	protected void onInitEnv(Context ctx, ParamChain env) {
-
 		Float coinBalance = env.get(KeyUser.K_COIN_BALANCE, Float.class);
 		setCoinBalance(coinBalance == null ? 0 : coinBalance);
 	}
@@ -85,7 +85,7 @@ abstract class CCBaseLayout extends BaseLayout {
 	private CharSequence getHelpTitle() {
 		// return null == Application.topicTitle ? null : Html
 		// .fromHtml(Application.topicTitle);
-		String title = mEnv.get(KeyGlobal.K_HELP_TITLE, String.class);
+		String title = getEnv().get(KeyGlobal.K_HELP_TITLE, String.class);
 		if (title != null)
 			return Html.fromHtml(title);
 		return null;
@@ -94,7 +94,7 @@ abstract class CCBaseLayout extends BaseLayout {
 	private CharSequence getHelpTopic() {
 		String topic;
 		// topic = Application.topicDes;
-		topic = mEnv.get(KeyGlobal.K_HELP_TOPIC, String.class);
+		topic = getEnv().get(KeyGlobal.K_HELP_TOPIC, String.class);
 		if (topic != null) {
 			return Html.fromHtml(ToDBC(topic));
 		}

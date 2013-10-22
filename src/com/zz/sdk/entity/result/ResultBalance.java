@@ -1,0 +1,42 @@
+package com.zz.sdk.entity.result;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.zz.sdk.entity.PayChannel;
+
+/**
+ * getBalance(获取卓越币）
+ */
+public class ResultBalance extends BaseResult {
+
+	private static final long serialVersionUID = -8456103310324367514L;
+
+	protected static final String K_ZYCOIN = "zyCoin";
+
+	public Double mZYCoin;
+
+	@Override
+	public JSONObject buildJson() {
+		try {
+			JSONObject json = super.buildJson();
+			setString(json, K_ZYCOIN, String.valueOf(mZYCoin));
+			return json;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	@Override
+	public void parseJson(JSONObject json) {
+		if (json == null)
+			return;
+		try {
+			super.parseJson(json);
+			mZYCoin = json.has(K_ZYCOIN) ? json.getDouble(K_ZYCOIN) : null;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+}

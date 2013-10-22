@@ -63,7 +63,7 @@ class ExchangeDetailLayout extends CCBaseLayout {
 		// The ImageFetcher takes care of loading images into our ImageView
 		// children asynchronously
 		mImageFetcher = new ImageFetcher(ctx, longest);
-		mImageFetcher.addImageCache(mEnv, cacheParams);
+		mImageFetcher.addImageCache(getEnv(), cacheParams);
 		mImageFetcher.setImageFadeIn(false);
 	}
 

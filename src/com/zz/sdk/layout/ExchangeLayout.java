@@ -248,9 +248,10 @@ public class ExchangeLayout extends CCBaseLayout {
 			Object o = mAdapter.getItem(pos);
 			if (o instanceof ZZPropsInfo) {
 				ZZPropsInfo info = (ZZPropsInfo) o;
-				mEnv.add(KeyExchange.PROPS_INFO, info);
-				mEnv.add(KeyExchange.PROPS_ID, pos);
-				host.enter(LAYOUT_TYPE.ExchangeDetail, mEnv);
+				ParamChain env = getEnv();
+				env.add(KeyExchange.PROPS_INFO, info);
+				env.add(KeyExchange.PROPS_ID, pos);
+				host.enter(LAYOUT_TYPE.ExchangeDetail, env);
 			}
 		}
 	}

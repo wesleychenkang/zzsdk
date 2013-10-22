@@ -74,6 +74,16 @@ public final class Constants {
 	 */
 	public static final String DSYN_REQ = URL_SERVER_SRV + "dsyn.do";
 
+	/**
+	 * getBalance(获取卓越币）
+	 */
+	public static final String GBL_REQ = URL_SERVER_SRV + "gbl.do";
+
+	/**
+	 * GetPropList(获取道具列表）
+	 */
+	public static final String GPRO_REQ = URL_SERVER_SRV + "gpro.do";
+
 	/** web 版本「支付宝」交易成功后的url */
 	public static final String GUARD_Alipay_callback = CALL_BACK_URL_SERVER
 			+ "andsrv/" + "palicb.lg";

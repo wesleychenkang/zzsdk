@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.os.Handler;
 
 import com.zz.sdk.layout.LAYOUT_TYPE;
+import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.Utils;
 
 /**
@@ -61,6 +62,9 @@ public interface ParamChain {
 
 		/** 键：帮助内容，{@link String} 用于展示给用户，内容是网页 html */
 		public static final String K_HELP_TOPIC = _TAG_ + "help_topic";
+
+		/** 键：网络请求处理，{@link ConnectionUtil} */
+		public static final String K_UTIL_CONNECT = _TAG_ + "util_connection";
 	}
 
 	public static interface KeyDevice extends KeyGlobal {

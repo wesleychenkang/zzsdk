@@ -48,12 +48,19 @@ import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.Result;
 import com.zz.sdk.entity.SMSChannelMessage;
 import com.zz.sdk.entity.UserAction;
+import com.zz.sdk.entity.result.BaseResult;
+import com.zz.sdk.entity.result.ResultBalance;
+import com.zz.sdk.entity.result.ResultPayList;
+import com.zz.sdk.entity.result.ResultRequest;
+import com.zz.sdk.entity.result.ResultRequestAlipayTenpay;
+import com.zz.sdk.entity.result.ResultRequestKKFunPay;
+import com.zz.sdk.entity.result.ResultRequestUionpay;
+import com.zz.sdk.layout.BaseLayout.ITaskCallBack;
 import com.zz.sdk.layout.LayoutFactory.ILayoutHost;
+import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.DebugFlags.KeyDebug;
-import com.zz.sdk.util.GetDataImpl;
-import com.zz.sdk.util.JsonUtil;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
@@ -61,6 +68,8 @@ import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
 import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
 import com.zz.sdk.util.Utils;
+
+//import com.zz.sdk.util.GetDataImpl;
 
 /**
  * 充值列表主界面
@@ -310,6 +319,24 @@ public class PaymentListLayout extends CCBaseLayout {
 		initUI(ctx);
 	}
 
+	private void start_paylist_loader() {
+		ITaskCallBack cb = new ITaskCallBack() {
+			@Override
+			public void onResult(AsyncTask<?, ?, ?> task, Object token,
+					BaseResult result) {
+				// TODO Auto-generated method stub
+				if (isCurrentTaskFinished(task)) {
+					onPayListUpdate(result);
+				}
+
+			}
+		};
+		AsyncTask<?, ?, ?> task = PayListTask.createAndStart(
+				getConnectionUtil(), cb, this,
+				genPayListParam(mContext, getEnv()));
+		setCurrentTask(task);
+	}
+
 	@Override
 	public boolean onEnter() {
 		boolean ret = super.onEnter();
@@ -330,19 +357,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			// }
 			// }, null);
 
-			PayListTask.ICallBack cb = new PayListTask.ICallBack() {
-				@Override
-				public void onResult(AsyncTask<?, ?, ?> task, Object token,
-						PayChannel[] result) {
-					// TODO Auto-generated method stub
-					if (isCurrentTaskFinished(task)) {
-						onPayListUpdate(result);
-					}
-				}
-			};
-			AsyncTask<?, ?, ?> task = PayListTask.createAndStart(mContext, cb,
-					this, genPayListParam(mContext, getEnv()));
-			setCurrentTask(task);
+			start_paylist_loader();
 		}
 		return ret;
 	}
@@ -351,6 +366,7 @@ public class PaymentListLayout extends CCBaseLayout {
 	protected void clean() {
 		// 发出退出消息
 		notifyCaller(MSG_TYPE.PAYMENT, MSG_STATUS.EXIT_SDK, null);
+
 		super.clean();
 	}
 
@@ -1063,27 +1079,37 @@ public class PaymentListLayout extends CCBaseLayout {
 	 * 
 	 * @param result
 	 */
-	protected void onPayListUpdate(PayChannel[] result) {
+	protected void onPayListUpdate(BaseResult result) {
 		if (!isAlive())
 			return;
 
-		if (result != null && result.length != 0) {
-			Logger.d("获取列表成功!");
+		if (result instanceof ResultPayList && result.isSuccess()) {
+			ResultPayList rpl = (ResultPayList) result;
 
-			setChannelMessages(result);
-			showPayList(true);
+			if (rpl.mZYCoin != null) {
+				float balance = rpl.mZYCoin.floatValue();
+				getEnv().add(KeyUser.K_COIN_BALANCE, Float.valueOf(balance));
+				updateBalance(balance);
+			}
 
-			// 自动 调用 话费
-			// if (mFlag.has(FLAG_TRY_SMS_MODE)) {
-			// for (PayChannel c : Application.mPayChannels) {
-			// if (c.type == PayChannel.PAY_TYPE_KKFUNPAY) {
-			// choosePayChannel(c);
-			// }
-			// }
-			// }
-		} else {
-			showPayList(false);
+			if (rpl.mPaies != null && rpl.mPaies.length > 0) {
+				Logger.d("获取列表成功!");
+
+				setChannelMessages(rpl.mPaies);
+				showPayList(true);
+
+				// 自动 调用 话费
+				// if (mFlag.has(FLAG_TRY_SMS_MODE)) {
+				// for (PayChannel c : Application.mPayChannels) {
+				// if (c.type == PayChannel.PAY_TYPE_KKFUNPAY) {
+				// choosePayChannel(c);
+				// }
+				// }
+				// }
+				return;
+			}
 		}
+		showPayList(false);
 	}
 
 	private void setChannelMessages(PayChannel[] channelMessages) {
@@ -1164,6 +1190,8 @@ public class PaymentListLayout extends CCBaseLayout {
 	 * @return
 	 */
 	private String checkInput(ILayoutHost host, PayChannel channel) {
+		ParamChain env = getEnv();
+
 		final float amount;
 		if (channel.type == PayChannel.PAY_TYPE_ZZCOIN)
 			amount = (Float) getValue(VAL.PRICE);
@@ -1178,7 +1206,8 @@ public class PaymentListLayout extends CCBaseLayout {
 				return ZZStr.CC_RECHARGE_COUNT_TITLE.str();
 			}
 		}
-		mEnv.add(KeyPaymentList.K_PAY_AMOUNT, amount, ValType.TEMPORARY);
+
+		env.add(KeyPaymentList.K_PAY_AMOUNT, amount, ValType.TEMPORARY);
 
 		final String ret;
 		switch (channel.type) {
@@ -1203,8 +1232,8 @@ public class PaymentListLayout extends CCBaseLayout {
 				set_child_focuse(IDC.PANEL_CARDINPUT, IDC.ED_PASSWD);
 				ret = ZZStr.CC_PASSWD_DESC.str();
 			} else {
-				mEnv.add(KeyPaymentList.K_PAY_CARD, card, ValType.TEMPORARY);
-				mEnv.add(KeyPaymentList.K_PAY_CARD_PASSWD, passwd,
+				env.add(KeyPaymentList.K_PAY_CARD, card, ValType.TEMPORARY);
+				env.add(KeyPaymentList.K_PAY_CARD_PASSWD, passwd,
 						ValType.TEMPORARY);
 				ret = null;
 			}
@@ -1228,14 +1257,14 @@ public class PaymentListLayout extends CCBaseLayout {
 	}
 
 	private boolean enterPayDetail(ILayoutHost host, PayChannel channel,
-			Result result) {
+			ResultRequest result) {
 		ParamChain env = getEnv();
 
 		Class<?> clazz = null;
 
-		Logger.d("订单号------>" + result.orderNumber);
+		Logger.d("订单号------>" + result.mCmgeOrderNum);
 		if (!result.isSuccess()) {
-			showToast(result.getDescription());
+			showToast(result.getErrDesc());
 			return false;
 		}
 
@@ -1243,12 +1272,14 @@ public class PaymentListLayout extends CCBaseLayout {
 				ValType.TEMPORARY);
 		env.add(KeyPaymentList.K_PAY_CHANNELNAME, channel.channelName,
 				ValType.TEMPORARY);
-		env.add(KeyPaymentList.K_PAY_ORDERNUMBER, result.orderNumber,
+		env.add(KeyPaymentList.K_PAY_ORDERNUMBER, result.mCmgeOrderNum,
 				ValType.TEMPORARY);
 
 		switch (channel.type) {
 		case PayChannel.PAY_TYPE_ALIPAY:
 		case PayChannel.PAY_TYPE_TENPAY: {
+			ResultRequestAlipayTenpay r = (ResultRequestAlipayTenpay) result;
+
 			String urlGuard;
 			if (channel.type == PayChannel.PAY_TYPE_TENPAY)
 				urlGuard = Constants.GUARD_Tenpay_callback;
@@ -1256,17 +1287,17 @@ public class PaymentListLayout extends CCBaseLayout {
 				urlGuard = Constants.GUARD_Alipay_callback;
 			else
 				urlGuard = null;
-			mEnv.add(KeyPaymentList.K_PAY_ONLINE_URL, result.url,
-					ValType.TEMPORARY);
-			mEnv.add(KeyPaymentList.K_PAY_ONLINE_URL_GUARD, urlGuard,
+			env.add(KeyPaymentList.K_PAY_ONLINE_URL, r.mUrl, ValType.TEMPORARY);
+			env.add(KeyPaymentList.K_PAY_ONLINE_URL_GUARD, urlGuard,
 					ValType.TEMPORARY);
 			clazz = PaymentOnlineLayout.class;
 		}
 			break;
 
 		case PayChannel.PAY_TYPE_UNMPAY: {
-			mEnv.add(KeyPaymentList.K_PAY_UNION_TN, result.tn,
-					ValType.TEMPORARY);
+			ResultRequestUionpay r = (ResultRequestUionpay) result;
+
+			env.add(KeyPaymentList.K_PAY_UNION_TN, r.mTN, ValType.TEMPORARY);
 			clazz = PaymentUnionLayout.class;
 		}
 			break;
@@ -1284,11 +1315,12 @@ public class PaymentListLayout extends CCBaseLayout {
 
 		case PayChannel.PAY_TYPE_KKFUNPAY: {
 			clazz = PaymentSMSLayout.class;
-			SMSChannelMessage[] m = (SMSChannelMessage[]) JsonUtil
-					.parseJSonArray(SMSChannelMessage.class, result.attach2);
-			mEnv.add(KeyPaymentList.K_PAY_SMS_CONFIRM_ENABLED,
-					result.enablePayConfirm, ValType.TEMPORARY);
-			mEnv.add(KeyPaymentList.K_PAY_SMS_CHANNELMESSAGE, m,
+
+			ResultRequestKKFunPay r = (ResultRequestKKFunPay) result;
+
+			env.add(KeyPaymentList.K_PAY_SMS_CONFIRM_ENABLED,
+					r.mEnablePayConfirm, ValType.TEMPORARY);
+			env.add(KeyPaymentList.K_PAY_SMS_CHANNELMESSAGE, r.mChannels,
 					ValType.TEMPORARY);
 		}
 			break;
@@ -1392,34 +1424,36 @@ public class PaymentListLayout extends CCBaseLayout {
 			}
 		});
 
-		PayTask.ICallBack cb = new PayTask.ICallBack() {
+		ITaskCallBack cb = new ITaskCallBack() {
 			@Override
 			public void onResult(AsyncTask<?, ?, ?> task, Object token,
-					Result result) {
+					BaseResult result) {
 				if (isCurrentTaskFinished(task)) {
 					resetExitTrigger();
 					tryEnterPayDetail(getHost(), (PayChannel) token, result);
 				}
 			}
 		};
-		AsyncTask<?, ?, ?> task = PayTask.createAndStart(mContext, cb, channel,
-				channel.type, payParam);
+		AsyncTask<?, ?, ?> task = PayTask.createAndStart(getConnectionUtil(),
+				cb, channel, channel.type, payParam);
 		setCurrentTask(task);
 		return false;
 	}
 
 	private boolean tryEnterPayDetail(ILayoutHost host, PayChannel channel,
-			Result result) {
+			BaseResult result) {
 		hidePopup();
-		if (host == null || channel == null || result == null
-				|| !result.isSuccess()) {
-			if (channel != null && channel.type == PayChannel.PAY_TYPE_KKFUNPAY) {
-				showPopup_Tip(ZZStr.CC_TRY_SMS_NO_CHANNEL);
-			} else {
-				showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
+
+		if (host != null && channel != null) {
+			if (result instanceof ResultRequest && result.isSuccess()) {
+				return enterPayDetail(host, channel, (ResultRequest) result);
 			}
+		}
+
+		if (channel != null && channel.type == PayChannel.PAY_TYPE_KKFUNPAY) {
+			showPopup_Tip(ZZStr.CC_TRY_SMS_NO_CHANNEL);
 		} else {
-			return enterPayDetail(host, channel, result);
+			showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
 		}
 		return false;
 	}
@@ -1428,10 +1462,11 @@ public class PaymentListLayout extends CCBaseLayout {
 		setExitTrigger(-1, null);
 	}
 
-	private PayParam genPayListParam(Context ctx, ParamChain env) {
+	private static PayParam genPayListParam(Context ctx, ParamChain env) {
 		PayParam p = new PayParam();
 		p.serverId = env.get(KeyCaller.K_GAME_SERVER_ID, String.class);
 		p.smsImsi = env.get(KeyDevice.K_IMSI, String.class);
+		p.loginName = env.get(KeyUser.K_LOGIN_NAME, String.class);
 		// TelephonyManager tm = (TelephonyManager)
 		// getSystemService(Context.TELEPHONY_SERVICE);
 		//
@@ -1601,31 +1636,26 @@ public class PaymentListLayout extends CCBaseLayout {
 	}
 }
 
-class PayTask extends AsyncTask<Object, Void, Result> {
-	protected interface ICallBack {
-		public void onResult(AsyncTask<?, ?, ?> task, Object token,
-				Result result);
-	}
-
-	protected static AsyncTask<?, ?, ?> createAndStart(Context ctx,
-			ICallBack callback, Object token, int type, PayParam charge) {
+class PayTask extends AsyncTask<Object, Void, ResultRequest> {
+	protected static AsyncTask<?, ?, ?> createAndStart(ConnectionUtil cu,
+			ITaskCallBack callback, Object token, int type, PayParam charge) {
 		PayTask task = new PayTask();
-		task.execute(ctx, callback, token, type, charge);
+		task.execute(cu, callback, token, type, charge);
 		return task;
 	}
 
-	private ICallBack mCallback;
+	private ITaskCallBack mCallback;
 	private Object mToken;
 
 	@Override
-	protected Result doInBackground(Object... params) {
-		Context ctx = (Context) params[0];
-		ICallBack callback = (ICallBack) params[1];
+	protected ResultRequest doInBackground(Object... params) {
+		ConnectionUtil cu = (ConnectionUtil) params[0];
+		ITaskCallBack callback = (ITaskCallBack) params[1];
 		Object token = params[2];
 
 		int type = (Integer) params[3];
 		PayParam charge = (PayParam) params[4];
-		Result ret = GetDataImpl.getInstance(ctx).charge(type, charge);
+		ResultRequest ret = cu.charge(type, charge);
 		if (!this.isCancelled()) {
 			mCallback = callback;
 			mToken = token;
@@ -1634,42 +1664,38 @@ class PayTask extends AsyncTask<Object, Void, Result> {
 	}
 
 	@Override
-	protected void onPostExecute(Result result) {
+	protected void onPostExecute(ResultRequest result) {
 		if (mCallback != null) {
 			mCallback.onResult(this, mToken, result);
-			mCallback = null;
-			mToken = null;
 		}
+		mCallback = null;
+		mToken = null;
 	}
 }
 
 /** 获取支付列表 */
-class PayListTask extends AsyncTask<Object, Void, PayChannel[]> {
-	protected interface ICallBack {
-		public void onResult(AsyncTask<?, ?, ?> task, Object token,
-				PayChannel[] result);
-	}
+class PayListTask extends AsyncTask<Object, Void, ResultPayList> {
 
 	/** 创建并启动任务 */
-	protected static AsyncTask<?, ?, ?> createAndStart(Context ctx,
-			ICallBack callback, Object token, PayParam charge) {
+	protected static AsyncTask<?, ?, ?> createAndStart(ConnectionUtil cu,
+			ITaskCallBack callback, Object token, PayParam charge) {
 		PayListTask task = new PayListTask();
-		task.execute(ctx, callback, token, charge);
+		task.execute(cu, callback, token, charge);
 		return task;
 	}
 
-	ICallBack mCallback;
+	ITaskCallBack mCallback;
 	Object mToken;
 
 	@Override
-	protected PayChannel[] doInBackground(Object... params) {
-		Context ctx = (Context) params[0];
-		ICallBack callback = (ICallBack) params[1];
+	protected ResultPayList doInBackground(Object... params) {
+		ConnectionUtil cu = (ConnectionUtil) params[0];
+		ITaskCallBack callback = (ITaskCallBack) params[1];
 		Object token = params[2];
 		PayParam charge = (PayParam) params[3];
 
 		Logger.d("获取列表Task！");
-		PayChannel[] ret = GetDataImpl.getInstance(ctx).getPaymentList(charge);
+		ResultPayList ret = cu.getPaymentList(charge);
 		if (!this.isCancelled()) {
 			mCallback = callback;
 			mToken = token;
@@ -1678,12 +1704,49 @@ class PayListTask extends AsyncTask<Object, Void, PayChannel[]> {
 	}
 
 	@Override
-	protected void onPostExecute(PayChannel[] result) {
+	protected void onPostExecute(ResultPayList result) {
 		if (mCallback != null) {
 			mCallback.onResult(this, mToken, result);
 		}
 		// clean
 		mCallback = null;
 		mToken = null;
+	}
+}
+
+class BalanceTask extends AsyncTask<Object, Void, ResultBalance> {
+
+	protected static AsyncTask<?, ?, ?> createAndStart(ConnectionUtil cu,
+			ITaskCallBack callback, Object token, String loginName) {
+		BalanceTask task = new BalanceTask();
+		task.execute(cu, callback, token, loginName);
+		return task;
+	}
+
+	private ITaskCallBack mCallback;
+	private Object mToken;
+
+	@Override
+	protected ResultBalance doInBackground(Object... params) {
+		ConnectionUtil cu = (ConnectionUtil) params[0];
+		ITaskCallBack callback = (ITaskCallBack) params[1];
+		Object token = params[2];
+
+		String loginName = (String) params[3];
+		ResultBalance ret = cu.getBalance(loginName);
+		if (!this.isCancelled()) {
+			mCallback = callback;
+			mToken = token;
+		}
+		return ret;
+	}
+
+	@Override
+	protected void onPostExecute(ResultBalance result) {
+		if (mCallback != null) {
+			mCallback.onResult(this, mToken, result);
+			mCallback = null;
+			mToken = null;
+		}
 	}
 }

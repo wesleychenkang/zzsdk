@@ -18,8 +18,8 @@ import com.zz.sdk.activity.ParamChain.KeyGlobal;
 import com.zz.sdk.activity.ParamChain.ValType;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
 import com.zz.sdk.protocols.EmptyActivityControlImpl;
+import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.DebugFlags;
-import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
 import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
@@ -189,13 +189,13 @@ class PaymentUnionLayout extends BaseLayout {
 				// 取消支付
 				if (mOrderNumber != null) {
 					new Thread("cancel-pay") {
-						private final Context ctx = mContext;
+						private final ConnectionUtil cu = getConnectionUtil();
 						private final String order = mOrderNumber;
+						private final String submitAmount = null;
 
 						@Override
 						public void run() {
-							GetDataImpl.getInstance(ctx).canclePay(order,
-									"银联内取消支付");
+							cu.canclePay(order, "银联内取消支付", submitAmount);
 						}
 					}.start();
 				}

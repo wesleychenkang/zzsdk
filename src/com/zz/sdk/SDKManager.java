@@ -22,6 +22,7 @@ import com.zz.sdk.entity.SdkUser;
 import com.zz.sdk.entity.SdkUserTable;
 import com.zz.sdk.layout.LAYOUT_TYPE;
 import com.zz.sdk.util.Application;
+import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.Logger;
@@ -112,6 +113,8 @@ public class SDKManager {
 		env = init_user(ctx, env);
 
 		mRootEnv = env.grow(SDKManager.class.getName());
+
+		mRootEnv.add(KeyGlobal.K_UTIL_CONNECT, ConnectionUtil.getInstance(ctx));
 
 		ResConstants.init(ctx);
 	}

@@ -1,7 +1,7 @@
 package com.zz.sdk.layout;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
+import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -22,11 +22,13 @@ import android.widget.RelativeLayout;
 import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.activity.ParamChain.ValType;
-import com.zz.sdk.entity.Result;
+import com.zz.sdk.entity.result.BaseResult;
+import com.zz.sdk.entity.result.ResultPayMessage;
+import com.zz.sdk.layout.BaseLayout.ITaskCallBack;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
 import com.zz.sdk.protocols.EmptyActivityControlImpl;
+import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.DebugFlags;
-import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants.ZZStr;
 
@@ -59,7 +61,7 @@ class PaymentOnlineLayout extends BaseLayout {
 	private int mType;
 	private String mTypeName;
 	private String mOrderNumber;
-	private ArrayList<Pair<String, String>> mPayMessages;
+	private List<Pair<String, String>> mPayMessages;
 	private String mPayMessage;
 
 	/** 支付状态 */
@@ -104,6 +106,7 @@ class PaymentOnlineLayout extends BaseLayout {
 		Float amount = env.get(KeyPaymentList.K_PAY_AMOUNT, Float.class);
 
 		mPayResultState = MSG_STATUS.EXIT_SDK;
+		mPayMessages = null;
 
 		if (mUrl == null || mUrlGuard == null || mType < 0) {
 			// finish();
@@ -217,7 +220,7 @@ class PaymentOnlineLayout extends BaseLayout {
 	}
 
 	private boolean judgeContainUrl(String url) {
-		ArrayList<Pair<String, String>> pm = mPayMessages;
+		List<Pair<String, String>> pm = mPayMessages;
 		if (url != null && pm != null) {
 			for (Pair<String, String> p : pm) {
 				if (p.first != null && url.startsWith(p.first)) {
@@ -264,9 +267,10 @@ class PaymentOnlineLayout extends BaseLayout {
 				// 取消支付
 				if (mPayMessage != null && mOrderNumber != null) {
 					new Thread("cancel-pay") {
-						private final Context ctx = mContext;
+						private final ConnectionUtil cu = getConnectionUtil();
 						private final String msg = mPayMessage;
 						private final String order = mOrderNumber;
+						private final String submitAmount = null;
 
 						// ?!
 						@Override
@@ -277,8 +281,7 @@ class PaymentOnlineLayout extends BaseLayout {
 							} catch (UnsupportedEncodingException e1) {
 								e1.printStackTrace();
 							}
-							GetDataImpl.getInstance(ctx).canclePay(order,
-									newmessage);
+							cu.canclePay(order, newmessage, submitAmount);
 						}
 					}.start();
 				}
@@ -318,12 +321,15 @@ class PaymentOnlineLayout extends BaseLayout {
 			}
 		});
 
-		GetPayUrlMessageTask.ICallBack cb = new GetPayUrlMessageTask.ICallBack() {
+		ITaskCallBack cb = new ITaskCallBack() {
 			@Override
 			public void onResult(AsyncTask<?, ?, ?> task, Object token,
-					Result result) {
+					BaseResult result) {
 				if (isCurrentTaskFinished(task)) {
-					mPayMessages = (result != null) ? result.payMessages : null;
+					if (result instanceof ResultPayMessage
+							&& result.isSuccess()) {
+						mPayMessages = ((ResultPayMessage) result).mPayMessages;
+					}
 
 					showWebView(true);
 
@@ -340,8 +346,8 @@ class PaymentOnlineLayout extends BaseLayout {
 				}
 			}
 		};
-		AsyncTask<?, ?, ?> task = GetPayUrlMessageTask.createAndStart(mContext,
-				cb, null);
+		AsyncTask<?, ?, ?> task = GetPayUrlMessageTask.createAndStart(
+				getConnectionUtil(), cb, null);
 		setCurrentTask(task);
 
 		showPopup_Wait(ZZStr.CC_TRY_CONNECT_SERVER.str(), new IWaitTimeout() {
@@ -406,27 +412,23 @@ class PaymentOnlineLayout extends BaseLayout {
 }
 
 /** 获取支付列表 */
-class GetPayUrlMessageTask extends AsyncTask<Object, Void, Result> {
-	protected interface ICallBack {
-		public void onResult(AsyncTask<?, ?, ?> task, Object token,
-				Result result);
-	}
+class GetPayUrlMessageTask extends AsyncTask<Object, Void, BaseResult> {
 
 	/** 创建并启动任务 */
-	protected static AsyncTask<?, ?, ?> createAndStart(Context ctx,
-			ICallBack callback, Object token) {
+	protected static AsyncTask<?, ?, ?> createAndStart(ConnectionUtil cu,
+			ITaskCallBack callback, Object token) {
 		GetPayUrlMessageTask task = new GetPayUrlMessageTask();
-		task.execute(ctx, callback, token);
+		task.execute(cu, callback, token);
 		return task;
 	}
 
-	ICallBack mCallback;
+	ITaskCallBack mCallback;
 	Object mToken;
 
 	@Override
-	protected Result doInBackground(Object... params) {
-		Context ctx = (Context) params[0];
-		ICallBack callback = (ICallBack) params[1];
+	protected BaseResult doInBackground(Object... params) {
+		ConnectionUtil cu = (ConnectionUtil) params[0];
+		ITaskCallBack callback = (ITaskCallBack) params[1];
 		Object token = params[2];
 
 		Logger.d("getPayUrlMessage");
@@ -434,7 +436,7 @@ class GetPayUrlMessageTask extends AsyncTask<Object, Void, Result> {
 			DebugFlags.debug_TrySleep(0, 60);
 		}
 
-		Result ret = GetDataImpl.getInstance(ctx).getPayUrlMessage();
+		ResultPayMessage ret = cu.getPayUrlMessage();
 		if (!this.isCancelled()) {
 			mCallback = callback;
 			mToken = token;
@@ -443,7 +445,7 @@ class GetPayUrlMessageTask extends AsyncTask<Object, Void, Result> {
 	}
 
 	@Override
-	protected void onPostExecute(Result result) {
+	protected void onPostExecute(BaseResult result) {
 		if (mCallback != null) {
 			mCallback.onResult(this, mToken, result);
 		}

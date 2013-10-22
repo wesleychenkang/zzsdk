@@ -2,7 +2,6 @@ package com.zz.sdk.layout;
 
 import java.text.DecimalFormat;
 
-import android.R.id;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
@@ -35,11 +34,15 @@ import android.widget.ViewAnimator;
 import com.zz.sdk.BuildConfig;
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.activity.ParamChain.KeyCaller;
+import com.zz.sdk.activity.ParamChain.KeyGlobal;
+import com.zz.sdk.activity.ParamChain.ValType;
+import com.zz.sdk.entity.result.BaseResult;
 import com.zz.sdk.layout.LayoutFactory.ILayoutHost;
 import com.zz.sdk.layout.LayoutFactory.ILayoutView;
 import com.zz.sdk.layout.LayoutFactory.KeyLayoutFactory;
 import com.zz.sdk.protocols.ActivityControlInterface;
 import com.zz.sdk.util.BitmapCache;
+import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants.CCImg;
@@ -165,12 +168,13 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	//
 	// - 成员变量区 -
 	protected Context mContext;
-	protected ParamChain mEnv;
+	private ParamChain mEnv;
 	private AsyncTask<?, ?, ?> mTask;
 	private ActivityControlInterface mActivityControlInterface;
 	private RUNSTATE mRunState;
 	private long mExitTriggerLastTime, mExitTriggerInterval;
 	private String mExitTriggerTip;
+	private ConnectionUtil mConnectionUtil;
 
 	protected final static LayoutParams LP_WM = new LayoutParams(
 			LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
@@ -266,7 +270,18 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		mContext = context;
 		mEnv = env.grow(getClass().getName());
 		mRunState = RUNSTATE.UNINITIALIZED;
+		mConnectionUtil = env.get(KeyGlobal.K_UTIL_CONNECT,
+				ConnectionUtil.class);
+		if (mConnectionUtil == null) {
+			mConnectionUtil = ConnectionUtil.getInstance(context);
+			mEnv.add(KeyGlobal.K_UTIL_CONNECT, mConnectionUtil,
+					ValType.TEMPORARY);
+		}
 		onInitEnv(context, mEnv);
+	}
+
+	protected ConnectionUtil getConnectionUtil() {
+		return mConnectionUtil;
 	}
 
 	/**
@@ -1067,6 +1082,11 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		removeActivityControlInterface();
 		removeExitTrigger();
 
+		if (mEnv.containsKeyOwn(KeyGlobal.K_UTIL_CONNECT) != null) {
+			ConnectionUtil.detachInstance(mConnectionUtil);
+		}
+		mConnectionUtil = null;
+
 		if (mEnv != null) {
 			mEnv.reset();
 			mEnv = null;
@@ -1161,6 +1181,10 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	//
 	// - UI-Task -
 	//
+	protected static interface ITaskCallBack {
+		public void onResult(AsyncTask<?, ?, ?> task, Object token,
+				BaseResult result);
+	}
 
 	/** 检查是否是当前任务完成了，如果是则清除任务记录。仅当任务完成时在UI线程中调用 */
 	protected boolean isCurrentTaskFinished(AsyncTask<?, ?, ?> task) {
