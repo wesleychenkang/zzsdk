@@ -245,6 +245,7 @@ public class PaymentListLayout extends CCBaseLayout {
 	private ChargeStyle mChargeStyle;
 
 	private String mIMSI;
+	private boolean mPermissionSendSMS;
 
 	private Handler mHandler = new Handler() {
 		@Override
@@ -270,6 +271,15 @@ public class PaymentListLayout extends CCBaseLayout {
 		mPaymentTypeChoose = -1;
 		mRechargeFormat = new DecimalFormat(ZZStr.CC_PRICE_FORMAT.str());
 		mIMSI = env.get(KeyDevice.K_IMSI, String.class);
+		if (mIMSI != null) {
+			boolean permissionSendSMS = Utils.checkPermission_SendSMS(mContext);
+			if (!permissionSendSMS) {
+				if (DEBUG) {
+					Logger.d("no permission for Send_SMS:" + mIMSI);
+				}
+				mIMSI = null;
+			}
+		}
 
 		Float o = env.get(KeyUser.K_COIN_RATE, Float.class);
 		if (o != null) {

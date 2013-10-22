@@ -14,13 +14,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apaches.commons.codec.binary.Base64;
 import org.apaches.commons.codec.digest.DigestUtils;
 
+import android.Manifest.permission;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -36,7 +36,6 @@ import android.util.Pair;
 import android.widget.Toast;
 
 import com.zz.lib.pojo.PojoUtils;
-import com.zz.sdk.BuildConfig;
 import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.SdkUser;
@@ -714,5 +713,17 @@ public class Utils {
 	 */
 	public static String price2str(double price) {
 		return PRICE_FORMAT.format(price);
+	}
+
+	public static boolean checkPermission_SendSMS(Context ctx) {
+		try {
+			if (PackageManager.PERMISSION_GRANTED == ctx.getPackageManager()
+					.checkPermission(permission.SEND_SMS, ctx.getPackageName())) {
+				return true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 }
