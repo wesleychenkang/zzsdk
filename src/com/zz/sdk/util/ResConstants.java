@@ -99,9 +99,13 @@ public class ResConstants {
 		CC_TRY_SMS_FAILED("对不起，话费支付失败！请确认您的卡是否已欠费或已失效，如需帮助请联系客服!"),
 		/** 请选择充值金额： */
 		CC_TRY_SMS_CHOOSE_TITILE("请选择充值金额："),
-		/** 您将使用%s公司提供的%s业务进行代支付,资费是%s元，您将收到相关的短信提示，请注意查收！ */
+		/** 充值 */
+		CC_TRY_SMS_CHOOSE_PREFIX("充值"),
+		/** %s元 */
+		CC_TRY_SMS_CHOOSE_CONTENT("%s元"),
+		/** 您将使用%s公司提供的%s业务进行代支付,资费是%s元，您将收到相关的短信提示，请注意查收！(ffea00) */
 		CC_TRY_SMS_PROMPT_HTML(
-				"您将使用<font color='#ffea00'>%s</font>公司提供的<font color='#ffea00'>%s</font>业务进行代支付,资费是<font color='#ffea00'>%s</font>元，您将收到相关的短信提示，请注意查收！"),
+				"您将使用<font color='#F17040'>%s</font>公司提供的<font color='#F17040'>%s</font>业务进行代支付,资费是<font color='#F17040'> %s </font>元，您将收到相关的短信提示，请注意查收！"),
 
 		/** 拼命加载中... */
 		CC_HINT_LOADING("拼命加载中..."),
@@ -116,6 +120,7 @@ public class ResConstants {
 		/** 卓越币的消耗描述，基于 {@link #CC_PRICE_FORMAT} */
 		CC_PAYTYPE_COIN_DESC("确认后，将扣除%s卓越币，您的余额为%s"), //
 		CC_COMMIT_RECHARGE("确认充值"), //
+		CC_COMMIT_RECHARGE_SMS("确认提交"), //
 		CC_COMMIT_BUY("确认购买"), //
 		CC_COMMIT_EXCHANGE("确认兑换"), //
 		CC_PAYCHANNEL_ERROR("很抱歉！未能获取到可用的支付通道。"), //
@@ -183,6 +188,13 @@ public class ResConstants {
 			/** 充值界面·帮助按钮 文本 */
 			CC_RECHARGE_HELP(Color.LTGRAY),
 
+			/** 充值界面·短信 普通文本 */
+			CC_RECHARGE_SMS_NORMAL(Color.BLACK),
+			/** 充值界面·短信 选择文本 */
+			CC_RECHARGE_SMS_CHOOSE(Color.GRAY),
+			/** 充值界面·短信 高亮文本 */
+			CC_RECHARGE_SMS_HIGHLIGHT(0xffF17040),
+
 			/** 兑换列表·条目 文本 */
 			CC_EXCHANGE_ITEM_TITLE(Color.BLACK), //
 			CC_EXCHANGE_ITEM_TITLE_PRESSED(Color.WHITE),
@@ -221,6 +233,13 @@ public class ResConstants {
 			CC_RECHARGE_COMMIT(20),
 			/** 充值界面·帮助按钮 文本 */
 			CC_RECHARGE_HELP(12),
+
+			/** 充值界面·短信 普通文本 */
+			CC_RECHARGE_SMS_NORMAL(18),
+			/** 充值界面·短信 选择文本 */
+			CC_RECHARGE_SMS_CHOOSE(18),
+			/** 充值界面·短信 高亮文本 */
+			CC_RECHARGE_SMS_HIGHLIGHT(22),
 
 			/** 兑换列表·条目 文本 */
 			CC_EXCHANGE_ITEM_TITLE(16),
@@ -264,6 +283,12 @@ public class ResConstants {
 			CC_GRIDVIEW_ITEM_PADDDING_RIGHT(16), //
 			CC_GRIDVIEW_ITEM_PADDDING_BOTTOM(12), //
 			CC_GRIDVIEW_ITEM_HEIGHT(52), //
+
+			/** 充值界面·话费·GridView 的单元格子项的边距 */
+			CC_GRIDVIEW_SMS_PADDDING_LEFT(8), //
+			CC_GRIDVIEW_SMS_PADDDING_TOP(4), //
+			CC_GRIDVIEW_SMS_PADDDING_RIGHT(8), //
+			CC_GRIDVIEW_SMS_PADDDING_BOTTOM(4), //
 
 			/** 充值界面·GridView 单元格大小 */
 			CC_GRIDVIEW_COLUMN_WIDTH(96),
