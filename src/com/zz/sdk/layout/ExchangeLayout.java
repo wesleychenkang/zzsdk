@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.AsyncTask.Status;
 import android.os.Handler;
 import android.util.Log;
 import android.util.StateSet;
@@ -25,14 +23,17 @@ import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.zz.lib.bitmapfun.provider.Images;
 import com.zz.lib.bitmapfun.ui.RecyclingImageView;
 import com.zz.lib.bitmapfun.util.ImageCache.ImageCacheParams;
 import com.zz.lib.bitmapfun.util.ImageFetcher;
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
+import com.zz.sdk.entity.result.BaseResult;
+import com.zz.sdk.entity.result.ResultPropList;
+import com.zz.sdk.layout.BaseLayout.ITaskCallBack;
 import com.zz.sdk.layout.LayoutFactory.ILayoutHost;
 import com.zz.sdk.lib.widget.CustomListView;
+import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
@@ -74,8 +75,11 @@ public class ExchangeLayout extends CCBaseLayout {
 	private MyAdapterExchange mAdapter;
 	private ImageFetcher mImageFetcher;
 
+	private int mRowsStart, mRowsCount;
+
 	private List<ZZPropsInfo> mPropsInfos = new ArrayList<ZZPropsInfo>();
-	private AsyncTask<?, ?, ?> mLoadTask;
+
+	// private AsyncTask<?, ?, ?> mLoadTask;
 
 	public ExchangeLayout(Context context, ParamChain env) {
 		super(context, env);
@@ -101,62 +105,39 @@ public class ExchangeLayout extends CCBaseLayout {
 	}
 
 	private synchronized void onLoad() {
-		if (mLoadTask != null && mLoadTask.getStatus() == Status.RUNNING) {
+		if (getCurrentTask() != null) {
 			Logger.d("task is running");
 			return;
 		}
 
-		AsyncTask<List<ZZPropsInfo>, Void, List<ZZPropsInfo>> task = new AsyncTask<List<ZZPropsInfo>, Void, List<ZZPropsInfo>>() {
-
+		// for (int i = 0; i < c; i++) {
+		// ZZPropsInfo info = new ZZPropsInfo();
+		// info.imgThumbUrl = Images.imageThumbUrls[s + i];
+		// info.imgUrl = Images.imageUrls[s + i];
+		// info.desc = "玩具射击";
+		// info.summary = "" + (s * 500 + i) + "卓越币";
+		// info.id = String.valueOf(s + i);
+		// ret.add(i, info);
+		// }
+		ITaskCallBack cb = new ITaskCallBack() {
 			@Override
-			protected List<ZZPropsInfo> doInBackground(
-					List<ZZPropsInfo>... params) {
-				if (DEBUG) {
-					try {
-						Thread.sleep(1500);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+			public void onResult(AsyncTask<?, ?, ?> task, Object token,
+					BaseResult result) {
+				if (isCurrentTaskFinished(task)) {
 
-					List<ZZPropsInfo> list = params[0];
-					int s = list.size();
-					int e = Images.imageThumbUrls.length;
-					if (s < e) {
-						List<ZZPropsInfo> ret = new ArrayList<ZZPropsInfo>(list);
-						int max = e - s;
-						if (max > 10)
-							max = 10;
-						int c = new Random().nextInt(max) + 1;
-						for (int i = 0; i < c; i++) {
-							ZZPropsInfo info = new ZZPropsInfo();
-							info.imgThumbUrl = Images.imageThumbUrls[s + i];
-							info.imgUrl = Images.imageUrls[s + i];
-							info.desc = "玩具射击";
-							info.summary = "" + (s * 500 + i) + "卓越币";
-							info.id = String.valueOf(s + i);
-							ret.add(i, info);
-						}
-						return ret;
-					}
-					return list;
+					// mPropsInfos = list;
+					mAdapter.resetData(mPropsInfos);
+
+					mListView.stopRefresh();
+					mListView.stopLoadMore();
+					mListView.setRefreshTime(new Date().toLocaleString());
 				}
-				return null;
-			}
-
-			@Override
-			protected void onPostExecute(List<ZZPropsInfo> list) {
-				mPropsInfos = list;
-				mAdapter.resetData(mPropsInfos);
-
-				mListView.stopRefresh();
-				mListView.stopLoadMore();
-				mListView.setRefreshTime(new Date().toLocaleString());
 			}
 		};
-		task.execute(mPropsInfos);
-		mLoadTask = task;
 
+		AsyncTask<?, ?, ?> task = GetPropListTask.createAndStart(
+				getConnectionUtil(), cb, this, mRowsStart, mRowsCount);
+		setCurrentTask(task);
 	}
 
 	@Override
@@ -259,6 +240,11 @@ public class ExchangeLayout extends CCBaseLayout {
 	@Override
 	public boolean onEnter() {
 		boolean ret = super.onEnter();
+
+		if (checkUpdateBalance() == 0) {
+			startUpdateBalanceAndWait();
+		}
+
 		return ret;
 	}
 
@@ -291,10 +277,6 @@ public class ExchangeLayout extends CCBaseLayout {
 		if (ret) {
 			if (mImageFetcher != null) {
 				mImageFetcher.closeCache();
-			}
-			if (mLoadTask != null) {
-				mLoadTask.cancel(true);
-				mLoadTask = null;
 			}
 			if (mPropsInfos != null) {
 				mPropsInfos = null;
@@ -538,4 +520,44 @@ public class ExchangeLayout extends CCBaseLayout {
 		}
 	}
 
+}
+
+class GetPropListTask extends AsyncTask<Object, Void, BaseResult> {
+
+	/** 创建并启动任务 */
+	protected static AsyncTask<?, ?, ?> createAndStart(ConnectionUtil cu,
+			ITaskCallBack callback, Object token, int rowStart, int rowCount) {
+		GetPropListTask task = new GetPropListTask();
+		task.execute(cu, callback, token, rowStart, rowCount);
+		return task;
+	}
+
+	ITaskCallBack mCallback;
+	Object mToken;
+
+	@Override
+	protected BaseResult doInBackground(Object... params) {
+		ConnectionUtil cu = (ConnectionUtil) params[0];
+		ITaskCallBack callback = (ITaskCallBack) params[1];
+		Object token = params[2];
+
+		int rowStart = (Integer) params[3];
+		int rowCount = (Integer) params[4];
+		ResultPropList ret = cu.getPropList(rowStart, rowCount);
+		if (!this.isCancelled()) {
+			mCallback = callback;
+			mToken = token;
+		}
+		return ret;
+	}
+
+	@Override
+	protected void onPostExecute(BaseResult result) {
+		if (mCallback != null) {
+			mCallback.onResult(this, mToken, result);
+		}
+		// clean
+		mCallback = null;
+		mToken = null;
+	}
 }

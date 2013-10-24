@@ -16,9 +16,11 @@ import android.widget.TextView;
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
 import com.zz.sdk.activity.ParamChain.KeyUser;
+import com.zz.sdk.entity.result.BaseResult;
 import com.zz.sdk.entity.result.ResultBalance;
 import com.zz.sdk.layout.BaseLayout.ITaskCallBack;
 import com.zz.sdk.util.ConnectionUtil;
+import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
 import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
@@ -76,6 +78,96 @@ abstract class CCBaseLayout extends BaseLayout {
 	protected void onInitEnv(Context ctx, ParamChain env) {
 		Double coinBalance = env.get(KeyUser.K_COIN_BALANCE, Double.class);
 		setCoinBalance(coinBalance == null ? 0 : coinBalance);
+	}
+
+	/**
+	 * 检查是否需要重新余额，若有必要，需要调用 {@link #startUpdateBalanceAndWait()} 将显示等待面板
+	 * 
+	 * @return 0需要开启任务 1已有记录 -1已经有一个任务在运行 -2未登录
+	 */
+	protected int checkUpdateBalance() {
+		ParamChain env = getEnv();
+		if (env.containsKey(KeyUser.K_COIN_BALANCE) != null) {
+			return 1;
+		}
+		if (getCurrentTask() != null) {
+			Logger.d("only one task can alive");
+			return -1;
+		}
+
+		String loginName = env.get(KeyUser.K_LOGIN_NAME, String.class);
+		if (loginName == null) {
+			Logger.d("need login");
+			return -2;
+		}
+
+		return 0;
+	}
+
+	/**
+	 * 开启任务向服务器请求用户的余额。
+	 * <p>
+	 * 或超时(20s)或得到服务器回应，将调用 {@link #onUpdateBalanceResult(BaseResult)}
+	 */
+	protected boolean startUpdateBalanceAndWait() {
+
+		showPopup_Wait(ZZStr.CC_TRY_CONNECT_SERVER.str(), new IWaitTimeout() {
+
+			@Override
+			public void onTimeOut() {
+				onUpdateBalanceResult(null);
+			}
+
+			@Override
+			public int getTimeout() {
+				return 0;
+			}
+
+			@Override
+			public String getTickCountDesc(int timeGap) {
+				return null;
+			}
+
+			@Override
+			public int getStart() {
+				return 20;
+			}
+		});
+
+		ITaskCallBack cb = new ITaskCallBack() {
+
+			@Override
+			public void onResult(AsyncTask<?, ?, ?> task, Object token,
+					BaseResult result) {
+				if (isCurrentTaskFinished(task)) {
+					Double balance;
+					if (result instanceof ResultBalance && result.isSuccess()) {
+						balance = ((ResultBalance) result).mZYCoin;
+					} else {
+						balance = null;
+					}
+					onUpdateBalanceResult(balance);
+				}
+			}
+		};
+		AsyncTask<?, ?, ?> task = BalanceTask.createAndStart(
+				getConnectionUtil(), cb, this,
+				getEnv().get(KeyUser.K_LOGIN_NAME, String.class));
+		setCurrentTask(task);
+		return true;
+	}
+
+	/**
+	 * 服务器返回用户余额值
+	 * <p>
+	 * 会先关闭弹框
+	 * 
+	 * @param result
+	 *            null表示失败
+	 */
+	protected void onUpdateBalanceResult(Double result) {
+		hidePopup();
+		setCoinBalance(result == null ? 0 : result.doubleValue());
 	}
 
 	/** 更新卓越币余额 */
