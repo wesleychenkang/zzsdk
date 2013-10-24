@@ -150,6 +150,16 @@ public interface ParamChain {
 	}
 
 	/**
+	 * 将自身所有变量转存到新的环境中
+	 * 
+	 * @param accept
+	 *            目标环境
+	 * @param force
+	 *            是否强制覆盖，若为 false 则跳过已存在的变量
+	 */
+	void dumpOwn(ParamChain accept, boolean force);
+
+	/**
 	 * 构造出一个子级变量环境
 	 * 
 	 * @return

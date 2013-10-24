@@ -1,6 +1,7 @@
 package com.zz.sdk.activity;
 
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.Stack;
 
 import com.zz.sdk.BuildConfig;
@@ -12,7 +13,7 @@ import com.zz.sdk.BuildConfig;
  * @version v0.1.0.20131010
  */
 public class ParamChainImpl implements ParamChain {
-	private static final ParamChainImpl GLOBAL_INSTANCE = new ParamChainImpl();
+	private static final ParamChain GLOBAL_INSTANCE = new ParamChainImpl();
 
 	static public ParamChain GLOBAL() {
 		return GLOBAL_INSTANCE;
@@ -24,7 +25,7 @@ public class ParamChainImpl implements ParamChain {
 	private HashMap<String, Object> mDataTmp;
 
 	/** 上一级环境 */
-	private ParamChainImpl mParent;
+	private ParamChain mParent;
 
 	/** 别名 */
 	private String mAliasName;
@@ -36,13 +37,13 @@ public class ParamChainImpl implements ParamChain {
 		this(null);
 	}
 
-	public ParamChainImpl(ParamChainImpl base) {
+	public ParamChainImpl(ParamChain base) {
 		this(base, null);
 	}
 
-	public ParamChainImpl(ParamChainImpl base, HashMap<String, Object> data) {
+	public ParamChainImpl(ParamChain base, HashMap<String, Object> data) {
 		mParent = base;
-		mLevel = base != null ? (base.mLevel + 1) : 0;
+		mLevel = base != null ? (base.getLevel() + 1) : 0;
 
 		if (data == null) {
 			mData = new HashMap<String, Object>(8);
@@ -53,26 +54,47 @@ public class ParamChainImpl implements ParamChain {
 		mDataTmp = new HashMap<String, Object>();
 	}
 
+	private void dump_own(ParamChain accept, boolean force,
+			HashMap<String, Object> data, ValType type) {
+		for (Entry<String, Object> e : data.entrySet()) {
+			String key = e.getKey();
+			ValType t = accept.containsKeyOwn(key);
+			if (force || t == null /* || (force && t != type) */) {
+				// 强制或目标不存在
+				if (t != null) {
+					// 如果是强制且目标类型不匹配，则删除旧数据
+					accept.remove(key);
+				}
+				accept.add(key, e.getValue(), type);
+			}
+		}
+	}
+
+	@Override
+	public void dumpOwn(ParamChain accept, boolean force) {
+		dump_own(accept, force, mData, ValType.NORMAL);
+		dump_own(accept, force, mDataTmp, ValType.TEMPORARY);
+	}
+
 	/**
 	 * 合并整个环境链为一级环境
 	 * 
 	 * @param base
 	 * @return
 	 */
-	public static ParamChainImpl generateUnion(ParamChainImpl base) {
+	public static ParamChain generateUnion(ParamChain base) {
 		ParamChainImpl c = new ParamChainImpl();
 
-		ParamChainImpl p = base;
-		Stack<ParamChainImpl> s = new Stack<ParamChainImpl>();
+		ParamChain p = base;
+		Stack<ParamChain> s = new Stack<ParamChain>();
 		while (p != null) {
 			s.push(p);
-			p = p.mParent;
+			p = p.getParent();
 		}
 
 		while (!s.isEmpty()) {
 			p = s.pop();
-			c.mData.putAll(p.mData);
-			c.mDataTmp.putAll(p.mDataTmp);
+			p.dumpOwn(c, true);
 		}
 		return c;
 	}
@@ -84,13 +106,12 @@ public class ParamChainImpl implements ParamChain {
 	 * @param keyList
 	 * @return
 	 */
-	public static ParamChainImpl generateUnion(ParamChainImpl base,
-			String... keyList) {
-		ParamChainImpl c = new ParamChainImpl();
+	public static ParamChain generateUnion(ParamChain base, String... keyList) {
+		ParamChain c = new ParamChainImpl();
 		if (base != null) {
 			for (int i = 0, n = keyList.length; i < n; i++) {
 				String key = keyList[i];
-				ParamChainImpl p = base.containsKey(key);
+				ParamChain p = base.containsKey(key);
 				if (p != null) {
 					Object val = p.getOwned(key);
 					ValType type = p.containsKeyOwn(key);
@@ -116,15 +137,15 @@ public class ParamChainImpl implements ParamChain {
 	 * 
 	 * @return
 	 */
-	public ParamChainImpl getParent() {
+	public ParamChain getParent() {
 		return mParent;
 	}
 
 	@Override
 	public ParamChain getRoot() {
-		ParamChainImpl p = this;
-		while (p.mParent != null)
-			p = p.mParent;
+		ParamChain p = this;
+		while (p.getParent() != null)
+			p = p.getParent();
 		return p;
 	}
 
@@ -276,10 +297,15 @@ public class ParamChainImpl implements ParamChain {
 	 * @return
 	 */
 	public Object get(String key) {
-		Object ret = getOwned(key);
-		if (ret == null && mParent != null)
-			ret = mParent.get(key);
-		return ret;
+		ParamChain p = this;
+		do {
+			Object ret = p.getOwned(key);
+			if (ret != null) {
+				return ret;
+			}
+			p = p.getParent();
+		} while (p != null);
+		return null;
 	}
 
 	/**
@@ -310,11 +336,13 @@ public class ParamChainImpl implements ParamChain {
 	 * @param key
 	 * @return 变量所在的实例，null表示不包含此变量
 	 */
-	public ParamChainImpl containsKey(String key) {
-		if (containsKeyOwn(key) != null)
-			return this;
-		if (mParent != null)
-			return mParent.containsKey(key);
+	public ParamChain containsKey(String key) {
+		ParamChain p = this;
+		do {
+			if (p.containsKeyOwn(key) != null)
+				return p;
+			p = p.getParent();
+		} while (p != null);
 		return null;
 	}
 
@@ -324,11 +352,20 @@ public class ParamChainImpl implements ParamChain {
 	 * @param key
 	 * @return 变量所在的实例，null表示不包含此变量
 	 */
-	public ParamChainImpl containsKeyReverse(String key) {
-		if (mParent != null)
-			return mParent.containsKey(key);
-		if (containsKeyOwn(key) != null)
-			return this;
+	public ParamChain containsKeyReverse(String key) {
+		ParamChain p = this;
+		Stack<ParamChain> s = new Stack<ParamChain>();
+		while (p != null) {
+			s.push(p);
+			p = p.getParent();
+		}
+
+		while (!s.isEmpty()) {
+			p = s.pop();
+			if (p.containsKeyOwn(key) != null) {
+				return p;
+			}
+		}
 		return null;
 	}
 
@@ -339,7 +376,7 @@ public class ParamChainImpl implements ParamChain {
 
 	@Override
 	public ParamChain grow(String aliasName) {
-		ParamChainImpl p = new ParamChainImpl(this);
+		ParamChain p = new ParamChainImpl(this);
 		p.setAliasName(aliasName);
 		return p;
 	}
@@ -361,10 +398,23 @@ public class ParamChainImpl implements ParamChain {
 
 	@Override
 	public ParamChain getParent(String aliasName) {
-		if (aliasName.equals(mAliasName))
-			return this;
-		if (mParent != null)
-			return mParent.getParent(aliasName);
+		if (aliasName != null) {
+			ParamChain p = this;
+			do {
+				if (aliasName.equals(p.getAliasName())) {
+					return p;
+				}
+				p = p.getParent();
+			} while (p != null);
+		} else {
+			ParamChain p = this;
+			do {
+				if (aliasName == p.getAliasName()) {
+					return p;
+				}
+				p = p.getParent();
+			} while (p != null);
+		}
 		return null;
 	}
 
