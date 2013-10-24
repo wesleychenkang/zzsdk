@@ -4,6 +4,24 @@ import org.json.JSONObject;
 
 /**
  * YeePayRequest(易宝请求）
+ * <ul>
+ * 输入
+ * <li>loginName
+ * <li>gameRole
+ * <li>serverId
+ * <li>projectId
+ * <li>type
+ * <li>amount
+ * <li>requestId
+ * <li>cardNo
+ * <li>cardPwd
+ * <li>productId
+ * </ul>
+ * <ul>
+ * 输出
+ * <li>message
+ * <li>cmgeOrderNum
+ * <ul>
  */
 public class ResultRequestYeePay extends ResultRequest {
 

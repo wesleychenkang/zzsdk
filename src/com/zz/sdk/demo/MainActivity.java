@@ -430,7 +430,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			if (mDebugEnv != null) {
 				String str = ((TextView) findViewById(IDC_ET_RECHARGE_RATE))
 						.getText().toString().trim();
-				float rate;
+				double rate;
 				if (str.length() > 0) {
 					try {
 						rate = Float.parseFloat(str);

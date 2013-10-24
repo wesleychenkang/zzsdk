@@ -1,6 +1,7 @@
 package com.zz.sdk.layout;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.text.Html;
 import android.view.Gravity;
 import android.view.View;
@@ -15,6 +16,8 @@ import android.widget.TextView;
 import com.zz.sdk.activity.ParamChain;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
 import com.zz.sdk.activity.ParamChain.KeyUser;
+import com.zz.sdk.entity.result.ResultBalance;
+import com.zz.sdk.layout.BaseLayout.ITaskCallBack;
 import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
@@ -62,7 +65,7 @@ abstract class CCBaseLayout extends BaseLayout {
 	}
 
 	/** 余额 */
-	private float mCoinBalance;
+	private double mCoinBalance;
 
 	public CCBaseLayout(Context context, ParamChain env) {
 		super(context, env);
@@ -71,12 +74,12 @@ abstract class CCBaseLayout extends BaseLayout {
 
 	@Override
 	protected void onInitEnv(Context ctx, ParamChain env) {
-		Float coinBalance = env.get(KeyUser.K_COIN_BALANCE, Float.class);
+		Double coinBalance = env.get(KeyUser.K_COIN_BALANCE, Double.class);
 		setCoinBalance(coinBalance == null ? 0 : coinBalance);
 	}
 
 	/** 更新卓越币余额 */
-	protected void updateBalance(float count) {
+	protected void updateBalance(double count) {
 		String str = String.format(ZZStr.CC_BALANCE_UNIT.str(),
 				mRechargeFormat.format(count));
 		set_child_text(IDC.TV_BALANCE, str);
@@ -260,11 +263,49 @@ abstract class CCBaseLayout extends BaseLayout {
 		return rv;
 	}
 
-	public float getCoinBalance() {
+	public double getCoinBalance() {
 		return mCoinBalance;
 	}
 
-	public void setCoinBalance(float coinBalance) {
+	public void setCoinBalance(double coinBalance) {
 		mCoinBalance = coinBalance;
+	}
+}
+
+/** 获取余额 */
+class BalanceTask extends AsyncTask<Object, Void, ResultBalance> {
+
+	protected static AsyncTask<?, ?, ?> createAndStart(ConnectionUtil cu,
+			ITaskCallBack callback, Object token, String loginName) {
+		BalanceTask task = new BalanceTask();
+		task.execute(cu, callback, token, loginName);
+		return task;
+	}
+
+	private ITaskCallBack mCallback;
+	private Object mToken;
+
+	@Override
+	protected ResultBalance doInBackground(Object... params) {
+		ConnectionUtil cu = (ConnectionUtil) params[0];
+		ITaskCallBack callback = (ITaskCallBack) params[1];
+		Object token = params[2];
+
+		String loginName = (String) params[3];
+		ResultBalance ret = cu.getBalance(loginName);
+		if (!this.isCancelled()) {
+			mCallback = callback;
+			mToken = token;
+		}
+		return ret;
+	}
+
+	@Override
+	protected void onPostExecute(ResultBalance result) {
+		if (mCallback != null) {
+			mCallback.onResult(this, mToken, result);
+			mCallback = null;
+			mToken = null;
+		}
 	}
 }

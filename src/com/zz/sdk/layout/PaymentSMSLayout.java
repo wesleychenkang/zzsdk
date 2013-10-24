@@ -165,7 +165,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 		mType = env.get(KeyPaymentList.K_PAY_CHANNELTYPE, Integer.class);
 		mTypeName = env.get(KeyPaymentList.K_PAY_CHANNELNAME, String.class);
 
-		Float amount = env.get(KeyPaymentList.K_PAY_AMOUNT, Float.class);
+		Double amount = env.get(KeyPaymentList.K_PAY_AMOUNT, Double.class);
 		mAmount = amount == null ? 0 : (int) (amount * 100);
 
 		// 读取并检查话费支付通道
@@ -600,7 +600,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 					ValType.TEMPORARY);
 			if (mSmsChannelMessage != null && mAmount == 0) {
 				env.add(KeyPaymentList.K_PAY_RESULT_PRICE,
-						(float) (mSmsChannelMessage.price / 100f),
+						(Double) (mSmsChannelMessage.price / 100d),
 						ValType.TEMPORARY);
 			}
 

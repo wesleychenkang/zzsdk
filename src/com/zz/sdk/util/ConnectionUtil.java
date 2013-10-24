@@ -34,6 +34,7 @@ import com.zz.sdk.entity.result.ResultChangePwd;
 import com.zz.sdk.entity.result.ResultLogin;
 import com.zz.sdk.entity.result.ResultPayList;
 import com.zz.sdk.entity.result.ResultPayMessage;
+import com.zz.sdk.entity.result.ResultPropList;
 import com.zz.sdk.entity.result.ResultQihoo;
 import com.zz.sdk.entity.result.ResultRegister;
 import com.zz.sdk.entity.result.ResultRequest;
@@ -562,8 +563,8 @@ public class ConnectionUtil {
 	 * @param rowstart
 	 * @param rowcount
 	 */
-	public ResultBalance getPropList(int rowstart, int rowcount) {
-		return doRequest(ResultBalance.class, Constants.GPRO_REQ, 1 //
+	public ResultPropList getPropList(int rowstart, int rowcount) {
+		return doRequest(ResultPropList.class, Constants.GPRO_REQ, 1 //
 				, "rowstart", String.valueOf(rowstart) //
 				, "rowcount", String.valueOf(rowcount) //
 		);

@@ -103,7 +103,7 @@ class PaymentOnlineLayout extends BaseLayout {
 		mTypeName = env.get(KeyPaymentList.K_PAY_CHANNELNAME, String.class);
 		mOrderNumber = env.get(KeyPaymentList.K_PAY_ORDERNUMBER, String.class);
 
-		Float amount = env.get(KeyPaymentList.K_PAY_AMOUNT, Float.class);
+		Double amount = env.get(KeyPaymentList.K_PAY_AMOUNT, Double.class);
 
 		mPayResultState = MSG_STATUS.EXIT_SDK;
 		mPayMessages = null;

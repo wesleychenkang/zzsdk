@@ -49,7 +49,6 @@ import com.zz.sdk.entity.Result;
 import com.zz.sdk.entity.SMSChannelMessage;
 import com.zz.sdk.entity.UserAction;
 import com.zz.sdk.entity.result.BaseResult;
-import com.zz.sdk.entity.result.ResultBalance;
 import com.zz.sdk.entity.result.ResultPayList;
 import com.zz.sdk.entity.result.ResultRequest;
 import com.zz.sdk.entity.result.ResultRequestAlipayTenpay;
@@ -93,7 +92,7 @@ public class PaymentListLayout extends CCBaseLayout {
 		public static final String K_PAY_RESULT = _TAG_ + "pay_result";
 
 		/**
-		 * 充值中心·支付结果·真正成交金额，类型 {@link Float}，属一次性数据，一般金额在调用前已经确定 ，类似于
+		 * 充值中心·支付结果·真正成交金额，类型 {@link Double}，属一次性数据，一般金额在调用前已经确定 ，类似于
 		 * {@link #K_PAY_AMOUNT}
 		 */
 		public static final String K_PAY_RESULT_PRICE = _TAG_
@@ -109,7 +108,7 @@ public class PaymentListLayout extends CCBaseLayout {
 		public static final String K_PAY_CHANNELNAME = _TAG_
 				+ "pay_channel_name";
 
-		/** 键：价格, {@link Float}，单位 [卓越币]或[人民币]，与支付方式有关，精度 0.01 */
+		/** 键：价格, {@link Double}，单位 [卓越币]或[人民币]，与支付方式有关，精度 0.01 */
 		static final String K_PAY_AMOUNT = _TAG_ + "pay_amount";;
 
 		/** 充值中心·服务器的返回值·订单号，类型 {@link String} */
@@ -156,9 +155,9 @@ public class PaymentListLayout extends CCBaseLayout {
 
 	/** 数据项 */
 	public static enum VAL {
-		/** 充值数量或道具价格，格式 "0.00"，类型 float, 单位 [个卓越币]，如果数据无效，则返回0 */
+		/** 充值数量或道具价格，格式 "0.00"，类型 double, 单位 [个卓越币]，如果数据无效，则返回0 */
 		PRICE,
-		/** 应付金额，格式 "0.00" ，类型 float, 单位 [元]，如果数据无效，则返回0 */
+		/** 应付金额，格式 "0.00" ，类型 double, 单位 [元]，如果数据无效，则返回0 */
 		COST,
 		/** 充值通道序号，类型 int，如果返回 -1 表示未选 */
 		PAYCHANNEL_INDEX,
@@ -237,10 +236,10 @@ public class PaymentListLayout extends CCBaseLayout {
 	private AdapterView.OnItemClickListener mPaytypeItemListener;
 
 	/** 默认价格，单位[元]，见 {@link KeyGlobal#K_PAY_AMOUNT} */
-	private float mDefAmount;
+	private double mDefAmount;
 
 	/** 卓越币与RMB的兑换比例, {@link #onInitEnv(Context, ParamChain)} */
-	private float ZZ_COIN_RATE;
+	private double ZZ_COIN_RATE;
 
 	private ChargeStyle mChargeStyle;
 
@@ -281,9 +280,9 @@ public class PaymentListLayout extends CCBaseLayout {
 			}
 		}
 
-		Float o = env.get(KeyUser.K_COIN_RATE, Float.class);
+		Double o = env.get(KeyUser.K_COIN_RATE, Double.class);
 		if (o != null) {
-			ZZ_COIN_RATE = o.floatValue();
+			ZZ_COIN_RATE = o.doubleValue();
 		} else {
 			if (BuildConfig.DEBUG) {
 				Logger.d("E:bad coin rate!");
@@ -293,7 +292,7 @@ public class PaymentListLayout extends CCBaseLayout {
 
 		Integer a = env.get(KeyCaller.K_AMOUNT, Integer.class);
 		if (a != null) {
-			mDefAmount = a.floatValue() / 100f;
+			mDefAmount = a.doubleValue() / 100f;
 			if (DEBUG) {
 				Logger.d("assign amount " + mDefAmount);
 			}
@@ -439,8 +438,8 @@ public class PaymentListLayout extends CCBaseLayout {
 		PaymentCallbackInfo info = new PaymentCallbackInfo();
 
 		Object price = env.remove(KeyPaymentList.K_PAY_RESULT_PRICE);
-		Float amount = (price instanceof Float) ? (Float) price : env.get(
-				KeyPaymentList.K_PAY_AMOUNT, Float.class);
+		Double amount = (price instanceof Double) ? (Double) price : env.get(
+				KeyPaymentList.K_PAY_AMOUNT, Double.class);
 		info.amount = amount == null ? null : Utils.price2str(amount);
 
 		info.cmgeOrderNumber = env.get(KeyPaymentList.K_PAY_ORDERNUMBER,
@@ -554,11 +553,11 @@ public class PaymentListLayout extends CCBaseLayout {
 		switch (type) {
 		case COST:
 		case PRICE: {
-			float count = 0;
+			double count = 0;
 			String s = get_child_text(IDC.ED_RECHARGE_COUNT);
 			if (s != null && s.length() > 0) {
 				try {
-					count = Float.parseFloat(s);
+					count = Double.parseDouble(s);
 					if (type == VAL.COST) {
 						count /= ZZ_COIN_RATE;
 					}
@@ -596,10 +595,10 @@ public class PaymentListLayout extends CCBaseLayout {
 
 	/** 更新充值的花费金额数值 */
 	private void updateRechargeCost() {
-		float count;
+		double count;
 		Object o = getValue(VAL.PRICE);
-		if (o instanceof Float) {
-			count = ((Float) o).floatValue();
+		if (o instanceof Double) {
+			count = ((Double) o).doubleValue();
 		} else {
 			count = 0;
 		}
@@ -607,7 +606,7 @@ public class PaymentListLayout extends CCBaseLayout {
 	}
 
 	/** 更新 “应付金额”值 */
-	private void updateRechargeCost(float count) {
+	private void updateRechargeCost(double count) {
 		String str = String.format(ZZStr.CC_RECHAGRE_COST_UNIT.str(),
 				mRechargeFormat.format(count / ZZ_COIN_RATE));
 		set_child_text(IDC.TV_RECHARGE_COST, str);
@@ -617,7 +616,7 @@ public class PaymentListLayout extends CCBaseLayout {
 	}
 
 	/** 因花费金额变化而更新 "支付方式的描述"，单位 卓越币 */
-	private void updatePayTypeByCost(float count) {
+	private void updatePayTypeByCost(double count) {
 		View v = findViewById(IDC.PANEL_CARDINPUT.id());
 		if (v instanceof ViewSwitcher) {
 			ViewSwitcher vs = (ViewSwitcher) v;
@@ -641,7 +640,7 @@ public class PaymentListLayout extends CCBaseLayout {
 	 * @param v
 	 *            主view，必须有设置 tag 为支付类别(见 {@link PayChannel})
 	 */
-	private void updatePayTypeByCost(float count, LinearLayout rv) {
+	private void updatePayTypeByCost(double count, LinearLayout rv) {
 		Object tag = rv.getTag();
 		if (tag == null || !(tag instanceof Integer))
 			return;
@@ -765,7 +764,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			break;
 
 		case PayChannel.PAY_TYPE_ZZCOIN: {
-			float count = ((Float) getValue(VAL.PRICE)).floatValue();
+			double count = ((Double) getValue(VAL.PRICE)).doubleValue();
 			updatePayTypeByCost(count, rv);
 		}
 			break;
@@ -1097,8 +1096,8 @@ public class PaymentListLayout extends CCBaseLayout {
 			ResultPayList rpl = (ResultPayList) result;
 
 			if (rpl.mZYCoin != null) {
-				float balance = rpl.mZYCoin.floatValue();
-				getEnv().add(KeyUser.K_COIN_BALANCE, Float.valueOf(balance));
+				double balance = rpl.mZYCoin.doubleValue();
+				getEnv().add(KeyUser.K_COIN_BALANCE, Double.valueOf(balance));
 				updateBalance(balance);
 			}
 
@@ -1202,11 +1201,11 @@ public class PaymentListLayout extends CCBaseLayout {
 	private String checkInput(ILayoutHost host, PayChannel channel) {
 		ParamChain env = getEnv();
 
-		final float amount;
+		final double amount;
 		if (channel.type == PayChannel.PAY_TYPE_ZZCOIN)
-			amount = (Float) getValue(VAL.PRICE);
+			amount = (Double) getValue(VAL.PRICE);
 		else
-			amount = (Float) getValue(VAL.COST);
+			amount = (Double) getValue(VAL.COST);
 		if (amount < 0.01f) {
 			if (DebugFlags.DEBUG_DEMO
 					&& channel.type == PayChannel.PAY_TYPE_KKFUNPAY) {
@@ -1500,7 +1499,7 @@ public class PaymentListLayout extends CCBaseLayout {
 		payParam.serverId = env.get(KeyCaller.K_GAME_SERVER_ID, String.class);
 		payParam.projectId = env.get(KeyDevice.K_PROJECT_ID, String.class);
 
-		Float amount = env.get(KeyPaymentList.K_PAY_AMOUNT, Float.class);
+		Double amount = env.get(KeyPaymentList.K_PAY_AMOUNT, Double.class);
 		payParam.amount = Utils.price2str(amount == null ? 0 : amount);
 
 		payParam.requestId = "";
@@ -1721,42 +1720,5 @@ class PayListTask extends AsyncTask<Object, Void, ResultPayList> {
 		// clean
 		mCallback = null;
 		mToken = null;
-	}
-}
-
-class BalanceTask extends AsyncTask<Object, Void, ResultBalance> {
-
-	protected static AsyncTask<?, ?, ?> createAndStart(ConnectionUtil cu,
-			ITaskCallBack callback, Object token, String loginName) {
-		BalanceTask task = new BalanceTask();
-		task.execute(cu, callback, token, loginName);
-		return task;
-	}
-
-	private ITaskCallBack mCallback;
-	private Object mToken;
-
-	@Override
-	protected ResultBalance doInBackground(Object... params) {
-		ConnectionUtil cu = (ConnectionUtil) params[0];
-		ITaskCallBack callback = (ITaskCallBack) params[1];
-		Object token = params[2];
-
-		String loginName = (String) params[3];
-		ResultBalance ret = cu.getBalance(loginName);
-		if (!this.isCancelled()) {
-			mCallback = callback;
-			mToken = token;
-		}
-		return ret;
-	}
-
-	@Override
-	protected void onPostExecute(ResultBalance result) {
-		if (mCallback != null) {
-			mCallback.onResult(this, mToken, result);
-			mCallback = null;
-			mToken = null;
-		}
 	}
 }

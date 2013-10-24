@@ -285,8 +285,8 @@ public class ParamChainImpl implements ParamChain {
 	/**
 	 * 获取指定类型的变量（所有级），示例
 	 * <P>
-	 * Float amount = env.get({@link KeyGlobal#K_PAY_AMOUNT}, {@link Float
-	 * Float.class});
+	 * Double amount = env.get({@link KeyGlobal#K_PAY_AMOUNT}, {@link Double
+	 * Double.class});
 	 * 
 	 * @param key
 	 *            变量名

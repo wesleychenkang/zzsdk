@@ -135,10 +135,10 @@ public interface ParamChain {
 		/** 新用户密码, {@link String} */
 		public static final String K_NEW_PASSWORD = _TAG_ + "password_new";
 
-		/** 余额，{@link Float}，格式 0.00 */
+		/** 余额，{@link Double}，格式 0.00 */
 		public static final String K_COIN_BALANCE = _TAG_ + "coin_balance";
 
-		/** 键：汇率，卓越币与RMB的兑换比例，{@link Float}, 精度 0.01，格式 0.00 */
+		/** 键：汇率，卓越币与RMB的兑换比例，{@link Double}, 精度 0.01，格式 0.00 */
 		public static final String K_COIN_RATE = _TAG_ + "coin_rate";
 	}
 
@@ -325,8 +325,8 @@ public interface ParamChain {
 	/**
 	 * 获取指定类型的变量（所有级），示例
 	 * <P>
-	 * Float amount = env.get({@link KeyGlobal#K_PAY_AMOUNT}, {@link Float
-	 * Float.class});
+	 * Double amount = env.get({@link KeyGlobal#K_PAY_AMOUNT}, {@link Double
+	 * Double.class});
 	 * 
 	 * @param key
 	 *            变量名
