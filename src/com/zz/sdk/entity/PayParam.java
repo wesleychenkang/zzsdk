@@ -32,10 +32,19 @@ public class PayParam implements Serializable, JsonParseInterface {
 	public String cardPassword; // 易宝充值卡密码
 	public String type; // 易宝充值类型
 	public String callBackInfo;
-    public String part;//请求路径
+	public String part;// 请求路径
 	public String smsActionType; // 短信请求类型 1获取通道 2提交订单
 	public String smsImsi;
-	
+
+	/**
+	 * [20131018] 充值方式
+	 * <nl>
+	 * <li>0或不传走原来方式；
+	 * <li>1充卓越币
+	 * </nl>
+	 */
+	public String way;
+
 	/** 附加参数，直接使用 */
 	public HashMap<String, String> attachParam;
 
@@ -124,52 +133,54 @@ public class PayParam implements Serializable, JsonParseInterface {
 	public static final String K_TYPE = "type";
 	public static final String K_CARD_NO = "cardNo";
 	public static final String K_CARD_PWD = "cardPwd";
-	public ArrayList<BasicNameValuePair> getChargeParameters(int payType){
-	     ArrayList<BasicNameValuePair> listParames = new ArrayList<BasicNameValuePair>();
-		switch(payType){
-		case PayChannel.PAY_TYPE_ALIPAY:	
+	public static final String K_WAY = "way";
+
+	public ArrayList<BasicNameValuePair> getChargeParameters(int payType) {
+		ArrayList<BasicNameValuePair> listParames = new ArrayList<BasicNameValuePair>();
+		switch (payType) {
+		case PayChannel.PAY_TYPE_ALIPAY:
 		case PayChannel.PAY_TYPE_UNMPAY:
 		case PayChannel.PAY_TYPE_TENPAY:
-			listParames.add(new BasicNameValuePair(K_LOGINNAME,loginName));
-			listParames.add(new BasicNameValuePair(K_GAMEROLE,gameRole));
-			listParames.add(new BasicNameValuePair(K_SERVERID,serverId));
-			listParames.add(new BasicNameValuePair(K_PROJECTID,projectId));
-			listParames.add(new BasicNameValuePair(K_AMOUNT,amount));
-			listParames.add(new BasicNameValuePair(K_REQUESTID,requestId));
+			listParames.add(new BasicNameValuePair(K_LOGINNAME, loginName));
+			listParames.add(new BasicNameValuePair(K_GAMEROLE, gameRole));
+			listParames.add(new BasicNameValuePair(K_SERVERID, serverId));
+			listParames.add(new BasicNameValuePair(K_PROJECTID, projectId));
+			listParames.add(new BasicNameValuePair(K_AMOUNT, amount));
+			listParames.add(new BasicNameValuePair(K_REQUESTID, requestId));
 			break;
-			
+
 		case PayChannel.PAY_TYPE_YEEPAY_LT:
-			
-			
+
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
-			listParames.add(new BasicNameValuePair(K_LOGINNAME,loginName));
-			listParames.add(new BasicNameValuePair(K_GAMEROLE,gameRole));
-			listParames.add(new BasicNameValuePair(K_SERVERID,serverId));
-			listParames.add(new BasicNameValuePair(K_PROJECTID,projectId));
-			listParames.add(new BasicNameValuePair(K_TYPE,type));
-			listParames.add(new BasicNameValuePair(K_AMOUNT,amount));
-			listParames.add(new BasicNameValuePair(K_REQUESTID,requestId));
-			listParames.add(new BasicNameValuePair(K_CARD_NO,cardNo));
-			listParames.add(new BasicNameValuePair(K_CARD_PWD,cardPassword));
+			listParames.add(new BasicNameValuePair(K_LOGINNAME, loginName));
+			listParames.add(new BasicNameValuePair(K_GAMEROLE, gameRole));
+			listParames.add(new BasicNameValuePair(K_SERVERID, serverId));
+			listParames.add(new BasicNameValuePair(K_PROJECTID, projectId));
+			listParames.add(new BasicNameValuePair(K_TYPE, type));
+			listParames.add(new BasicNameValuePair(K_AMOUNT, amount));
+			listParames.add(new BasicNameValuePair(K_REQUESTID, requestId));
+			listParames.add(new BasicNameValuePair(K_CARD_NO, cardNo));
+			listParames.add(new BasicNameValuePair(K_CARD_PWD, cardPassword));
 			break;
-			
+
 		case PayChannel.PAY_TYPE_KKFUNPAY:
-			listParames.add(new BasicNameValuePair(K_LOGINNAME,loginName));
-			listParames.add(new BasicNameValuePair(K_GAMEROLE,gameRole));
-			listParames.add(new BasicNameValuePair(K_SERVERID,serverId));
-			listParames.add(new BasicNameValuePair(K_PROJECTID,projectId));
-			listParames.add(new BasicNameValuePair(K_REQUESTID,requestId));
-			listParames.add(new BasicNameValuePair(K_IMSI,smsImsi));
-			if(DebugFlags.DEBUG) {
-				listParames.add(new BasicNameValuePair("ip",DebugFlags.DEF_DEBUG_IP));
+			listParames.add(new BasicNameValuePair(K_LOGINNAME, loginName));
+			listParames.add(new BasicNameValuePair(K_GAMEROLE, gameRole));
+			listParames.add(new BasicNameValuePair(K_SERVERID, serverId));
+			listParames.add(new BasicNameValuePair(K_PROJECTID, projectId));
+			listParames.add(new BasicNameValuePair(K_REQUESTID, requestId));
+			listParames.add(new BasicNameValuePair(K_IMSI, smsImsi));
+			if (DebugFlags.DEBUG) {
+				listParames.add(new BasicNameValuePair("ip",
+						DebugFlags.DEF_DEBUG_IP));
 			}
 			break;
 		case PayChannel.PAY_TYPE_KKFUNPAY_EX:
-			listParames.add(new BasicNameValuePair(K_LOGINNAME,loginName));
-			listParames.add(new BasicNameValuePair(K_IMSI,smsImsi));
+			listParames.add(new BasicNameValuePair(K_LOGINNAME, loginName));
+			listParames.add(new BasicNameValuePair(K_IMSI, smsImsi));
 			break;
 		}
-		switch(payType){
+		switch (payType) {
 		case PayChannel.PAY_TYPE_ALIPAY:
 			part = "pali.lg";
 			break;
@@ -179,7 +190,7 @@ public class PayParam implements Serializable, JsonParseInterface {
 		case PayChannel.PAY_TYPE_TENPAY:
 			part = "pten.lg";
 			break;
-		case PayChannel.PAY_TYPE_YEEPAY_LT: 
+		case PayChannel.PAY_TYPE_YEEPAY_LT:
 			part = "pyee.lg";
 			break;
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
@@ -192,13 +203,19 @@ public class PayParam implements Serializable, JsonParseInterface {
 			part = "pkkfunnt.lg";
 			break;
 		}
-		
+
 		if (attachParam != null) {
 			Set<Entry<String, String>> s = attachParam.entrySet();
 			for (Entry<String, String> e : s) {
-				listParames.add(new BasicNameValuePair(e.getKey(), e.getValue()));
+				listParames
+						.add(new BasicNameValuePair(e.getKey(), e.getValue()));
 			}
 		}
+
+		if (way != null) {
+			listParames.add(new BasicNameValuePair(K_WAY, way));
+		}
+
 		return listParames;
 	}
 }

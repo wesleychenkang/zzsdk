@@ -91,18 +91,19 @@ public class ConnectionUtil {
 			String json = parseJsonData(is);
 
 			try {
+				JSONObject o = new JSONObject(json);
+				if (DebugFlags.DEBUG) {
+					Logger.d(o);
+				}
 				T br = clazz.newInstance();
 				if (br instanceof BaseResult)
-					((BaseResult) br).parseJson(new JSONObject(json));
+					((BaseResult) br).parseJson(o);
 				return br;
 			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -215,9 +216,10 @@ public class ConnectionUtil {
 	 */
 	public ResultLogin login(String loginName, String password, int autoLogin,
 			Context ctx) {
-		return doRequest(ResultLogin.class, Constants.LOGIN_REQ, 2,
-				K_LOGIN_NAME, loginName, K_PASSWORD,
-				Md5Code.encodePassword(password));
+		return doRequest(ResultLogin.class, Constants.LOGIN_REQ, 2 //
+				, K_LOGIN_NAME, loginName //
+				, K_PASSWORD, Md5Code.encodePassword(password) //
+		);
 	}
 
 	/**
@@ -232,8 +234,9 @@ public class ConnectionUtil {
 		} else {
 			imsi = Utils.getIMSI(ctx);
 		}
-		return doRequest(ResultAutoLogin.class, Constants.QUICK_LOGIN_REQ, 2,
-				"imsi", imsi);
+		return doRequest(ResultAutoLogin.class, Constants.QUICK_LOGIN_REQ, 2 //
+				, "imsi", imsi//
+		);
 		// Application.isLogin = true;
 		// syncSdkUser();
 		// isOperationDeviceSyn(result.username, ctx);
@@ -249,8 +252,11 @@ public class ConnectionUtil {
 	public ResultRegister register(String loginName, String password) {
 		String imsi = Utils.getIMSI(mContext);
 		String e_password = Md5Code.encodePassword(password);
-		return doRequest(ResultRegister.class, Constants.REG_REQ, 2, "imsi",
-				imsi, K_LOGIN_NAME, loginName, K_PASSWORD, e_password);
+		return doRequest(ResultRegister.class, Constants.REG_REQ, 2 //
+				, "imsi", imsi //
+				, K_LOGIN_NAME, loginName //
+				, K_PASSWORD, e_password //
+		);
 		// Application.isLogin = true;
 		// syncSdkUser();
 		// isOperationDeviceSyn(result.username, ctx);
@@ -258,10 +264,12 @@ public class ConnectionUtil {
 
 	}
 
-	/** 获取QiHoo返回的token */
+	/** 获取QiHoo返回的token get360UserInfo(获取360用户信息） */
 	public ResultQihoo getAcessToken(String productId, String authCode) {
-		return doRequest(ResultQihoo.class, Constants.GET_TOKEN, 2,
-				"productId", productId, "authCode", authCode);
+		return doRequest(ResultQihoo.class, Constants.GET_TOKEN, 2 //
+				, "productId", productId //
+				, "authCode", authCode //
+		);
 	}
 
 	/**
@@ -277,11 +285,12 @@ public class ConnectionUtil {
 	 */
 	public ResultChangePwd modifyPassword(String user, String oldPassword,
 			String newPassword) {
-		return doRequest(ResultChangePwd.class, Constants.MODIFY_PWD, 2,
-				K_LOGIN_NAME, user, K_PASSWORD,
-				Md5Code.encodePassword(oldPassword), "newPassword",
-				Md5Code.encodePassword(newPassword), "productId",
-				Utils.getProductId(mContext));
+		return doRequest(ResultChangePwd.class, Constants.MODIFY_PWD, 2 //
+				, K_LOGIN_NAME, user //
+				, K_PASSWORD, Md5Code.encodePassword(oldPassword) //
+				, "newPassword", Md5Code.encodePassword(newPassword) //
+				, "productId", Utils.getProductId(mContext) //
+		);
 		// syncSdkUser();
 	}
 
@@ -322,14 +331,19 @@ public class ConnectionUtil {
 	 * @param submitAmount
 	 *            金额（可选）
 	 */
-	public void canclePay(String OrderNum, String payMsg, String submitAmount) {
-		doRequest(BaseResult.class, Constants.NPM_REQ, 1, "cmgeOrderNum",
-				OrderNum, "payMsg", payMsg, "submitAmount", submitAmount);
+	public BaseResult canclePay(String OrderNum, String payMsg,
+			String submitAmount) {
+		return doRequest(BaseResult.class, Constants.NPM_REQ, 1 //
+				, "cmgeOrderNum", OrderNum //
+				, "payMsg", payMsg //
+				, "submitAmount", submitAmount //
+		);
 	}
 
 	/** 获取支付URL对应判断消息 */
 	public ResultPayMessage getPayUrlMessage() {
-		return doRequest(ResultPayMessage.class, Constants.GPM_REQ, 2);
+		return doRequest(ResultPayMessage.class, Constants.GPM_REQ, 2 //
+		);
 	}
 
 	/**
@@ -339,8 +353,11 @@ public class ConnectionUtil {
 	 * @return
 	 */
 	public BaseResult request(UserAction user) {
-		return doRequest(BaseResult.class, Constants.LOG_REQ, 1, "actionType",
-				"" + user.actionType, K_LOGIN_NAME, user.loginName, "memo", "");
+		return doRequest(BaseResult.class, Constants.LOG_REQ, 1 //
+				, "actionType", "" + user.actionType //
+				, K_LOGIN_NAME, user.loginName //
+				, "memo", "" //
+		);
 	}
 
 	/**
@@ -356,18 +373,19 @@ public class ConnectionUtil {
 	 */
 	public BaseResult deviceSyn(String loginname, Context ctx) {
 		DeviceProperties mDeviceProperties = new DeviceProperties(ctx);
-		return doRequest(BaseResult.class, Constants.DSYN_REQ, 1, //
-				K_LOGIN_NAME, loginname, //
-				"systemVersion", "" + mDeviceProperties.versionCode, //
-				"deviceType", mDeviceProperties.type, //
-				"imei", mDeviceProperties.imei, //
-				"imsi", mDeviceProperties.imsi, //
-				"latitude", "" + mDeviceProperties.latitude, //
-				"longtitude", "" + mDeviceProperties.longitude, //
-				"area", "" + mDeviceProperties.area, //
-				"netType", mDeviceProperties.networkInfo, //
-				"projectId", mDeviceProperties.projectId, //
-				"sdkVersion", mDeviceProperties.sdkVersion);
+		return doRequest(BaseResult.class, Constants.DSYN_REQ, 1 //
+				, K_LOGIN_NAME, loginname //
+				, "systemVersion", "" + mDeviceProperties.versionCode //
+				, "deviceType", mDeviceProperties.type //
+				, "imei", mDeviceProperties.imei //
+				, "imsi", mDeviceProperties.imsi //
+				, "latitude", "" + mDeviceProperties.latitude //
+				, "longtitude", "" + mDeviceProperties.longitude //
+				, "area", "" + mDeviceProperties.area //
+				, "netType", mDeviceProperties.networkInfo //
+				, "projectId", mDeviceProperties.projectId //
+				, "sdkVersion", mDeviceProperties.sdkVersion //
+		);
 		// SharedPreferences prefs = mContext.getSharedPreferences(DEVICESYN,
 		// Context.MODE_PRIVATE);
 		// if ("0".equals(result.codes)) {
@@ -383,8 +401,10 @@ public class ConnectionUtil {
 	 * @return
 	 */
 	public BaseResult online(Context ctx) {
-		return doRequest(BaseResult.class, Constants.LOG_REQ, 1, "imsi",
-				Utils.getIMSI(mContext), "actionType", UserAction.ONLINE);
+		return doRequest(BaseResult.class, Constants.LOG_REQ, 1 //
+				, "imsi", Utils.getIMSI(mContext) //
+				, "actionType", UserAction.ONLINE //
+		);
 	}
 
 	/**
@@ -393,8 +413,10 @@ public class ConnectionUtil {
 	 * @return
 	 */
 	public BaseResult offline(Context ctx) {
-		return doRequest(BaseResult.class, Constants.LOG_REQ, 1, "imsi",
-				Utils.getIMSI(mContext), "actionType", UserAction.OFFLINE);
+		return doRequest(BaseResult.class, Constants.LOG_REQ, 1 //
+				, "imsi", Utils.getIMSI(mContext) //
+				, "actionType", UserAction.OFFLINE //
+		);
 	}
 
 	/**
@@ -493,12 +515,13 @@ public class ConnectionUtil {
 	}
 
 	/**
-	 * 查询订单
+	 * 查询订单 queryOrder(查询订单状态）
 	 */
 	public BaseResult checkOrder(String ordrNumber) {
 		// TODO:
-		return doRequest(BaseResult.class, Constants.GPM_QO, 1, "cmgeOrderNum",
-				ordrNumber);
+		return doRequest(BaseResult.class, Constants.GPM_QO, 1 //
+				, "cmgeOrderNum", ordrNumber //
+		);
 	}
 
 	/**
@@ -528,8 +551,9 @@ public class ConnectionUtil {
 	 * @return
 	 */
 	public ResultBalance getBalance(String loginName) {
-		return doRequest(ResultBalance.class, Constants.GBL_REQ, 1,
-				K_LOGIN_NAME, loginName);
+		return doRequest(ResultBalance.class, Constants.GBL_REQ, 1 //
+				, K_LOGIN_NAME, loginName //
+		);
 	}
 
 	/**
@@ -539,10 +563,17 @@ public class ConnectionUtil {
 	 * @param rowcount
 	 */
 	public ResultBalance getPropList(int rowstart, int rowcount) {
-		return doRequest(ResultBalance.class, Constants.GPRO_REQ, 1,
-				"rowstart", String.valueOf(rowstart), "rowcount",
-				String.valueOf(rowcount));
+		return doRequest(ResultBalance.class, Constants.GPRO_REQ, 1 //
+				, "rowstart", String.valueOf(rowstart) //
+				, "rowcount", String.valueOf(rowcount) //
+		);
 	}
+
+	//
+	// ////////////////////////////////////////////////////////////////////////
+	//
+	//
+	//
 
 	private static int sRefCount = 0;
 	private static ConnectionUtil sInstance = null;

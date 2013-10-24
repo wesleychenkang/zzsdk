@@ -7,6 +7,14 @@ import com.zz.sdk.entity.PayChannel;
 
 /**
  * getBalance(获取卓越币）
+ * <ul>
+ * 输入
+ * <li>loginName
+ * </ul>
+ * <ul>
+ * 输出
+ * <li>zyCoin
+ * </ul>
  */
 public class ResultBalance extends BaseResult {
 

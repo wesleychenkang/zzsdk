@@ -65,6 +65,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final int IDC_ET_RECHARGE_RATE = _IDC_START_ + 15;
 	private static final int IDC_CB_CANCEL_AS_SUCCESS = _IDC_START_ + 16;
 	private static final int IDC_BT_LOGIN_MAIN = _IDC_START_ + 17;
+	private static final int IDC_BT_PAY_OUT = _IDC_START_ + 18;
 
 	/* 自定义消息 */
 	private static final int _MSG_USER_ = 2013;
@@ -147,6 +148,14 @@ public class MainActivity extends Activity implements OnClickListener {
 			Button btCharge = new Button(ctx);
 			btCharge.setText("充值");
 			btCharge.setId(IDC_BT_PAY);
+
+			btCharge.setOnClickListener(onClickListener);
+			rootLayout.addView(btCharge);
+		}
+		{
+			Button btCharge = new Button(ctx);
+			btCharge.setText("充值(旧)");
+			btCharge.setId(IDC_BT_PAY_OUT);
 
 			btCharge.setOnClickListener(onClickListener);
 			rootLayout.addView(btCharge);
@@ -289,15 +298,15 @@ public class MainActivity extends Activity implements OnClickListener {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView,
 					boolean isChecked) {
-				
-				  if(isChecked){
-					  isDisplayLoginfail = true;
-				  }else{
-					  isDisplayLoginfail = false; 
-				  }
-				  
-				 mSDKManager.setConfigInfo(false, isDisplayLoginTip,
-							isDisplayLoginfail); 
+
+				if (isChecked) {
+					isDisplayLoginfail = true;
+				} else {
+					isDisplayLoginfail = false;
+				}
+
+				mSDKManager.setConfigInfo(false, isDisplayLoginTip,
+						isDisplayLoginfail);
 			}
 
 		};
@@ -319,13 +328,38 @@ public class MainActivity extends Activity implements OnClickListener {
 		}
 			break;
 
+		case IDC_BT_PAY_OUT: {
+			String s_amount = ((TextView) findViewById(IDC_ET_PAY_AMOUNT))
+					.getText().toString();
+			int amount;
+			try {
+				amount = Integer.parseInt(s_amount);
+			} catch (NumberFormatException e) {
+				amount = 0;
+			}
+
+			boolean isCloseWindow;
+			View vCloseWindow = findViewById(IDC_CHARGE_AUTO_CLOSE);
+			if (vCloseWindow instanceof CheckBox) {
+				isCloseWindow = ((CheckBox) vCloseWindow).isChecked();
+			} else {
+				isCloseWindow = false;
+			}
+
+			mSDKManager.showPaymentView(mHandler, MSG_PAYMENT_CALLBACK,
+					CONFIG_GAME_SERVER_ID, CONFIG_GAME_SERVER_NAME,
+					CONFIG_GAME_ROLE_ID, CONFIG_GAME_ROLE, amount,
+					isCloseWindow, CONFIG_GAME_CALLBACK_INFO);
+		}
+			break;
+
 		/* 充值 */
 		case IDC_BT_PAY_AMOUNT:
 		case IDC_BT_PAY: {
 			if (!mSDKManager.isLogined()) {
 				String tip = "尚未登录用户, 请选择[单机模式]或[登录].";
 				pushLog(tip);
-				break;
+				// break;
 			}
 
 			if (mLoginCallbackInfo == null) {

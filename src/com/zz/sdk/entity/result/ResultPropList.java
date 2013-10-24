@@ -5,6 +5,26 @@ import org.json.JSONObject;
 
 /**
  * GetPropList(获取道具列表）
+ * <ul>
+ * 输入
+ * <li>rowstart rowcount
+ * </ul>
+ * <ul>
+ * 输出
+ * <li>props
+ * <li>count
+ * <li>prop
+ * <ul>
+ * <li>id
+ * <li>productId
+ * <li>name
+ * <li>icon
+ * <li>bigIcon
+ * <li>price
+ * <li>desc
+ * <li>gameRole
+ * </ul>
+ * </ul>
  */
 public class ResultPropList extends BaseResult {
 

@@ -7,6 +7,25 @@ import com.zz.sdk.entity.PayChannel;
 
 /**
  * GetPayList(获取支付列表）
+ * <ul>
+ * 输入
+ * <li>serverId
+ * <li>loginName: <i>2013-10-18多加loginName参数，不传按原来方式，传会有余额返回</i>
+ * </ul>
+ * <ul>
+ * 输出
+ * <li>paies
+ * <ul>
+ * <li>payDesc
+ * <li>id
+ * <li>serverId
+ * <li>type
+ * <li>desc
+ * <li>name
+ * </ul>
+ * <li>payServerDesc
+ * <li>zyCoin:如果 loginName 有效
+ * </ul>
  */
 public class ResultPayList extends BaseResult {
 

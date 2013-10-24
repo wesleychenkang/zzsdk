@@ -37,12 +37,12 @@
         <!-- 游戏服务器ID，由SDK方提供 -->
         <meta-data
             android:name="SERVER_ID"
-            android:value="M1001A" />
+            android:value="M1002A" />
 
         <!-- 项目ID，由SDK方提供 -->
         <meta-data
             android:name="PROJECT_ID"
-            android:value="P10003A" />
+            android:value="P10002A" />
         <!-- 产品ID,由SDK方提供 -->
         <meta-data
             android:name="PRODUCT_ID"
