@@ -167,7 +167,12 @@ abstract class CCBaseLayout extends BaseLayout {
 	 */
 	protected void onUpdateBalanceResult(Double result) {
 		hidePopup();
-		setCoinBalance(result == null ? 0 : result.doubleValue());
+		if (result == null) {
+			setCoinBalance(0);
+		} else {
+			setCoinBalance(result.doubleValue());
+			getEnv().add(KeyUser.K_COIN_BALANCE, result);
+		}
 	}
 
 	/** 更新卓越币余额 */
@@ -361,6 +366,7 @@ abstract class CCBaseLayout extends BaseLayout {
 
 	public void setCoinBalance(double coinBalance) {
 		mCoinBalance = coinBalance;
+		updateBalance(coinBalance);
 	}
 }
 

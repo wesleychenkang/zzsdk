@@ -58,6 +58,9 @@ public class ResConstants {
 		/** 充值金额，基于 {@link #CC_PRICE_FORMAT} */
 		CC_RECHAGRE_COST_UNIT("%s元"), //
 
+		/** 支付金额大于1000元，建议使用大额支付。 */
+		CC_RECHARGE_COST_SUMMARY("支付金额大于1000元，建议使用大额支付。"),
+
 		/** 充值数量候选列表 %s个，基于 {@link #CC_PRICE_FORMAT} */
 		CC_RECHAGRE_CANDIDATE_UNIT("%s个"), //
 
@@ -119,6 +122,8 @@ public class ResConstants {
 		CC_PAYTYPE_DESC("请点击确认充值，进入到%s充值界面"), //
 		/** 卓越币的消耗描述，基于 {@link #CC_PRICE_FORMAT} */
 		CC_PAYTYPE_COIN_DESC("确认后，将扣除%s卓越币，您的余额为%s"), //
+		/** 卓越币余额不足 */
+		CC_PAYTYPE_COIN_DESC_POOR("你的卓越币余额不足，请更换其他方式进行支付"), //
 		CC_COMMIT_RECHARGE("确认充值"), //
 		CC_COMMIT_RECHARGE_SMS("确认提交"), //
 		CC_COMMIT_BUY("确认购买"), //
@@ -177,6 +182,8 @@ public class ResConstants {
 		public static enum ZZFontColor {
 			/** 充值界面·普通文本 */
 			CC_RECHAGR_NORMAL(Color.BLACK),
+			/** 充值界面·错误提示文本 */
+			CC_RECHAGR_ERROR(Color.RED),
 			/** 充值界面输入文本 */
 			CC_RECHAGR_INPUT(Color.DKGRAY),
 			/** 充值界面·应付金额文本 */

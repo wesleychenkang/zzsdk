@@ -656,9 +656,17 @@ public class PaymentListLayout extends CCBaseLayout {
 				tv = new TextView(mContext);
 				rv.addView(tv, new LayoutParams(LP_MW));
 			}
-			tv.setText(String.format(ZZStr.CC_PAYTYPE_COIN_DESC.str(),
-					mRechargeFormat.format(count),
-					mRechargeFormat.format(getCoinBalance() - count)));
+
+			double b = getCoinBalance() - count;
+			if (b < 0) {
+				tv.setText(ZZStr.CC_PAYTYPE_COIN_DESC_POOR.str());
+				tv.setTextColor(ZZFontColor.CC_RECHAGR_ERROR.color());
+			} else {
+				tv.setText(String.format(ZZStr.CC_PAYTYPE_COIN_DESC.str(),
+						mRechargeFormat.format(count),
+						mRechargeFormat.format(b)));
+			}
+
 			ZZFontSize.CC_RECHAGR_NORMAL.apply(tv);
 		}
 			break;
@@ -1098,7 +1106,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			if (rpl.mZYCoin != null) {
 				double balance = rpl.mZYCoin.doubleValue();
 				getEnv().add(KeyUser.K_COIN_BALANCE, Double.valueOf(balance));
-				updateBalance(balance);
+				setCoinBalance(balance);
 			}
 
 			if (rpl.mPaies != null && rpl.mPaies.length > 0) {
@@ -1250,7 +1258,10 @@ public class PaymentListLayout extends CCBaseLayout {
 			break;
 
 		case PayChannel.PAY_TYPE_ZZCOIN:
-			ret = null;
+			if (amount > getCoinBalance())
+				ret = ZZStr.CC_PAYTYPE_COIN_DESC_POOR.str();
+			else
+				ret = null;
 			break;
 
 		case PayChannel.PAY_TYPE_KKFUNPAY:
@@ -1392,6 +1403,13 @@ public class PaymentListLayout extends CCBaseLayout {
 		}
 
 		PayParam payParam = genPayParam(mContext, getEnv(), type);
+
+		if (mChargeStyle == ChargeStyle.RECHARGE) {
+			if (DEBUG) {
+				showToast("充值卓越币，花费 RMB" + payParam.amount);
+			}
+			payParam.way = "1";
+		}
 
 		if (type == PayChannel.PAY_TYPE_KKFUNPAY) {
 			if (payParam == null || payParam.smsImsi == null) {
@@ -1584,8 +1602,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			if (BuildConfig.DEBUG) {
 				Logger.d("显示固定的充值候选列表");
 			}
-			showPopup_ChargePull(new float[] { 100, 500, 1000, 3000, 5000,
-					10000 });
+			showPopup_ChargePull(new float[] { 1, 10, 50, 100, 300, 500 });
 		}
 			break;
 
