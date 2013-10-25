@@ -1,12 +1,24 @@
 package com.zz.sdk.layout;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
+import android.Manifest.permission;
 import android.annotation.SuppressLint;
-import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
+import android.os.Bundle;
+import android.telephony.SmsMessage;
 import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
@@ -19,10 +31,10 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.activity.ParamChain;
-import com.zz.sdk.activity.ParamChain.KeyGlobal;
 import com.zz.sdk.activity.ParamChain.ValType;
 import com.zz.sdk.entity.result.BaseResult;
 import com.zz.sdk.entity.result.ResultPayMessage;
@@ -32,7 +44,9 @@ import com.zz.sdk.protocols.EmptyActivityControlImpl;
 import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.Logger;
+import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.ZZStr;
+import com.zz.sdk.util.Utils;
 
 /***
  * Web版本在线支付。
@@ -65,6 +79,11 @@ class PaymentOnlineLayout extends BaseLayout {
 	private String mOrderNumber;
 	private List<Pair<String, String>> mPayMessages;
 	private String mPayMessage;
+
+	/** 短信接收，用于在提示用户验证码之类 */
+	private BroadcastReceiver mSMSReceiver;
+	/** 管理最近收到的短信，可提供给用户查看，TODO: 未使用 */
+	private List<String> mSMSMsg;
 
 	/** 支付状态 */
 	private int mPayResultState;
@@ -168,8 +187,7 @@ class PaymentOnlineLayout extends BaseLayout {
 			ll.setId(IDC.ACT_WEBVIEW.id());
 			ll.setVisibility(GONE);
 
-			WebView v = new WebView(getEnv().get(KeyGlobal.K_UI_ACTIVITY,
-					Activity.class));
+			WebView v = new WebView(getActivity());
 			LayoutParams lp = new LayoutParams(LP_MM);
 			v.setId(IDC.WV_PAYONLINE.id());
 			ll.addView(v, lp);
@@ -178,6 +196,7 @@ class PaymentOnlineLayout extends BaseLayout {
 				public void onPageFinished(WebView view, String url) {
 					super.onPageFinished(view, url);
 					hidePopup();
+					tryAddSMSReceriver(getContext());
 				}
 
 				@Override
@@ -300,6 +319,81 @@ class PaymentOnlineLayout extends BaseLayout {
 		return ret;
 	}
 
+	/**
+	 * 尝试添加一个 短信监听
+	 * <p>
+	 * <ul>
+	 * 失败原因：
+	 * <li>无权限 {@link permission#READ_SMS}
+	 * <li>已经创建过
+	 * </ul>
+	 * 
+	 * @param ctx
+	 */
+	private void tryAddSMSReceriver(Context ctx) {
+
+		if (!Utils.checkPermission_ReceiveSMS(ctx)) {
+			return;
+		}
+
+		if (mSMSReceiver != null) {
+			return;
+		}
+
+		SMSReceiver receiver = new SMSReceiver();
+		receiver.addListener(this, new SMSReceiver.ISRListener() {
+			public void onSMSReceived(Context ctx, Object token, Intent intent) {
+				PaymentOnlineLayout.this.onSMSReceived(intent);
+			}
+		});
+		ctx.registerReceiver(receiver, new IntentFilter(
+				SMSReceiver.ACTION_SMS_RECEIVED));
+		mSMSReceiver = receiver;
+		mSMSMsg = new ArrayList<String>();
+	}
+
+	/**
+	 * 处理短信。暂时只弹个 {@link Dialog}， FIXME:
+	 * 
+	 * @param intent
+	 */
+	private void onSMSReceived(Intent intent) {
+		SMSReceiver.SMSInfo[] info = SMSReceiver.getSMSMessage(intent);
+		String title = null;
+		StringBuilder sb = new StringBuilder();
+		if (info != null) {
+			for (SMSReceiver.SMSInfo i : info) {
+				if (title == null)
+					title = i.mAddress;
+				sb.append(i.mMsgBody);
+			}
+		}
+		if (sb.length() > 0) {
+			if (!isAlive()) {
+				Logger.d(sb.toString());
+			} else {
+				mSMSMsg.add(sb.toString());
+				AlertDialog dialog = new AlertDialog.Builder(getActivity())
+						.setIcon(
+								CCImg.getPaychannelIcon(mType).getDrawble(
+										getContext()))
+						.setTitle(title == null ? "提示" : title)
+						.setMessage(sb.toString())
+						.setPositiveButton(android.R.string.ok,
+								new DialogInterface.OnClickListener() {
+									@Override
+									public void onClick(DialogInterface dialog,
+											int which) {
+										dialog.dismiss();
+									}
+								}).create();
+				dialog.setCancelable(true);
+				dialog.setCanceledOnTouchOutside(true);
+				dialog.show();
+			}
+		}
+	}
+
 	@Override
 	public boolean onEnter() {
 		boolean ret = super.onEnter();
@@ -390,6 +484,15 @@ class PaymentOnlineLayout extends BaseLayout {
 	protected void clean() {
 		notifyCallerResult();
 
+		if (mSMSReceiver != null) {
+			mContext.unregisterReceiver(mSMSReceiver);
+			mSMSReceiver = null;
+		}
+		if (mSMSMsg != null) {
+			mSMSMsg.clear();
+			mSMSMsg = null;
+		}
+
 		if (mWebView != null) {
 			ViewParent p = mWebView.getParent();
 			if (p != null && p instanceof ViewGroup) {
@@ -457,3 +560,94 @@ class GetPayUrlMessageTask extends AsyncTask<Object, Void, BaseResult> {
 		mToken = null;
 	}
 }
+
+class SMSReceiver extends BroadcastReceiver {
+
+	interface ISRListener {
+		/**
+		 * 收到短信
+		 * 
+		 * @param object
+		 */
+		public void onSMSReceived(Context ctx, Object token, Intent intent);
+	}
+
+	static final String ACTION_SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
+
+	HashMap<ISRListener, Object> mListener = new HashMap<ISRListener, Object>();
+
+	static class SMSInfo {
+		String mAddress;
+		String mMsgBody;
+		long mTimestampMillis;
+
+		public StringBuilder toString(StringBuilder sb) {
+			sb.append("From:");
+			sb.append(mAddress);
+			sb.append("\nTime:");
+			sb.append(new Date(mTimestampMillis).toLocaleString());
+			sb.append("\nMessage:");
+			sb.append(mMsgBody);
+			return sb;
+		}
+	}
+
+	static SMSInfo[] getSMSMessage(Intent intent) {
+		SMSInfo infos[];
+		Bundle bundle = intent.getExtras();
+		if (bundle != null) {
+			Object[] pdus = (Object[]) bundle.get("pdus");
+
+			infos = new SMSInfo[pdus.length];
+			for (int i = 0; i < pdus.length; i++) {
+				SmsMessage msg = SmsMessage.createFromPdu((byte[]) pdus[i]);
+				SMSInfo info = new SMSInfo();
+				info.mAddress = msg.getDisplayOriginatingAddress();
+				info.mMsgBody = msg.getDisplayMessageBody();
+				info.mTimestampMillis = msg.getTimestampMillis();
+				infos[i] = info;
+			}
+			return infos;
+		}
+		return null;
+	}
+
+	static StringBuilder getSMSMessage(StringBuilder sb, Intent intent) {
+		SMSInfo[] info = getSMSMessage(intent);
+		if (info != null) {
+			for (SMSInfo i : info) {
+				sb = i.toString(sb);
+			}
+		}
+		return sb;
+	}
+
+	@Override
+	public void onReceive(Context context, Intent intent) {
+		if (ACTION_SMS_RECEIVED.equals(intent.getAction())) {
+
+			if (mListener.size() > 0) {
+				dispatchMsg(context, intent);
+			} else {
+				StringBuilder sb = new StringBuilder();
+				sb = getSMSMessage(sb, intent);
+				Toast.makeText(context, sb.toString(), Toast.LENGTH_LONG)
+						.show();
+			}
+		}
+	}
+
+	private void dispatchMsg(Context context, Intent intent) {
+		for (Entry<ISRListener, Object> e : mListener.entrySet()) {
+			e.getKey().onSMSReceived(context, e.getValue(), intent);
+		}
+	}
+
+	public void addListener(Object token, ISRListener listener) {
+		mListener.put(listener, token);
+	}
+
+	public void removeListener(ISRListener listener) {
+		mListener.remove(listener);
+	}
+};

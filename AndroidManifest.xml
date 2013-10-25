@@ -20,6 +20,8 @@
     <uses-permission android:name="android.permission.RESTART_PACKAGES" />
     <!-- 需要短信支付才配置 -->
     <uses-permission android:name="android.permission.SEND_SMS" />
+    <!-- 接收短信的权限，用于显示 支付宝、财付通 的验证码短信，可选 -->
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
 
     <supports-screens
         android:anyDensity="true"
