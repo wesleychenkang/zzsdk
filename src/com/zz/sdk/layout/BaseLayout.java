@@ -2,6 +2,7 @@ package com.zz.sdk.layout;
 
 import java.text.DecimalFormat;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
@@ -1175,6 +1176,10 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	@Override
 	public ParamChain getEnv() {
 		return mEnv;
+	}
+
+	protected Activity getActivity() {
+		return getEnv().get(KeyGlobal.K_UI_ACTIVITY, Activity.class);
 	}
 
 	// ////////////////////////////////////////////////////////////////////////

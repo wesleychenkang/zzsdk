@@ -354,14 +354,12 @@ class PaymentUnionLayout extends BaseLayout {
 	}
 
 	private void tryInstall() {
-		Activity activity = getEnv().get(KeyGlobal.K_UI_ACTIVITY,
-				Activity.class);
+		Activity activity = getActivity();
 		UPPayAssistEx.installUPPayPlugin(activity);
 	}
 
 	private void tryPayUnion() {
-		Activity activity = getEnv().get(KeyGlobal.K_UI_ACTIVITY,
-				Activity.class);
+		Activity activity = getActivity();
 		tryPayUnion(activity, mTN);
 	}
 

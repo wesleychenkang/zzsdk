@@ -715,15 +715,24 @@ public class Utils {
 		return PRICE_FORMAT.format(price);
 	}
 
-	public static boolean checkPermission_SendSMS(Context ctx) {
+	/** 检查是否有权限， true表示有权限， false表示失败或无权限 */
+	public static boolean checkPermission(Context ctx, String permName) {
 		try {
 			if (PackageManager.PERMISSION_GRANTED == ctx.getPackageManager()
-					.checkPermission(permission.SEND_SMS, ctx.getPackageName())) {
+					.checkPermission(permName, ctx.getPackageName())) {
 				return true;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return false;
+	}
+
+	public static boolean checkPermission_SendSMS(Context ctx) {
+		return checkPermission(ctx, permission.SEND_SMS);
+	}
+
+	public static boolean checkPermission_ReceiveSMS(Context ctx) {
+		return checkPermission(ctx, permission.RECEIVE_SMS);
 	}
 }
