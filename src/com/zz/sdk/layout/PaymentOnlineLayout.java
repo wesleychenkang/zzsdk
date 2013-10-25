@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Pair;
@@ -21,6 +22,7 @@ import android.widget.RelativeLayout;
 
 import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.activity.ParamChain;
+import com.zz.sdk.activity.ParamChain.KeyGlobal;
 import com.zz.sdk.activity.ParamChain.ValType;
 import com.zz.sdk.entity.result.BaseResult;
 import com.zz.sdk.entity.result.ResultPayMessage;
@@ -166,7 +168,8 @@ class PaymentOnlineLayout extends BaseLayout {
 			ll.setId(IDC.ACT_WEBVIEW.id());
 			ll.setVisibility(GONE);
 
-			WebView v = new WebView(ctx);
+			WebView v = new WebView(getEnv().get(KeyGlobal.K_UI_ACTIVITY,
+					Activity.class));
 			LayoutParams lp = new LayoutParams(LP_MM);
 			v.setId(IDC.WV_PAYONLINE.id());
 			ll.addView(v, lp);
