@@ -51,6 +51,7 @@ public class ResConstants {
 		/** 充值中心（游戏购买入口） */
 		CC_RECHARGE_COUNT_TITLE_PRICE("道具价格"), //
 		CC_RECHAGRE_COUNT_HINT("请输入数量"), //
+		CC_RECHARGE_COUNT_CHECK_FAILED("请输入正确的充值数量"), //
 		CC_RECHAGRE_COUNT_DESC("卓越币"), //
 		/** RMB与卓越币的兑换比例，如 (1元=%s卓越币)，基于 {@link #CC_PRICE_FORMAT} */
 		CC_RECHAGRE_RATE_DESC("(1元=%s卓越币)"), //
@@ -92,6 +93,9 @@ public class ResConstants {
 		/** 充值结果：充值未到账 */
 		CC_RECHARGE_RESULT_FAILED("充值未到账！请立即联系客服解决问题。祝您游戏愉快！"),
 
+		/** 您填写的卡号和密码不匹配，请重新输入 */
+		CC_RECHARGE_RESULT_FAILED_CARD("您填写的卡号和密码不匹配，请重新输入"),
+
 		/** 对不起，手机没有插入SIM卡，无法使用话费支付，请选择其它支付方式，如需帮助请联系客服! */
 		CC_TRY_SMS_NO_IMSI("对不起，手机没有插入SIM卡，无法使用话费支付，请选择其它支付方式，如需帮助请联系客服!"),
 		/** 获取不到支付通道，请选择其他方式 */
@@ -115,7 +119,9 @@ public class ResConstants {
 
 		CC_PAYCHANNEL_TITLE("支付方式"), //
 		CC_CARDNUM_DESC("请输入卡号"), //
+		CC_CARDNUM_CHECK_FAILED("请输入完整的充值卡卡号"), //
 		CC_PASSWD_DESC("请输入密码"), //
+		CC_PASSWD_CHECK_FAILED("请输入完整的充值卡密码"), //
 		/** 联通卡(15:19) 移动卡(17:18) */
 		CC_CARDNUM_HINT("请输入卡号（%d位）"), //
 		CC_PASSWD_HINT("请输入卡号（%d位）"), //
@@ -123,7 +129,7 @@ public class ResConstants {
 		/** 卓越币的消耗描述，基于 {@link #CC_PRICE_FORMAT} */
 		CC_PAYTYPE_COIN_DESC("确认后，将扣除%s卓越币，您的余额为%s"), //
 		/** 卓越币余额不足 */
-		CC_PAYTYPE_COIN_DESC_POOR("你的卓越币余额不足，请更换其他方式进行支付"), //
+		CC_PAYTYPE_COIN_DESC_POOR("卓越币余额不足，请更换其他方式进行支付"), //
 		CC_COMMIT_RECHARGE("确认充值"), //
 		CC_COMMIT_RECHARGE_SMS("确认提交"), //
 		CC_COMMIT_BUY("确认购买"), //
@@ -182,6 +188,8 @@ public class ResConstants {
 		public static enum ZZFontColor {
 			/** 充值界面·普通文本 */
 			CC_RECHAGR_NORMAL(Color.BLACK),
+			/** 充值界面·警示性文本 */
+			CC_RECHAGR_WARN(Color.MAGENTA),
 			/** 充值界面·错误提示文本 */
 			CC_RECHAGR_ERROR(Color.RED),
 			/** 充值界面输入文本 */

@@ -110,8 +110,14 @@ public interface ParamChain {
 		/** 键：角色名称，{@link String} */
 		static final String K_GAME_ROLE = _TAG_ + "game_role";
 
-		/** 键：定额价格, 单位为 [分], 如果 >0表示此次充值只能以指定的价格交易.，{@link Integer} */
+		/**
+		 * 键：定额价格, 单位为 [分]或[卓越币]（如果指定了 {@link #K_AMOUNT_IS_ZYCOIN}）, 如果
+		 * >0表示此次充值只能以指定的价格交易.，{@link Integer}
+		 */
 		static final String K_AMOUNT = _TAG_ + "amount";
+
+		/** 键：定额价格({@link #K_AMOUNT})是卓越币数量, 单位为 [0.01个], {@link Boolean} */
+		static final String K_AMOUNT_IS_ZYCOIN = _TAG_ + "coin_count";
 
 		/** 键：支付成功是否自动关闭支付SDK, 如果是 true 则在充值成功后自动退出SDK，{@link Boolean} */
 		static final String K_IS_CLOSE_WINDOW = _TAG_ + "is_close_window";
