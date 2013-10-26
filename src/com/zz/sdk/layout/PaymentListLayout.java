@@ -857,19 +857,21 @@ public class PaymentListLayout extends CCBaseLayout {
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
 			prepparePayType_Card(ctx, rv, 17, 18);
 			break;
+		case PayChannel.PAY_TYPE_YEEPAY_DX: {
+			// TODO: 暂时得知电信充值卡的长度为卡号（19）密码（18）
+
+			// tv = new TextView(ctx);
+			// rv.addView(tv, new LayoutParams(LP_MW));
+			// tv.setText("暂不可使用电信充值卡，请使用其他方式");
+			// tv.setTextColor(Color.BLUE);
+			// ZZFontSize.CC_RECHAGR_NORMAL.apply(tv);
+			prepparePayType_Card(ctx, rv, 19, 18);
+		}
+			break;
 
 		case PayChannel.PAY_TYPE_ZZCOIN: {
 			double count = ((Double) getValue(VAL.PRICE)).doubleValue();
 			updatePayTypeByCost(count, rv);
-		}
-			break;
-
-		case PayChannel.PAY_TYPE_YEEPAY_DX: {
-			tv = new TextView(ctx);
-			rv.addView(tv, new LayoutParams(LP_MW));
-			tv.setText("暂不可使用电信充值卡，请使用其他方式");
-			tv.setTextColor(Color.BLUE);
-			ZZFontSize.CC_RECHAGR_NORMAL.apply(tv);
 		}
 			break;
 
@@ -1216,10 +1218,14 @@ public class PaymentListLayout extends CCBaseLayout {
 
 		if (result instanceof ResultPayList && result.isSuccess()) {
 			ResultPayList rpl = (ResultPayList) result;
+			ParamChain env = getEnv();
+			if (rpl.mPayServerDesc != null) {
+				env.add(KeyGlobal.K_HELP_TOPIC, rpl.mPayServerDesc);
+			}
 
 			if (rpl.mZYCoin != null) {
 				double balance = rpl.mZYCoin.doubleValue();
-				getEnv().add(KeyUser.K_COIN_BALANCE, Double.valueOf(balance));
+				env.add(KeyUser.K_COIN_BALANCE, Double.valueOf(balance));
 				setCoinBalance(balance);
 			}
 
@@ -1352,7 +1358,8 @@ public class PaymentListLayout extends CCBaseLayout {
 			break;
 
 		case PayChannel.PAY_TYPE_YEEPAY_LT:
-		case PayChannel.PAY_TYPE_YEEPAY_YD: {
+		case PayChannel.PAY_TYPE_YEEPAY_YD:
+		case PayChannel.PAY_TYPE_YEEPAY_DX: {
 			String card = get_child_text(IDC.PANEL_CARDINPUT, IDC.ED_CARD, 1);
 			String passwd = get_child_text(IDC.PANEL_CARDINPUT, IDC.ED_PASSWD,
 					1);
@@ -1382,7 +1389,6 @@ public class PaymentListLayout extends CCBaseLayout {
 			ret = null;
 			break;
 
-		case PayChannel.PAY_TYPE_YEEPAY_DX:
 		default:
 			ret = "暂不支持";
 			break;
@@ -1500,7 +1506,9 @@ public class PaymentListLayout extends CCBaseLayout {
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
 			dRequest = UserAction.PYEE;
 			break;
-
+		case PayChannel.PAY_TYPE_YEEPAY_DX:
+			dRequest = UserAction.PYEE;
+			break;
 		case PayChannel.PAY_TYPE_UNMPAY:
 			dRequest = UserAction.PUNION;
 			break;
@@ -1509,7 +1517,6 @@ public class PaymentListLayout extends CCBaseLayout {
 			dRequest = UserAction.PKKFUN;
 			break;
 
-		case PayChannel.PAY_TYPE_YEEPAY_DX:
 		case PayChannel.PAY_TYPE_ZZCOIN:
 		default:
 			showToast("暂不支持");
