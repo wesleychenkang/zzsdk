@@ -3,6 +3,7 @@ package com.zz.sdk.layout;
 import java.text.DecimalFormat;
 import java.util.Random;
 
+import android.R.integer;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
@@ -459,6 +460,15 @@ public class PaymentListLayout extends CCBaseLayout {
 		info.cmgeOrderNumber = env.get(KeyPaymentList.K_PAY_ORDERNUMBER,
 				String.class);
 		info.statusCode = code;
+
+		Integer payWayType = env.get(KeyPaymentList.K_PAY_CHANNELTYPE,
+				Integer.class);
+		info.payWayType = payWayType == null ? -1 : payWayType;
+		info.payWayName = env.get(KeyPaymentList.K_PAY_CHANNELNAME,
+				String.class);
+
+		info.currency = "RMB";
+
 		notifyCaller(MSG_TYPE.PAYMENT, state, info);
 	}
 
