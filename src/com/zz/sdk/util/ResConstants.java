@@ -58,6 +58,7 @@ public class ResConstants {
 		CC_RECHAGRE_COST_DESC("应付金额："), //
 		/** 充值金额，基于 {@link #CC_PRICE_FORMAT} */
 		CC_RECHAGRE_COST_UNIT("%s元"), //
+		CC_RECHAGRE_COST_UNIT_ZYCOIN("%s卓越币"), //
 
 		/** 支付金额大于1000元，建议使用大额支付。 */
 		CC_RECHARGE_COST_SUMMARY("支付金额大于1000元，建议使用大额支付。"),
@@ -285,7 +286,7 @@ public class ResConstants {
 			CC_ROOTVIEW_PADDING_BOTTOM(12),
 
 			/** 充值界面·各面板垂直方向间隔 */
-			CC_SAPCE_PANEL_V(16),
+			CC_SAPCE_PANEL_V(12),
 
 			/** 充值数量输入框的边距 */
 			CC_RECHARGE_COUNT_PADDING_H(16), CC_RECHARGE_COUNT_PADDING_V(8),
@@ -370,10 +371,10 @@ public class ResConstants {
 		TITLE_EXIT_PRESSED("title_exit_pressed.png"),
 
 		/** XListView */
-		XLISTVIEW_ARROW("xlistview_arrow.png"),
+		XLISTVIEW_ARROW("xlistview_arrow.png"), //
 		EMPTY_PHOTO("empty_photo.png"),
 
-		// :%s/\([a-z_]*\)\.\(.*\)$/\U\1\l("\1\.\2"), \/\//g 
+		// :%s/\([a-z_]*\)\.\(.*\)$/\U\1\l("\1\.\2"), \/\//g
 		/** 登录界面资源 */
 		LOGIN_BUTTON_LV_CLICK("login_button_lv_click.9.png"), //
 		LOGIN_BUTTON_LV("login_button_lv.9.png"), //

@@ -243,7 +243,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		LinearLayout ll = new LinearLayout(ctx);
 		ll.setOrientation(VERTICAL);
 		LayoutParams lp = new LayoutParams(LP_MW);
-		lp.topMargin = ZZDimen.CC_SAPCE_PANEL_V.px();
+		lp.bottomMargin = ZZDimen.CC_SAPCE_PANEL_V.px();
 		rv.addView(ll, lp);
 		return ll;
 	}
