@@ -371,8 +371,20 @@ public class ResConstants {
 
 		/** XListView */
 		XLISTVIEW_ARROW("xlistview_arrow.png"),
-
 		EMPTY_PHOTO("empty_photo.png"),
+
+		// :%s/\([a-z_]*\)\.\(.*\)$/\U\1\l("\1\.\2"), \/\//g 
+		/** 登录界面资源 */
+		LOGIN_BUTTON_LV_CLICK("login_button_lv_click.9.png"), //
+		LOGIN_BUTTON_LV("login_button_lv.9.png"), //
+		LOGIN_BUTTON_LAN_CLICK("login_button_lan_click.9.png"), //
+		LOGIN_BUTTON_LAN("login_button_lan.9.png"), //
+		LOGIN_BUTTON_HUI_CLICK("login_button_hui_click.9.png"), //
+		LOGIN_BUTTON_HUI("login_button_hui.9.png"), //
+		LOGIN_BUTTON_HUANG_CLICK("login_button_huang_click.9.png"), //
+		LOGIN_BUTTON_HUANG("login_button_huang.9.png"), //
+		LOGIN_BUTTON_KUAI("login_button_kuai.png"), //
+		LOGIN_BUTTON_KUAI_ANXIA("login_button_kuai_anxia.png"), //
 
 		;
 

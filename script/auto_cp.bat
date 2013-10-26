@@ -52,6 +52,24 @@ call :mycp 公共资源\tup_zyb.png tup_zyb.png
 call :mycp 公共资源\zf_wxz.9.png zf_wxz.9.png
 call :mycp 公共资源\zf_xz.9.png zf_xz.9.png
 
+
+:login
+set s=x:\resource\SDK登陆android\
+set p=y:\workspace\android\zzsdk\assets\zz_res\drawable\
+set pr=login_
+call :mycp butten_lv.9.png button_lv.9.png
+call :mycp butten_lan.9.png button_lan.9.png
+call :mycp butten_hui.9.png button_hui.9.png
+call :mycp butten_huang.9.png button_huang.9.png
+call :mycp butten_@lv.9.png button_lv_click.9.png
+call :mycp butten_@lan.9.png button_lan_click.9.png
+call :mycp butten_@hui.9.png button_hui_click.9.png
+call :mycp butten_@huang.9.png button_huang_click.9.png
+call :mycp butten_kuai.png button_kuai.png
+call :mycp butten_kuai_anxia.png button_kuai_anxia.png
+goto :eof
+
+
 @pause
 goto :eof
 
