@@ -36,7 +36,7 @@ public class PayChannel implements JsonParseInterface {
 	public static final int PAY_TYPE_YEEPAY_YD = 4;
 	/** 话费[短信请求] */
 	public static final int PAY_TYPE_KKFUNPAY = 5;
-//	public static final int _PAY_TYPE_MAX_ = 6;
+	// public static final int _PAY_TYPE_MAX_ = 6;
 
 	/** 电信充值卡 */
 	public static final int PAY_TYPE_YEEPAY_DX = 6;
@@ -64,6 +64,8 @@ public class PayChannel implements JsonParseInterface {
 	public String channelId;
 	/** 支付渠道名称，见 {@link #CHANNEL_NAME} */
 	public String channelName;
+
+	public String serverId;
 	/** 支付渠道描述 */
 	public String desc;
 	public String notifyUrl;
@@ -90,12 +92,13 @@ public class PayChannel implements JsonParseInterface {
 	public JSONObject buildJson() {
 		try {
 			JSONObject json = new JSONObject();
-			json.put("channelId", channelId);
-			json.put("channelName", channelName);
-			json.put("desc", desc);
-			json.put("notifyUrl", notifyUrl);
-			json.put("type", type);
-			json.put("priceList", priceList);
+			json.put(K_ID, channelId);
+			json.put(K_NAME, channelName);
+			json.put(K_DESC, desc);
+			json.put(K_TYPE, type);
+
+			json.put(K_NOTIFY_URL, notifyUrl);
+			json.put(K_CARD_AMOUNT, priceList);
 			return json;
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -107,28 +110,24 @@ public class PayChannel implements JsonParseInterface {
 	public void parseJson(JSONObject json) {
 		if (json == null)
 			return;
-		try {
-			channelId = json.isNull("id") ? "-1" : json.getString("id");
-			channelName = json.isNull("channelName") ? null : json
-					.getString("channelName");
-			desc = json.isNull("desc") ? null : json.getString("desc");
-			notifyUrl = json.isNull("notifyUrl") ? null : json
-					.getString("notifyUrl");
-			type = json.isNull("type") ? -1 : json.getInt("type");
-			priceList = json.isNull("cardAmount") ? null : json
-					.getString("cardAmount");
+		channelId = json.optString(K_ID, "-1");
+		channelName = json.optString(K_NAME, null);
+		serverId = json.optString(K_SERVER_ID, null);
+		desc = json.optString(K_DESC, null);
+		// type = json.isNull("type") ? -1 : json.getInt("type");
+		type = json.optInt(K_TYPE, -1);
 
-			// ---- 本地化调整
-			if (type >= 0 && type < _PAY_TYPE_MAX_) {
-				if (channelName == null) {
-					channelName = CHANNEL_NAME[type];
-				}
-				if (priceList == null) {
-					priceList = DEF_PRICE_LIST;
-				}
+		notifyUrl = json.optString(K_NOTIFY_URL, null);
+		priceList = json.optString(K_CARD_AMOUNT, null);
+
+		// ---- 本地化调整
+		if (type >= 0 && type < _PAY_TYPE_MAX_) {
+			if (channelName == null) {
+				channelName = CHANNEL_NAME[type];
 			}
-		} catch (JSONException e) {
-			e.printStackTrace();
+			if (priceList == null) {
+				priceList = DEF_PRICE_LIST;
+			}
 		}
 	}
 
@@ -143,4 +142,14 @@ public class PayChannel implements JsonParseInterface {
 		return "paies";
 	}
 
+	final static String K_ID = "id";
+	final static String K_SERVER_ID = "serverId";
+	final static String K_TYPE = "type";
+	final static String K_DESC = "desc";
+	final static String K_NAME = "name";
+
+	// 下面的不再使用
+
+	final static String K_NOTIFY_URL = "notifyUrl";
+	final static String K_CARD_AMOUNT = "cardAmount";
 }

@@ -720,7 +720,7 @@ public class PaymentListLayout extends CCBaseLayout {
 	/**
 	 * 因花费金额变化而更新 "支付方式的描述"，
 	 * 
-	 * @see {@link #prepparePayType(Context, LinearLayout, int)}
+	 * @see {@link #prepparePayType(Context, LinearLayout, PayChannel)}
 	 * @param count
 	 *            单位 卓越币
 	 * @param v
@@ -775,15 +775,15 @@ public class PaymentListLayout extends CCBaseLayout {
 				return;
 		}
 
-		int type = getPaychannelType(pos);
-
-		if (type < 0) {
+		PayChannel channel = getFocusPaychannel(pos);
+		if (channel == null) {
 			if (BuildConfig.DEBUG) {
 				Logger.d("无效索引或支付列表尚未初始化");
 			}
 			return;
 		}
 
+		int type = channel.type;
 		if (mPaymentTypeChoose != pos) {
 			do {
 				View v;
@@ -797,8 +797,9 @@ public class PaymentListLayout extends CCBaseLayout {
 					v = vs.getCurrentView();
 					if (v instanceof LinearLayout) {
 						Object tag = v.getTag();
-						if (tag instanceof Integer
-								&& ((Integer) tag).intValue() != getPaychannelType(mPaymentTypeChoose)) {
+						PayChannel ctmp = getFocusPaychannel(mPaymentTypeChoose);
+						if (ctmp != null && tag instanceof Integer
+								&& ((Integer) tag).intValue() == ctmp.type) {
 							// 与当前支付方式同类，不需要切换
 							break;
 						}
@@ -812,7 +813,7 @@ public class PaymentListLayout extends CCBaseLayout {
 							|| ((Integer) tag).intValue() != type) {
 						((LinearLayout) v).removeAllViews();
 						v.setTag(type);
-						prepparePayType(mContext, ((LinearLayout) v), type);
+						prepparePayType(mContext, ((LinearLayout) v), channel);
 					}
 					vs.showNext();
 				}
@@ -826,27 +827,28 @@ public class PaymentListLayout extends CCBaseLayout {
 		}
 	}
 
-	private int getPaychannelType(int itemPos) {
+	private PayChannel getFocusPaychannel(int itemPos) {
 		if (mPaymentListAdapter != null) {
 			Object o = mPaymentListAdapter.getItem(itemPos);
 			if (o instanceof PayChannel) {
-				return ((PayChannel) o).type;
+				return (PayChannel) o;
 			}
 		}
-		return -1;
+		return null;
 	}
 
 	/** 准备支付方式的附加数据输入或简单描述 */
-	private void prepparePayType(Context ctx, LinearLayout rv, int type) {
+	private void prepparePayType(Context ctx, LinearLayout rv,
+			PayChannel channel) {
 		TextView tv;
-		switch (type) {
+		switch (channel.type) {
 		case PayChannel.PAY_TYPE_ALIPAY:
 		case PayChannel.PAY_TYPE_TENPAY:
 		case PayChannel.PAY_TYPE_UNMPAY: {
 			tv = new TextView(ctx);
 			rv.addView(tv, new LayoutParams(LP_MW));
 			tv.setText(String.format(ZZStr.CC_PAYTYPE_DESC.str(),
-					PayChannel.CHANNEL_NAME[type]));
+					channel.channelName));
 			ZZFontSize.CC_RECHAGR_NORMAL.apply(tv);
 		}
 			break;
@@ -881,11 +883,12 @@ public class PaymentListLayout extends CCBaseLayout {
 			rv.addView(tv, new LayoutParams(LP_MW));
 
 			if (mIMSI == null || mIMSI.length() == 0) {
-				tv.setText("暂不可使用短信充值，请使用其他方式");
+				tv.setText(String.format(ZZStr.CC_PAYTYPE_DESC_DISABLED.str(),
+						channel.channelName));
 				tv.setTextColor(Color.RED);
 			} else {
 				tv.setText(String.format(ZZStr.CC_PAYTYPE_DESC.str(),
-						PayChannel.CHANNEL_NAME[type]));
+						channel.channelName));
 			}
 			ZZFontSize.CC_RECHAGR_NORMAL.apply(tv);
 		}

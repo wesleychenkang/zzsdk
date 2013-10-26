@@ -127,6 +127,8 @@ public class ResConstants {
 		CC_CARDNUM_HINT("请输入卡号（%d位）"), //
 		CC_PASSWD_HINT("请输入卡号（%d位）"), //
 		CC_PAYTYPE_DESC("请点击确认充值，进入到%s充值界面"), //
+		/** 暂不可使用%s充值，请使用其他方式 */
+		CC_PAYTYPE_DESC_DISABLED("暂不可使用%s充值，请使用其他方式"), //
 		/** 卓越币的消耗描述，基于 {@link #CC_PRICE_FORMAT} */
 		CC_PAYTYPE_COIN_DESC("确认后，将扣除%s卓越币，您的余额为%s"), //
 		/** 卓越币余额不足 */

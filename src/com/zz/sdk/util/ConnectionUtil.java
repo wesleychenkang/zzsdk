@@ -78,7 +78,6 @@ public class ConnectionUtil {
 		for (Entry<String, String> e : params.entrySet()) {
 			npv.add(new BasicNameValuePair(e.getKey(), e.getValue()));
 		}
-		npv.add(new BasicNameValuePair(Constants.E, "1"));
 		npv.add(new BasicNameValuePair(Constants.SING, sign));
 		return npv;
 	}
