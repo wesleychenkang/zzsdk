@@ -907,18 +907,22 @@ public class PaymentListLayout extends CCBaseLayout {
 		tv = create_normal_label(ctx, ZZStr.CC_CARDNUM_DESC);
 		rv.addView(tv, new LayoutParams(LP_WW));
 
+		int padding_h = ZZDimen.CC_RECHARGE_COUNT_PADDING_H.px();
+		int padding_v = ZZDimen.CC_RECHARGE_COUNT_PADDING_V.px();
 		// 卡号
 		tv = create_normal_input(ctx, null, ZZFontColor.CC_RECHAGR_INPUT,
 				ZZFontSize.CC_RECHAGR_INPUT, limitCard);
 		rv.addView(tv, new LayoutParams(LayoutParams.MATCH_PARENT,
-				ZZDimen.CC_CARD_HEIGHT.px()));
+				LayoutParams.WRAP_CONTENT/* ZZDimen.CC_CARD_HEIGHT.px() */));
 		tv.setId(IDC.ED_CARD.id());
 		tv.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
-		tv.setBackgroundDrawable(CCImg.ZF_WXZ.getDrawble(ctx));
+		tv.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
+				CCImg.RECHARGE_BAN, CCImg.RECHARGE_INPUT));
 		if (limitCard > 0) {
 			String hint = String.format(ZZStr.CC_CARDNUM_HINT.str(), limitCard);
 			tv.setHint(hint);
 		}
+		tv.setPadding(padding_h, padding_v, padding_h, padding_v);
 
 		tv = create_normal_label(ctx, ZZStr.CC_PASSWD_DESC);
 		rv.addView(tv, new LayoutParams(LP_WW));
@@ -927,15 +931,17 @@ public class PaymentListLayout extends CCBaseLayout {
 		tv = create_normal_input(ctx, null, ZZFontColor.CC_RECHAGR_INPUT,
 				ZZFontSize.CC_RECHAGR_INPUT, limitPasswd);
 		rv.addView(tv, new LayoutParams(LayoutParams.MATCH_PARENT,
-				ZZDimen.CC_CARD_HEIGHT.px()));
+				LayoutParams.WRAP_CONTENT/* ZZDimen.CC_CARD_HEIGHT.px() */));
 		tv.setId(IDC.ED_PASSWD.id());
 		tv.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
-		tv.setBackgroundDrawable(CCImg.ZF_WXZ.getDrawble(ctx));
+		tv.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
+				CCImg.RECHARGE_BAN, CCImg.RECHARGE_INPUT));
 		if (limitPasswd > 0) {
 			String hint = String.format(ZZStr.CC_CARDNUM_HINT.str(),
 					limitPasswd);
 			tv.setHint(hint);
 		}
+		tv.setPadding(padding_h, padding_v, padding_h, padding_v);
 	}
 
 	private void postUIChangedMsg(int id) {
@@ -985,7 +991,8 @@ public class PaymentListLayout extends CCBaseLayout {
 				ll2.addView(tv, new LayoutParams(LayoutParams.MATCH_PARENT,
 						LayoutParams.MATCH_PARENT, 1.0f));
 				tv.setId(IDC.ED_RECHARGE_COUNT.id());
-				tv.setBackgroundDrawable(CCImg.ZF_XZ.getDrawble(ctx));
+				tv.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
+						CCImg.RECHARGE_BAN, CCImg.RECHARGE_INPUT));
 				tv.addTextChangedListener(new MyTextWatcher(
 						IDC.ED_RECHARGE_COUNT.id()));
 				tv.setInputType(EditorInfo.TYPE_CLASS_NUMBER

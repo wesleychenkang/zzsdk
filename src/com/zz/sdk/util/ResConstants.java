@@ -6,6 +6,7 @@ import java.text.DecimalFormat;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.util.TypedValue;
@@ -423,6 +424,23 @@ public class ResConstants {
 			return BitmapCache.getBitmap(ctx, path);
 		}
 
+		/**
+		 * 构造按钮状态图
+		 * 
+		 * @param ctx
+		 *            环境
+		 * @param picNormal
+		 *            普通状态({@link android.R.attr#state_enabled})
+		 * @param picPressed
+		 *            <ul>
+		 *            特别状态
+		 *            <li>按下({@link android.R.attr#state_pressed})、
+		 *            <li>焦点({@link android.R.attr#state_focused})、
+		 *            <li>选择({@link android.R.attr#state_selected})
+		 *            </ul>
+		 * @return
+		 * @see BitmapCache#getStateListDrawable(Context, Drawable, Drawable)
+		 */
 		public static StateListDrawable getStateListDrawable(Context ctx,
 				CCImg picNormal, CCImg picPressed) {
 			Drawable dn = picNormal.getDrawble(ctx);

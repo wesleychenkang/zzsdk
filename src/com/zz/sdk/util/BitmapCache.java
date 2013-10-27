@@ -201,6 +201,7 @@ public class BitmapCache {
 			Drawable picPressed, Drawable picNormal) {
 		StateListDrawable listDrawable = new StateListDrawable();
 		listDrawable.addState(new int[] { android.R.attr.state_pressed }, picPressed); 
+		listDrawable.addState(new int[] { android.R.attr.state_focused}, picPressed); 
 		listDrawable.addState(new int[] { android.R.attr.state_selected }, picPressed);
 		listDrawable.addState(new int[] { android.R.attr.state_enabled }, picNormal);
 		listDrawable.addState(new int[] {  }, picNormal);
