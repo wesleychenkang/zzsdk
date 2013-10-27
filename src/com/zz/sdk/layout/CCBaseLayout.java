@@ -13,9 +13,9 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.zz.sdk.activity.ParamChain;
-import com.zz.sdk.activity.ParamChain.KeyGlobal;
-import com.zz.sdk.activity.ParamChain.KeyUser;
+import com.zz.sdk.ParamChain;
+import com.zz.sdk.ParamChain.KeyGlobal;
+import com.zz.sdk.ParamChain.KeyUser;
 import com.zz.sdk.entity.result.BaseResult;
 import com.zz.sdk.entity.result.ResultBalance;
 import com.zz.sdk.layout.BaseLayout.ITaskCallBack;

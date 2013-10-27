@@ -24,6 +24,7 @@ import android.content.Context;
 import android.util.Pair;
 
 import com.zz.sdk.entity.DeviceProperties;
+import com.zz.sdk.entity.JsonParseInterface;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.UserAction;
@@ -44,7 +45,7 @@ import com.zz.sdk.entity.result.ResultRequestUionpay;
 import com.zz.sdk.entity.result.ResultRequestYeePay;
 
 /**
- * 网络连接工具(与服务器通信获取数据在此写相应的方法) 使用该工具类里的方法时。请在线程中使用。
+ * 网络连接工具(与服务器通信获取数据在此写相应的方法) 使用该工具类里的方法时。<b>请在线程中使用。</b>
  */
 public class ConnectionUtil {
 
@@ -82,33 +83,43 @@ public class ConnectionUtil {
 		return npv;
 	}
 
+	/**
+	 * 请求数据
+	 * 
+	 * @param clazz
+	 *            数据构造类，基于 {@link JsonParseInterface}
+	 * @param url
+	 *            地址
+	 * @param nvps
+	 *            参数
+	 * @param attempts
+	 *            尝试次数
+	 * @return 如果返回 null 表示构造类失败，否则自行判断有无经过
+	 *         {@link JsonParseInterface#parseJson(JSONObject)} 构造数据
+	 */
 	private <T> T doRequest(Class<T> clazz, String url,
 			List<BasicNameValuePair> nvps, int attempts) {
-
 		InputStream is = doRequest(url, nvps, attempts);
-
-		if (is != null) {
-			String json = parseJsonData(is);
-
-			try {
+		T br = null;
+		try {
+			br = clazz.newInstance();
+			if (is != null) {
+				String json = parseJsonData(is);
 				JSONObject o = new JSONObject(json);
 				if (DebugFlags.DEBUG) {
 					Logger.d(o);
 				}
-				T br = clazz.newInstance();
-				if (br instanceof BaseResult)
-					((BaseResult) br).parseJson(o);
-				return br;
-			} catch (InstantiationException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			} catch (JSONException e) {
-				e.printStackTrace();
+				if (br instanceof JsonParseInterface)
+					((JsonParseInterface) br).parseJson(o);
 			}
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (JSONException e) {
+			e.printStackTrace();
 		}
-
-		return null;
+		return br;
 	}
 
 	private <T> T doRequest(Class<T> clazz, String url, int attempts,
@@ -214,8 +225,7 @@ public class ConnectionUtil {
 	 * 
 	 * @return true表示登录成功 false表示登录失败 </br> codes=0成功|1用户不存在|2密码错误
 	 */
-	public ResultLogin login(String loginName, String password, int autoLogin,
-			Context ctx) {
+	public ResultLogin login(String loginName, String password) {
 		return doRequest(ResultLogin.class, Constants.LOGIN_REQ, 2 //
 				, K_LOGIN_NAME, loginName //
 				, K_PASSWORD, Md5Code.encodePassword(password) //
@@ -227,12 +237,12 @@ public class ConnectionUtil {
 	 * 
 	 * @return 登录结果
 	 */
-	public ResultAutoLogin quickLogin(Context ctx) {
+	public ResultAutoLogin quickLogin() {
 		String imsi;
 		if (DebugFlags.DEBUG) {
 			imsi = DebugFlags.DEF_DEBUG_IMSI;
 		} else {
-			imsi = Utils.getIMSI(ctx);
+			imsi = Utils.getIMSI(mContext);
 		}
 		return doRequest(ResultAutoLogin.class, Constants.QUICK_LOGIN_REQ, 2 //
 				, "imsi", imsi//
@@ -529,7 +539,7 @@ public class ConnectionUtil {
 	 * 
 	 * @param ctx
 	 */
-	public void loginForLone(Pair<String, String> account) {
+	private void loginForLone(Pair<String, String> account) {
 		// if (account != null) {
 		// final String loginName = account.first;
 		// final String password = account.second;

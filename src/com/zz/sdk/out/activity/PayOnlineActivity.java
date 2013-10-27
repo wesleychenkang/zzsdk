@@ -1,4 +1,4 @@
-package com.zz.sdk.activity;
+package com.zz.sdk.out.activity;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -29,11 +29,11 @@ import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.Result;
 import com.zz.sdk.out.ui.ChargeAbstractLayout;
-import com.zz.sdk.util.Application;
+import com.zz.sdk.out.util.Application;
+import com.zz.sdk.out.util.DialogUtil;
+import com.zz.sdk.out.util.GetDataImpl;
 import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.DebugFlags;
-import com.zz.sdk.util.DialogUtil;
-import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.Utils;
 
 /***

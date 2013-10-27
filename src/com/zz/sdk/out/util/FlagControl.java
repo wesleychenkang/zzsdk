@@ -1,4 +1,4 @@
-package com.zz.sdk.util;
+package com.zz.sdk.out.util;
 
 /**
  * (常规)状态控制

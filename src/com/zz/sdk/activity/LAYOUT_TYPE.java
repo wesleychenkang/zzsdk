@@ -1,6 +1,6 @@
 package com.zz.sdk.activity;
 
-import com.zz.sdk.activity.ParamChain.KeyGlobal;
+import com.zz.sdk.ParamChain.KeyGlobal;
 
 class KeyLayoutName implements KeyGlobal {
 	final static String _TAG_ = KeyGlobal._TAG_ + "layout_name" + _SEPARATOR_;

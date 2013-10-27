@@ -39,14 +39,10 @@ public class ResultLogin extends BaseResult {
 	public void parseJson(JSONObject json) {
 		if (json == null)
 			return;
-		try {
-			super.parseJson(json);
-			mId = getString(json, K_ID);
-			mSdkUserId = getString(json, K_SDKUSERID);
-			mUserName = getString(json, K_USERNAME);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		super.parseJson(json);
+		mId = json.optString(K_ID, null);
+		mSdkUserId = json.optString(K_SDKUSERID, null);
+		mUserName = json.optString(K_USERNAME, null);
 	}
 
 	@Override

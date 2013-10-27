@@ -29,13 +29,12 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.zz.sdk.MSG_STATUS;
-import com.zz.sdk.activity.ParamChain;
-import com.zz.sdk.activity.ParamChain.ValType;
+import com.zz.sdk.ParamChain;
+import com.zz.sdk.ParamChain.ValType;
 import com.zz.sdk.entity.SMSChannelMessage;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
 import com.zz.sdk.layout.PaymentListLayout.TypeGridView;
 import com.zz.sdk.util.DebugFlags;
-import com.zz.sdk.util.DimensionUtil;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
@@ -371,7 +370,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 			Button bt = new Button(ctx);
 			LayoutParams lp = new LayoutParams(LP_WW);
 			lp.gravity = Gravity.CENTER_HORIZONTAL;
-			lp.topMargin = DimensionUtil.dip2px(ctx, 30);
+			lp.topMargin = ZZDimen.dip2px(30);
 			ll.addView(bt, lp);
 			bt.setId(IDC.BT_PROMPT.id());
 			bt.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,

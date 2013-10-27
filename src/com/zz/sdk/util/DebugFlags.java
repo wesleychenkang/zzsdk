@@ -5,11 +5,11 @@ import java.util.Random;
 import android.content.Context;
 
 import com.zz.sdk.BuildConfig;
+import com.zz.sdk.ParamChain;
 import com.zz.sdk.ZZSDKConfig;
-import com.zz.sdk.activity.ParamChain;
-import com.zz.sdk.activity.ParamChain.KeyDevice;
-import com.zz.sdk.activity.ParamChain.KeyGlobal;
-import com.zz.sdk.activity.ParamChain.KeyUser;
+import com.zz.sdk.ParamChain.KeyDevice;
+import com.zz.sdk.ParamChain.KeyGlobal;
+import com.zz.sdk.ParamChain.KeyUser;
 
 public class DebugFlags {
 	public static final boolean DEBUG = BuildConfig.DEBUG;

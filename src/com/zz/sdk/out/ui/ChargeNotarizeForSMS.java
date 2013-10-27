@@ -13,8 +13,8 @@ import android.widget.Toast;
 
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
-import com.zz.sdk.util.Application;
-import com.zz.sdk.util.DimensionUtil;
+import com.zz.sdk.out.util.Application;
+import com.zz.sdk.out.util.DimensionUtil;
 import com.zz.sdk.util.Utils;
 public class ChargeNotarizeForSMS extends ChargeAbstractLayout {
 	protected static final int ID_PLAY = 20001;

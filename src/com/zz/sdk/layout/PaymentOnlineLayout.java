@@ -34,8 +34,8 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.zz.sdk.MSG_STATUS;
-import com.zz.sdk.activity.ParamChain;
-import com.zz.sdk.activity.ParamChain.ValType;
+import com.zz.sdk.ParamChain;
+import com.zz.sdk.ParamChain.ValType;
 import com.zz.sdk.entity.result.BaseResult;
 import com.zz.sdk.entity.result.ResultPayMessage;
 import com.zz.sdk.layout.BaseLayout.ITaskCallBack;

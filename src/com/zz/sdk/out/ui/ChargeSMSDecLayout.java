@@ -12,8 +12,8 @@ import android.widget.TextView;
 
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
-import com.zz.sdk.util.Application;
-import com.zz.sdk.util.DimensionUtil;
+import com.zz.sdk.out.util.Application;
+import com.zz.sdk.out.util.DimensionUtil;
 import com.zz.sdk.util.Utils;
 
 public class ChargeSMSDecLayout extends ChargeAbstractLayout {

@@ -1,4 +1,4 @@
-package com.zz.sdk.util;
+package com.zz.sdk.out.util;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -14,6 +14,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.zz.sdk.out.ui.MyDialog;
+import com.zz.sdk.util.BitmapCache;
+import com.zz.sdk.util.Constants;
+import com.zz.sdk.util.Utils;
 
 public class DialogUtil {
 

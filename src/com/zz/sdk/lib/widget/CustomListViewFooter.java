@@ -1,8 +1,5 @@
 package com.zz.sdk.lib.widget;
 
-import com.zz.sdk.util.DimensionUtil;
-import com.zz.sdk.util.ResConstants.ZZStr;
-
 import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
@@ -12,6 +9,9 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.zz.sdk.util.ResConstants.Config.ZZDimen;
+import com.zz.sdk.util.ResConstants.ZZStr;
 
 /**
  * @file XFooterView.java
@@ -125,7 +125,7 @@ public class CustomListViewFooter extends LinearLayout
 	private void initView(Context context)
 	{
 		mContentView = new RelativeLayout(context);
-		int padding = DimensionUtil.dip2px(context, 12);
+		int padding = ZZDimen.dip2px(12);
 		// 布局
 		RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		lp.addRule(RelativeLayout.CENTER_IN_PARENT);

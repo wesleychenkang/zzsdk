@@ -13,8 +13,10 @@ import android.util.Pair;
 import com.zz.lib.utils.Encrypt1;
 import com.zz.lib.utils.MD5Util;
 import com.zz.sdk.BuildConfig;
-import com.zz.sdk.util.GetDataImpl;
+import com.zz.sdk.entity.result.ResultLogin;
+import com.zz.sdk.entity.result.ResultRegister;
 import com.zz.sdk.util.Logger;
+import com.zz.sdk.util.UserUtil;
 
 /**
  * 封装豆趣接口
@@ -125,10 +127,10 @@ public class PojoUtils {
 	 *            待比对的用户名
 	 * @return true表示与 name 不匹配，需要向服务器重新注册
 	 */
-	private static boolean checkLoginNameExist(Context ctx, String name,
+	private static boolean checkLoginNameExist(UserUtil ctx, String name,
 			String passwd) {
-		Pair<String, String> p = com.zz.sdk.util.Utils.getAccountFromDB(ctx,
-				name);
+		Pair<String, String> p = com.zz.sdk.util.Utils.getAccountFromDB(
+				ctx.getContext(), name);
 		if (p == null) {
 			return true;
 		} else {
@@ -150,7 +152,7 @@ public class PojoUtils {
 	 * @param passwd
 	 * @return 返回用户名，若操作失败，将返回 null
 	 */
-	private static String auto_registe(Context ctx, Result result,
+	private static String auto_registe(UserUtil ctx, Result result,
 			String account, String passwd) {
 		if (DEF_DOUQU_PASSWD != null) {
 			passwd = DEF_DOUQU_PASSWD;
@@ -158,13 +160,12 @@ public class PojoUtils {
 		String loginName = result.userid + SIGN;
 		if (checkLoginNameExist(ctx, loginName, passwd)) {
 			// 向服务器注册， codes=0成功|1失败|2用户名已经存在
-			com.zz.sdk.entity.Result r = GetDataImpl.getInstance(ctx).register(
-					loginName, passwd, ctx);
+			ResultRegister r = ctx.register(loginName, passwd);
 			if (r != null) {
 				// 已经存在(2)或注册成功(0)
-				if ("2".equals(r.codes) || "0".equals(r.codes)) {
-					com.zz.sdk.util.Utils.writeAccount2DB(ctx, loginName,
-							passwd, get_login_user_id(), 0);
+				if (r.isSuccess() || r.isExistent()) {
+					com.zz.sdk.util.Utils.writeAccount2DB(ctx.getContext(),
+							loginName, passwd, get_login_user_id(), 0);
 				} else {
 					loginName = null;
 				}
@@ -174,12 +175,11 @@ public class PojoUtils {
 			}
 			Logger.d("执行了注册回调");
 		} else {
-			com.zz.sdk.entity.Result r = GetDataImpl.getInstance(ctx).login(
-					loginName, passwd, 0, ctx);
+			ResultLogin r = ctx.login(loginName, passwd, false);
 			Logger.d("login [" + loginName + " result:" + r);
 			if (r != null) {
 				// codes=0成功|1用户不存在|2密码错误
-				if ("0".equals(r.codes)) {
+				if (r.isSuccess()) {
 				} else {
 					loginName = null;
 				}
@@ -439,7 +439,7 @@ public class PojoUtils {
 	// - 对外接口
 	//
 
-	private static void _test(Context ctx, String name, String passwd) {
+	private static void _test(UserUtil ctx, String name, String passwd) {
 		if (BuildConfig.DEBUG) {
 			String s = null;
 			boolean success = false;
@@ -463,7 +463,7 @@ public class PojoUtils {
 	 * @param passwd
 	 * @return 返回可使用的用户名
 	 */
-	public static String login(Context ctx, String name, String passwd) {
+	public static String login(UserUtil ctx, String name, String passwd) {
 		reset_last_code();
 
 		Login login = new Login();
@@ -507,7 +507,7 @@ public class PojoUtils {
 	 * @param passwd
 	 * @return
 	 */
-	static String registe(Context ctx, String name, String passwd) {
+	static String registe(UserUtil ctx, String name, String passwd) {
 		Register register = new Register();
 		register.account = name;
 		register.md5pwd = MD5Util.md5Encode(passwd);
@@ -536,7 +536,7 @@ public class PojoUtils {
 	 * @param newPasswd
 	 * @return
 	 */
-	public static boolean updatePasswd(Context ctx, String name,
+	public static boolean updatePasswd(UserUtil ctx, String name,
 			String oldPasswd, String newPasswd) {
 		UpdatePwd updatePwd = new UpdatePwd();
 		updatePwd.account = name;

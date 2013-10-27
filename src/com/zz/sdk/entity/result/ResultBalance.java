@@ -40,11 +40,8 @@ public class ResultBalance extends BaseResult {
 	public void parseJson(JSONObject json) {
 		if (json == null)
 			return;
-		try {
-			super.parseJson(json);
-			mZYCoin = json.has(K_ZYCOIN) ? json.getDouble(K_ZYCOIN) : null;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		super.parseJson(json);
+		double d = json.optDouble(K_ZYCOIN);
+		mZYCoin = Double.isNaN(d) ? null : d;
 	}
 }

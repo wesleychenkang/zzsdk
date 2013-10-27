@@ -51,21 +51,21 @@
             android:value="D10002" />
         <!-- SDK 的窗体 -->
         <activity
-            android:name="com.zz.sdk.activity.LoginActivity"
+            android:name="com.zz.sdk.out.activity.LoginActivity"
             android:configChanges="keyboardHidden|orientation"
             android:launchMode="singleTask"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             android:windowSoftInputMode="adjustPan" >
         </activity>
         <activity
-            android:name="com.zz.sdk.activity.ChargeActivity"
+            android:name="com.zz.sdk.out.activity.ChargeActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:excludeFromRecents="true"
             android:launchMode="singleTask"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" >
         </activity>
         <activity
-            android:name="com.zz.sdk.activity.PayOnlineActivity"
+            android:name="com.zz.sdk.out.activity.PayOnlineActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="false"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" >
@@ -88,7 +88,7 @@
 
         <!-- 仅用于奇虎360平台 -->
         <activity
-            android:name="com.zz.sdk.activity.LoginForQiFu"
+            android:name="com.zz.sdk.out.activity.LoginForQiFunForQiFu"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:launchMode="singleTask"
             android:screenOrientation="landscape"

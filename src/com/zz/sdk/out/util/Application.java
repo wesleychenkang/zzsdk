@@ -1,4 +1,4 @@
-package com.zz.sdk.util;
+package com.zz.sdk.out.util;
 
 import com.zz.sdk.entity.PayChannel;
 

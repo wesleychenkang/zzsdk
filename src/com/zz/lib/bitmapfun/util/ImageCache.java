@@ -17,7 +17,7 @@
 package com.zz.lib.bitmapfun.util;
 
 import com.zz.sdk.BuildConfig;
-import com.zz.sdk.activity.ParamChain;
+import com.zz.sdk.ParamChain;
 
 import android.annotation.TargetApi;
 import android.content.Context;

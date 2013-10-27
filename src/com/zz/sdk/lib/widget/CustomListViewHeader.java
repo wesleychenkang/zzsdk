@@ -1,9 +1,5 @@
 package com.zz.sdk.lib.widget;
 
-import com.zz.sdk.util.DimensionUtil;
-import com.zz.sdk.util.ResConstants.CCImg;
-import com.zz.sdk.util.ResConstants.ZZStr;
-
 import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
@@ -17,6 +13,10 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.zz.sdk.util.ResConstants.CCImg;
+import com.zz.sdk.util.ResConstants.Config.ZZDimen;
+import com.zz.sdk.util.ResConstants.ZZStr;
 
 /**
  * @file XListViewHeader.java
@@ -72,7 +72,7 @@ public class CustomListViewHeader extends LinearLayout
 		addView(mContainer, lp);
 
 		mHeaderViewContent = new RelativeLayout(context);
-		mContainer.addView(mHeaderViewContent, new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, DimensionUtil.dip2px(context, 60)));
+		mContainer.addView(mHeaderViewContent, new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, ZZDimen.dip2px(60)));
 
 		// 布局
 		RelativeLayout.LayoutParams reLp = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -92,7 +92,7 @@ public class CustomListViewHeader extends LinearLayout
 		timeLayout = new LinearLayout(context);
 		lp = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		timeLayout.setVisibility(View.GONE);
-		lp.topMargin = DimensionUtil.dip2px(context, 3);
+		lp.topMargin = ZZDimen.dip2px(3);
 		layoutHeader.addView(timeLayout, lp);
 
 		TextView textView = new TextView(context);
@@ -111,8 +111,8 @@ public class CustomListViewHeader extends LinearLayout
 		mArrowImageView = new ImageView(context);
 		mArrowImageView.setImageDrawable(CCImg.XLISTVIEW_ARROW.getDrawble(context));
 		reLp = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		reLp.leftMargin = DimensionUtil.dip2px(context, 50);
-		reLp.rightMargin = DimensionUtil.dip2px(context, 20);
+		reLp.leftMargin = ZZDimen.dip2px(50);
+		reLp.rightMargin = ZZDimen.dip2px(20);
 		reLp.addRule(RelativeLayout.CENTER_VERTICAL);
 		reLp.addRule(RelativeLayout.LEFT_OF, layoutHeader.getId());
 		mHeaderViewContent.addView(mArrowImageView, reLp);
@@ -120,8 +120,8 @@ public class CustomListViewHeader extends LinearLayout
 		mProgressBar = new ProgressBar(context, null, android.R.attr.progressBarStyleSmallInverse);
 		mProgressBar.setVisibility(View.GONE);
 		reLp = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		reLp.leftMargin = DimensionUtil.dip2px(context, 50);
-		reLp.rightMargin = DimensionUtil.dip2px(context, 20);
+		reLp.leftMargin = ZZDimen.dip2px(50);
+		reLp.rightMargin = ZZDimen.dip2px(20);
 		reLp.addRule(RelativeLayout.CENTER_VERTICAL);
 		reLp.addRule(RelativeLayout.LEFT_OF, layoutHeader.getId());
 		mHeaderViewContent.addView(mProgressBar, reLp);

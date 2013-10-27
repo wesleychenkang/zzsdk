@@ -20,8 +20,8 @@ import com.zz.sdk.BuildConfig;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.SMSChannelMessage;
-import com.zz.sdk.util.Application;
-import com.zz.sdk.util.DimensionUtil;
+import com.zz.sdk.out.util.Application;
+import com.zz.sdk.out.util.DimensionUtil;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.Utils;
 

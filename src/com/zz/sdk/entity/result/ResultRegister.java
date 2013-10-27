@@ -14,4 +14,8 @@ public class ResultRegister extends ResultLogin {
 	public String getErrDesc() {
 		return getErrDesc(errMsg, 0);
 	}
+
+	public boolean isExistent() {
+		return mCodeNumber != null && 2 == mCodeNumber;
+	}
 }

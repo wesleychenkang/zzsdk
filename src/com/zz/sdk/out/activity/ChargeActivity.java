@@ -1,4 +1,4 @@
-package com.zz.sdk.activity;
+package com.zz.sdk.out.activity;
 
 import java.util.HashMap;
 import java.util.Stack;
@@ -41,15 +41,15 @@ import com.zz.sdk.out.ui.ChargePaymentListLayout;
 import com.zz.sdk.out.ui.ChargeSMSDecLayout;
 import com.zz.sdk.out.ui.MyDialog;
 import com.zz.sdk.out.ui.SmsChannelLayout;
-import com.zz.sdk.util.Application;
+import com.zz.sdk.out.util.Application;
+import com.zz.sdk.out.util.DialogUtil;
+import com.zz.sdk.out.util.FlagControl;
+import com.zz.sdk.out.util.GetDataImpl;
+import com.zz.sdk.out.util.SMSUtil;
 import com.zz.sdk.util.DebugFlags;
-import com.zz.sdk.util.DialogUtil;
-import com.zz.sdk.util.FlagControl;
-import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.JsonUtil;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.RequestRunnable;
-import com.zz.sdk.util.SMSUtil;
 import com.zz.sdk.util.Utils;
 
 /**

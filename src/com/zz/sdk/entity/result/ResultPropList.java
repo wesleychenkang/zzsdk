@@ -58,12 +58,7 @@ public class ResultPropList extends BaseResult {
 	public void parseJson(JSONObject json) {
 		if (json == null)
 			return;
-		try {
-			super.parseJson(json);
-
-			JSONArray ja = getArray(json, K_PROP);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		super.parseJson(json);
+		JSONArray ja = json.optJSONArray(K_PROP);
 	}
 }

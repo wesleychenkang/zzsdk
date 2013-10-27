@@ -26,11 +26,7 @@ public class ResultRequest extends BaseResult {
 	public void parseJson(JSONObject json) {
 		if (json == null)
 			return;
-		try {
-			super.parseJson(json);
-			mCmgeOrderNum = getString(json, K_CMGE_ORDER_NUM);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		super.parseJson(json);
+		mCmgeOrderNum = json.optString(K_CMGE_ORDER_NUM, null);
 	}
 }

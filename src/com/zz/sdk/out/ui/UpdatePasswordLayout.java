@@ -11,7 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.zz.sdk.util.DimensionUtil;
+import com.zz.sdk.out.util.DimensionUtil;
 
 public class UpdatePasswordLayout extends AbstractLayout implements View.OnClickListener{
 

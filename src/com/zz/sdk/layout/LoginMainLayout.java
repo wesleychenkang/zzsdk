@@ -7,7 +7,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import com.zz.sdk.activity.ParamChain;
+import com.zz.sdk.ParamChain;
 import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;

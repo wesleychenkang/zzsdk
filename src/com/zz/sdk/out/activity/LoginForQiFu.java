@@ -1,4 +1,4 @@
-package com.zz.sdk.activity;
+package com.zz.sdk.out.activity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,9 +27,9 @@ import com.zz.sdk.MSG_TYPE;
 import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.entity.QiHooResult;
 import com.zz.sdk.entity.Result;
-import com.zz.sdk.util.Application;
-import com.zz.sdk.util.DialogUtil;
-import com.zz.sdk.util.GetDataImpl;
+import com.zz.sdk.out.util.Application;
+import com.zz.sdk.out.util.DialogUtil;
+import com.zz.sdk.out.util.GetDataImpl;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.Utils;
 

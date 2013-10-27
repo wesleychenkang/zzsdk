@@ -1,4 +1,4 @@
-package com.zz.sdk.activity;
+package com.zz.sdk.out.activity;
 
 import java.util.Stack;
 import java.util.concurrent.ExecutorService;
@@ -35,12 +35,13 @@ import com.zz.sdk.entity.UserAction;
 import com.zz.sdk.out.ui.LoginLayout;
 import com.zz.sdk.out.ui.RegisterLayout;
 import com.zz.sdk.out.ui.UpdatePasswordLayout;
-import com.zz.sdk.util.Application;
+import com.zz.sdk.out.util.Application;
+import com.zz.sdk.out.util.DimensionUtil;
+import com.zz.sdk.out.util.GetDataImpl;
 import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.Constants;
-import com.zz.sdk.util.DimensionUtil;
-import com.zz.sdk.util.GetDataImpl;
 import com.zz.sdk.util.Logger;
+import com.zz.sdk.util.UserUtil;
 import com.zz.sdk.util.Utils;
 
 /**
@@ -72,6 +73,8 @@ public class LoginActivity extends Activity implements OnClickListener {
 	private static int mWhatCallback;
 	private boolean check = true;
 
+	private UserUtil mUserUtil;
+
 	// private boolean checkonkeydown = true;
 	public synchronized static void start(Context ctx, Handler callback,
 			int what) {
@@ -89,6 +92,8 @@ public class LoginActivity extends Activity implements OnClickListener {
 		super.onCreate(savedInstanceState);
 
 		Utils.loack_screen_orientation(this);
+
+		mUserUtil = new UserUtil(getBaseContext());
 
 		check = true;
 		user = new UserAction();
@@ -373,7 +378,10 @@ public class LoginActivity extends Activity implements OnClickListener {
 	private synchronized void clean() {
 		mHandler = null;
 		mWhatCallback = 0;
-
+		if (mUserUtil != null) {
+			mUserUtil.clean();
+			mUserUtil = null;
+		}
 		mViewStack.clear();
 	}
 
@@ -587,7 +595,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 				if (PojoUtils.isDouquUser(user)) {
 					loginResult = new Result();
 					String newName = PojoUtils.getDouquBaseName(user);
-					String dqName = PojoUtils.login(ctx, newName, pw);
+					String dqName = PojoUtils.login(mUserUtil, newName, pw);
 					int err = PojoUtils.get_last_code();
 					int userid = PojoUtils.get_login_user_id();
 					if (err == PojoUtils.CODE_SUCCESS && dqName != null) {
@@ -717,7 +725,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 				if (PojoUtils.isDouquUser(user)) {
 					loginResult = new Result();
 					String newName = PojoUtils.getDouquBaseName(user);
-					String dqName = PojoUtils.login(ctx, newName, pw);
+					String dqName = PojoUtils.login(mUserUtil, newName, pw);
 					int err = PojoUtils.get_last_code();
 					int userid = PojoUtils.get_login_user_id();
 					if (err == PojoUtils.CODE_SUCCESS && dqName != null) {
@@ -797,7 +805,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 	 * 
 	 */
 	class DoModifyPWTask extends AsyncTask<Void, Void, Result> {
-		private String user, pw; 
+		private String user, pw;
 		// 新密码
 		String newPW;
 		Context ctx;
@@ -808,12 +816,14 @@ public class LoginActivity extends Activity implements OnClickListener {
 		 * 修改密码
 		 * 
 		 * @param ctx
-		 * @param user 用户 
-		 * @param pw 密码
+		 * @param user
+		 *            用户
+		 * @param pw
+		 *            密码
 		 * @param newPW
 		 *            新密码
-		 * @param newPW2 
-		 * @param newPW2 
+		 * @param newPW2
+		 * @param newPW2
 		 */
 		DoModifyPWTask(Context ctx, String user, String pw, String newPW) {
 			check = false;
@@ -836,8 +846,8 @@ public class LoginActivity extends Activity implements OnClickListener {
 				if (PojoUtils.isDouquUser(user)) {
 					result = new Result();
 					String newName = PojoUtils.getDouquBaseName(user);
-					boolean success = PojoUtils.updatePasswd(ctx, newName,
-							pw, newPW);
+					boolean success = PojoUtils.updatePasswd(mUserUtil,
+							newName, pw, newPW);
 					if (success) {
 						Application.password = newPW;
 						GetDataImpl.getInstance(ctx).updateLogin_passwd(newPW);
@@ -849,7 +859,8 @@ public class LoginActivity extends Activity implements OnClickListener {
 			}
 
 			if (result == null)
-				result = GetDataImpl.getInstance(ctx).modifyPassword(user, pw, newPW);
+				result = GetDataImpl.getInstance(ctx).modifyPassword(user, pw,
+						newPW);
 			return result;
 		}
 

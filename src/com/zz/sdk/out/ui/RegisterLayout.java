@@ -11,9 +11,9 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.zz.sdk.out.util.DimensionUtil;
 import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.Constants;
-import com.zz.sdk.util.DimensionUtil;
 
 public class RegisterLayout extends AbstractLayout implements View.OnClickListener{
 

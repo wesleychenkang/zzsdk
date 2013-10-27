@@ -4,6 +4,8 @@
  */
 package com.zz.sdk.util;
 
+import com.zz.sdk.out.util.DimensionUtil;
+
 import android.content.Context;
 import android.os.Handler;
 import android.util.AttributeSet;

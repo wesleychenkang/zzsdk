@@ -13,9 +13,9 @@ import android.widget.TextView;
 
 import com.unionpay.UPPayAssistEx;
 import com.zz.sdk.MSG_STATUS;
-import com.zz.sdk.activity.ParamChain;
-import com.zz.sdk.activity.ParamChain.KeyGlobal;
-import com.zz.sdk.activity.ParamChain.ValType;
+import com.zz.sdk.ParamChain;
+import com.zz.sdk.ParamChain.KeyGlobal;
+import com.zz.sdk.ParamChain.ValType;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
 import com.zz.sdk.protocols.EmptyActivityControlImpl;
 import com.zz.sdk.util.ConnectionUtil;

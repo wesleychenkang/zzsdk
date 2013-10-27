@@ -15,7 +15,7 @@ import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.zz.sdk.util.DimensionUtil;
+import com.zz.sdk.out.util.DimensionUtil;
 import com.zz.sdk.util.Utils;
 
 class PayDialogHelper extends Dialog {

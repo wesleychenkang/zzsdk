@@ -1,6 +1,7 @@
 package com.zz.sdk.entity;
 
-import com.zz.sdk.util.GetDataImpl;
+import com.zz.sdk.out.util.GetDataImpl;
+
 import android.content.Context;
 
 /**

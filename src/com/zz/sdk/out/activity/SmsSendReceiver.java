@@ -1,4 +1,4 @@
-package com.zz.sdk.activity;
+package com.zz.sdk.out.activity;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;

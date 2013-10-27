@@ -20,8 +20,14 @@ public class BaseResult implements Serializable, JsonParseInterface {
 	public Integer mCodeNumber;
 	public String mCodeStr;
 
+	private boolean mHasUsed = false;
+
 	public boolean isSuccess() {
 		return mCodeNumber != null && mCodeNumber == 0;
+	}
+
+	public boolean isUsed() {
+		return mHasUsed;
 	}
 
 	@Override
@@ -40,17 +46,19 @@ public class BaseResult implements Serializable, JsonParseInterface {
 	public void parseJson(JSONObject json) {
 		if (json == null)
 			return;
-		try {
-			JSONArray ja = getArray(json, K_CODES);
-			mCodeStr = ja.length() > 0 ? ja.getString(0) : null;
-			try {
-				mCodeNumber = Integer.parseInt(mCodeStr);
-			} catch (Exception e) {
+		JSONArray ja = json.optJSONArray(K_CODES);
+		if (ja == null || ja.length() == 0) {
+			mCodeStr = null;
+			mCodeNumber = null;
+		} else {
+			mCodeStr = ja.optString(0);
+			int num = ja.optInt(0, Integer.MIN_VALUE);
+			if (num == Integer.MIN_VALUE)
 				mCodeNumber = null;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
+			else
+				mCodeNumber = num;
 		}
+		mHasUsed = true;
 	}
 
 	@Override

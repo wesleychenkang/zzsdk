@@ -60,26 +60,24 @@ public class ResultPayList extends BaseResult {
 	public void parseJson(JSONObject json) {
 		if (json == null)
 			return;
-		try {
-			super.parseJson(json);
 
-			mCardAmount = getString(json, K_CARD_AMOUNT);
-			mPayServerDesc = getString(json, K_PAY_SERVER_DESC);
+		super.parseJson(json);
 
-			JSONArray ja = getArray(json, K_PAIES);
-			if (ja == null || ja.length() == 0) {
-				mPaies = null;
-			} else {
-				mPaies = new PayChannel[ja.length()];
-				for (int i = 0, c = ja.length(); i < c; i++) {
-					mPaies[i] = new PayChannel();
-					mPaies[i].parseJson(ja.getJSONObject(i));
-				}
+		mCardAmount = json.optString(K_CARD_AMOUNT, null);
+		mPayServerDesc = json.optString(K_PAY_SERVER_DESC, null);
+
+		JSONArray ja = json.optJSONArray(K_PAIES);
+		if (ja == null || ja.length() == 0) {
+			mPaies = null;
+		} else {
+			mPaies = new PayChannel[ja.length()];
+			for (int i = 0, c = ja.length(); i < c; i++) {
+				mPaies[i] = new PayChannel();
+				mPaies[i].parseJson(ja.optJSONObject(i));
 			}
-
-			mZYCoin = json.has(K_ZYCOIN) ? json.getDouble(K_ZYCOIN) : null;
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
+
+		double d = json.optDouble(K_ZYCOIN);
+		mZYCoin = Double.isNaN(d) ? null : d;
 	}
 }

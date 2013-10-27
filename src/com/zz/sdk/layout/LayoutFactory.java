@@ -6,9 +6,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.view.View;
 
+import com.zz.sdk.ParamChain;
+import com.zz.sdk.ParamChain.KeyGlobal;
 import com.zz.sdk.activity.LAYOUT_TYPE;
-import com.zz.sdk.activity.ParamChain;
-import com.zz.sdk.activity.ParamChain.KeyGlobal;
 import com.zz.sdk.protocols.ActivityControlInterface;
 import com.zz.sdk.util.Logger;
 

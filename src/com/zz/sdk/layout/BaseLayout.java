@@ -33,10 +33,10 @@ import android.widget.Toast;
 import android.widget.ViewAnimator;
 
 import com.zz.sdk.BuildConfig;
-import com.zz.sdk.activity.ParamChain;
-import com.zz.sdk.activity.ParamChain.KeyCaller;
-import com.zz.sdk.activity.ParamChain.KeyGlobal;
-import com.zz.sdk.activity.ParamChain.ValType;
+import com.zz.sdk.ParamChain;
+import com.zz.sdk.ParamChain.KeyCaller;
+import com.zz.sdk.ParamChain.KeyGlobal;
+import com.zz.sdk.ParamChain.ValType;
 import com.zz.sdk.entity.result.BaseResult;
 import com.zz.sdk.layout.LayoutFactory.ILayoutHost;
 import com.zz.sdk.layout.LayoutFactory.ILayoutView;

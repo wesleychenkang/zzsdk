@@ -1,4 +1,4 @@
-package com.zz.sdk.util;
+package com.zz.sdk.out.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,7 +30,6 @@ import android.util.Pair;
 
 import com.zz.lib.pojo.PojoUtils;
 import com.zz.sdk.ZZSDKConfig;
-import com.zz.sdk.activity.ChargeActivity;
 import com.zz.sdk.entity.DeviceProperties;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
@@ -40,6 +39,14 @@ import com.zz.sdk.entity.Result;
 import com.zz.sdk.entity.SdkUser;
 import com.zz.sdk.entity.SdkUserTable;
 import com.zz.sdk.entity.UserAction;
+import com.zz.sdk.out.activity.ChargeActivity;
+import com.zz.sdk.util.Constants;
+import com.zz.sdk.util.DebugFlags;
+import com.zz.sdk.util.HttpUtil;
+import com.zz.sdk.util.JsonUtil;
+import com.zz.sdk.util.Logger;
+import com.zz.sdk.util.Md5Code;
+import com.zz.sdk.util.Utils;
 
 public class GetDataImpl {
 
