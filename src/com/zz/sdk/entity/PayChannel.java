@@ -142,6 +142,10 @@ public class PayChannel implements JsonParseInterface {
 		return "paies";
 	}
 
+	public boolean isValid() {
+		return type >= 0 && type < _PAY_TYPE_MAX_;
+	}
+
 	final static String K_ID = "id";
 	final static String K_SERVER_ID = "serverId";
 	final static String K_TYPE = "type";

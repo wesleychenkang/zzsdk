@@ -1,6 +1,8 @@
 package com.zz.sdk.layout;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import android.app.Activity;
@@ -797,9 +799,8 @@ public class PaymentListLayout extends CCBaseLayout {
 					v = vs.getCurrentView();
 					if (v instanceof LinearLayout) {
 						Object tag = v.getTag();
-						PayChannel ctmp = getFocusPaychannel(mPaymentTypeChoose);
-						if (ctmp != null && tag instanceof Integer
-								&& ((Integer) tag).intValue() == ctmp.type) {
+						if (tag instanceof Integer
+								&& ((Integer) tag).intValue() == type) {
 							// 与当前支付方式同类，不需要切换
 							break;
 						}
@@ -1192,6 +1193,7 @@ public class PaymentListLayout extends CCBaseLayout {
 		setTileTypeText(getEnv().getOwned(KeyPaymentList.K_PAY_TITLE,
 				ZZStr.class).str());
 
+		updateUIStyle(mChargeStyle);
 		updateDefaultAmount();
 		updateRechargeCost();
 		updatePayType(-1);
@@ -1215,7 +1217,7 @@ public class PaymentListLayout extends CCBaseLayout {
 	 * 
 	 * @param result
 	 */
-	protected void onPayListUpdate(BaseResult result) {
+	private void onPayListUpdate(BaseResult result) {
 		if (!isAlive())
 			return;
 
@@ -1254,7 +1256,7 @@ public class PaymentListLayout extends CCBaseLayout {
 
 	private void setChannelMessages(PayChannel[] channelMessages) {
 
-		if (BuildConfig.DEBUG) {
+		if (DEBUG) {
 			// XXX:
 			if (mChargeStyle == ChargeStyle.BUY
 					|| (mChargeStyle == null && new Random(
@@ -1281,6 +1283,22 @@ public class PaymentListLayout extends CCBaseLayout {
 			}
 		}
 
+		// 滤过无效支付方式
+		{
+			List<PayChannel> tmp = new ArrayList<PayChannel>();
+			for (int i = 0, c = channelMessages.length; i < c; i++) {
+				PayChannel p = channelMessages[i];
+				if (p.isValid()) {
+					tmp.add(p);
+				}
+			}
+			if (tmp.size() == channelMessages.length) {
+			} else {
+				channelMessages = new PayChannel[tmp.size()];
+				channelMessages = tmp.toArray(channelMessages);
+			}
+		}
+
 		if (mPaymentListAdapter == null) {
 			mPaymentListAdapter = new PaymentListAdapter(mContext,
 					channelMessages);
@@ -1293,7 +1311,7 @@ public class PaymentListLayout extends CCBaseLayout {
 		updatePayType(-1);
 
 		// 探测界面模式，规则：是否存在“卓越币”的支付
-		{
+		if (false) {
 			ChargeStyle mode = ChargeStyle.RECHARGE;
 			for (int i = 0, c = channelMessages.length; i < c; i++) {
 				if (channelMessages[i].type == PayChannel.PAY_TYPE_ZZCOIN) {
