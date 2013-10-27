@@ -15,7 +15,6 @@ import android.view.inputmethod.InputMethodManager;
 import com.zz.sdk.BuildConfig;
 import com.zz.sdk.activity.ParamChain.KeyGlobal;
 import com.zz.sdk.activity.ParamChain.ValType;
-import com.zz.sdk.layout.LAYOUT_TYPE;
 import com.zz.sdk.layout.LayoutFactory;
 import com.zz.sdk.layout.LayoutFactory.ILayoutView;
 import com.zz.sdk.layout.LayoutFactory.KeyLayoutFactory;

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import android.app.Activity;
 import android.os.Handler;
 
-import com.zz.sdk.layout.LAYOUT_TYPE;
 import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.Utils;
 

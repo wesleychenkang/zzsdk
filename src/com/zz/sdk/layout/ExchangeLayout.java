@@ -23,6 +23,7 @@ import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.zz.lib.bitmapfun.provider.Images;
 import com.zz.lib.bitmapfun.ui.RecyclingImageView;
 import com.zz.lib.bitmapfun.util.ImageCache.ImageCacheParams;
 import com.zz.lib.bitmapfun.util.ImageFetcher;
@@ -34,6 +35,7 @@ import com.zz.sdk.layout.BaseLayout.ITaskCallBack;
 import com.zz.sdk.layout.LayoutFactory.ILayoutHost;
 import com.zz.sdk.lib.widget.CustomListView;
 import com.zz.sdk.util.ConnectionUtil;
+import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
@@ -56,6 +58,9 @@ class ZZPropsInfo {
  * 
  */
 public class ExchangeLayout extends CCBaseLayout {
+
+	final static boolean DEBUG = CCBaseLayout.DEBUG;
+
 	final static class KeyExchange implements KeyGlobal {
 		public static final String _TAG_ = KeyGlobal._TAG_ + "exchangeLayout"
 				+ _SEPARATOR_;
@@ -66,6 +71,9 @@ public class ExchangeLayout extends CCBaseLayout {
 		/** 道具信息, {@link ZZPropsInfo} */
 		public static final String PROPS_INFO = _TAG_ + "info";
 	}
+
+	/** 一次刷新的条目数 */
+	private final static int DEFAULT_ROWS_COUNT = 20;
 
 	private CustomListView mListView;
 	private Handler mHandler;
@@ -86,9 +94,12 @@ public class ExchangeLayout extends CCBaseLayout {
 		initUI(context);
 	}
 
-	protected void onInitUI(Context ctx) {
-		setTileTypeText(ZZStr.CC_EXCHANGE_TITLE.str());
+	@Override
+	protected void onInitEnv(Context ctx, ParamChain env) {
+		super.onInitEnv(ctx, env);
 
+		mRowsStart = 0;
+		mRowsCount = DEFAULT_ROWS_COUNT;
 		mImageThumbSize = ZZDimen.CC_EX_ICON_W.px();
 
 		ImageCacheParams cacheParams = new ImageCacheParams(mContext,
@@ -104,52 +115,16 @@ public class ExchangeLayout extends CCBaseLayout {
 		mImageFetcher.addImageCache(getEnv().getRoot(), cacheParams);
 	}
 
-	private synchronized void onLoad() {
-		if (getCurrentTask() != null) {
-			Logger.d("task is running");
-			return;
-		}
-
-		// for (int i = 0; i < c; i++) {
-		// ZZPropsInfo info = new ZZPropsInfo();
-		// info.imgThumbUrl = Images.imageThumbUrls[s + i];
-		// info.imgUrl = Images.imageUrls[s + i];
-		// info.desc = "玩具射击";
-		// info.summary = "" + (s * 500 + i) + "卓越币";
-		// info.id = String.valueOf(s + i);
-		// ret.add(i, info);
-		// }
-		ITaskCallBack cb = new ITaskCallBack() {
-			@Override
-			public void onResult(AsyncTask<?, ?, ?> task, Object token,
-					BaseResult result) {
-				if (isCurrentTaskFinished(task)) {
-
-					// mPropsInfos = list;
-					mAdapter.resetData(mPropsInfos);
-
-					mListView.stopRefresh();
-					mListView.stopLoadMore();
-					mListView.setRefreshTime(new Date().toLocaleString());
-				}
-			}
-		};
-
-		AsyncTask<?, ?, ?> task = GetPropListTask.createAndStart(
-				getConnectionUtil(), cb, this, mRowsStart, mRowsCount);
-		setCurrentTask(task);
-	}
-
-	@Override
-	protected void initUI(Context ctx) {
-		super.initUI(ctx);
+	protected void onInitUI(Context ctx) {
 
 		mHandler = new Handler();
 
 		CustomListView lv = new CustomListView(ctx);
 		lv.setOnRefreshEventListener(mRefreshEventListener);
-		lv.setPullRefreshEnable(true);
+		lv.setPullRefreshEnable(false);
+		lv.setPullLoadEnable(true);
 		lv.startRefresh();
+		lv.setDivider(null);
 		lv.setDividerHeight(16);
 		lv.setPadding(ZZDimen.CC_ROOTVIEW_PADDING_LEFT.px(),
 				ZZDimen.CC_ROOTVIEW_PADDING_TOP.px(),
@@ -221,6 +196,58 @@ public class ExchangeLayout extends CCBaseLayout {
 
 		mAdapter = new MyAdapterExchange(ctx, mPropsInfos);
 		lv.setAdapter(mAdapter);
+
+		setTileTypeText(ZZStr.CC_EXCHANGE_TITLE.str());
+	}
+
+	private synchronized void onLoad() {
+		if (getCurrentTask() != null) {
+			Logger.d("task is running");
+			return;
+		}
+
+		ITaskCallBack cb = new ITaskCallBack() {
+			@Override
+			public void onResult(AsyncTask<?, ?, ?> task, Object token,
+					BaseResult result) {
+				if (isCurrentTaskFinished(task)) {
+
+					if (DEBUG) {
+						int s = mPropsInfos.size();
+						int e = Images.imageThumbUrls.length;
+						if (s < e) {
+							List<ZZPropsInfo> ret = new ArrayList<ZZPropsInfo>(
+									mPropsInfos);
+							int max = e - s;
+							if (max > mRowsCount)
+								max = mRowsCount;
+							int c = DebugFlags.RANDOM.nextInt(max) + 1;
+							for (int i = 0; i < c; i++) {
+								ZZPropsInfo info = new ZZPropsInfo();
+								info.imgThumbUrl = Images.imageThumbUrls[s + i];
+								info.imgUrl = Images.imageUrls[s + i];
+								info.desc = "玩具射击";
+								info.summary = "" + (s * 500 + i) + "卓越币";
+								info.id = String.valueOf(s + i);
+								ret.add(info);
+							}
+							mPropsInfos = ret;
+						}
+					}
+
+					// mPropsInfos = list;
+					mAdapter.resetData(mPropsInfos);
+
+					mListView.stopRefresh();
+					mListView.stopLoadMore();
+					mListView.setRefreshTime(new Date().toLocaleString());
+				}
+			}
+		};
+
+		AsyncTask<?, ?, ?> task = GetPropListTask.createAndStart(
+				getConnectionUtil(), cb, this, mRowsStart, mRowsCount);
+		setCurrentTask(task);
 	}
 
 	private void enterDetail(int pos) {
@@ -232,7 +259,8 @@ public class ExchangeLayout extends CCBaseLayout {
 				ParamChain env = getEnv();
 				env.add(KeyExchange.PROPS_INFO, info);
 				env.add(KeyExchange.PROPS_ID, pos);
-				host.enter(LAYOUT_TYPE.ExchangeDetail, env);
+				host.enter(getClass().getClassLoader(),
+						ExchangeDetailLayout.class.getName(), env);
 			}
 		}
 	}

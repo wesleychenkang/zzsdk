@@ -350,8 +350,8 @@ public class ResConstants {
 		CHARGE_PULL("cc_charge_pull.png"), //
 		EX_BUTTON("cc_ex_button.9.png"), //
 		EX_BUTTON_CLICK("cc_ex_button_click.9.png"), //
-		EX_RIGHT("cc_ex_right.png"), //
-		EX_RIGHT_CLICK("cc_ex_right_click.png"), //
+		EX_RIGHT("cc_ex_Right.png"), //
+		EX_RIGHT_CLICK("cc_ex_Right_click.png"), //
 		HELP("cc_help.png"), //
 		MONEY("cc_money.png"), //
 		PAYMENT_INPUT("cc_payment_input.9.png"), //
