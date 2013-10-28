@@ -247,7 +247,8 @@ public class UserUtil {
 		if (ret.isSuccess()) {
 			mSdkUser = new SdkUser();
 			mSdkUser.autoLogin = 1;
-			mSdkUser.loginName = ret.mUserName;
+			mSdkUser.loginName = ret.mUserName == null ? loginName
+					: ret.mUserName;
 			mSdkUser.password = password;
 			try {
 				mSdkUser.sdkUserId = Integer.parseInt(ret.mSdkUserId);

@@ -56,6 +56,7 @@ public class LoginRegisterLayout extends LinearLayout{
 		wrap1.addView(rtvUser);
 
 		mRegistUserId = new EditText(ctx);
+		mRegistUserId.setId(IDC.ED_REGISTER_NAME.id());
 		mRegistUserId.setSingleLine();
 		mRegistUserId.setBackgroundDrawable(CCImg.LOGIN_EDIT.getDrawble(ctx));
 		mRegistUserId.setHint("请输入帐号");
@@ -84,7 +85,7 @@ public class LoginRegisterLayout extends LinearLayout{
 		wrap2.addView(rtvUserPwd);
 
 		mRegistUserPwd = new EditText(ctx);
-		//mRegistUserPwd.setId(ID_RUSERPWD);
+		mRegistUserPwd.setId(IDC.ED_REGISTER_PASSWORD.id());
 		mRegistUserPwd.setSingleLine();
 		mRegistUserPwd.setBackgroundDrawable(CCImg.LOGIN_EDIT.getDrawble(ctx));
 		mRegistUserPwd.setHint("请输入密码");
@@ -105,7 +106,7 @@ public class LoginRegisterLayout extends LinearLayout{
 		mBtConfirm.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
 		mBtConfirm.setPadding(50, 10, 50, 10);
 		mBtConfirm.setSingleLine();
-		mBtConfirm.setId(IDC.BT_MODIFY_CONFIRM.id());
+		mBtConfirm.setId(IDC.BT_REGISTER_CONFIRM.id());
 		mBtConfirm.setOnClickListener(l);
 		wrap3.addView(mBtConfirm);
 
