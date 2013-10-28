@@ -29,6 +29,7 @@ import com.zz.lib.bitmapfun.util.ImageCache.ImageCacheParams;
 import com.zz.lib.bitmapfun.util.ImageFetcher;
 import com.zz.sdk.ParamChain;
 import com.zz.sdk.ParamChain.KeyGlobal;
+import com.zz.sdk.entity.PropsInfo;
 import com.zz.sdk.entity.result.BaseResult;
 import com.zz.sdk.entity.result.ResultPropList;
 import com.zz.sdk.layout.BaseLayout.ITaskCallBack;
@@ -43,14 +44,6 @@ import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
 import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
 
-class ZZPropsInfo {
-	String desc;
-	String summary;
-	String imgThumbUrl;
-	String imgUrl;
-	String id;
-}
-
 /**
  * 道具兑换界面
  * 
@@ -59,7 +52,7 @@ class ZZPropsInfo {
  */
 public class ExchangeLayout extends CCBaseLayout {
 
-	final static boolean DEBUG = CCBaseLayout.DEBUG;
+	final static boolean DEBUG = false;// CCBaseLayout.DEBUG;
 
 	final static class KeyExchange implements KeyGlobal {
 		public static final String _TAG_ = KeyGlobal._TAG_ + "exchangeLayout"
@@ -68,7 +61,7 @@ public class ExchangeLayout extends CCBaseLayout {
 		/** 道具ID, {@link String} */
 		public static final String PROPS_ID = _TAG_ + "id";
 
-		/** 道具信息, {@link ZZPropsInfo} */
+		/** 道具信息, {@link PropsInfo} */
 		public static final String PROPS_INFO = _TAG_ + "info";
 	}
 
@@ -85,7 +78,7 @@ public class ExchangeLayout extends CCBaseLayout {
 
 	private int mRowsStart, mRowsCount;
 
-	private List<ZZPropsInfo> mPropsInfos = new ArrayList<ZZPropsInfo>();
+	private List<PropsInfo> mPropsInfos = new ArrayList<PropsInfo>();
 
 	// private AsyncTask<?, ?, ?> mLoadTask;
 
@@ -194,7 +187,8 @@ public class ExchangeLayout extends CCBaseLayout {
 		// }
 		// });
 
-		mAdapter = new MyAdapterExchange(ctx, mPropsInfos);
+		mAdapter = new MyAdapterExchange(ctx,
+				ZZStr.CC_RECHAGRE_COST_UNIT_ZYCOIN.str(), mPropsInfos);
 		lv.setAdapter(mAdapter);
 
 		setTileTypeText(ZZStr.CC_EXCHANGE_TITLE.str());
@@ -216,31 +210,32 @@ public class ExchangeLayout extends CCBaseLayout {
 						int s = mPropsInfos.size();
 						int e = Images.imageThumbUrls.length;
 						if (s < e) {
-							List<ZZPropsInfo> ret = new ArrayList<ZZPropsInfo>(
+							List<PropsInfo> ret = new ArrayList<PropsInfo>(
 									mPropsInfos);
 							int max = e - s;
 							if (max > mRowsCount)
 								max = mRowsCount;
 							int c = DebugFlags.RANDOM.nextInt(max) + 1;
 							for (int i = 0; i < c; i++) {
-								ZZPropsInfo info = new ZZPropsInfo();
-								info.imgThumbUrl = Images.imageThumbUrls[s + i];
-								info.imgUrl = Images.imageUrls[s + i];
-								info.desc = "玩具射击";
-								info.summary = "" + (s * 500 + i) + "卓越币";
-								info.id = String.valueOf(s + i);
+								PropsInfo info = new PropsInfo();
+								info.mIcon = Images.imageThumbUrls[s + i];
+								info.mBigIcon = Images.imageUrls[s + i];
+								info.mName = "玩具射击";
+								info.mDesc = "" + (s * 500 + i) + "卓越币";
+								info.mId = s + i;
 								ret.add(info);
 							}
 							mPropsInfos = ret;
 						}
+						// mPropsInfos = list;
+						mAdapter.resetData(mPropsInfos);
+						mListView.stopRefresh();
+						mListView.stopLoadMore();
+						mListView.setRefreshTime(new Date().toLocaleString());
+					} else {
+						onGetPropListResult(result);
 					}
 
-					// mPropsInfos = list;
-					mAdapter.resetData(mPropsInfos);
-
-					mListView.stopRefresh();
-					mListView.stopLoadMore();
-					mListView.setRefreshTime(new Date().toLocaleString());
 				}
 			}
 		};
@@ -250,12 +245,41 @@ public class ExchangeLayout extends CCBaseLayout {
 		setCurrentTask(task);
 	}
 
+	private void onGetPropListResult(BaseResult result) {
+		if (result.isSuccess() && result instanceof ResultPropList) {
+			ResultPropList p = (ResultPropList) result;
+
+			int m = p.mCount;
+			for (int i = 0; i < m; i++) {
+				mPropsInfos.add(p.mProps[i]);
+			}
+			mAdapter.resetData(mPropsInfos);
+
+			if (m < mRowsCount) {
+				if (DEBUG) {
+					showToast("调试：列表项数量不足，没有更多项");
+				}
+				mListView.setPullLoadEnable(false);
+				mRowsStart = mPropsInfos.size();
+			}
+
+			mListView.stopRefresh();
+			mListView.stopLoadMore();
+			mListView.setRefreshTime(new Date().toLocaleString());
+		} else {
+			if (result.isUsed())
+				showPopup_Tip(result.getErrDesc());
+			else
+				showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
+		}
+	}
+
 	private void enterDetail(int pos) {
 		ILayoutHost host = getHost();
 		if (host != null) {
 			Object o = mAdapter.getItem(pos);
-			if (o instanceof ZZPropsInfo) {
-				ZZPropsInfo info = (ZZPropsInfo) o;
+			if (o instanceof PropsInfo) {
+				PropsInfo info = (PropsInfo) o;
 				ParamChain env = getEnv();
 				env.add(KeyExchange.PROPS_INFO, info);
 				env.add(KeyExchange.PROPS_ID, pos);
@@ -324,7 +348,7 @@ public class ExchangeLayout extends CCBaseLayout {
 					// mListView.setAdapter(mAdapter);
 					onLoad();
 				}
-			}, 2000);
+			}, 200);
 		}
 
 		@Override
@@ -336,21 +360,20 @@ public class ExchangeLayout extends CCBaseLayout {
 					// mAdapter.notifyDataSetChanged();
 					onLoad();
 				}
-			}, 2000);
+			}, 200);
 		}
 	};
 
 	class MyAdapterExchange extends BaseAdapter {
 
 		private Context mContext;
-		// private NumberFormat mFormat;
-		// private String mDescFormat;
-		private List<ZZPropsInfo> mData;
+		private String mFormat;
+		private List<PropsInfo> mData;
 
 		private int ICON_WDITH, ICON_HEIGHT;
 		private int PADDING;
 
-		protected void resetData(List<ZZPropsInfo> data) {
+		protected void resetData(List<PropsInfo> data) {
 			mData = data;
 			notifyDataSetInvalidated();
 		}
@@ -418,10 +441,10 @@ public class ExchangeLayout extends CCBaseLayout {
 			}
 		}
 
-		public MyAdapterExchange(Context ctx, List<ZZPropsInfo> data) {
+		public MyAdapterExchange(Context ctx, String format,
+				List<PropsInfo> data) {
 			mContext = ctx;
-			// mFormat = format;
-			// mDescFormat = desc;
+			mFormat = format;
 			mData = data;
 
 			ICON_WDITH = ZZDimen.CC_EX_ICON_W.px();
@@ -458,20 +481,19 @@ public class ExchangeLayout extends CCBaseLayout {
 			Holder holder = (Holder) convertView.getTag();
 
 			Object val = getItem(position);
-			if (val instanceof ZZPropsInfo) {
-				ZZPropsInfo info = (ZZPropsInfo) val;
+			if (val instanceof PropsInfo) {
+				PropsInfo info = (PropsInfo) val;
 				// holder.ivIcon.setImageDrawable(null);
 				// Finally load the image asynchronously into the ImageView,
 				// this
 				// also takes care of
 				// setting a placeholder image while the background thread
 				// runs
-				mImageFetcher.loadImage(info.imgThumbUrl, holder.ivIcon);
+				mImageFetcher.loadImage(info.mIcon, holder.ivIcon);
 
-				if (DEBUG) {
-					holder.tvTitle.setText(info.desc);
-					holder.tvSummary.setText(info.summary);
-				}
+				holder.tvTitle.setText(info.mName);
+				holder.tvSummary.setText(String.format(mFormat,
+						com.zz.sdk.util.Utils.price2str(info.mPrice)));
 			}
 
 			holder.onStateChanged(null);

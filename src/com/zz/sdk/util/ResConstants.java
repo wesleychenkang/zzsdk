@@ -149,6 +149,9 @@ public class ResConstants {
 		CC_EXCHANGE_TITLE("道具兑换"),
 		/** 道具兑换详情 */
 		CC_EXCHANGE_DETAIL_TITLE("兑换——%s"),
+		/** 价格：%s卓越币 */
+		CC_EXCHANGE_DETAIL_PRICE_DESC("价格：%s卓越币"),
+		CC_EXCHANGE_DETAIL_BALANCE_DESC("本次消费%s，您的余额还有%s"),
 
 		/** XLISTVIEW: 下拉刷新 */
 		XLISTVIEW_HEADER_HINT_NORMAL("下拉刷新"),
