@@ -13,6 +13,7 @@ import android.util.Pair;
 import com.zz.lib.utils.Encrypt1;
 import com.zz.lib.utils.MD5Util;
 import com.zz.sdk.BuildConfig;
+import com.zz.sdk.entity.result.BaseResult;
 import com.zz.sdk.entity.result.ResultLogin;
 import com.zz.sdk.entity.result.ResultRegister;
 import com.zz.sdk.util.Logger;
@@ -157,6 +158,7 @@ public class PojoUtils {
 		if (DEF_DOUQU_PASSWD != null) {
 			passwd = DEF_DOUQU_PASSWD;
 		}
+		
 		String loginName = result.userid + SIGN;
 		if (checkLoginNameExist(ctx, loginName, passwd)) {
 			// 向服务器注册， codes=0成功|1失败|2用户名已经存在
@@ -175,7 +177,7 @@ public class PojoUtils {
 			}
 			Logger.d("执行了注册回调");
 		} else {
-			ResultLogin r = ctx.login(loginName, passwd, false);
+			ResultLogin r = ctx.login(loginName, passwd);
 			Logger.d("login [" + loginName + " result:" + r);
 			if (r != null) {
 				// codes=0成功|1用户不存在|2密码错误

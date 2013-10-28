@@ -96,6 +96,7 @@
 		<do-update-zzsdk-config-java key="VERSION_CODE" value="${zzsdk.config.version.code}" />
 		<do-update-zzsdk-config-java key="VERSION_NAME" value='"${zzsdk.config.version.name}"' />
 		<do-update-zzsdk-config-java key="VERSION_DATE" value='"${zzsdk.config.build.date}"' />
+		<do-update-zzsdk-config-java key="PLUGIN_MODE" value='"${zzsdk.plugin.enabled}"' />
 	</target>
 	
 	
@@ -153,6 +154,9 @@
 		
 		<!-- 逗趣开关 -->
 		<property name="zzsdk.douqu.enabled" value="false" />
+		
+		<!-- 插件开关 -->
+		<property name="zzsdk.plugin.enabled" value="false" />
 	</target>
 	
 	<target name="-set-zzsdk-mode-check">

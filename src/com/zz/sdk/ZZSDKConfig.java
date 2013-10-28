@@ -26,6 +26,9 @@ public final class ZZSDKConfig {
 	/** 调试·服务器URL */
 	public final static boolean DEBUG_URL = false; // DEBUG;
 
+	/** 插件模式 */
+	public final static boolean PLUGIN_MODE = false;
+
 	/* 版本信息 */
 
 	/** 版本号，编译时更新，格式：1 */

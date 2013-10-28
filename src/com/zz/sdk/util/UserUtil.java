@@ -59,6 +59,22 @@ public class UserUtil {
 		return mSdkUser == null ? null : mSdkUser.password;
 	}
 
+	public boolean setCachedAutoLogin(boolean auto_login) {
+		if (mSdkUser != null) {
+			mSdkUser.autoLogin = auto_login ? 1 : 0;
+			return true;
+		}
+		return false;
+	}
+
+	public boolean setCachedSdkUserId(int sdkUserId) {
+		if (mSdkUser != null) {
+			mSdkUser.sdkUserId = sdkUserId;
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * 初始化。读取数据库及SD卡的用户登录记录，主要用于自动登录
 	 */
