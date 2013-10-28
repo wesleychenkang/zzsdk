@@ -237,6 +237,8 @@ public class PaymentListLayout extends CCBaseLayout {
 
 	/** 当前的支付方式选择 */
 	private int mPaymentTypeChoose;
+	/** 当前支付方式的类别ID，以 {@link #mPaymentTypeChoose} 为准 */
+	private int mPaymentTypeChoose_ChannelType;
 
 	/** 价格或卓越币数的表达规则 */
 	private DecimalFormat mRechargeFormat;
@@ -278,6 +280,7 @@ public class PaymentListLayout extends CCBaseLayout {
 	protected void onInitEnv(Context ctx, ParamChain env) {
 		super.onInitEnv(ctx, env);
 		mPaymentTypeChoose = -1;
+		mPaymentTypeChoose_ChannelType = -1;
 		mRechargeFormat = new DecimalFormat(ZZStr.CC_PRICE_FORMAT.str());
 		mIMSI = env.get(KeyDevice.K_IMSI, String.class);
 		if (mIMSI != null) {
@@ -459,6 +462,15 @@ public class PaymentListLayout extends CCBaseLayout {
 		info.cmgeOrderNumber = env.get(KeyPaymentList.K_PAY_ORDERNUMBER,
 				String.class);
 		info.statusCode = code;
+
+		Integer payWayType = env.get(KeyPaymentList.K_PAY_CHANNELTYPE,
+				Integer.class);
+		info.payWayType = payWayType == null ? -1 : payWayType;
+		info.payWayName = env.get(KeyPaymentList.K_PAY_CHANNELNAME,
+				String.class);
+
+		info.currency = "RMB";
+
 		notifyCaller(MSG_TYPE.PAYMENT, state, info);
 	}
 
@@ -638,17 +650,55 @@ public class PaymentListLayout extends CCBaseLayout {
 	/** 更新 “应付金额”值 */
 	private void updateRechargeCost(double count) {
 		double amount = count / ZZ_COIN_RATE;
-		String str = String.format(ZZStr.CC_RECHAGRE_COST_UNIT.str(),
-				mRechargeFormat.format(amount));
-		set_child_text(IDC.TV_RECHARGE_COST, str);
+
+		String strCost;
+		if (mPaymentTypeChoose >= 0
+				&& mPaymentTypeChoose_ChannelType == PayChannel.PAY_TYPE_ZZCOIN) {
+			// 如果是 卓越币的支付方式，这里以描述成卓越币
+			ZZStr unit = ZZStr.CC_RECHAGRE_COST_UNIT_ZYCOIN;
+			strCost = String.format(unit.str(), mRechargeFormat.format(count));
+		} else {
+			ZZStr unit = ZZStr.CC_RECHAGRE_COST_UNIT;
+			strCost = String.format(unit.str(), mRechargeFormat.format(amount));
+		}
+		set_child_text(IDC.TV_RECHARGE_COST, strCost);
+
 		if (amount > 1000) {
 			set_child_visibility(IDC.TV_RECHARGE_COST_SUMMARY, VISIBLE);
 		} else {
-			set_child_visibility(IDC.TV_RECHARGE_COST_SUMMARY, INVISIBLE);
+			set_child_visibility(IDC.TV_RECHARGE_COST_SUMMARY, GONE);
 		}
 
 		// 有些支付方式的描述是动态变化的，依赖于 充值金额
 		updatePayTypeByCost(count);
+	}
+
+	// TODO: 区别 卓越币与其它充值方式对“应付金额”的描述文本 @add 20131026
+	/** 因支付类别变化而改变“应付金额”的描述文本 */
+	private void updateRechargeCostUintByChannelType(int type) {
+		if ((type == PayChannel.PAY_TYPE_ZZCOIN && mPaymentTypeChoose_ChannelType != PayChannel.PAY_TYPE_ZZCOIN)
+				|| (type != PayChannel.PAY_TYPE_ZZCOIN && mPaymentTypeChoose_ChannelType == PayChannel.PAY_TYPE_ZZCOIN)) {
+			double count;
+			Object o = getValue(VAL.PRICE);
+			if (o instanceof Double) {
+				count = ((Double) o).doubleValue();
+			} else {
+				count = 0;
+			}
+			String strCost;
+			if (type == PayChannel.PAY_TYPE_ZZCOIN) {
+				// 如果是 卓越币的支付方式，这里以描述成卓越币
+				ZZStr unit = ZZStr.CC_RECHAGRE_COST_UNIT_ZYCOIN;
+				strCost = String.format(unit.str(),
+						mRechargeFormat.format(count));
+			} else {
+				ZZStr unit = ZZStr.CC_RECHAGRE_COST_UNIT;
+				strCost = String.format(unit.str(),
+						mRechargeFormat.format(count / ZZ_COIN_RATE));
+			}
+			set_child_text(IDC.TV_RECHARGE_COST, strCost);
+		}
+		mPaymentTypeChoose_ChannelType = type;
 	}
 
 	/** 因花费金额变化而更新 "支付方式的描述"，单位 卓越币 */
@@ -768,6 +818,7 @@ public class PaymentListLayout extends CCBaseLayout {
 				}
 			} while (false);
 			mPaymentTypeChoose = pos;
+			updateRechargeCostUintByChannelType(type);
 		}
 
 		if (mPaymentListAdapter != null) {
@@ -806,19 +857,21 @@ public class PaymentListLayout extends CCBaseLayout {
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
 			prepparePayType_Card(ctx, rv, 17, 18);
 			break;
+		case PayChannel.PAY_TYPE_YEEPAY_DX: {
+			// TODO: 暂时得知电信充值卡的长度为卡号（19）密码（18）
+
+			// tv = new TextView(ctx);
+			// rv.addView(tv, new LayoutParams(LP_MW));
+			// tv.setText("暂不可使用电信充值卡，请使用其他方式");
+			// tv.setTextColor(Color.BLUE);
+			// ZZFontSize.CC_RECHAGR_NORMAL.apply(tv);
+			prepparePayType_Card(ctx, rv, 19, 18);
+		}
+			break;
 
 		case PayChannel.PAY_TYPE_ZZCOIN: {
 			double count = ((Double) getValue(VAL.PRICE)).doubleValue();
 			updatePayTypeByCost(count, rv);
-		}
-			break;
-
-		case PayChannel.PAY_TYPE_YEEPAY_DX: {
-			tv = new TextView(ctx);
-			rv.addView(tv, new LayoutParams(LP_MW));
-			tv.setText("暂不可使用电信充值卡，请使用其他方式");
-			tv.setTextColor(Color.BLUE);
-			ZZFontSize.CC_RECHAGR_NORMAL.apply(tv);
 		}
 			break;
 
@@ -959,7 +1012,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			}
 
 			// 应付金额
-			{
+			if (false) {
 				ll2 = new LinearLayout(ctx);
 				ll2.setOrientation(HORIZONTAL);
 				ll.addView(ll2);
@@ -981,7 +1034,7 @@ public class PaymentListLayout extends CCBaseLayout {
 				tv.setSingleLine(false);
 				tv.setId(IDC.TV_RECHARGE_COST_SUMMARY.id());
 				tv.setTextColor(ZZFontColor.CC_RECHAGR_WARN.color());
-				tv.setVisibility(INVISIBLE);
+				tv.setVisibility(GONE);
 			}
 		}
 
@@ -1012,6 +1065,23 @@ public class PaymentListLayout extends CCBaseLayout {
 
 			mPaymentListAdapter = new PaymentListAdapter(ctx, null);
 			gv.setAdapter(mPaymentListAdapter);
+		}
+
+		// 应付金额
+		if (true) {
+			LinearLayout ll2;
+			ll2 = new LinearLayout(ctx);
+			ll2.setOrientation(HORIZONTAL);
+			ll.addView(ll2);
+
+			tv = create_normal_label(ctx, ZZStr.CC_RECHAGRE_COST_DESC);
+			ll2.addView(tv, new LayoutParams(LP_WM));
+
+			tv = create_normal_label(ctx, null);
+			ll2.addView(tv, new LayoutParams(LP_WM));
+			tv.setId(IDC.TV_RECHARGE_COST.id());
+			tv.setTextColor(ZZFontColor.CC_RECHAGRE_COST.color());
+			ZZFontSize.CC_RECHAGR_COST.apply(tv);
 		}
 
 		// 输入面板
@@ -1148,10 +1218,14 @@ public class PaymentListLayout extends CCBaseLayout {
 
 		if (result instanceof ResultPayList && result.isSuccess()) {
 			ResultPayList rpl = (ResultPayList) result;
+			ParamChain env = getEnv();
+			if (rpl.mPayServerDesc != null) {
+				env.add(KeyGlobal.K_HELP_TOPIC, rpl.mPayServerDesc);
+			}
 
 			if (rpl.mZYCoin != null) {
 				double balance = rpl.mZYCoin.doubleValue();
-				getEnv().add(KeyUser.K_COIN_BALANCE, Double.valueOf(balance));
+				env.add(KeyUser.K_COIN_BALANCE, Double.valueOf(balance));
 				setCoinBalance(balance);
 			}
 
@@ -1284,7 +1358,8 @@ public class PaymentListLayout extends CCBaseLayout {
 			break;
 
 		case PayChannel.PAY_TYPE_YEEPAY_LT:
-		case PayChannel.PAY_TYPE_YEEPAY_YD: {
+		case PayChannel.PAY_TYPE_YEEPAY_YD:
+		case PayChannel.PAY_TYPE_YEEPAY_DX: {
 			String card = get_child_text(IDC.PANEL_CARDINPUT, IDC.ED_CARD, 1);
 			String passwd = get_child_text(IDC.PANEL_CARDINPUT, IDC.ED_PASSWD,
 					1);
@@ -1314,7 +1389,6 @@ public class PaymentListLayout extends CCBaseLayout {
 			ret = null;
 			break;
 
-		case PayChannel.PAY_TYPE_YEEPAY_DX:
 		default:
 			ret = "暂不支持";
 			break;
@@ -1432,7 +1506,9 @@ public class PaymentListLayout extends CCBaseLayout {
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
 			dRequest = UserAction.PYEE;
 			break;
-
+		case PayChannel.PAY_TYPE_YEEPAY_DX:
+			dRequest = UserAction.PYEE;
+			break;
 		case PayChannel.PAY_TYPE_UNMPAY:
 			dRequest = UserAction.PUNION;
 			break;
@@ -1441,7 +1517,6 @@ public class PaymentListLayout extends CCBaseLayout {
 			dRequest = UserAction.PKKFUN;
 			break;
 
-		case PayChannel.PAY_TYPE_YEEPAY_DX:
 		case PayChannel.PAY_TYPE_ZZCOIN:
 		default:
 			showToast("暂不支持");

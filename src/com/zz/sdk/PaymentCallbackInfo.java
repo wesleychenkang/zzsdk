@@ -24,15 +24,26 @@ public class PaymentCallbackInfo {
 	/** 状态 */
 	public int statusCode;
 
-	/** 金额，单位：元 */
+	/** 金额，单位：元，精度 0.01 */
 	public String amount;
 
 	/** CMGE订单号 */
 	public String cmgeOrderNumber;
 
+	/** 充值方式：ID，-1表示无效 */
+	public int payWayType;
+
+	/** 充值方式：名称， null 表示无效 */
+	public String payWayName;
+
+	/** 充值币种，如 "RMB" "ZYCOIN" 等 */
+	public String currency;
+
 	@Override
 	public String toString() {
 		return "PaymentCallbackInfo [statusCode=" + statusCode + ", amount="
-				+ amount + ", cmgeOrderNumber=" + cmgeOrderNumber + "]";
+				+ amount + ", cmgeOrderNumber=" + cmgeOrderNumber + ", payWay="
+				+ payWayName + "(" + payWayType + ")" + ", currency="
+				+ currency + "]";
 	}
 }
