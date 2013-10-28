@@ -751,8 +751,12 @@ class LoginMainLayout extends BaseLayout {
 
 		main = new FrameLayout(ctx);
 		LinearLayout login = createView_login(ctx, hasAccount);
+		main.setBackgroundDrawable(BitmapCache.getDrawable(ctx,
+				Constants.ASSETS_RES_PATH + "landed_bg.png"));
+		FrameLayout.LayoutParams lf =new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+		lf.gravity = Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL;
 		main.addView(login);
-		rv.addView(main);
+		rv.addView(main,lf);
 		// 显示“自动登录”框
 		if (hasAccount) {
 			show_auto_login_wait();

@@ -28,16 +28,13 @@ public class LoginRegisterLayout extends LinearLayout{
 		
 		initUI(context,l);
 	}
-	
-
 	public void initUI(Context ctx,OnClickListener l){
-		
 		setOrientation(LinearLayout.VERTICAL);
-		setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);
+		setGravity(Gravity.CENTER);
 		LayoutParams ly =new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
 		LinearLayout content = new LinearLayout(ctx);
-		content.setBackgroundDrawable(BitmapCache.getDrawable(ctx,Constants.ASSETS_RES_PATH+"landed_bg.png"));
-		content.setPadding(ZZDimen.dip2px(48), ZZDimen.dip2px(32), ZZDimen.dip2px(48), ZZDimen.dip2px(32));
+		//content.setBackgroundDrawable(BitmapCache.getDrawable(ctx,Constants.ASSETS_RES_PATH+"landed_bg.png"));
+		content.setPadding(ZZDimen.dip2px(30), ZZDimen.dip2px(35), ZZDimen.dip2px(30), ZZDimen.dip2px(35));
 		
 		addView(content,ly);
 		content.setOrientation(LinearLayout.VERTICAL);
@@ -56,7 +53,6 @@ public class LoginRegisterLayout extends LinearLayout{
 		wrap1.addView(rtvUser);
 
 		mRegistUserId = new EditText(ctx);
-		mRegistUserId.setId(IDC.ED_REGISTER_NAME.id());
 		mRegistUserId.setSingleLine();
 		mRegistUserId.setBackgroundDrawable(CCImg.LOGIN_EDIT.getDrawble(ctx));
 		mRegistUserId.setHint("请输入帐号");
@@ -64,7 +60,6 @@ public class LoginRegisterLayout extends LinearLayout{
 		wrap1.addView(mRegistUserId, -1, -2);
 		
 		LinearLayout.LayoutParams lpid = new LinearLayout.LayoutParams(-1,-2);
-		
 		content.addView(wrap1,lpid);
 		
 		// 用来放置密码帐号信息的布局
@@ -85,7 +80,7 @@ public class LoginRegisterLayout extends LinearLayout{
 		wrap2.addView(rtvUserPwd);
 
 		mRegistUserPwd = new EditText(ctx);
-		mRegistUserPwd.setId(IDC.ED_REGISTER_PASSWORD.id());
+		//mRegistUserPwd.setId(ID_RUSERPWD);
 		mRegistUserPwd.setSingleLine();
 		mRegistUserPwd.setBackgroundDrawable(CCImg.LOGIN_EDIT.getDrawble(ctx));
 		mRegistUserPwd.setHint("请输入密码");
@@ -102,9 +97,9 @@ public class LoginRegisterLayout extends LinearLayout{
 		//确认按钮
 		Button mBtConfirm = new Button(ctx);
 		mBtConfirm.setText("确认");
-		mBtConfirm.setTextSize(18);
+		mBtConfirm.setTextSize(14);
 		mBtConfirm.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
-		mBtConfirm.setPadding(50, 10, 50, 10);
+		mBtConfirm.setPadding(30,0, 30, 0);
 		mBtConfirm.setSingleLine();
 		mBtConfirm.setId(IDC.BT_REGISTER_CONFIRM.id());
 		mBtConfirm.setOnClickListener(l);
@@ -113,9 +108,9 @@ public class LoginRegisterLayout extends LinearLayout{
 		//返回按钮
 		Button mBtBack = new Button(ctx);
 		mBtBack.setText("返回");
-		mBtBack.setTextSize(18);
+		mBtBack.setTextSize(14);
 		mBtBack.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
-		mBtBack.setPadding(50, 10, 50, 10);
+		mBtBack.setPadding(30,0, 30, 0);
 
 		mBtBack.setId(IDC.BT_BACK.id());
 		LinearLayout.LayoutParams lpbt = new LinearLayout.LayoutParams(-2, -2);

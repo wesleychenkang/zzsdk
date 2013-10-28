@@ -1,23 +1,19 @@
 package com.zz.sdk.layout;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.view.Gravity;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.LinearLayout.LayoutParams;
-
 import com.zz.sdk.layout.LoginMainLayout.IDC;
-import com.zz.sdk.util.BitmapCache;
-import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.ResConstants;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
-import com.zz.sdk.util.Utils;
+
 
 public class LoginUpdatePwdLayout extends LinearLayout{
 	public LinearLayout mUpdatePwdLayout;
@@ -31,11 +27,10 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 	public void init(Context ctx,OnClickListener l){
 	
 		setOrientation(LinearLayout.VERTICAL);
-		setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);
+		setGravity(Gravity.CENTER);
 		LinearLayout content = new LinearLayout(ctx);
 		LayoutParams ly =new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
-		content.setBackgroundDrawable(BitmapCache.getDrawable(ctx,Constants.ASSETS_RES_PATH+"landed_bg.png"));
-		content.setPadding(ZZDimen.dip2px(45), ZZDimen.dip2px(30), ZZDimen.dip2px(45), ZZDimen.dip2px(30));
+		content.setPadding(ZZDimen.dip2px(30), ZZDimen.dip2px(35), ZZDimen.dip2px(30), ZZDimen.dip2px(35));
 		addView(content,ly);
 		content.setOrientation(LinearLayout.VERTICAL);
 		
@@ -50,22 +45,20 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		rtvUser.setText("旧密码    ");
 		//黑色
 		rtvUser.setTextColor(Color.BLACK);
-		rtvUser.setTextSize(17);
+		rtvUser.setTextSize(14);
 		wrap1.addView(rtvUser);
 
 		//显示旧密码
 		mOldPwd = new TextView(ctx);
-		mOldPwd.setPadding(ZZDimen.dip2px(15), ZZDimen.dip2px(5), 0, ZZDimen.dip2px(5));
+		mOldPwd.setPadding(ZZDimen.dip2px(10), 0, 0,0);
 		mOldPwd.setSingleLine();
 		mOldPwd.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
-		//mOldPwd.setId(ID_OLDPWD);
-		mOldPwd.setTextSize(18);
+		mOldPwd.setTextSize(15);
 		mOldPwd.setBackgroundDrawable(CCImg.LOGIN_EDIT.getDrawble(ctx));
 		mOldPwd.setTextColor(Color.WHITE);
 		wrap1.addView(mOldPwd, -1, -2);
 		
 		LinearLayout.LayoutParams lpid = new LinearLayout.LayoutParams(-1,-2);
-		
 		content.addView(wrap1,lpid);
 		
 		// 用来放置密码帐号信息的布局
@@ -80,12 +73,11 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		rtvUserPwd.setText("新密码   ");
 		//黑色
 		rtvUserPwd.setTextColor(Color.BLACK);
-		rtvUserPwd.setTextSize(17);
+		rtvUserPwd.setTextSize(14);
 		wrap2.addView(rtvUserPwd);
 
 		//用户输入新密码 
 		mNewPwd = new EditText(ctx);
-		mNewPwd.setId(IDC.ED_NEW_PASSOWRD.id());
 		mNewPwd.setSingleLine();
 		mNewPwd.setBackgroundDrawable(CCImg.LOGIN_EDIT.getDrawble(ctx));
 		mNewPwd.setHint("请输入新密码");
@@ -104,21 +96,21 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		
 		Button mBtConfirm = new Button(ctx);
 		mBtConfirm.setText("确认");
-		mBtConfirm.setTextSize(18);
+		mBtConfirm.setTextSize(14);
 		mBtConfirm.setId(IDC.BT_MODIFY_CONFIRM.id());
 		mBtConfirm.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
-		mBtConfirm.setPadding(50, 10, 50, 10);
-		wrap3.addView(mBtConfirm);
+	    mBtConfirm.setPadding(30,0, 30, 0);
+	    LayoutParams lbtn = new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+	    wrap3.addView(mBtConfirm,lbtn);
 		mBtConfirm.setOnClickListener(l);
 		
 		Button mBtClose = new Button(ctx);
 		mBtClose.setText("返回");
-		mBtClose.setTextSize(18);
+		mBtClose.setTextSize(14);
 		mBtClose.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
-		mBtClose.setPadding(50, 10, 50, 10);
+		mBtClose.setPadding(30,0, 30, 0);
 		mBtClose.setId(IDC.BT_BACK.id());
 		mBtClose.setOnClickListener(l);
-
 		LinearLayout.LayoutParams lpbt = new LinearLayout.LayoutParams(-2, -2);
 		lpbt.leftMargin = ZZDimen.dip2px(30);
 		wrap3.addView(mBtClose, lpbt);
