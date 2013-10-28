@@ -174,9 +174,7 @@ class LoginMainLayout extends BaseLayout {
 		set_child_visibility(BaseLayout.IDC.ACT_TITLE, VISIBLE);
 
 		FrameLayout rv = getSubjectContainer();
-
 		final boolean isVertical = Utils.isOrientationVertical(getContext());
-
 		int widthPixels = getResources().getDisplayMetrics().widthPixels;
 		int heightPixels = getResources().getDisplayMetrics().heightPixels;
 		int weight1 = widthPixels * 4 / 5;
@@ -189,7 +187,6 @@ class LoginMainLayout extends BaseLayout {
 				(isVertical ? Constants.ASSETS_RES_PATH_VERTICAL
 						: Constants.ASSETS_RES_PATH) + "bj.jpg"));
 	    setWeightSum(1.0f);
-	    
 	    
 	    LinearLayout layout1 = new LinearLayout(ctx);
 		layout1.setOrientation(HORIZONTAL);
@@ -217,7 +214,7 @@ class LoginMainLayout extends BaseLayout {
 	    top.addView(image);
 	    FrameLayout.LayoutParams l = new  FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
 	    rv.addView(top,l);
-		boolean hasAccount = true;
+		boolean hasAccount = false;
 		
 		main = new FrameLayout(ctx);
 		LinearLayout login = createView_login(ctx,hasAccount);

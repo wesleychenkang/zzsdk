@@ -37,7 +37,7 @@ public class LoginRegisterLayout extends LinearLayout{
 		LayoutParams ly =new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
 		LinearLayout content = new LinearLayout(ctx);
 		content.setBackgroundDrawable(BitmapCache.getDrawable(ctx,Constants.ASSETS_RES_PATH+"landed_bg.png"));
-		content.setPadding(ZZDimen.dip2px(45), ZZDimen.dip2px(30), ZZDimen.dip2px(45), ZZDimen.dip2px(30));
+		content.setPadding(ZZDimen.dip2px(48), ZZDimen.dip2px(32), ZZDimen.dip2px(48), ZZDimen.dip2px(32));
 		
 		addView(content,ly);
 		content.setOrientation(LinearLayout.VERTICAL);

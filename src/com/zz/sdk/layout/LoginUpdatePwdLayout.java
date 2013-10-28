@@ -56,7 +56,7 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 
 		//显示旧密码
 		mOldPwd = new TextView(ctx);
-		mOldPwd.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(5), 0, ZZDimen.dip2px(5));
+		mOldPwd.setPadding(ZZDimen.dip2px(15), ZZDimen.dip2px(5), 0, ZZDimen.dip2px(5));
 		mOldPwd.setSingleLine();
 		mOldPwd.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
 		//mOldPwd.setId(ID_OLDPWD);

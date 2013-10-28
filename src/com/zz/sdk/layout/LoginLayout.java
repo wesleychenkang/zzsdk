@@ -60,12 +60,23 @@ public class LoginLayout extends LinearLayout {
 		btnLogin.setText("立即登录");
 		btnLogin.setTextSize(18);
 		btnLogin.setOnClickListener(l);
+		
+		//第三方登录
+		Button btnOther = new Button(ctx);
+		btnOther.setText("第三方登录");
+		btnOther.setTextSize(18);
+		btnOther.setOnClickListener(l);
+		
 		if (hasAccount) {
+			
 			btnLogin.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
+		    btnLogin.setPadding(24, 10,24,10);
 		} else {
+			
 			btnLogin.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
+			btnLogin.setPadding(20, 10,20,10);
 		}
-		 btnLogin.setPadding(24, 10,24,10);
+		
 		 
 		 
 		// 快速登录
@@ -161,7 +172,8 @@ public class LoginLayout extends LinearLayout {
 
 			// 立即登录
 			{
-				wrap3.addView(btnLogin, LayoutParams.WRAP_CONTENT,
+				
+			wrap3.addView(btnLogin, LayoutParams.WRAP_CONTENT,
 						LayoutParams.WRAP_CONTENT);
 			}
 
@@ -173,10 +185,18 @@ public class LoginLayout extends LinearLayout {
 				LinearLayout.LayoutParams lpregister = new LinearLayout.LayoutParams(
 						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 				lpregister.setMargins(ZZDimen.dip2px(10), 0, 0, 0);
-				btnRegister.setPadding(24, 10,24,10);
+				btnRegister.setPadding(20, 10,20,10);
 				wrap3.addView(btnRegister, lpregister);
 			}
-
+			LinearLayout.LayoutParams lother = new LinearLayout.LayoutParams(
+					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			lother.setMargins(ZZDimen.dip2px(10), 0, 0, 0);
+			if(hasAccount){
+		    lother.setMargins(ZZDimen.dip2px(15), 0, 0, 0);	
+			}
+			btnOther.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx,CCImg.LOGIN_BUTTON_HUANG,CCImg.LOGIN_BUTTON_HUANG_CLICK));
+			btnOther.setPadding(15, 10,15,10);
+			wrap3.addView(btnOther,lother);
 		}
 		
 	}
