@@ -31,15 +31,16 @@ public class ResultPayMessage extends BaseResult {
 	public void parseJson(JSONObject json) {
 		if (json == null)
 			return;
-		try {
-			mPayMessage = getString(json, K_PAY_MESSAGES);
+		super.parseJson(json);
 
-			JSONArray ja = getArray(json, K_PAY_MESSAGE);
-			if (ja != null && ja.length() > 0) {
-				for (int i = 0, c = ja.length(); i < c; i++) {
-					JSONObject object = ja.getJSONObject(i);
-					String url = getString(object, K_URL);
-					String msg = getString(object, K_MESSAGE);
+		mPayMessage = json.optString(K_PAY_MESSAGES, null);
+		JSONArray ja = json.optJSONArray(K_PAY_MESSAGE);
+		if (ja != null && ja.length() > 0) {
+			for (int i = 0, c = ja.length(); i < c; i++) {
+				JSONObject object = ja.optJSONObject(i);
+				if (object != null) {
+					String url = object.optString(K_URL, null);
+					String msg = object.optString(K_MESSAGE, null);
 					if (url != null && msg != null) {
 						Pair<String, String> pair = new Pair<String, String>(
 								url, msg);
@@ -47,8 +48,6 @@ public class ResultPayMessage extends BaseResult {
 					}
 				}
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 }

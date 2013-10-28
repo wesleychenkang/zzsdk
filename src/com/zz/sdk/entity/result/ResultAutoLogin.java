@@ -29,13 +29,9 @@ public class ResultAutoLogin extends ResultLogin {
 	public void parseJson(JSONObject json) {
 		if (json == null)
 			return;
-		try {
-			super.parseJson(json);
-			mUser = getString(json, K_USER);
-			mPassword = getString(json, K_PASSWORD);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		super.parseJson(json);
+		mUser = json.optString(K_USER, null);
+		mPassword = json.optString(K_PASSWORD, null);
 	}
 
 	@Override

@@ -1,9 +1,6 @@
 package com.zz.sdk.entity.result;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
-
-import com.zz.sdk.entity.PayChannel;
 
 /**
  * getBalance(获取卓越币）
