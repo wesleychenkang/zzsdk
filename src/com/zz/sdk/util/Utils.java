@@ -28,6 +28,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
 import android.os.Environment;
@@ -542,6 +543,10 @@ public class Utils {
 		return listDrawable;
 	}
 
+	public static Drawable getDrawable(Context ctx,String path) {
+		return BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH + path);
+	}
+	
 	public static String substringStatusStr(String str, String start, String end) {
 		String ss = str;
 		try {
