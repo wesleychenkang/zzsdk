@@ -71,6 +71,21 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" >
         </activity>
 
+        <!-- 银联窗体，依赖风格文件 unionpay_style.xml -->
+        <activity
+            android:name="com.unionpay.uppay.PayActivityEx"
+            android:configChanges="orientation|keyboardHidden"
+            android:excludeFromRecents="true"
+            android:label="@string/app_name"
+            android:windowSoftInputMode="adjustResize" >
+        </activity>
+        <activity
+            android:name="com.unionpay.uppay.PayActivity"
+            android:configChanges="orientation|keyboardHidden|screenLayout"
+            android:excludeFromRecents="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.UPPay" />
+
         <!-- 演示窗体 -->
         <activity
             android:name="com.zz.sdk.demo.MainActivity"
@@ -122,9 +137,11 @@
             android:name="QHOPENSDK_CHANNEL"
             android:value="default" >
         </meta-data>
-        <activity android:name="com.zz.sdk.activity.BaseActivity"
+
+        <activity
+            android:name="com.zz.sdk.activity.BaseActivity"
             android:configChanges="orientation|keyboardHidden|navigation|screenSize"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"></activity>
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
     </application>
 
 </manifest>

@@ -12,9 +12,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.unionpay.UPPayAssistEx;
+import com.unionpay.uppay.PayActivity;
 import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.ParamChain;
-import com.zz.sdk.ParamChain.KeyGlobal;
 import com.zz.sdk.ParamChain.ValType;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
 import com.zz.sdk.protocols.EmptyActivityControlImpl;
@@ -363,12 +363,20 @@ class PaymentUnionLayout extends BaseLayout {
 		tryPayUnion(activity, mTN);
 	}
 
+	// public static void startPayByJAR(Activity activity, Class<?> payCls,
+	// String spId, String sysProvider, String orderInfo, String mode)
 	private void tryPayUnion(Activity activity, String tn) {
-		int ret = UPPayAssistEx.startPay(activity, null, null, tn, serverMode);
-		if (ret == UPPayAssistEx.PLUGIN_NOT_FOUND) {
-			show_install_plugin();
+		if (false) {
+			int ret = UPPayAssistEx.startPay(activity, null, null, tn,
+					serverMode);
+			if (ret == UPPayAssistEx.PLUGIN_NOT_FOUND) {
+				show_install_plugin();
+			} else {
+				showPopup_Wait(ZZStr.CC_RECHARGE_WAIT_RESULT.str(), null);
+			}
 		} else {
-			showPopup_Wait(ZZStr.CC_RECHARGE_WAIT_RESULT.str(), null);
+			UPPayAssistEx.startPayByJAR(activity, PayActivity.class, null,
+					null, tn, serverMode);
 		}
 	}
 
