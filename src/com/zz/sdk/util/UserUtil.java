@@ -5,8 +5,8 @@ import android.util.Pair;
 
 import com.zz.lib.pojo.PojoUtils;
 import com.zz.sdk.ParamChain;
-import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.ParamChain.KeyUser;
+import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.entity.SdkUser;
 import com.zz.sdk.entity.SdkUserTable;
 import com.zz.sdk.entity.result.BaseResult;
@@ -15,9 +15,10 @@ import com.zz.sdk.entity.result.ResultChangePwd;
 import com.zz.sdk.entity.result.ResultLogin;
 import com.zz.sdk.entity.result.ResultRegister;
 import com.zz.sdk.out.util.Application;
-import com.zz.sdk.out.util.GetDataImpl;
 
 /**
+ * <b>注意：</b>这里储存的 <i>用户名、密码</i> 等，均为 ZZSDK 服务器上的数据。
+ * <p>
  * 用户操作，如
  * <p>
  * <ul>
@@ -43,6 +44,8 @@ public class UserUtil {
 	public UserUtil(Context ctx) {
 		mContext = ctx;
 		mConnectionUtil = ConnectionUtil.getInstance(ctx);
+
+		init();
 	}
 
 	public Context getContext() {
@@ -182,7 +185,7 @@ public class UserUtil {
 		if (ret.isSuccess()) {
 			// 若登录成功，更新缓存
 			SdkUser user = new SdkUser();
-			user.loginName = ret.mUserName;
+			user.loginName = ret.mUserName == null ? loginName : ret.mUserName;
 			user.password = passwd;
 			try {
 				user.sdkUserId = Integer.parseInt(ret.mSdkUserId);
@@ -255,9 +258,9 @@ public class UserUtil {
 	}
 
 	public void clean() {
-		mContext = null;
-		ConnectionUtil.detachInstance(mConnectionUtil);
-		mConnectionUtil = null;
+		// mContext = null;
+		// ConnectionUtil.detachInstance(mConnectionUtil);
+		// mConnectionUtil = null;
 	}
 
 	/** 更新登录缓存 */
@@ -337,5 +340,14 @@ public class UserUtil {
 					uu.getCachedPassword());
 		}
 		return ret;
+	}
+
+	static UserUtil sInstance;
+
+	public static synchronized UserUtil getInstance(Context ctx) {
+		if (sInstance == null) {
+			sInstance = new UserUtil(ctx);
+		}
+		return sInstance;
 	}
 }

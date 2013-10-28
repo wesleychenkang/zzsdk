@@ -447,30 +447,15 @@ class PaymentOnlineLayout extends BaseLayout {
 				getConnectionUtil(), cb, null);
 		setCurrentTask(task);
 
-		showPopup_Wait(ZZStr.CC_TRY_CONNECT_SERVER.str(), new IWaitTimeout() {
-
-			@Override
-			public void onTimeOut() {
-				mPayResultState = MSG_STATUS.FAILED;
-				removeExitTrigger();
-				showPopup_Tip(false, ZZStr.CC_TRY_CONNECT_SERVER_TIMEOUT);
-			}
-
-			@Override
-			public int getTimeout() {
-				return 20;
-			}
-
-			@Override
-			public String getTickCountDesc(int timeGap) {
-				return String.format("- %02d -", timeGap);
-			}
-
-			@Override
-			public int getStart() {
-				return 8;
-			}
-		});
+		showPopup_Wait(ZZStr.CC_TRY_CONNECT_SERVER.str(),
+				new SimpleWaitTimeout() {
+					public void onTimeOut() {
+						mPayResultState = MSG_STATUS.FAILED;
+						removeExitTrigger();
+						showPopup_Tip(false,
+								ZZStr.CC_TRY_CONNECT_SERVER_TIMEOUT);
+					}
+				});
 		setExitTrigger(-1, ZZStr.CC_TRY_CONNECT_SERVER.str());
 
 		return ret;

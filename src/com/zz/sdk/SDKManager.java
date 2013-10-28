@@ -15,11 +15,7 @@ import com.zz.sdk.ParamChain.KeyGlobal;
 import com.zz.sdk.ParamChain.KeyUser;
 import com.zz.sdk.activity.BaseActivity;
 import com.zz.sdk.activity.LAYOUT_TYPE;
-import com.zz.sdk.entity.SdkUser;
-import com.zz.sdk.entity.SdkUserTable;
-import com.zz.sdk.out.activity.ChargeActivity;
-import com.zz.sdk.out.activity.LoginActivity;
-import com.zz.sdk.out.activity.LoginForQiFu;
+import com.zz.sdk.out.ZZSDKOut;
 import com.zz.sdk.out.util.Application;
 import com.zz.sdk.out.util.GetDataImpl;
 import com.zz.sdk.util.ConnectionUtil;
@@ -170,7 +166,7 @@ public class SDKManager {
 	 *            {@link #showPaymentView(Handler, int, String, String, String, String, int, boolean, String)
 	 *            showPaymentView}
 	 */
-	public void setGameServerId(String gameServerId) {
+	public static void setGameServerId(String gameServerId) {
 		Utils.setGameServerID(gameServerId);
 	}
 
@@ -250,16 +246,7 @@ public class SDKManager {
 	 * @see LoginCallbackInfo
 	 */
 	public void showLoginView(Handler callbackHandler, int what) {
-		if (ZZSDKConfig.SUPPORT_360SDK) {
-			LoginForQiFu.startLogin(mContext,
-					!Utils.isOrientationVertical(mContext), false,
-					callbackHandler, what);
-		} else {
-			autoLoginUser(mContext);
-			// init(); //统计登录
-			LoginActivity.start(mContext, callbackHandler, what);
-			// savaChannalMessage();
-		}
+		ZZSDKOut.showLoginView(mContext, callbackHandler, what);
 	}
 
 	public void showLoginViewEx(Handler callbackHandler, int what) {
@@ -344,29 +331,9 @@ public class SDKManager {
 			String gameServerID, final String serverName, final String roleId,
 			final String gameRole, final int amount,
 			final boolean isCloseWindow, final String callBackInfo) {
-		Application.isCloseWindow = isCloseWindow;
-		/* 固定金额设置 */
-		if (amount > 0) {
-			// 修改为整型int 接收
-			Application.changeCount = amount;
-		} else {
-			Application.changeCount = 0;
-		}
-		Application.staticAmountIndex = -1;
-		if (Application.loginName == null) {
-			Pair<String, String> account = Utils.getAccountFromSDcard(mContext);
-			Application.setLoginName(account.first);
-			Application.password = account.second;
-		}
-
-		if (gameServerID != null && gameServerID.length() > 0) {
-			setGameServerId(gameServerID);
-		} else {
-			gameServerID = Utils.getGameServerId(mContext);
-		}
-
-		ChargeActivity.start(callbackHandler, what, mContext, gameServerID,
-				serverName, roleId, gameRole, callBackInfo);
+		ZZSDKOut.showPaymentView(mContext, callbackHandler, what, gameServerID,
+				serverName, roleId, gameRole, amount, isCloseWindow,
+				callBackInfo);
 	}
 
 	public void showPaymentViewEx(Handler callbackHandler, int what,
@@ -396,13 +363,6 @@ public class SDKManager {
 		env.add(KeyGlobal.K_UI_VIEW_TYPE, root_layout);
 		env.getParent(BaseActivity.class.getName()).add(root_layout.key(), env,
 				ParamChain.ValType.TEMPORARY);
-
-		// TODO:
-		{
-			env.getParent(KeyUser.class.getName()).add(KeyUser.K_LOGIN_NAME,
-					Application.loginName);
-		}
-
 		Intent intent = new Intent(ctx, BaseActivity.class);
 		intent.putExtra(KeyGlobal.K_UI_NAME, root_layout.key());
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -415,8 +375,8 @@ public class SDKManager {
 	 * @return 已经登录的用户名，如果未登录则返回 null
 	 */
 	public String getAccountName() {
-		if (Application.isLogin) {
-			String account = Application.getLoginName();
+		if (isLogined()) {
+			String account = mRootEnv.get(KeyUser.K_LOGIN_NAME, String.class);
 			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
 				if (PojoUtils.isDouquUser(account)) {
 					return PojoUtils.getDouquBaseName(account);
@@ -432,8 +392,13 @@ public class SDKManager {
 	 * @return 获取已经登录的游戏用户名，如果未登录则返回 null
 	 */
 	public String getGameUserName() {
-		if (Application.isLogin) {
-			return Application.getGameUserName();
+		if (isLogined()) {
+			String name = mRootEnv.get(KeyUser.K_LOGIN_NAME_GAME_USER,
+					String.class);
+			if (name == null) {
+				return mRootEnv.get(KeyUser.K_LOGIN_NAME, String.class);
+			}
+			return name;
 		}
 		return null;
 	}
@@ -444,7 +409,16 @@ public class SDKManager {
 	 * @return true-已经成功登录
 	 */
 	public boolean isLogined() {
-		return Application.isLogin && Application.loginName != null;
+		Boolean b = mRootEnv.get(KeyUser.K_LOGIN_STATE_SUCCESS, Boolean.class);
+		if (b != null && b) {
+			// 检查登录名的有效性
+			// String name = mRootEnv.get(KeyUser.K_LOGIN_NAME, String.class);
+			// if (name != null && name.length() > 0) {
+			// return true;
+			// } else
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -484,56 +458,6 @@ public class SDKManager {
 		// });
 		// thread.start();
 		//
-	}
-
-	private void autoLoginUser(Context ctx) {
-		SdkUserTable t = SdkUserTable.getInstance(ctx);
-		SdkUser sdkUser = t.getSdkUserByAutoLogin();
-		if (sdkUser == null) {
-			SdkUser[] sdkUsers = t.getAllSdkUsers();
-			if (sdkUsers != null && sdkUsers.length > 0) {
-				if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
-					for (int i = 0; i < sdkUsers.length; i++) {
-						if (PojoUtils.isCMGEUser(sdkUsers[i].loginName))
-							continue;
-						sdkUser = sdkUsers[i];
-						break;
-					}
-				} else
-					sdkUser = sdkUsers[0];
-			}
-		}
-		if (sdkUser != null) {
-			Application.setLoginName(sdkUser.loginName);
-			Application.password = sdkUser.password;
-		}
-		if (Application.loginName == null || "".equals(Application.loginName)) {
-			Pair<String, String> pair = null;
-
-			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
-				/*
-				 * 有：　1,cmge数据库 2,cmge的SD卡 3.zz数据库 4.zz的SD卡 这４个用户信息储存点 ３→１→４→２
-				 */
-				pair = PojoUtils.checkDouquUser_DB(ctx);
-			}
-
-			// 尝试从sdcard中读取
-			if (pair == null)
-				pair = Utils.getAccountFromSDcard(ctx);
-
-			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
-				if (pair != null && PojoUtils.isCMGEUser(pair.first)) {
-					pair = null;
-				}
-				if (pair == null)
-					pair = PojoUtils.checkDouquUser_SDCard();
-			}
-
-			if (pair != null) {
-				Application.setLoginName(pair.first);
-				Application.password = pair.second;
-			}
-		}
 	}
 
 	/**

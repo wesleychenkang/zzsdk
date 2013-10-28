@@ -1576,29 +1576,13 @@ public class PaymentListLayout extends CCBaseLayout {
 
 		setExitTrigger(-1, ZZStr.CC_TRY_CONNECT_SERVER.str());
 
-		showPopup_Wait(ZZStr.CC_TRY_CONNECT_SERVER.str(), new IWaitTimeout() {
-
-			@Override
-			public void onTimeOut() {
-				resetExitTrigger();
-				showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
-			}
-
-			@Override
-			public int getTimeout() {
-				return 40;
-			}
-
-			@Override
-			public String getTickCountDesc(int timeGap) {
-				return String.format("> %02d <", timeGap);
-			}
-
-			@Override
-			public int getStart() {
-				return 8;
-			}
-		});
+		showPopup_Wait(ZZStr.CC_TRY_CONNECT_SERVER.str(),
+				new SimpleWaitTimeout() {
+					public void onTimeOut() {
+						resetExitTrigger();
+						showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
+					}
+				});
 
 		ITaskCallBack cb = new ITaskCallBack() {
 			@Override

@@ -105,7 +105,7 @@ public class LoginRegisterLayout extends LinearLayout{
 		mBtConfirm.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
 		mBtConfirm.setPadding(50, 10, 50, 10);
 		mBtConfirm.setSingleLine();
-		mBtConfirm.setId(IDC.BT_CONFIRM.id());
+		mBtConfirm.setId(IDC.BT_MODIFY_CONFIRM.id());
 		mBtConfirm.setOnClickListener(l);
 		wrap3.addView(mBtConfirm);
 

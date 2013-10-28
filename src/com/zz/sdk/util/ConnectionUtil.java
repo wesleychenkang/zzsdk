@@ -99,10 +99,10 @@ public class ConnectionUtil {
 	 */
 	private <T> T doRequest(Class<T> clazz, String url,
 			List<BasicNameValuePair> nvps, int attempts) {
-		InputStream is = doRequest(url, nvps, attempts);
 		T br = null;
 		try {
 			br = clazz.newInstance();
+			InputStream is = doRequest(url, nvps, attempts);
 			if (is != null) {
 				String json = parseJsonData(is);
 				JSONObject o = new JSONObject(json);
@@ -536,8 +536,6 @@ public class ConnectionUtil {
 
 	/**
 	 * 单机游戏的登录
-	 * 
-	 * @param ctx
 	 */
 	private void loginForLone(Pair<String, String> account) {
 		// if (account != null) {

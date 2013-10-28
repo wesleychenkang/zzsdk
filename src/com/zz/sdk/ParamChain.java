@@ -129,11 +129,22 @@ public interface ParamChain {
 	public static interface KeyUser extends KeyGlobal {
 		static final String _TAG_ = KeyGlobal._TAG_ + "user" + _SEPARATOR_;
 
-		/** 登录名, {@link String} */
-		public static final String K_LOGIN_NAME = _TAG_ + "loginname";
+		/** 登录成功的, {@link Boolean}，初始时该值应该未设置 */
+		public static final String K_LOGIN_STATE_SUCCESS = _TAG_
+				+ "login_state_success";
 
-		/** 游戏名|用户ID, {@link String} */
-		public static final String K_ID = _TAG_ + "id";
+		/** 登录名, {@link String} */
+		public static final String K_LOGIN_NAME = _TAG_ + "login_name";
+
+		/**
+		 * 游戏中账号名, {@link String}，一般而言，应该与 {@link #K_LOGIN_NAME}
+		 * 相同，但在支持逗趣等第3方用户系统时，需要这个转换
+		 */
+		public static final String K_LOGIN_NAME_GAME_USER = _TAG_
+				+ "login_name_game_user";
+
+		/** 用户ID, {@link String} */
+		public static final String K_SDKUSER_ID = _TAG_ + "sdk_user_id";
 
 		/** 用户密码, {@link String} */
 		public static final String K_PASSWORD = _TAG_ + "password";

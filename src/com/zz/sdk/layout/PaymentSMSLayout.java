@@ -509,29 +509,15 @@ class PaymentSMSLayout extends CCBaseLayout {
 	}
 
 	private void showPopup_Wait_SMSResult() {
-		IWaitTimeout cb = new IWaitTimeout() {
-
-			@Override
+		showPopup_Wait("正在为您充值，请耐心等待结果……", new SimpleWaitTimeout() {
 			public void onTimeOut() {
 				on_wait_time_out();
 			}
 
-			@Override
 			public int getTimeout() {
 				return 90;
 			}
-
-			@Override
-			public String getTickCountDesc(int timeGap) {
-				return String.format("%02d", timeGap);
-			}
-
-			@Override
-			public int getStart() {
-				return 8;
-			}
-		};
-		showPopup_Wait("正在为您充值，请耐心等待结果……", cb);
+		});
 		isWaitPayResult = 1;
 	}
 

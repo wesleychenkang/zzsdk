@@ -101,7 +101,7 @@ public class LoginLayout extends LinearLayout {
 				wrap2.addView(wrap1,lw);
 				wrap1.setOrientation(VERTICAL);
 				mInputAccount = new EditText(ctx);
-				mInputAccount.setId(0);
+				mInputAccount.setId(IDC.ED_LOGIN_NAME.id());
 				//mInputAccount.setOnFocusChangeListener(this);
 				mInputAccount.setHint("请输入帐号");
 				mInputAccount.setTextColor(Color.BLACK);
@@ -111,7 +111,7 @@ public class LoginLayout extends LinearLayout {
 						LayoutParams.WRAP_CONTENT);
 
 				mInputPW = new EditText(ctx);
-				mInputPW.setId(0);
+				mInputPW.setId(IDC.ED_LOGIN_PASSWORD.id());
 				//mInputPW.setOnFocusChangeListener(this);
 				mInputPW.setHint("请输入密码");
 				mInputPW.setSingleLine(true);

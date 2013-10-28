@@ -374,6 +374,21 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		void onTimeOut();
 	}
 
+	/** 普通的等待超时回调，普通等待8s，倒计时30s，显示格式 > %02d < */
+	protected static abstract class SimpleWaitTimeout implements IWaitTimeout {
+		public int getTimeout() {
+			return 30;
+		}
+
+		public String getTickCountDesc(int timeGap) {
+			return String.format("> %02d <", timeGap);
+		}
+
+		public int getStart() {
+			return 8;
+		}
+	}
+
 	/** 等待 20 秒后取消 popup 锁，以免子界面加载失败而用户无法取消 popup 遮罩 */
 	protected final IWaitTimeout DEFAULT_TIMEOUT_AUTO_UNLOCK = new IWaitTimeout() {
 

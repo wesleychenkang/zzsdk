@@ -93,7 +93,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 
 		Utils.loack_screen_orientation(this);
 
-		mUserUtil = new UserUtil(getBaseContext());
+		mUserUtil = UserUtil.getInstance(getBaseContext());
 
 		check = true;
 		user = new UserAction();

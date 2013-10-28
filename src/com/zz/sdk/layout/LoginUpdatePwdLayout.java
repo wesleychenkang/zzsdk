@@ -85,7 +85,7 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 
 		//用户输入新密码 
 		mNewPwd = new EditText(ctx);
-		//mNewPwd.setId(ID_NEWPWD);
+		mNewPwd.setId(IDC.ED_NEW_PASSOWRD.id());
 		mNewPwd.setSingleLine();
 		mNewPwd.setBackgroundDrawable(CCImg.LOGIN_EDIT.getDrawble(ctx));
 		mNewPwd.setHint("请输入新密码");
@@ -105,7 +105,7 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		Button mBtConfirm = new Button(ctx);
 		mBtConfirm.setText("确认");
 		mBtConfirm.setTextSize(18);
-		mBtConfirm.setId(IDC.BT_CONFIRM.id());
+		mBtConfirm.setId(IDC.BT_MODIFY_CONFIRM.id());
 		mBtConfirm.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
 		mBtConfirm.setPadding(50, 10, 50, 10);
 		wrap3.addView(mBtConfirm);
