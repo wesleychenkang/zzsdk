@@ -292,11 +292,6 @@ public class ExchangeLayout extends CCBaseLayout {
 	@Override
 	public boolean onEnter() {
 		boolean ret = super.onEnter();
-
-		if (checkUpdateBalance() == 0) {
-			startUpdateBalanceAndWait();
-		}
-
 		return ret;
 	}
 

@@ -39,12 +39,12 @@ import com.zz.sdk.BuildConfig;
 import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.MSG_TYPE;
 import com.zz.sdk.ParamChain;
-import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.ParamChain.KeyCaller;
 import com.zz.sdk.ParamChain.KeyDevice;
 import com.zz.sdk.ParamChain.KeyGlobal;
 import com.zz.sdk.ParamChain.KeyUser;
 import com.zz.sdk.ParamChain.ValType;
+import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.Result;
@@ -56,7 +56,6 @@ import com.zz.sdk.entity.result.ResultRequest;
 import com.zz.sdk.entity.result.ResultRequestAlipayTenpay;
 import com.zz.sdk.entity.result.ResultRequestKKFunPay;
 import com.zz.sdk.entity.result.ResultRequestUionpay;
-import com.zz.sdk.layout.BaseLayout.ITaskCallBack;
 import com.zz.sdk.layout.LayoutFactory.ILayoutHost;
 import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.Constants;
@@ -258,7 +257,6 @@ public class PaymentListLayout extends CCBaseLayout {
 	private ChargeStyle mChargeStyle;
 
 	private String mIMSI;
-	private boolean mPermissionSendSMS;
 
 	private Handler mHandler = new Handler() {
 		@Override
@@ -369,22 +367,7 @@ public class PaymentListLayout extends CCBaseLayout {
 	public boolean onEnter() {
 		boolean ret = super.onEnter();
 		if (ret) {
-			ILayoutHost host = getHost();
-			if (host == null) {
-				return false;
-			}
-
 			resetExitTrigger();
-			// host.showWaitDialog(0, "", false, new OnCancelListener() {
-			// @Override
-			// public void onCancel(DialogInterface dialog) {
-			// ILayoutHost host = getHost();
-			// if (host != null) {
-			// host.exit();
-			// }
-			// }
-			// }, null);
-
 			start_paylist_loader();
 		}
 		return ret;
@@ -507,7 +490,7 @@ public class PaymentListLayout extends CCBaseLayout {
 		if (str != null) {
 			if (autoclose) {
 				removeExitTrigger();
-				callHost_exit();
+				callHost_back();
 				showToast(str);
 				hidePopup();
 			} else {
@@ -1237,9 +1220,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			}
 
 			if (rpl.mZYCoin != null) {
-				double balance = rpl.mZYCoin.doubleValue();
-				env.add(KeyUser.K_COIN_BALANCE, Double.valueOf(balance));
-				setCoinBalance(balance);
+				setCoinBalance(rpl.mZYCoin);
 			}
 
 			if (rpl.mPaies != null && rpl.mPaies.length > 0) {
@@ -1554,6 +1535,9 @@ public class PaymentListLayout extends CCBaseLayout {
 			showToast("暂不支持");
 			return false;
 		}
+		if (DEBUG) {
+			Logger.d("D: 需要发送通知至服务器 " + dRequest);
+		}
 
 		PayParam payParam = genPayParam(mContext, getEnv(), type);
 
@@ -1798,82 +1782,103 @@ public class PaymentListLayout extends CCBaseLayout {
 		}
 		showPopup(ll);
 	}
-}
 
-class PayTask extends AsyncTask<Object, Void, ResultRequest> {
-	protected static AsyncTask<?, ?, ?> createAndStart(ConnectionUtil cu,
-			ITaskCallBack callback, Object token, int type, PayParam charge) {
-		PayTask task = new PayTask();
-		task.execute(cu, callback, token, type, charge);
-		return task;
-	}
-
-	private ITaskCallBack mCallback;
-	private Object mToken;
-
-	@Override
-	protected ResultRequest doInBackground(Object... params) {
-		ConnectionUtil cu = (ConnectionUtil) params[0];
-		ITaskCallBack callback = (ITaskCallBack) params[1];
-		Object token = params[2];
-
-		int type = (Integer) params[3];
-		PayParam charge = (PayParam) params[4];
-		ResultRequest ret = cu.charge(type, charge);
-		if (!this.isCancelled()) {
-			mCallback = callback;
-			mToken = token;
+	private static class PayTask extends AsyncTask<Object, Void, ResultRequest> {
+		protected static AsyncTask<?, ?, ?> createAndStart(ConnectionUtil cu,
+				ITaskCallBack callback, Object token, int type, PayParam charge) {
+			PayTask task = new PayTask();
+			task.execute(cu, callback, token, type, charge);
+			if (DEBUG) {
+				Logger.d("PayTask: created!");
+			}
+			return task;
 		}
-		return ret;
-	}
 
-	@Override
-	protected void onPostExecute(ResultRequest result) {
-		if (mCallback != null) {
-			mCallback.onResult(this, mToken, result);
+		private ITaskCallBack mCallback;
+		private Object mToken;
+
+		@Override
+		protected ResultRequest doInBackground(Object... params) {
+			ConnectionUtil cu = (ConnectionUtil) params[0];
+			ITaskCallBack callback = (ITaskCallBack) params[1];
+			Object token = params[2];
+
+			int type = (Integer) params[3];
+			PayParam charge = (PayParam) params[4];
+
+			if (DEBUG) {
+				Logger.d("PayTask: run!");
+			}
+
+			ResultRequest ret = cu.charge(type, charge);
+			if (!this.isCancelled()) {
+				mCallback = callback;
+				mToken = token;
+			}
+			return ret;
 		}
-		mCallback = null;
-		mToken = null;
-	}
-}
 
-/** 获取支付列表 */
-class PayListTask extends AsyncTask<Object, Void, ResultPayList> {
-
-	/** 创建并启动任务 */
-	protected static AsyncTask<?, ?, ?> createAndStart(ConnectionUtil cu,
-			ITaskCallBack callback, Object token, PayParam charge) {
-		PayListTask task = new PayListTask();
-		task.execute(cu, callback, token, charge);
-		return task;
-	}
-
-	ITaskCallBack mCallback;
-	Object mToken;
-
-	@Override
-	protected ResultPayList doInBackground(Object... params) {
-		ConnectionUtil cu = (ConnectionUtil) params[0];
-		ITaskCallBack callback = (ITaskCallBack) params[1];
-		Object token = params[2];
-		PayParam charge = (PayParam) params[3];
-
-		Logger.d("获取列表Task！");
-		ResultPayList ret = cu.getPaymentList(charge);
-		if (!this.isCancelled()) {
-			mCallback = callback;
-			mToken = token;
+		@Override
+		protected void onPostExecute(ResultRequest result) {
+			if (DEBUG) {
+				Logger.d("PayTask: result!");
+			}
+			if (mCallback != null) {
+				mCallback.onResult(this, mToken, result);
+			}
+			mCallback = null;
+			mToken = null;
 		}
-		return ret;
 	}
 
-	@Override
-	protected void onPostExecute(ResultPayList result) {
-		if (mCallback != null) {
-			mCallback.onResult(this, mToken, result);
+	/** 获取支付列表 */
+	private static class PayListTask extends
+			AsyncTask<Object, Void, ResultPayList> {
+
+		/** 创建并启动任务 */
+		protected static AsyncTask<?, ?, ?> createAndStart(ConnectionUtil cu,
+				ITaskCallBack callback, Object token, PayParam charge) {
+			PayListTask task = new PayListTask();
+			task.execute(cu, callback, token, charge);
+			if (DEBUG) {
+				Logger.d("PayListTask: created!");
+			}
+			return task;
 		}
-		// clean
-		mCallback = null;
-		mToken = null;
+
+		ITaskCallBack mCallback;
+		Object mToken;
+
+		@Override
+		protected ResultPayList doInBackground(Object... params) {
+			ConnectionUtil cu = (ConnectionUtil) params[0];
+			ITaskCallBack callback = (ITaskCallBack) params[1];
+			Object token = params[2];
+			PayParam charge = (PayParam) params[3];
+
+			if (DEBUG) {
+				Logger.d("PayListTask: run!");
+			}
+
+			ResultPayList ret = cu.getPaymentList(charge);
+			if (!this.isCancelled()) {
+				mCallback = callback;
+				mToken = token;
+			}
+			return ret;
+		}
+
+		@Override
+		protected void onPostExecute(ResultPayList result) {
+			if (DEBUG) {
+				Logger.d("PayListTask: result!");
+			}
+			if (mCallback != null) {
+				mCallback.onResult(this, mToken, result);
+			}
+			// clean
+			mCallback = null;
+			mToken = null;
+		}
 	}
 }
