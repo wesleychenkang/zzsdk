@@ -343,6 +343,12 @@ public class ResConstants {
 			/** 道具兑换列表·空隙 */
 			CC_EX_PADDING(8),
 
+			/** 充值界面·主活动区的边距 */
+			CC_EX_DETAIL_PADDING_LEFT(16), //
+			CC_EX_DETAIL_PADDING_TOP(8), //
+			CC_EX_DETAIL_PADDING_RIGHT(16), //
+			CC_EX_DETAIL_PADDING_BOTTOM(8),
+
 			;
 
 			private float dimen;
