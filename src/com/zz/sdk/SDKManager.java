@@ -23,6 +23,7 @@ import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants;
 import com.zz.sdk.util.Utils;
+import com.zz.sdk.util.ResConstants.ZZStr;
 
 /**
  * SDK 接口管理类. <strong>使用流程（示例）：</strong>
@@ -107,11 +108,21 @@ public class SDKManager {
 		// 初始化用户属性
 		env = init_user(ctx, env);
 
-		mRootEnv = env.grow(SDKManager.class.getName());
-
-		mRootEnv.add(KeyGlobal.K_UTIL_CONNECT, ConnectionUtil.getInstance(ctx));
+		// 初始化SDK变量环境
+		mRootEnv = init_sdk(ctx, env);
 
 		ResConstants.init(ctx);
+	}
+
+	private ParamChain init_sdk(Context ctx, ParamChain rootEnv) {
+		ParamChain env = rootEnv.grow(SDKManager.class.getName());
+
+		// 设置默认的帮助信息
+		env.add(KeyGlobal.K_HELP_TITLE, ZZStr.DEFAULT_HELP_TITLE.str());
+		env.add(KeyGlobal.K_HELP_TOPIC, ZZStr.DEFAULT_HELP_TOPIC.str());
+
+		env.add(KeyGlobal.K_UTIL_CONNECT, ConnectionUtil.getInstance(ctx));
+		return env;
 	}
 
 	/** 初始化「用户」信息 */

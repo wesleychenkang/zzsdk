@@ -45,8 +45,16 @@ public class ResConstants {
 		/** 余额显示，基于 {@link #CC_PRICE_FORMAT} */
 		CC_BALANCE_UNIT("%s"), //
 
+		/** 默认·帮助·标题 */
+		DEFAULT_HELP_TITLE(""),
+		/** 默认·帮助·内容 */
+		DEFAULT_HELP_TOPIC(
+				"如有疑问请联系客服，<br /><b>客服热线</b>： <a>020-85525051</a><br><b>客服QQ</b>：9159。"),
+
 		/** 充值中心 */
-		CC_RECHARGE_TITLE("充值中心"), CC_RECHARGE_TITLE_SOCIAL("充值中心(社交)"),
+		CC_RECHARGE_TITLE("充值中心"),
+		/** 充值中心(购买) */
+		CC_RECHARGE_TITLE_SOCIAL("充值中心(购买)"),
 
 		CC_RECHARGE_COUNT_TITLE("充值数量"), //
 		/** 充值中心（游戏购买入口） */
@@ -151,6 +159,7 @@ public class ResConstants {
 		CC_EXCHANGE_DETAIL_TITLE("兑换——%s"),
 		/** 价格：%s卓越币 */
 		CC_EXCHANGE_DETAIL_PRICE_DESC("价格：%s卓越币"),
+		/** 消费描述：本次消费%s，您的余额还有%s */
 		CC_EXCHANGE_DETAIL_BALANCE_DESC("本次消费%s，您的余额还有%s"),
 
 		/** XLISTVIEW: 下拉刷新 */
