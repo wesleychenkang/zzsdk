@@ -95,7 +95,8 @@ abstract class CCBaseLayout extends BaseLayout {
 
 	@Override
 	protected void onInitEnv(Context ctx, ParamChain env) {
-		mCoinBalance = env.get(KeyUser.K_COIN_BALANCE, Double.class);
+		mCoinBalance = env.getParent(KeyUser.class.getName()).getOwned(
+				KeyUser.K_COIN_BALANCE, Double.class);
 		mCoinbalanceCallback = new ITaskCallBack() {
 			@Override
 			public void onResult(AsyncTask<?, ?, ?> task, Object token,
@@ -103,16 +104,6 @@ abstract class CCBaseLayout extends BaseLayout {
 				onUpdateBalanceResult(result);
 			}
 		};
-	}
-
-	/** 服务器返回用户余额值 */
-	private void onUpdateBalanceResult(BaseResult result) {
-		if (isAlive()) {
-			if (result instanceof ResultBalance) {
-				setCoinBalance(((ResultBalance) result).mZYCoin);
-			}
-			checkBalcanceState();
-		}
 	}
 
 	private CharSequence getHelpTitle() {
@@ -172,6 +163,16 @@ abstract class CCBaseLayout extends BaseLayout {
 		showPopup(ll);
 	}
 
+	/** 服务器返回用户余额值 */
+	private void onUpdateBalanceResult(BaseResult result) {
+		if (isAlive()) {
+			if (result instanceof ResultBalance && result.isSuccess()) {
+				setCoinBalance(((ResultBalance) result).mZYCoin);
+			}
+			checkBalcanceState();
+		}
+	}
+
 	/** 获取余额值，如果无记录则返回 0 */
 	public double getCoinBalance() {
 		return mCoinBalance == null ? 0 : mCoinBalance;
@@ -179,9 +180,12 @@ abstract class CCBaseLayout extends BaseLayout {
 
 	/** 设置余额值，如果数据有效(!=null)则更新到环境变量 */
 	public void setCoinBalance(Double coinBalance) {
-		if (coinBalance != null)
-			getEnv().getParent(KeyUser.class.getName()).add(
-					KeyUser.K_COIN_BALANCE, coinBalance);
+		if (coinBalance == null || coinBalance.equals(mCoinBalance)) {
+			Logger.d("D: balance unchanged!");
+			return;
+		}
+		getEnv().getParent(KeyUser.class.getName()).add(KeyUser.K_COIN_BALANCE,
+				coinBalance);
 		mCoinBalance = coinBalance;
 		updateBalance();
 	}
@@ -220,6 +224,7 @@ abstract class CCBaseLayout extends BaseLayout {
 			BalanceTask.bindCallback(mCoinbalanceCallback, this);
 		} else {
 			set_child_visibility(IDC.PB_BALANCE, GONE);
+			setCoinBalance(getEnv().get(KeyUser.K_COIN_BALANCE, Double.class));
 		}
 	}
 

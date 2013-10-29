@@ -192,7 +192,7 @@ class LoginMainLayout extends BaseLayout {
 		env.add(KeyUser.K_SDKUSER_ID, mSdkUserId);
 		env.add(KeyUser.K_LOGIN_STATE_SUCCESS, Boolean.TRUE);
 
-		mUserUtil.syncSdkUser();
+		mUserUtil.syncSdkUser(true);
 	}
 
 	@Override

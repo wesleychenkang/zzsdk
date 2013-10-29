@@ -658,6 +658,14 @@ public class PaymentListLayout extends CCBaseLayout {
 		updatePayTypeByCost(count);
 	}
 
+	@Override
+	protected void updateBalance(double count) {
+		super.updateBalance(count);
+
+		// 有些支付方式的描述是动态变化的，依赖于 充值金额
+		updatePayTypeByCost((Double) getValue(VAL.PRICE));
+	}
+
 	// TODO: 区别 卓越币与其它充值方式对“应付金额”的描述文本 @add 20131026
 	/** 因支付类别变化而改变“应付金额”的描述文本 */
 	private void updateRechargeCostUintByChannelType(int type) {
