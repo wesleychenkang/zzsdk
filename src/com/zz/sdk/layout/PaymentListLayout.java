@@ -845,7 +845,8 @@ public class PaymentListLayout extends CCBaseLayout {
 		switch (channel.type) {
 		case PayChannel.PAY_TYPE_ALIPAY:
 		case PayChannel.PAY_TYPE_TENPAY:
-		case PayChannel.PAY_TYPE_UNMPAY: {
+		case PayChannel.PAY_TYPE_UNMPAY:
+		case PayChannel.PAY_TYPE_EX_DEZF: {
 			tv = new TextView(ctx);
 			rv.addView(tv, new LayoutParams(LP_MW));
 			tv.setText(String.format(ZZStr.CC_PAYTYPE_DESC.str(),
@@ -1279,7 +1280,7 @@ public class PaymentListLayout extends CCBaseLayout {
 				pc = new PayChannel();
 				tmp[len++] = pc;
 				pc.type = PayChannel.PAY_TYPE_YEEPAY_DX;
-				pc.channelName = PayChannel.CHANNEL_NAME[pc.type];
+				pc.channelName = "D:电信卡";
 
 				pc = new PayChannel();
 				tmp[len++] = pc;
@@ -1382,6 +1383,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			break;
 
 		case PayChannel.PAY_TYPE_UNMPAY:
+		case PayChannel.PAY_TYPE_EX_DEZF:
 			ret = null;
 			break;
 
@@ -1462,7 +1464,8 @@ public class PaymentListLayout extends CCBaseLayout {
 		}
 			break;
 
-		case PayChannel.PAY_TYPE_UNMPAY: {
+		case PayChannel.PAY_TYPE_UNMPAY:
+		case PayChannel.PAY_TYPE_EX_DEZF: {
 			ResultRequestUionpay r = (ResultRequestUionpay) result;
 
 			env.add(KeyPaymentList.K_PAY_UNION_TN, r.mTN, ValType.TEMPORARY);
@@ -1538,6 +1541,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			dRequest = UserAction.PYEE;
 			break;
 		case PayChannel.PAY_TYPE_UNMPAY:
+		case PayChannel.PAY_TYPE_EX_DEZF:
 			dRequest = UserAction.PUNION;
 			break;
 
@@ -1657,6 +1661,7 @@ public class PaymentListLayout extends CCBaseLayout {
 		switch (payType) {
 		case PayChannel.PAY_TYPE_ALIPAY:
 		case PayChannel.PAY_TYPE_UNMPAY:
+		case PayChannel.PAY_TYPE_EX_DEZF:
 		case PayChannel.PAY_TYPE_TENPAY:
 			break;
 

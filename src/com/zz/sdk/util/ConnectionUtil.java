@@ -444,6 +444,7 @@ public class ConnectionUtil {
 			clazz = ResultRequestAlipayTenpay.class;
 			break;
 		case PayChannel.PAY_TYPE_UNMPAY:
+		case PayChannel.PAY_TYPE_EX_DEZF:
 			clazz = ResultRequestUionpay.class;
 			break;
 		case PayChannel.PAY_TYPE_YEEPAY_LT:

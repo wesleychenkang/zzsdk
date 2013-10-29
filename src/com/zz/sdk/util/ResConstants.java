@@ -6,7 +6,6 @@ import java.text.DecimalFormat;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.util.TypedValue;
@@ -233,6 +232,11 @@ public class ResConstants {
 			CC_EXCHANGE_ITEM_SUMMARY(Color.GRAY), //
 			CC_EXCHANGE_ITEM_SUMMARY_PRESSED(Color.WHITE),
 
+			/** 兑换详情·道具名 */
+			CC_EXCHANGE_DETAIL_NAME(Color.BLACK),
+			/** 兑换详情·描述文本 */
+			CC_EXCHANGE_DETAIL_DESC(0xff777777),
+
 			;
 
 			private int c;
@@ -276,6 +280,11 @@ public class ResConstants {
 			CC_EXCHANGE_ITEM_TITLE(16),
 			/** 兑换列表·条目备注 文本 */
 			CC_EXCHANGE_ITEM_SUMMARY(13),
+
+			/** 兑换详情·道具名 */
+			CC_EXCHANGE_DETAIL_NAME(20),
+			/** 兑换详情·描述文本 */
+			CC_EXCHANGE_DETAIL_DESC(16),
 
 			;
 
@@ -377,6 +386,7 @@ public class ResConstants {
 		TUP_YL("cc_tup_yl.png"), //
 		TUP_ZFB("cc_tup_zfb.png"), //
 		TUP_ZYB("cc_tup_zyb.png"), //
+		TUP_DEZF("cc_tup_dezf.png"), //
 		ZF_WXZ("cc_zf_wxz.9.png"), //
 		ZF_XZ("cc_zf_xz.9.png"), //
 		TITLE_BACK_DEFAULT("title_back_default.png"), //
@@ -482,6 +492,9 @@ public class ResConstants {
 			case PayChannel.PAY_TYPE_UNMPAY:
 				ret = CCImg.TUP_YL;
 				break;
+			case PayChannel.PAY_TYPE_EX_DEZF:
+				ret = CCImg.TUP_DEZF;
+				break;
 			case PayChannel.PAY_TYPE_YEEPAY_LT:
 				ret = CCImg.TUP_LT;
 				break;
@@ -495,7 +508,6 @@ public class ResConstants {
 				// 卓越币
 				ret = CCImg.TUP_ZYB;
 				break;
-
 			default:
 				ret = null;
 				break;

@@ -140,6 +140,7 @@ public class PayParam implements Serializable, JsonParseInterface {
 		switch (payType) {
 		case PayChannel.PAY_TYPE_ALIPAY:
 		case PayChannel.PAY_TYPE_UNMPAY:
+		case PayChannel.PAY_TYPE_EX_DEZF:
 		case PayChannel.PAY_TYPE_TENPAY:
 			listParames.add(new BasicNameValuePair(K_LOGINNAME, loginName));
 			listParames.add(new BasicNameValuePair(K_GAMEROLE, gameRole));
@@ -185,6 +186,7 @@ public class PayParam implements Serializable, JsonParseInterface {
 			part = "pali.lg";
 			break;
 		case PayChannel.PAY_TYPE_UNMPAY:
+		case PayChannel.PAY_TYPE_EX_DEZF:
 			part = "pupmp.lg";
 			break;
 		case PayChannel.PAY_TYPE_TENPAY:
