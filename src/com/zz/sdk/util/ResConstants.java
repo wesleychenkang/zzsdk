@@ -209,7 +209,7 @@ public class ResConstants {
 			/** 充值界面·描述文本 */
 			CC_RECHARGE_DESC(Color.LTGRAY),
 			/** 充值界面·警示性文本 */
-			CC_RECHARGE_WARN(Color.MAGENTA),
+			CC_RECHARGE_WARN(0xffd9680d),
 			/** 充值界面·错误提示文本 */
 			CC_RECHARGE_ERROR(Color.RED),
 			/** 充值界面输入文本 */

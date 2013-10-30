@@ -653,6 +653,7 @@ public class PaymentListLayout extends CCBaseLayout {
 		}
 		set_child_text(IDC.TV_RECHARGE_COST, strCost);
 
+		// 检查是否提示“使用大额支付”
 		if (amount > 1000) {
 			set_child_visibility(IDC.TV_RECHARGE_COST_SUMMARY, VISIBLE);
 		} else {
@@ -997,7 +998,7 @@ public class PaymentListLayout extends CCBaseLayout {
 				tv.addTextChangedListener(new MyTextWatcher(
 						IDC.ED_RECHARGE_COUNT.id()));
 				tv.setInputType(EditorInfo.TYPE_CLASS_NUMBER
-						| EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
+				/* | EditorInfo.TYPE_NUMBER_FLAG_DECIMAL */);
 				int padding_h = ZZDimen.CC_RECHARGE_COUNT_PADDING_H.px();
 				int padding_v = ZZDimen.CC_RECHARGE_COUNT_PADDING_V.px();
 				tv.setPadding(padding_h, padding_v, padding_h, padding_v);
@@ -1262,7 +1263,7 @@ public class PaymentListLayout extends CCBaseLayout {
 
 	private void setChannelMessages(PayChannel[] channelMessages) {
 
-		if (DEBUG) {
+		if (DEBUG && false) {
 			// XXX:
 			if (mChargeStyle == ChargeStyle.BUY
 					|| (mChargeStyle == null && new Random(

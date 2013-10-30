@@ -151,8 +151,8 @@ public class PayParam implements Serializable, JsonParseInterface {
 			break;
 
 		case PayChannel.PAY_TYPE_YEEPAY_LT:
-
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
+		case PayChannel.PAY_TYPE_YEEPAY_DX:
 			listParames.add(new BasicNameValuePair(K_LOGINNAME, loginName));
 			listParames.add(new BasicNameValuePair(K_GAMEROLE, gameRole));
 			listParames.add(new BasicNameValuePair(K_SERVERID, serverId));
@@ -193,9 +193,8 @@ public class PayParam implements Serializable, JsonParseInterface {
 			part = "pten.lg";
 			break;
 		case PayChannel.PAY_TYPE_YEEPAY_LT:
-			part = "pyee.lg";
-			break;
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
+		case PayChannel.PAY_TYPE_YEEPAY_DX:
 			part = "pyee.lg";
 			break;
 		case PayChannel.PAY_TYPE_KKFUNPAY:
