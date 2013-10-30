@@ -294,7 +294,7 @@ class ExchangeDetailLayout extends CCBaseLayout {
 					tv.setId(IDC.TV_COST_DESC_POOR.id());
 					tv.setSingleLine(false);
 					tv.setGravity(Gravity.CENTER);
-					tv.setTextColor(ZZFontColor.CC_RECHAGR_ERROR.color());
+					tv.setTextColor(ZZFontColor.CC_RECHARGE_ERROR.color());
 					ZZFontSize.CC_EXCHANGE_DETAIL_DESC.apply(tv);
 					if (DEBUG_UI) {
 						tv.setBackgroundColor(0xffc08000);
@@ -388,7 +388,6 @@ class ExchangeDetailLayout extends CCBaseLayout {
 	public boolean onEnter() {
 		boolean ret = super.onEnter();
 		if (ret) {
-
 			if (mPropsInfo == null)
 				return false;
 			updateUI();
@@ -401,6 +400,8 @@ class ExchangeDetailLayout extends CCBaseLayout {
 		boolean ret = super.onResume();
 		if (mImageFetcher != null) {
 			mImageFetcher.setExitTasksEarly(false);
+			// 恢复时，重新加载图片
+			mImageFetcher.loadImage(mPropsInfo.mBigIcon, mImageView);
 		}
 		return ret;
 	}

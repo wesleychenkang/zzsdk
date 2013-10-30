@@ -297,7 +297,7 @@ abstract class CCBaseLayout extends BaseLayout {
 			tv.setGravity(Gravity.CENTER);
 			tv.setCompoundDrawablesWithIntrinsicBounds(null, null,
 					CCImg.MONEY.getDrawble(ctx), null);
-			ZZFontSize.CC_RECHAGR_BALANCE.apply(tv);
+			ZZFontSize.CC_RECHARGE_BALANCE.apply(tv);
 			if (DEBUG_UI) {
 				tv.setBackgroundColor(0xc0c00000);
 			}

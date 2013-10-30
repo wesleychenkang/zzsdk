@@ -18,16 +18,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewAnimator;
@@ -196,9 +193,9 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		if (title != null)
 			tv.setText(title.str());
 		tv.setSingleLine();
-		tv.setTextColor(ZZFontColor.CC_RECHAGR_NORMAL.color());
+		tv.setTextColor(ZZFontColor.CC_RECHARGE_NORMAL.color());
 		tv.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
-		ZZFontSize.CC_RECHAGR_NORMAL.apply(tv);
+		ZZFontSize.CC_RECHARGE_NORMAL.apply(tv);
 		return tv;
 	}
 
@@ -451,28 +448,31 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 				ZZDimen.CC_ROOTVIEW_PADDING_BOTTOM.px());
 
 		{
-			RotateAnimation anim = new RotateAnimation(0, 360,
-					Animation.RELATIVE_TO_SELF, 0.5f,
-					Animation.RELATIVE_TO_SELF, 0.5f);
-			anim.setDuration(1500);
-			anim.setRepeatCount(Animation.INFINITE);
-			// anim.setFillAfter(true);
-			anim.setInterpolator(new LinearInterpolator());
-			anim.setRepeatMode(Animation.RESTART);
-			ImageView iv = new ImageView(ctx);
-			iv.setImageDrawable(BitmapCache.getDrawable(ctx,
-					Constants.ASSETS_RES_PATH + "loading_icon.png"));
-			iv.setScaleType(ScaleType.CENTER_INSIDE);
-			iv.startAnimation(anim);
-			LayoutParams lp = new LayoutParams(LP_MW);
-			lp.gravity = Gravity.CENTER;
-			ll.addView(iv, lp);
-
-			// ProgressBar pb = new ProgressBar(ctx);
+			// RotateAnimation anim = new RotateAnimation(0, 360,
+			// Animation.RELATIVE_TO_SELF, 0.5f,
+			// Animation.RELATIVE_TO_SELF, 0.5f);
+			// anim.setDuration(1500);
+			// anim.setRepeatCount(Animation.INFINITE);
+			// // anim.setFillAfter(true);
+			// anim.setInterpolator(new LinearInterpolator());
+			// anim.setRepeatMode(Animation.RESTART);
+			// ImageView iv = new ImageView(ctx);
+			// iv.setImageDrawable(BitmapCache.getDrawable(ctx,
+			// Constants.ASSETS_RES_PATH + "loading_icon.png"));
+			// iv.setScaleType(ScaleType.CENTER_INSIDE);
+			// iv.startAnimation(anim);
 			// LayoutParams lp = new LayoutParams(LP_MW);
 			// lp.gravity = Gravity.CENTER;
-			// ll.addView(pb, lp);
-			// pb.setIndeterminate(true);
+			// ll.addView(iv, lp);
+
+			FrameLayout fl = new FrameLayout(ctx);
+			ll.addView(fl, new LayoutParams(LP_MW));
+			ProgressBar pb = new ProgressBar(ctx, null,
+					android.R.attr.progressBarStyleInverse);
+			fl.addView(pb, new FrameLayout.LayoutParams(
+					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
+					Gravity.CENTER));
+			pb.setIndeterminate(true);
 		}
 
 		if (timeoutCallback != null) {
@@ -480,9 +480,9 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 			ll.addView(tv, new LayoutParams(LP_MW));
 			tv.setId(IDC.TV_POPUP_WAIT_LABEL_SUMMARY.id());
 			tv.setGravity(Gravity.CENTER);
-			tv.setTextColor(ZZFontColor.CC_RECHAGRE_COST.color());
+			tv.setTextColor(ZZFontColor.CC_RECHARGE_COST.color());
 			tv.setVisibility(GONE);
-			ZZFontSize.CC_RECHAGR_COST.apply(tv);
+			ZZFontSize.CC_RECHARGE_COST.apply(tv);
 		}
 
 		{

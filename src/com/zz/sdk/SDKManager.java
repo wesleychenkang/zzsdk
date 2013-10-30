@@ -364,9 +364,10 @@ public class SDKManager {
 		startActivity(mContext, env, LAYOUT_TYPE.PaymentList);
 	}
 
-	public void showExchange(Handler callbackHandler, int what, String projectID) {
-		startActivity(mContext, mRootEnv.grow(KeyCaller.class.getName()),
-				LAYOUT_TYPE.Exchange);
+	public void showExchange(Handler callbackHandler, String gameServerID) {
+		ParamChain env = mRootEnv.grow(KeyCaller.class.getName());
+		env.add(KeyCaller.K_GAME_SERVER_ID, gameServerID);
+		startActivity(mContext, env, LAYOUT_TYPE.Exchange);
 	}
 
 	private static void startActivity(Context ctx, ParamChain env,

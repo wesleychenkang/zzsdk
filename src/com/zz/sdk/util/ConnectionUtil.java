@@ -102,6 +102,10 @@ public class ConnectionUtil {
 		T br = null;
 		try {
 			br = clazz.newInstance();
+			if (DebugFlags.DEBUG) {
+				Logger.d("url:" + url);
+				Logger.d("request:" + nvps);
+			}
 			InputStream is = doRequest(url, nvps, attempts);
 			if (is != null) {
 				String json = parseJsonData(is);

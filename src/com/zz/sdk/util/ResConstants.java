@@ -15,17 +15,17 @@ import com.zz.sdk.entity.PayChannel;
 
 public class ResConstants {
 
-	private static Context mContext;
+	// private static Context mContext;
 	private static float mDensity = 1.0f;
 
 	/** 初始化环境配置，如分辨率等 */
 	public static void init(Context ctx) {
-		mContext = null;
+		// mContext = null;
 		mDensity = ctx.getResources().getDisplayMetrics().density;
 	}
 
 	public static void clean() {
-		mContext = null;
+		// mContext = null;
 	}
 
 	public static int dip2px(int dpValue) {
@@ -202,15 +202,17 @@ public class ResConstants {
 		 */
 		public static enum ZZFontColor {
 			/** 充值界面·普通文本 */
-			CC_RECHAGR_NORMAL(Color.BLACK),
+			CC_RECHARGE_NORMAL(Color.BLACK),
+			/** 充值界面·描述文本 */
+			CC_RECHARGE_DESC(Color.LTGRAY),
 			/** 充值界面·警示性文本 */
-			CC_RECHAGR_WARN(Color.MAGENTA),
+			CC_RECHARGE_WARN(Color.MAGENTA),
 			/** 充值界面·错误提示文本 */
-			CC_RECHAGR_ERROR(Color.RED),
+			CC_RECHARGE_ERROR(Color.RED),
 			/** 充值界面输入文本 */
-			CC_RECHAGR_INPUT(Color.DKGRAY),
+			CC_RECHARGE_INPUT(Color.DKGRAY),
 			/** 充值界面·应付金额文本 */
-			CC_RECHAGRE_COST(0xffccaa00),
+			CC_RECHARGE_COST(0xffccaa00),
 			/** 充值界面·支付方式子项文本 */
 			CC_PAYTYPE_ITEM(Color.BLACK),
 			/** 充值界面·确认充值按钮 文本 */
@@ -241,6 +243,10 @@ public class ResConstants {
 
 			private int c;
 
+			private ZZFontColor(ZZFontColor c) {
+				this.c = c.c;
+			}
+
 			private ZZFontColor(int c) {
 				this.c = c;
 			}
@@ -255,13 +261,15 @@ public class ResConstants {
 		 */
 		public static enum ZZFontSize {
 			/** 充值界面普通文本 */
-			CC_RECHAGR_NORMAL(16),
+			CC_RECHARGE_NORMAL(16),
+			/** 充值界面·描述文本 */
+			CC_RECHARGE_DESC(16),
 			/** 余额文本 */
-			CC_RECHAGR_BALANCE(22),
+			CC_RECHARGE_BALANCE(22),
 			/** 充值界面输入文本 */
-			CC_RECHAGR_INPUT(12),
+			CC_RECHARGE_INPUT(18),
 			/** 充值界面应付金额文本 */
-			CC_RECHAGR_COST(20),
+			CC_RECHARGE_COST(20),
 			/** 充值界面·支付方式子项文本 */
 			CC_PAYTYPE_ITEM(14),
 			/** 充值界面·确认充值按钮 文本 */

@@ -416,8 +416,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 
 		// 设置标题
 		{
-			ZZStr str = getEnv().getOwned(KeyPaymentList.K_PAY_TITLE,
-					ZZStr.class);
+			ZZStr str = getEnv().get(KeyPaymentList.K_PAY_TITLE, ZZStr.class);
 			if (str != null) {
 				String title;
 				if (mTypeName != null) {

@@ -422,7 +422,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		// 道具兑换
 		case IDC_BT_EXCHANGE: {
-			mSDKManager.showExchange(mHandler, MSG_PAYMENT_CALLBACK, null);
+			mSDKManager.showExchange(mHandler, CONFIG_GAME_SERVER_ID);
 		}
 			break;
 

@@ -67,6 +67,7 @@ import com.zz.sdk.util.ResConstants.Config.ZZDimen;
 import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
 import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
+import com.zz.sdk.util.UserUtil;
 import com.zz.sdk.util.Utils;
 
 //import com.zz.sdk.util.GetDataImpl;
@@ -739,14 +740,15 @@ public class PaymentListLayout extends CCBaseLayout {
 			double b = getCoinBalance() - count;
 			if (b < 0) {
 				tv.setText(ZZStr.CC_PAYTYPE_COIN_DESC_POOR.str());
-				tv.setTextColor(ZZFontColor.CC_RECHAGR_ERROR.color());
+				tv.setTextColor(ZZFontColor.CC_RECHARGE_ERROR.color());
 			} else {
 				tv.setText(String.format(ZZStr.CC_PAYTYPE_COIN_DESC.str(),
 						mRechargeFormat.format(count),
 						mRechargeFormat.format(b)));
+				tv.setTextColor(ZZFontColor.CC_RECHARGE_DESC.color());
 			}
 
-			ZZFontSize.CC_RECHAGR_NORMAL.apply(tv);
+			ZZFontSize.CC_RECHARGE_NORMAL.apply(tv);
 		}
 			break;
 
@@ -842,7 +844,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			rv.addView(tv, new LayoutParams(LP_MW));
 			tv.setText(String.format(ZZStr.CC_PAYTYPE_DESC.str(),
 					channel.channelName));
-			ZZFontSize.CC_RECHAGR_NORMAL.apply(tv);
+			ZZFontSize.CC_RECHARGE_NORMAL.apply(tv);
 		}
 			break;
 
@@ -883,7 +885,7 @@ public class PaymentListLayout extends CCBaseLayout {
 				tv.setText(String.format(ZZStr.CC_PAYTYPE_DESC.str(),
 						channel.channelName));
 			}
-			ZZFontSize.CC_RECHAGR_NORMAL.apply(tv);
+			ZZFontSize.CC_RECHARGE_NORMAL.apply(tv);
 		}
 			break;
 
@@ -902,8 +904,8 @@ public class PaymentListLayout extends CCBaseLayout {
 		int padding_h = ZZDimen.CC_RECHARGE_COUNT_PADDING_H.px();
 		int padding_v = ZZDimen.CC_RECHARGE_COUNT_PADDING_V.px();
 		// 卡号
-		tv = create_normal_input(ctx, null, ZZFontColor.CC_RECHAGR_INPUT,
-				ZZFontSize.CC_RECHAGR_INPUT, limitCard);
+		tv = create_normal_input(ctx, null, ZZFontColor.CC_RECHARGE_INPUT,
+				ZZFontSize.CC_RECHARGE_INPUT, limitCard);
 		rv.addView(tv, new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT/* ZZDimen.CC_CARD_HEIGHT.px() */));
 		tv.setId(IDC.ED_CARD.id());
@@ -920,8 +922,8 @@ public class PaymentListLayout extends CCBaseLayout {
 		rv.addView(tv, new LayoutParams(LP_WW));
 
 		// 密码
-		tv = create_normal_input(ctx, null, ZZFontColor.CC_RECHAGR_INPUT,
-				ZZFontSize.CC_RECHAGR_INPUT, limitPasswd);
+		tv = create_normal_input(ctx, null, ZZFontColor.CC_RECHARGE_INPUT,
+				ZZFontSize.CC_RECHARGE_INPUT, limitPasswd);
 		rv.addView(tv, new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT/* ZZDimen.CC_CARD_HEIGHT.px() */));
 		tv.setId(IDC.ED_PASSWD.id());
@@ -974,11 +976,11 @@ public class PaymentListLayout extends CCBaseLayout {
 				// TODO: 如果是定额不可编辑，则这里使用 TextView 即可
 				if (isCanModifyAmount()) {
 					tv = create_normal_input(ctx, ZZStr.CC_RECHAGRE_COUNT_HINT,
-							ZZFontColor.CC_RECHAGR_INPUT,
-							ZZFontSize.CC_RECHAGR_INPUT, 8);
+							ZZFontColor.CC_RECHARGE_INPUT,
+							ZZFontSize.CC_RECHARGE_INPUT, 8);
 				} else {
 					tv = create_normal_label(ctx, null);
-					tv.setTextColor(ZZFontColor.CC_RECHAGR_INPUT.color());
+					tv.setTextColor(ZZFontColor.CC_RECHARGE_INPUT.color());
 				}
 				ll2.addView(tv, new LayoutParams(LayoutParams.MATCH_PARENT,
 						LayoutParams.MATCH_PARENT, 1.0f));
@@ -1026,8 +1028,8 @@ public class PaymentListLayout extends CCBaseLayout {
 				tv = create_normal_label(ctx, null);
 				ll2.addView(tv, new LayoutParams(LP_WM));
 				tv.setId(IDC.TV_RECHARGE_COST.id());
-				tv.setTextColor(ZZFontColor.CC_RECHAGRE_COST.color());
-				ZZFontSize.CC_RECHAGR_COST.apply(tv);
+				tv.setTextColor(ZZFontColor.CC_RECHARGE_COST.color());
+				ZZFontSize.CC_RECHARGE_COST.apply(tv);
 			}
 
 			// 附加显示
@@ -1036,7 +1038,7 @@ public class PaymentListLayout extends CCBaseLayout {
 				ll.addView(tv, new LayoutParams(LP_MW));
 				tv.setSingleLine(false);
 				tv.setId(IDC.TV_RECHARGE_COST_SUMMARY.id());
-				tv.setTextColor(ZZFontColor.CC_RECHAGR_WARN.color());
+				tv.setTextColor(ZZFontColor.CC_RECHARGE_WARN.color());
 				tv.setVisibility(GONE);
 			}
 		}
@@ -1083,8 +1085,8 @@ public class PaymentListLayout extends CCBaseLayout {
 			tv = create_normal_label(ctx, null);
 			ll2.addView(tv, new LayoutParams(LP_WM));
 			tv.setId(IDC.TV_RECHARGE_COST.id());
-			tv.setTextColor(ZZFontColor.CC_RECHAGRE_COST.color());
-			ZZFontSize.CC_RECHAGR_COST.apply(tv);
+			tv.setTextColor(ZZFontColor.CC_RECHARGE_COST.color());
+			ZZFontSize.CC_RECHARGE_COST.apply(tv);
 		}
 
 		// 输入面板
@@ -1866,6 +1868,10 @@ public class PaymentListLayout extends CCBaseLayout {
 
 			if (DEBUG) {
 				Logger.d("PayListTask: run!");
+			}
+
+			if (charge.loginName == null) {
+				// UserUtil.loginForLone(cu.)
 			}
 
 			ResultPayList ret = cu.getPaymentList(charge);
