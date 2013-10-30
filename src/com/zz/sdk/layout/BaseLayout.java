@@ -468,7 +468,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 			FrameLayout fl = new FrameLayout(ctx);
 			ll.addView(fl, new LayoutParams(LP_MW));
 			ProgressBar pb = new ProgressBar(ctx, null,
-					android.R.attr.progressBarStyleInverse);
+					android.R.attr.progressBarStyle);
 			fl.addView(pb, new FrameLayout.LayoutParams(
 					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
 					Gravity.CENTER));

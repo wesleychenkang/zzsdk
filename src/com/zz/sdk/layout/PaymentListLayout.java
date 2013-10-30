@@ -660,6 +660,12 @@ public class PaymentListLayout extends CCBaseLayout {
 	}
 
 	@Override
+	protected void tryUpdadteBalance(Double balance) {
+		// 由于在获取支付列表时有返回　用户余额，所以这里不需要触发余额更新
+		super.tryUpdadteBalance(balance == null ? 0 : balance);
+	}
+
+	@Override
 	protected void updateBalance(double count) {
 		super.updateBalance(count);
 

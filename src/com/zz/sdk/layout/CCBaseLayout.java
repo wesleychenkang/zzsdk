@@ -174,12 +174,12 @@ abstract class CCBaseLayout extends BaseLayout {
 	}
 
 	/** 获取余额值，如果无记录则返回 0 */
-	public double getCoinBalance() {
+	protected double getCoinBalance() {
 		return mCoinBalance == null ? 0 : mCoinBalance;
 	}
 
 	/** 设置余额值，如果数据有效(!=null)则更新到环境变量 */
-	public void setCoinBalance(Double coinBalance) {
+	protected void setCoinBalance(Double coinBalance) {
 		if (coinBalance == null || coinBalance.equals(mCoinBalance)) {
 			Logger.d("D: balance unchanged!");
 			return;
@@ -200,6 +200,14 @@ abstract class CCBaseLayout extends BaseLayout {
 		String str = String.format(ZZStr.CC_BALANCE_UNIT.str(),
 				mRechargeFormat.format(count));
 		set_child_text(IDC.TV_BALANCE, str);
+	}
+
+	protected void tryUpdadteBalance(Double balance) {
+		if (balance == null) {
+			tryUpdadteBalance();
+		} else {
+			checkBalcanceState();
+		}
 	}
 
 	/** 尝试打开余额刷新，如果启动了任务，则将显示等待 */
@@ -370,11 +378,7 @@ abstract class CCBaseLayout extends BaseLayout {
 	public boolean onEnter() {
 		boolean ret = super.onEnter();
 		if (ret) {
-			if (mCoinBalance == null) {
-				tryUpdadteBalance();
-			} else {
-				checkBalcanceState();
-			}
+			tryUpdadteBalance(mCoinBalance);
 		}
 		return ret;
 	}
