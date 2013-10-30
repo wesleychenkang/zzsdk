@@ -64,10 +64,10 @@ import com.zz.sdk.util.DebugFlags.KeyDebug;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
+import com.zz.sdk.util.ResConstants.Config.ZZDimenRect;
 import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
 import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
-import com.zz.sdk.util.UserUtil;
 import com.zz.sdk.util.Utils;
 
 //import com.zz.sdk.util.GetDataImpl;
@@ -241,6 +241,8 @@ public class PaymentListLayout extends CCBaseLayout {
 	private int mPaymentTypeChoose;
 	/** 当前支付方式的类别ID，以 {@link #mPaymentTypeChoose} 为准 */
 	private int mPaymentTypeChoose_ChannelType;
+	/** 屏蔽卓越币的支付方式 */
+	private boolean mPaymentTypeSkipZYCoin;
 
 	/** 价格或卓越币数的表达规则 */
 	private DecimalFormat mRechargeFormat;
@@ -282,6 +284,8 @@ public class PaymentListLayout extends CCBaseLayout {
 		super.onInitEnv(ctx, env);
 		mPaymentTypeChoose = -1;
 		mPaymentTypeChoose_ChannelType = -1;
+		Boolean b = env.get(KeyCaller.K_PAYMENT_ZYCOIN_DISABLED, Boolean.class);
+		mPaymentTypeSkipZYCoin = (b != null && b);
 		mRechargeFormat = new DecimalFormat(ZZStr.CC_PRICE_FORMAT.str());
 		mIMSI = env.get(KeyDevice.K_IMSI, String.class);
 		if (mIMSI != null) {
@@ -954,10 +958,7 @@ public class PaymentListLayout extends CCBaseLayout {
 	private View createView_Charge(Context ctx) {
 		// 主视图
 		LinearLayout rv = new LinearLayout(ctx);
-		rv.setPadding(ZZDimen.CC_ROOTVIEW_PADDING_LEFT.px(),
-				ZZDimen.CC_ROOTVIEW_PADDING_TOP.px(),
-				ZZDimen.CC_ROOTVIEW_PADDING_RIGHT.px(),
-				ZZDimen.CC_ROOTVIEW_PADDING_BOTTOM.px());
+		ZZDimenRect.CC_ROOTVIEW_PADDING.apply_padding(rv);
 		rv.setOrientation(LinearLayout.VERTICAL);
 
 		LinearLayout ll;
@@ -1133,7 +1134,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			bt.setId(IDC.BT_RECHARGE_COMMIT.id());
 			bt.setText(ZZStr.CC_COMMIT_RECHARGE.str());
 			bt.setTextColor(ZZFontColor.CC_RECHARGE_COMMIT.color());
-			bt.setPadding(24, 8, 24, 8);
+			ZZDimenRect.CC_RECHARGE_COMMIT.apply_padding(bt);
 			ZZFontSize.CC_RECHARGE_COMMIT.apply(bt);
 			bt.setOnClickListener(this);
 		}
@@ -1293,9 +1294,14 @@ public class PaymentListLayout extends CCBaseLayout {
 			List<PayChannel> tmp = new ArrayList<PayChannel>();
 			for (int i = 0, c = channelMessages.length; i < c; i++) {
 				PayChannel p = channelMessages[i];
-				if (p.isValid()) {
-					tmp.add(p);
+				if (!p.isValid()) {
+					continue;
 				}
+				if (mPaymentTypeSkipZYCoin
+						&& p.type == PayChannel.PAY_TYPE_ZZCOIN) {
+					continue;
+				}
+				tmp.add(p);
 			}
 			if (tmp.size() == channelMessages.length) {
 			} else {

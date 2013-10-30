@@ -24,6 +24,7 @@ import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
+import com.zz.sdk.util.ResConstants.Config.ZZDimenRect;
 import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
 import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
@@ -266,10 +267,7 @@ abstract class CCBaseLayout extends BaseLayout {
 	protected View createView_subject(Context ctx) {
 		// 主视图
 		LinearLayout rv = new LinearLayout(ctx);
-		rv.setPadding(ZZDimen.CC_ROOTVIEW_PADDING_LEFT.px(),
-				ZZDimen.CC_ROOTVIEW_PADDING_TOP.px(),
-				ZZDimen.CC_ROOTVIEW_PADDING_RIGHT.px(),
-				ZZDimen.CC_ROOTVIEW_PADDING_BOTTOM.px());
+		ZZDimenRect.CC_ROOTVIEW_PADDING.apply_padding(rv);
 		rv.setOrientation(LinearLayout.VERTICAL);
 		rv.setBackgroundDrawable(CCImg.BACKGROUND.getDrawble(ctx));
 

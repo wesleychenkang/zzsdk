@@ -45,6 +45,7 @@ import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
+import com.zz.sdk.util.ResConstants.Config.ZZDimenRect;
 import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
 import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
@@ -442,10 +443,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
 				Gravity.CENTER));
 		ll.setBackgroundDrawable(CCImg.BACKGROUND.getDrawble(ctx));
-		ll.setPadding(ZZDimen.CC_ROOTVIEW_PADDING_LEFT.px(),
-				ZZDimen.CC_ROOTVIEW_PADDING_TOP.px(),
-				ZZDimen.CC_ROOTVIEW_PADDING_RIGHT.px(),
-				ZZDimen.CC_ROOTVIEW_PADDING_BOTTOM.px());
+		ZZDimenRect.CC_ROOTVIEW_PADDING.apply_padding(ll);
 
 		{
 			// RotateAnimation anim = new RotateAnimation(0, 360,
@@ -665,16 +663,10 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
 				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
 				Gravity.CENTER);
-		lp.setMargins(ZZDimen.CC_ROOTVIEW_PADDING_LEFT.px(),
-				ZZDimen.CC_ROOTVIEW_PADDING_TOP.px(),
-				ZZDimen.CC_ROOTVIEW_PADDING_RIGHT.px(),
-				ZZDimen.CC_ROOTVIEW_PADDING_BOTTOM.px());
+		ZZDimenRect.CC_ROOTVIEW_PADDING.apply_margins(lp);
 		ll.setLayoutParams(lp);
 		ll.setBackgroundDrawable(CCImg.BACKGROUND.getDrawble(ctx));
-		ll.setPadding(ZZDimen.CC_ROOTVIEW_PADDING_LEFT.px(),
-				ZZDimen.CC_ROOTVIEW_PADDING_TOP.px(),
-				ZZDimen.CC_ROOTVIEW_PADDING_RIGHT.px(),
-				ZZDimen.CC_ROOTVIEW_PADDING_BOTTOM.px());
+		ZZDimenRect.CC_ROOTVIEW_PADDING.apply_padding(ll);
 		{
 			TextView tv = create_normal_label(ctx, null);
 			ll.addView(tv, new LayoutParams(LP_MW));
@@ -954,10 +946,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	protected View createView_subject(Context ctx) {
 		FrameLayout fl = new FrameLayout(ctx);
 		fl.setId(IDC.ACT_SUBJECT.id());
-		fl.setPadding(ZZDimen.CC_ROOTVIEW_PADDING_LEFT.px(),
-				ZZDimen.CC_ROOTVIEW_PADDING_TOP.px(),
-				ZZDimen.CC_ROOTVIEW_PADDING_RIGHT.px(),
-				ZZDimen.CC_ROOTVIEW_PADDING_BOTTOM.px());
+		ZZDimenRect.CC_ROOTVIEW_PADDING.apply_padding(fl);
 		fl.setBackgroundDrawable(CCImg.BACKGROUND.getDrawble(ctx));
 		return fl;
 	}

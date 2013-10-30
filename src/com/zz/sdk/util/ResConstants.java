@@ -6,9 +6,12 @@ import java.text.DecimalFormat;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.util.TypedValue;
+import android.view.View;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.TextView;
 
 import com.zz.sdk.entity.PayChannel;
@@ -311,12 +314,6 @@ public class ResConstants {
 		 * 尺寸配置, DIP
 		 */
 		public static enum ZZDimen {
-			/** 充值界面·主活动区的边距 */
-			CC_ROOTVIEW_PADDING_LEFT(24), //
-			CC_ROOTVIEW_PADDING_TOP(16), //
-			CC_ROOTVIEW_PADDING_RIGHT(24), //
-			CC_ROOTVIEW_PADDING_BOTTOM(12),
-
 			/** 充值界面·各面板垂直方向间隔 */
 			CC_SAPCE_PANEL_V(12),
 
@@ -325,18 +322,9 @@ public class ResConstants {
 
 			/** 充值界面·GridView 的单元格间距 */
 			CC_GRIDVIEW_SPACE_H(8), CC_GRIDVIEW_SPACE_V(4),
-			/** 充值界面·GridView 的单元格子项的边距 */
-			CC_GRIDVIEW_ITEM_PADDDING_LEFT(16), //
-			CC_GRIDVIEW_ITEM_PADDDING_TOP(12), //
-			CC_GRIDVIEW_ITEM_PADDDING_RIGHT(16), //
-			CC_GRIDVIEW_ITEM_PADDDING_BOTTOM(12), //
-			CC_GRIDVIEW_ITEM_HEIGHT(52), //
 
-			/** 充值界面·话费·GridView 的单元格子项的边距 */
-			CC_GRIDVIEW_SMS_PADDDING_LEFT(8), //
-			CC_GRIDVIEW_SMS_PADDDING_TOP(4), //
-			CC_GRIDVIEW_SMS_PADDDING_RIGHT(8), //
-			CC_GRIDVIEW_SMS_PADDDING_BOTTOM(4), //
+			/** 充值界面·GridView 的单元格子项的边距 */
+			CC_GRIDVIEW_ITEM_HEIGHT(52), //
 
 			/** 充值界面·GridView 单元格大小 */
 			CC_GRIDVIEW_COLUMN_WIDTH(96),
@@ -344,18 +332,15 @@ public class ResConstants {
 			/** 充值界面·充值卡输入框的高度 */
 			CC_CARD_HEIGHT(32),
 
+			/** 按钮间隔 */
+			CC_COMMIT_SPACE(16),
+
 			/** 道具兑换列表·图标宽度 */
 			CC_EX_ICON_W(48),
 			/** 道具兑换列表·图标高度 */
 			CC_EX_ICON_H(48),
 			/** 道具兑换列表·空隙 */
 			CC_EX_PADDING(8),
-
-			/** 充值界面·主活动区的边距 */
-			CC_EX_DETAIL_PADDING_LEFT(16), //
-			CC_EX_DETAIL_PADDING_TOP(8), //
-			CC_EX_DETAIL_PADDING_RIGHT(16), //
-			CC_EX_DETAIL_PADDING_BOTTOM(8),
 
 			;
 
@@ -372,6 +357,61 @@ public class ResConstants {
 
 			public static int dip2px(float d) {
 				return (int) (d * mDensity + 0.5f);
+			}
+		}
+
+		/** 尺寸配置, DIP */
+		public static enum ZZDimenRect {
+			/** 充值界面·主活动区的边距 */
+			CC_ROOTVIEW_PADDING(24, 16, 24, 12),
+
+			/** 确认充值等提交类按钮 */
+			CC_RECHARGE_COMMIT(16, 4, 16, 4),
+
+			/** 充值界面·GridView 的单元格子项的边距 */
+			CC_GRIDVIEW_ITEM_PADDDING(16, 12, 16, 12),
+
+			/** 充值界面·话费·GridView 的单元格子项的边距 */
+			CC_GRIDVIEW_SMS_PADDDING(8, 4, 8, 4),
+
+			/** 兑换详情 */
+			CC_EX_DETAIL_PADDING(12, 8, 12, 8),
+			/** 兑换详情的展示面板边距 */
+			CC_EX_DETAIL_PANEL(6, 4, 6, 4),
+
+			;
+
+			private float left, top, right, bottom;
+
+			private ZZDimenRect(float l, float t, float r, float b) {
+				left = l;
+				top = t;
+				right = r;
+				bottom = b;
+			}
+
+			public void apply_padding(View v) {
+				int l = ZZDimen.dip2px(left);
+				int t = ZZDimen.dip2px(top);
+				int r = ZZDimen.dip2px(right);
+				int b = ZZDimen.dip2px(bottom);
+				v.setPadding(l, t, r, b);
+			}
+
+			public Rect rect() {
+				int l = ZZDimen.dip2px(left);
+				int t = ZZDimen.dip2px(top);
+				int r = ZZDimen.dip2px(right);
+				int b = ZZDimen.dip2px(bottom);
+				return new Rect(l, t, r, b);
+			}
+
+			public void apply_margins(MarginLayoutParams mlp) {
+				int l = ZZDimen.dip2px(left);
+				int t = ZZDimen.dip2px(top);
+				int r = ZZDimen.dip2px(right);
+				int b = ZZDimen.dip2px(bottom);
+				mlp.setMargins(l, t, r, b);
 			}
 		}
 	}

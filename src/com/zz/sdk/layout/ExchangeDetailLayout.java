@@ -1,6 +1,7 @@
 package com.zz.sdk.layout;
 
 import android.content.Context;
+import android.text.TextPaint;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
@@ -25,6 +26,7 @@ import com.zz.sdk.entity.PropsInfo;
 import com.zz.sdk.layout.ExchangeLayout.KeyExchange;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
+import com.zz.sdk.util.ResConstants.Config.ZZDimenRect;
 import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
 import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
@@ -137,19 +139,14 @@ class ExchangeDetailLayout extends CCBaseLayout {
 	}
 
 	protected void onInitUI(Context ctx) {
-		final int pleft = ZZDimen.CC_EX_DETAIL_PADDING_LEFT.px();
-		final int ptop = ZZDimen.CC_EX_DETAIL_PADDING_TOP.px();
-		final int pright = ZZDimen.CC_EX_DETAIL_PADDING_RIGHT.px();
-		final int pbottom = ZZDimen.CC_EX_DETAIL_PADDING_BOTTOM.px();
-
 		FrameLayout rv = getSubjectContainer();
 		{
 			ScrollView sv = new ScrollView(ctx);
 			rv.addView(sv, new FrameLayout.LayoutParams(LP_MM));
 			LinearLayout ll = new LinearLayout(ctx);
 			sv.addView(ll, new FrameLayout.LayoutParams(LP_MW));
-			ll.setPadding(pleft, ptop, pright, pbottom);
 			ll.setOrientation(VERTICAL);
+			ZZDimenRect.CC_EX_DETAIL_PADDING.apply_padding(ll);
 			if (DEBUG_UI) {
 				ll.setBackgroundColor(0xffc00000);
 			}
@@ -165,8 +162,7 @@ class ExchangeDetailLayout extends CCBaseLayout {
 				{
 					FrameLayout flPanel = new FrameLayout(ctx);
 					ll2.addView(flPanel, new LayoutParams(LP_MW));
-					flPanel.setPadding(pleft / 2, ptop / 2, pright / 2,
-							pbottom / 2);
+					ZZDimenRect.CC_EX_DETAIL_PANEL.apply_padding(ll);
 					if (DEBUG_UI) {
 						flPanel.setBackgroundColor(0xff00c000);
 					}
@@ -197,6 +193,10 @@ class ExchangeDetailLayout extends CCBaseLayout {
 					if (DEBUG_UI) {
 						tv.setBackgroundColor(0xff00c060);
 					}
+
+					TextPaint tp = tv.getPaint();
+					if (tp != null)
+						tp.setFakeBoldText(true);
 
 				}
 				// 价格
@@ -239,20 +239,18 @@ class ExchangeDetailLayout extends CCBaseLayout {
 						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
 						Gravity.CENTER));
 				l2.setOrientation(HORIZONTAL);
-				l2.setPadding(pleft, ptop, pright, pbottom);
 
 				Button bt;
 				{
 					bt = new Button(ctx);
 					bt.setId(IDC.BT_RECHARGE.id());
 					LayoutParams lp = new LayoutParams(LP_WW);
-					lp.setMargins(0, 0, pright, 0);
+					lp.setMargins(0, 0, ZZDimen.CC_COMMIT_SPACE.px(), 0);
 					l2.addView(bt, lp);
-
 					bt.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
-							CCImg.BUTTON, CCImg.BUTTON_CLICK));
+							CCImg.BUY_BUTTON, CCImg.BUY_BUTTON_CLICK));
 					bt.setTextColor(ZZFontColor.CC_RECHARGE_COMMIT.color());
-					bt.setPadding(pleft, 6, pright, 6);
+					ZZDimenRect.CC_RECHARGE_COMMIT.apply_padding(bt);
 					ZZFontSize.CC_RECHARGE_COMMIT.apply(bt);
 					bt.setOnClickListener(this);
 					bt.setText("先去充值");
@@ -261,11 +259,10 @@ class ExchangeDetailLayout extends CCBaseLayout {
 					bt = new Button(ctx);
 					bt.setId(IDC.BT_CONFIRM.id());
 					l2.addView(bt, new LayoutParams(LP_WW));
-
 					bt.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
-							CCImg.BUY_BUTTON, CCImg.BUY_BUTTON_CLICK));
+							CCImg.BUTTON, CCImg.BUTTON_CLICK));
 					bt.setTextColor(ZZFontColor.CC_RECHARGE_COMMIT.color());
-					bt.setPadding(pleft, 6, pright, 6);
+					ZZDimenRect.CC_RECHARGE_COMMIT.apply_padding(bt);
 					ZZFontSize.CC_RECHARGE_COMMIT.apply(bt);
 					bt.setOnClickListener(this);
 					bt.setText("确认兑换");
@@ -344,6 +341,9 @@ class ExchangeDetailLayout extends CCBaseLayout {
 			env.add(KeyCaller.K_AMOUNT, mPropsInfo.mPrice/*-getCoinBalance()*/);
 		// env.add(KeyCaller.K_IS_CLOSE_WINDOW, isCloseWindow);
 		// env.add(KeyCaller.K_CALL_BACK_INFO, callBackInfo);
+
+		env.add(KeyCaller.K_AMOUNT_IS_ZYCOIN, Boolean.TRUE);
+		env.add(KeyCaller.K_PAYMENT_ZYCOIN_DISABLED, Boolean.TRUE);
 
 		getHost().enter(LAYOUT_TYPE.PaymentList, env);
 	}

@@ -40,6 +40,7 @@ import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
+import com.zz.sdk.util.ResConstants.Config.ZZDimenRect;
 import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
 import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
@@ -119,10 +120,7 @@ public class ExchangeLayout extends CCBaseLayout {
 		lv.startRefresh();
 		lv.setDivider(null);
 		lv.setDividerHeight(16);
-		lv.setPadding(ZZDimen.CC_ROOTVIEW_PADDING_LEFT.px(),
-				ZZDimen.CC_ROOTVIEW_PADDING_TOP.px(),
-				ZZDimen.CC_ROOTVIEW_PADDING_RIGHT.px(),
-				ZZDimen.CC_ROOTVIEW_PADDING_BOTTOM.px());
+		ZZDimenRect.CC_ROOTVIEW_PADDING.apply_padding(lv);
 
 		getSubjectContainer().addView(lv, new FrameLayout.LayoutParams(LP_MM));
 		mListView = lv;

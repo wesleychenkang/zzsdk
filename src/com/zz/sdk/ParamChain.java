@@ -119,6 +119,10 @@ public interface ParamChain {
 		/** 键：定额价格({@link #K_AMOUNT})是卓越币数量, 单位为 [0.01个], {@link Boolean} */
 		static final String K_AMOUNT_IS_ZYCOIN = _TAG_ + "coin_count";
 
+		/** 键：禁用卓越币的支付方式，{@link Boolean}，如果是 TRUE则屏蔽 */
+		static final String K_PAYMENT_ZYCOIN_DISABLED = _TAG_
+				+ "payment_zycoin_disabled";
+
 		/** 键：支付成功是否自动关闭支付SDK, 如果是 true 则在充值成功后自动退出SDK，{@link Boolean} */
 		static final String K_IS_CLOSE_WINDOW = _TAG_ + "is_close_window";
 
