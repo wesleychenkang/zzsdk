@@ -1,6 +1,7 @@
 package com.zz.sdk.layout;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -12,6 +13,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.text.Html;
@@ -28,14 +30,21 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.ParamChain;
+import com.zz.sdk.ParamChain.KeyDevice;
+import com.zz.sdk.ParamChain.KeyUser;
 import com.zz.sdk.ParamChain.ValType;
+import com.zz.sdk.entity.PayChannel;
+import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.SMSChannelMessage;
+import com.zz.sdk.entity.result.BaseResult;
+import com.zz.sdk.entity.result.ResultRequest;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
 import com.zz.sdk.layout.PaymentListLayout.TypeGridView;
-import com.zz.sdk.util.DebugFlags;
+import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
@@ -90,6 +99,8 @@ class PaymentSMSLayout extends CCBaseLayout {
 	/** 可用支付列表 */
 	private SMSChannelMessage[] mSmsChannelMessages;
 
+	private String mOrderNumber;
+
 	private int mType;
 	private String mTypeName;
 
@@ -98,12 +109,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 	/** 是否在等待支付结果中，避免重复 */
 	private int isWaitPayResult;
 
-	// 充值
-	private String ACTION;
-	// 查詢指令
-	private String ACTION_CHECK;
-
-	private BroadcastReceiver mBroadcastReceiver;
+	private SMSPayReceiver mSMSPayReceiver;
 
 	public PaymentSMSLayout(Context context, ParamChain env) {
 		super(context, env);
@@ -155,13 +161,10 @@ class PaymentSMSLayout extends CCBaseLayout {
 	protected void onInitEnv(Context ctx, ParamChain env) {
 		super.onInitEnv(ctx, env);
 
-		// 这里使用临时的广播名，避免冲突
-		ACTION = "action.send.sms" + "." + DebugFlags.RANDOM.nextFloat();
-		ACTION_CHECK = "action.send.check" + "."
-				+ DebugFlags.RANDOM.nextFloat();
-
 		mPayResultState = MSG_STATUS.EXIT_SDK;
 		isWaitPayResult = 0;
+
+		mOrderNumber = env.get(KeyPaymentList.K_PAY_ORDERNUMBER, String.class);
 
 		mType = env.get(KeyPaymentList.K_PAY_CHANNELTYPE, Integer.class);
 		mTypeName = env.get(KeyPaymentList.K_PAY_CHANNELNAME, String.class);
@@ -211,6 +214,20 @@ class PaymentSMSLayout extends CCBaseLayout {
 		}
 		mSmsChannelMessage = null;
 		mSmsChannelMessages = smsChannel;
+
+		mSMSPayReceiver = SMSPayReceiver.getInstance();
+		mSMSPayReceiver.bindCallback(new SMSPayReceiver.ICallback() {
+			@Override
+			public boolean onSMSPayResult(String cmd, int resultCode,
+					PayParam param) {
+				if (isAlive()) {
+					if (cmd != null) {
+						return notifySendMessageFinish(cmd, resultCode, param);
+					}
+				}
+				return false;
+			}
+		});
 	}
 
 	private void createView_error(Context ctx, FrameLayout rv) {
@@ -449,8 +466,6 @@ class PaymentSMSLayout extends CCBaseLayout {
 	}
 
 	private void tryPay(SMSChannelMessage cm) {
-		// mDialog = new CustomDialog(ctx, "正在为您充值，请稍候...", 2);
-		// mDialog.show();
 		if (isWaitPayResult > 0) {
 			if (DEBUG) {
 				Logger.d("W: 不可频繁使用话费支付");
@@ -458,12 +473,19 @@ class PaymentSMSLayout extends CCBaseLayout {
 			return;
 		}
 
+		// 监听广播
+		PayParam param = genPayParam(getEnv(), cm);
+		String action = mSMSPayReceiver.genAction(mOrderNumber + "\n"
+				+ cm.command, param);
+		mContext.registerReceiver(mSMSPayReceiver, new IntentFilter(action));
+
 		Logger.d("sms body length -> " + cm.command.length());
 		Logger.d("sms body -> " + cm.command);
 
+		// 填充短信内容
 		SmsManager smsManager = SmsManager.getDefault();
 		Intent intent = new Intent();
-		intent.setAction(ACTION);
+		intent.setAction(action);
 		Bundle bundle = new Bundle();
 		bundle.putString(EXTRA_SERVICE_TYPE, cm.serviceType);
 		bundle.putString(EXTRA_PRICE, "" + cm.price);
@@ -485,11 +507,27 @@ class PaymentSMSLayout extends CCBaseLayout {
 		} catch (Exception e) {
 			showPopup_Tip(false, "你已取消话费充值！");
 			removeExitTrigger();
+
+			// 从监听器中移除
+			mSMSPayReceiver.freeAction(action);
 		}
 	}
 
+	private PayParam genPayParam(ParamChain env, SMSChannelMessage cm) {
+		PayParam payParam = new PayParam();
+		HashMap<String, String> ap = new HashMap<String, String>();
+		ap.put("dueFee", String.valueOf(cm.price / 100));
+		ap.put("serviceType", cm.serviceType);
+		ap.put("status", "0");
+		ap.put("cmgeOrderNum", mOrderNumber);
+		payParam.loginName = env.get(KeyUser.K_LOGIN_NAME, String.class);
+		payParam.smsImsi = env.get(KeyDevice.K_IMSI, String.class);
+		payParam.attachParam = ap;
+		return payParam;
+	}
+
 	private void showPopup_Wait_SMSResult() {
-		showPopup_Wait("正在为您充值，请耐心等待结果……", new SimpleWaitTimeout() {
+		showPopup_Wait("正在为您充值，请保持网络畅通并耐心等待结果……", new SimpleWaitTimeout() {
 			public void onTimeOut() {
 				on_wait_time_out();
 			}
@@ -522,14 +560,42 @@ class PaymentSMSLayout extends CCBaseLayout {
 		set_child_text(IDC.TV_ERROR, str);
 	}
 
-	protected void notifySendMessageFinish(int code) {
+	/**
+	 * 充值结果
+	 * 
+	 * @param command
+	 *            指令
+	 * @param code
+	 *            状态
+	 * @param param
+	 *            参数
+	 */
+	protected boolean notifySendMessageFinish(String cmd, int code,
+			PayParam param) {
+		if (!cmd.startsWith(mOrderNumber))
+			return false;
+
+		String command = cmd.substring(mOrderNumber.length());
 		isWaitPayResult = 2;
 		if (code == Activity.RESULT_OK) {
-			// success
-			onPaySuccess();
+			ITaskCallBack cb = new ITaskCallBack() {
+
+				@Override
+				public void onResult(AsyncTask<?, ?, ?> task, Object token,
+						BaseResult result) {
+					if (result.isUsed()) {
+						// success
+						onPaySuccess();
+					}
+				}
+			};
+			setCurrentTask(SMSSeedBackTask.createAndStart(getConnectionUtil(),
+					cb, this, param));
 		} else {
 			onPayFailed();
 		}
+
+		return true;
 	}
 
 	/** 支付成功 */
@@ -578,10 +644,12 @@ class PaymentSMSLayout extends CCBaseLayout {
 	@Override
 	protected void clean() {
 		notifyCallerResult();
-		if (mBroadcastReceiver != null) {
-			mContext.unregisterReceiver(mBroadcastReceiver);
-			mBroadcastReceiver = null;
+
+		if (mSMSPayReceiver != null) {
+			mSMSPayReceiver.unbindCallback(null);
+			mSMSPayReceiver = null;
 		}
+
 		super.clean();
 		mType = -1;
 		mTypeName = null;
@@ -589,6 +657,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 		mAdapter = null;
 		mSmsChannelMessage = null;
 		mSmsChannelMessages = null;
+		mOrderNumber = null;
 	}
 
 	@Override
@@ -622,27 +691,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 		} else if (mSmsChannelMessages.length == 0) {
 			onErr(ZZStr.CC_TRY_SMS_NO_MATCH);
 		} else {
-			mBroadcastReceiver = new BroadcastReceiver() {
-				@Override
-				public void onReceive(Context context, Intent intent) {
-					String action = intent.getAction();
-					int resultCode = getResultCode();
-					Logger.d("receiver action -> " + action + " code -> "
-							+ resultCode);
-					if (ACTION.equals(action)) {
-						notifySendMessageFinish(resultCode);
-					} else if (ACTION_CHECK.equals(action)) {
-						// notifySendMessageFinish(resultCode, 1);
-					}
-				}
-			};
-			IntentFilter intentFilter = new IntentFilter();
-			intentFilter.addAction(ACTION);
-			intentFilter.addAction(ACTION_CHECK);
-			mContext.registerReceiver(mBroadcastReceiver, intentFilter);
-
 			setExitTrigger(-1, null);
-
 			updateSMSChannel();
 		}
 
@@ -669,6 +718,159 @@ class PaymentSMSLayout extends CCBaseLayout {
 		}
 	}
 
+	/**
+	 * 短信回调广播，用于监听短信是否发送成功。如果发送成功，必须通知到SDK服务器以完成支付流程
+	 * 
+	 * @author nxliao
+	 * 
+	 */
+	private static class SMSPayReceiver extends BroadcastReceiver {
+		private static final String BASE_ACTION = "action.send.sms";
+		private static final String BASE_ACTION_CHECK = "action.send.check";
+
+		protected static interface ICallback {
+			public boolean onSMSPayResult(String cmd, int resultCode,
+					PayParam param);
+		}
+
+		private static SMSPayReceiver sInsatnce = null;
+
+		protected String genAction(String cmd, PayParam param) {
+			String action = BASE_ACTION + "." + cmd;
+			mOrder.put(cmd, param);
+			return action;
+		}
+
+		private PayParam freeAction(String action) {
+			String cmd = getCmd(action);
+			if (cmd != null) {
+				return mOrder.remove(cmd);
+			}
+			return null;
+		}
+
+		private String getCmd(String action) {
+			if (action != null)
+				if (action.startsWith(BASE_ACTION)) {
+					return action.substring(BASE_ACTION.length());
+				}
+			return null;
+		}
+
+		private HashMap<String, PayParam> mOrder = new HashMap<String, PayParam>();
+		private ICallback mCallback;
+
+		/** 获取单例 */
+		protected static synchronized SMSPayReceiver getInstance() {
+			if (sInsatnce == null) {
+				sInsatnce = new SMSPayReceiver();
+			}
+			return sInsatnce;
+		}
+
+		protected synchronized void bindCallback(ICallback callback) {
+			mCallback = callback;
+		}
+
+		protected synchronized void unbindCallback(ICallback callback) {
+			if (mCallback == callback)
+				mCallback = null;
+			else if (callback == null)
+				mCallback = null;
+		}
+
+		private static ResultRequest sendSmsFeedback(ConnectionUtil cu,
+				PayParam param) {
+			return cu.charge(PayChannel.PAY_TYPE_KKFUNPAY_EX, param);
+		}
+
+		@Override
+		public synchronized void onReceive(final Context context, Intent intent) {
+			String action = intent.getAction();
+			String cmd = getCmd(action);
+			final PayParam param;
+			if (cmd != null && cmd.length() > 0) {
+				param = mOrder.remove(cmd);
+			} else {
+				param = null;
+			}
+			if (param == null) {
+				if (DEBUG) {
+					Logger.d("D:SMS 无效广播 " + action);
+				}
+			} else {
+				int resultCode = getResultCode();
+				Logger.d("receiver action -> " + cmd + " code -> " + resultCode);
+
+				// 判断有无监听，若无则开启线程通知到服务器
+				if (mCallback == null
+						|| !mCallback.onSMSPayResult(cmd, resultCode, param)) {
+					if (resultCode == Activity.RESULT_OK) {
+						new Thread("send-sms-feed-back") {
+							PayParam mParam = param;
+							ConnectionUtil mConnectionUtil = ConnectionUtil
+									.getInstance(context);
+
+							@Override
+							public void run() {
+								if (DEBUG) {
+									Logger.d("D: sms-feed-back start!");
+								}
+								sendSmsFeedback(mConnectionUtil, mParam);
+								mParam = null;
+								mConnectionUtil = null;
+							}
+						}.start();
+
+						Toast.makeText(context, "支付成功！详情：\n" + cmd,
+								Toast.LENGTH_LONG).show();
+					} else {
+						Logger.d("D: sms-pay failed!");
+						Toast.makeText(context, "支付失败！详情：\n" + cmd,
+								Toast.LENGTH_LONG).show();
+					}
+				}
+			}
+		}
+	}
+
+	private static class SMSSeedBackTask extends
+			AsyncTask<Object, Void, BaseResult> {
+
+		static SMSSeedBackTask createAndStart(ConnectionUtil cu,
+				ITaskCallBack callback, Object token, PayParam param) {
+			SMSSeedBackTask task = new SMSSeedBackTask();
+			task.execute(cu, callback, token, param);
+			return task;
+		}
+
+		ITaskCallBack mCallback;
+		Object mToken;
+
+		@Override
+		protected void onPostExecute(BaseResult result) {
+			if (mCallback != null) {
+				mCallback.onResult(this, mToken, result);
+			}
+			// clean
+			mCallback = null;
+			mToken = null;
+		}
+
+		@Override
+		protected BaseResult doInBackground(Object... params) {
+			ConnectionUtil cu = (ConnectionUtil) params[0];
+			ITaskCallBack callback = (ITaskCallBack) params[1];
+			Object token = params[2];
+			PayParam charge = (PayParam) params[3];
+			ResultRequest ret = SMSPayReceiver.sendSmsFeedback(cu, charge);
+			if (!this.isCancelled()) {
+				mCallback = callback;
+				mToken = token;
+			}
+			return ret;
+		}
+	}
 }
 
 class SMSAmountAdapter extends BaseAdapter {
