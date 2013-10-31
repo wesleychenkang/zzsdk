@@ -41,16 +41,31 @@ call :mycp 公共资源\money.png money.png
 call :mycp 公共资源\payment_input.9.png payment_input.9.png
 @rem call :mycp 公共资源\recharge_input.png recharge_input.png
 call :mycp 公共资源\recharge_input.9.png recharge_input.9.png
-call :mycp 公共资源\tup_cft.png tup_cft.png
-call :mycp 公共资源\tup_dx.png tup_dx.png
-call :mycp 公共资源\tup_lt.png tup_lt.png
-call :mycp 公共资源\tup_sjdx.png tup_sjdx.png
-call :mycp 公共资源\tup_yd.png tup_yd.png
-call :mycp 公共资源\tup_yl.png tup_yl.png
-call :mycp 公共资源\tup_zfb.png tup_zfb.png
-call :mycp 公共资源\tup_zyb.png tup_zyb.png
+@rem call :mycp 公共资源\tup_cft.png tup_cft.png
+@rem call :mycp 公共资源\tup_dx.png tup_dx.png
+@rem call :mycp 公共资源\tup_lt.png tup_lt.png
+@rem call :mycp 公共资源\tup_sjdx.png tup_sjdx.png
+@rem call :mycp 公共资源\tup_yd.png tup_yd.png
+@rem call :mycp 公共资源\tup_yl.png tup_yl.png
+@rem call :mycp 公共资源\tup_zfb.png tup_zfb.png
+@rem call :mycp 公共资源\tup_zyb.png tup_zyb.png
 call :mycp 公共资源\zf_wxz.9.png zf_wxz.9.png
 call :mycp 公共资源\zf_xz.9.png zf_xz.9.png
+
+:tup
+set s=x:\resource\充值方式小图标1029\支付图标_android\
+set p=y:\workspace\android\zzsdk\assets\zz_res\drawable\
+set pr=cc_
+set t=
+call :mycp tup_cft.png tup_cft.png
+call :mycp tup_dezf.png tup_dezf.png
+call :mycp tup_dx.png tup_dx.png
+call :mycp tup_lt.png tup_lt.png
+call :mycp tup_sjdx.png tup_sjdx.png
+call :mycp tup_yd.png tup_yd.png
+call :mycp tup_yl.png tup_yl.png
+call :mycp tup_zfb.png tup_zfb.png
+call :mycp tup_zyb.png tup_zyb.png
 
 
 :login

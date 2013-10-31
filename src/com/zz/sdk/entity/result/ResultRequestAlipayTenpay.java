@@ -45,11 +45,7 @@ public class ResultRequestAlipayTenpay extends ResultRequest {
 	public void parseJson(JSONObject json) {
 		if (json == null)
 			return;
-		try {
-			super.parseJson(json);
-			mUrl = getString(json, K_URL);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		super.parseJson(json);
+		mUrl = json.optString(K_URL, null);
 	}
 }

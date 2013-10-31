@@ -140,6 +140,7 @@ public class PayParam implements Serializable, JsonParseInterface {
 		switch (payType) {
 		case PayChannel.PAY_TYPE_ALIPAY:
 		case PayChannel.PAY_TYPE_UNMPAY:
+		case PayChannel.PAY_TYPE_EX_DEZF:
 		case PayChannel.PAY_TYPE_TENPAY:
 			listParames.add(new BasicNameValuePair(K_LOGINNAME, loginName));
 			listParames.add(new BasicNameValuePair(K_GAMEROLE, gameRole));
@@ -150,8 +151,8 @@ public class PayParam implements Serializable, JsonParseInterface {
 			break;
 
 		case PayChannel.PAY_TYPE_YEEPAY_LT:
-
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
+		case PayChannel.PAY_TYPE_YEEPAY_DX:
 			listParames.add(new BasicNameValuePair(K_LOGINNAME, loginName));
 			listParames.add(new BasicNameValuePair(K_GAMEROLE, gameRole));
 			listParames.add(new BasicNameValuePair(K_SERVERID, serverId));
@@ -185,15 +186,15 @@ public class PayParam implements Serializable, JsonParseInterface {
 			part = "pali.lg";
 			break;
 		case PayChannel.PAY_TYPE_UNMPAY:
+		case PayChannel.PAY_TYPE_EX_DEZF:
 			part = "pupmp.lg";
 			break;
 		case PayChannel.PAY_TYPE_TENPAY:
 			part = "pten.lg";
 			break;
 		case PayChannel.PAY_TYPE_YEEPAY_LT:
-			part = "pyee.lg";
-			break;
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
+		case PayChannel.PAY_TYPE_YEEPAY_DX:
 			part = "pyee.lg";
 			break;
 		case PayChannel.PAY_TYPE_KKFUNPAY:

@@ -38,24 +38,17 @@ public class ResultRequestKKFunPay extends ResultRequest {
 	public void parseJson(JSONObject json) {
 		if (json == null)
 			return;
-		try {
-			super.parseJson(json);
-
-			JSONArray ja = getArray(json, K_CHANNELS);
-			if (ja == null || ja.length() == 0) {
-				mChannels = null;
-			} else {
-				mChannels = new SMSChannelMessage[ja.length()];
-				for (int i = 0, c = ja.length(); i < c; i++) {
-					mChannels[i] = new SMSChannelMessage();
-					mChannels[i].parseJson(ja.getJSONObject(i));
-				}
+		super.parseJson(json);
+		JSONArray ja = json.optJSONArray(K_CHANNELS);
+		if (ja == null || ja.length() == 0) {
+			mChannels = null;
+		} else {
+			mChannels = new SMSChannelMessage[ja.length()];
+			for (int i = 0, c = ja.length(); i < c; i++) {
+				mChannels[i] = new SMSChannelMessage();
+				mChannels[i].parseJson(ja.optJSONObject(i));
 			}
-
-			mEnablePayConfirm = json.has(K_ENABLE_PAY_CONFIRM) ? json
-					.getBoolean(K_ENABLE_PAY_CONFIRM) : true;
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
+		mEnablePayConfirm = json.optBoolean(K_ENABLE_PAY_CONFIRM, true);
 	}
 }

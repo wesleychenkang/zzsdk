@@ -15,6 +15,7 @@ public final class Constants {
 	// public static final String URL_SERVER = "http://testsdk.kkfun.cn:8081/";
 	// //外网测试
 	public static final String URL_SERVER_DEBUG = "http://and124.sdksrv.com/";
+//	public static final String URL_SERVER_DEBUG = "http://and124.msprit.com:8081/";
 	// //内网测试
 	// public static final String URL_SERVER = "http://10.0.0.23:8080/";
 	// //文哥测试端口

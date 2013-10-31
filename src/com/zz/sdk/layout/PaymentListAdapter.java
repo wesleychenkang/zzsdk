@@ -6,12 +6,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
-import android.widget.TextView;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.TextView;
 
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
+import com.zz.sdk.util.ResConstants.Config.ZZDimenRect;
 import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
 import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 
@@ -26,16 +27,10 @@ class PaymentListAdapter extends BaseAdapter {
 	private Context mContext;
 	private PayChannel[] mPayChannels;
 
-	private int mItemPaddingLeft, mItemPaddingTop, mItemPaddingRight,
-			mItemPaddingBootom;
 	private int mItemHeight;
 
 	public PaymentListAdapter(Context ctx, PayChannel[] payChannels) {
 		mContext = ctx;
-		mItemPaddingLeft = ZZDimen.CC_GRIDVIEW_ITEM_PADDDING_LEFT.px();
-		mItemPaddingRight = ZZDimen.CC_GRIDVIEW_ITEM_PADDDING_RIGHT.px();
-		mItemPaddingTop = ZZDimen.CC_GRIDVIEW_ITEM_PADDDING_TOP.px();
-		mItemPaddingBootom = ZZDimen.CC_GRIDVIEW_ITEM_PADDDING_BOTTOM.px();
 		mItemHeight = ZZDimen.CC_GRIDVIEW_ITEM_HEIGHT.px();
 		mPayChannels = payChannels;
 	}
@@ -82,10 +77,9 @@ class PaymentListAdapter extends BaseAdapter {
 			holder.setGravity(Gravity.CENTER);
 			holder.setSingleLine();
 			holder.setTextColor(ZZFontColor.CC_PAYTYPE_ITEM.color());
-			holder.setPadding(mItemPaddingLeft, mItemPaddingTop,
-					mItemPaddingRight, mItemPaddingBootom);
 			holder.setLayoutParams(new AbsListView.LayoutParams(
 					LayoutParams.MATCH_PARENT, mItemHeight));
+			ZZDimenRect.CC_GRIDVIEW_ITEM_PADDDING.apply_padding(holder);
 			ZZFontSize.CC_PAYTYPE_ITEM.apply(holder);
 		}
 		if (position == mCurPos) {

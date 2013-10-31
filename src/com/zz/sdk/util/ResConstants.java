@@ -6,27 +6,29 @@ import java.text.DecimalFormat;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.util.TypedValue;
+import android.view.View;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.TextView;
 
 import com.zz.sdk.entity.PayChannel;
 
 public class ResConstants {
 
-	private static Context mContext;
+	// private static Context mContext;
 	private static float mDensity = 1.0f;
 
 	/** 初始化环境配置，如分辨率等 */
 	public static void init(Context ctx) {
-		mContext = null;
+		// mContext = null;
 		mDensity = ctx.getResources().getDisplayMetrics().density;
 	}
 
 	public static void clean() {
-		mContext = null;
+		// mContext = null;
 	}
 
 	public static int dip2px(int dpValue) {
@@ -45,8 +47,16 @@ public class ResConstants {
 		/** 余额显示，基于 {@link #CC_PRICE_FORMAT} */
 		CC_BALANCE_UNIT("%s"), //
 
+		/** 默认·帮助·标题 */
+		DEFAULT_HELP_TITLE(""),
+		/** 默认·帮助·内容 */
+		DEFAULT_HELP_TOPIC(
+				"如有疑问请联系客服，<br /><b>客服热线</b>： <a>020-85525051</a><br><b>客服QQ</b>：9159。"),
+
 		/** 充值中心 */
-		CC_RECHARGE_TITLE("充值中心"), CC_RECHARGE_TITLE_SOCIAL("充值中心(社交)"),
+		CC_RECHARGE_TITLE("充值中心"),
+		/** 充值中心(购买) */
+		CC_RECHARGE_TITLE_SOCIAL("充值中心(购买)"),
 
 		CC_RECHARGE_COUNT_TITLE("充值数量"), //
 		/** 充值中心（游戏购买入口） */
@@ -149,6 +159,10 @@ public class ResConstants {
 		CC_EXCHANGE_TITLE("道具兑换"),
 		/** 道具兑换详情 */
 		CC_EXCHANGE_DETAIL_TITLE("兑换——%s"),
+		/** 价格：%s卓越币 */
+		CC_EXCHANGE_DETAIL_PRICE_DESC("价格：%s卓越币"),
+		/** 消费描述：本次消费%s，您的余额还有%s */
+		CC_EXCHANGE_DETAIL_BALANCE_DESC("本次消费%s，您的余额还有%s"),
 
 		/** XLISTVIEW: 下拉刷新 */
 		XLISTVIEW_HEADER_HINT_NORMAL("下拉刷新"),
@@ -191,15 +205,17 @@ public class ResConstants {
 		 */
 		public static enum ZZFontColor {
 			/** 充值界面·普通文本 */
-			CC_RECHAGR_NORMAL(Color.BLACK),
+			CC_RECHARGE_NORMAL(Color.BLACK),
+			/** 充值界面·描述文本 */
+			CC_RECHARGE_DESC(Color.LTGRAY),
 			/** 充值界面·警示性文本 */
-			CC_RECHAGR_WARN(Color.MAGENTA),
+			CC_RECHARGE_WARN(0xffd9680d),
 			/** 充值界面·错误提示文本 */
-			CC_RECHAGR_ERROR(Color.RED),
+			CC_RECHARGE_ERROR(Color.RED),
 			/** 充值界面输入文本 */
-			CC_RECHAGR_INPUT(Color.DKGRAY),
+			CC_RECHARGE_INPUT(Color.DKGRAY),
 			/** 充值界面·应付金额文本 */
-			CC_RECHAGRE_COST(0xffccaa00),
+			CC_RECHARGE_COST(0xffccaa00),
 			/** 充值界面·支付方式子项文本 */
 			CC_PAYTYPE_ITEM(Color.BLACK),
 			/** 充值界面·确认充值按钮 文本 */
@@ -221,9 +237,18 @@ public class ResConstants {
 			CC_EXCHANGE_ITEM_SUMMARY(Color.GRAY), //
 			CC_EXCHANGE_ITEM_SUMMARY_PRESSED(Color.WHITE),
 
+			/** 兑换详情·道具名 */
+			CC_EXCHANGE_DETAIL_NAME(Color.BLACK),
+			/** 兑换详情·描述文本 */
+			CC_EXCHANGE_DETAIL_DESC(0xff777777),
+
 			;
 
 			private int c;
+
+			private ZZFontColor(ZZFontColor c) {
+				this.c = c.c;
+			}
 
 			private ZZFontColor(int c) {
 				this.c = c;
@@ -239,13 +264,15 @@ public class ResConstants {
 		 */
 		public static enum ZZFontSize {
 			/** 充值界面普通文本 */
-			CC_RECHAGR_NORMAL(16),
+			CC_RECHARGE_NORMAL(16),
+			/** 充值界面·描述文本 */
+			CC_RECHARGE_DESC(16),
 			/** 余额文本 */
-			CC_RECHAGR_BALANCE(22),
+			CC_RECHARGE_BALANCE(22),
 			/** 充值界面输入文本 */
-			CC_RECHAGR_INPUT(12),
+			CC_RECHARGE_INPUT(18),
 			/** 充值界面应付金额文本 */
-			CC_RECHAGR_COST(20),
+			CC_RECHARGE_COST(20),
 			/** 充值界面·支付方式子项文本 */
 			CC_PAYTYPE_ITEM(14),
 			/** 充值界面·确认充值按钮 文本 */
@@ -265,6 +292,11 @@ public class ResConstants {
 			/** 兑换列表·条目备注 文本 */
 			CC_EXCHANGE_ITEM_SUMMARY(13),
 
+			/** 兑换详情·道具名 */
+			CC_EXCHANGE_DETAIL_NAME(20),
+			/** 兑换详情·描述文本 */
+			CC_EXCHANGE_DETAIL_DESC(16),
+
 			;
 
 			private float size;
@@ -282,12 +314,6 @@ public class ResConstants {
 		 * 尺寸配置, DIP
 		 */
 		public static enum ZZDimen {
-			/** 充值界面·主活动区的边距 */
-			CC_ROOTVIEW_PADDING_LEFT(24), //
-			CC_ROOTVIEW_PADDING_TOP(16), //
-			CC_ROOTVIEW_PADDING_RIGHT(24), //
-			CC_ROOTVIEW_PADDING_BOTTOM(12),
-
 			/** 充值界面·各面板垂直方向间隔 */
 			CC_SAPCE_PANEL_V(12),
 
@@ -296,24 +322,18 @@ public class ResConstants {
 
 			/** 充值界面·GridView 的单元格间距 */
 			CC_GRIDVIEW_SPACE_H(8), CC_GRIDVIEW_SPACE_V(4),
-			/** 充值界面·GridView 的单元格子项的边距 */
-			CC_GRIDVIEW_ITEM_PADDDING_LEFT(16), //
-			CC_GRIDVIEW_ITEM_PADDDING_TOP(12), //
-			CC_GRIDVIEW_ITEM_PADDDING_RIGHT(16), //
-			CC_GRIDVIEW_ITEM_PADDDING_BOTTOM(12), //
-			CC_GRIDVIEW_ITEM_HEIGHT(52), //
 
-			/** 充值界面·话费·GridView 的单元格子项的边距 */
-			CC_GRIDVIEW_SMS_PADDDING_LEFT(8), //
-			CC_GRIDVIEW_SMS_PADDDING_TOP(4), //
-			CC_GRIDVIEW_SMS_PADDDING_RIGHT(8), //
-			CC_GRIDVIEW_SMS_PADDDING_BOTTOM(4), //
+			/** 充值界面·GridView 的单元格子项的边距 */
+			CC_GRIDVIEW_ITEM_HEIGHT(52), //
 
 			/** 充值界面·GridView 单元格大小 */
 			CC_GRIDVIEW_COLUMN_WIDTH(96),
 
 			/** 充值界面·充值卡输入框的高度 */
 			CC_CARD_HEIGHT(32),
+
+			/** 按钮间隔 */
+			CC_COMMIT_SPACE(16),
 
 			/** 道具兑换列表·图标宽度 */
 			CC_EX_ICON_W(48),
@@ -337,6 +357,61 @@ public class ResConstants {
 
 			public static int dip2px(float d) {
 				return (int) (d * mDensity + 0.5f);
+			}
+		}
+
+		/** 尺寸配置, DIP */
+		public static enum ZZDimenRect {
+			/** 充值界面·主活动区的边距 */
+			CC_ROOTVIEW_PADDING(24, 16, 24, 12),
+
+			/** 确认充值等提交类按钮 */
+			CC_RECHARGE_COMMIT(16, 4, 16, 4),
+
+			/** 充值界面·GridView 的单元格子项的边距 */
+			CC_GRIDVIEW_ITEM_PADDDING(16, 12, 16, 12),
+
+			/** 充值界面·话费·GridView 的单元格子项的边距 */
+			CC_GRIDVIEW_SMS_PADDDING(8, 4, 8, 4),
+
+			/** 兑换详情 */
+			CC_EX_DETAIL_PADDING(12, 8, 12, 8),
+			/** 兑换详情的展示面板边距 */
+			CC_EX_DETAIL_PANEL(6, 4, 6, 4),
+
+			;
+
+			private float left, top, right, bottom;
+
+			private ZZDimenRect(float l, float t, float r, float b) {
+				left = l;
+				top = t;
+				right = r;
+				bottom = b;
+			}
+
+			public void apply_padding(View v) {
+				int l = ZZDimen.dip2px(left);
+				int t = ZZDimen.dip2px(top);
+				int r = ZZDimen.dip2px(right);
+				int b = ZZDimen.dip2px(bottom);
+				v.setPadding(l, t, r, b);
+			}
+
+			public Rect rect() {
+				int l = ZZDimen.dip2px(left);
+				int t = ZZDimen.dip2px(top);
+				int r = ZZDimen.dip2px(right);
+				int b = ZZDimen.dip2px(bottom);
+				return new Rect(l, t, r, b);
+			}
+
+			public void apply_margins(MarginLayoutParams mlp) {
+				int l = ZZDimen.dip2px(left);
+				int t = ZZDimen.dip2px(top);
+				int r = ZZDimen.dip2px(right);
+				int b = ZZDimen.dip2px(bottom);
+				mlp.setMargins(l, t, r, b);
 			}
 		}
 	}
@@ -365,6 +440,7 @@ public class ResConstants {
 		TUP_YL("cc_tup_yl.png"), //
 		TUP_ZFB("cc_tup_zfb.png"), //
 		TUP_ZYB("cc_tup_zyb.png"), //
+		TUP_DEZF("cc_tup_dezf.png"), //
 		ZF_WXZ("cc_zf_wxz.9.png"), //
 		ZF_XZ("cc_zf_xz.9.png"), //
 		TITLE_BACK_DEFAULT("title_back_default.png"), //
@@ -472,6 +548,9 @@ public class ResConstants {
 			case PayChannel.PAY_TYPE_UNMPAY:
 				ret = CCImg.TUP_YL;
 				break;
+			case PayChannel.PAY_TYPE_EX_DEZF:
+				ret = CCImg.TUP_DEZF;
+				break;
 			case PayChannel.PAY_TYPE_YEEPAY_LT:
 				ret = CCImg.TUP_LT;
 				break;
@@ -485,7 +564,6 @@ public class ResConstants {
 				// 卓越币
 				ret = CCImg.TUP_ZYB;
 				break;
-
 			default:
 				ret = null;
 				break;

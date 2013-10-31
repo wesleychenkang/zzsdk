@@ -47,11 +47,7 @@ public class ResultRequestYeePay extends ResultRequest {
 	public void parseJson(JSONObject json) {
 		if (json == null)
 			return;
-		try {
-			super.parseJson(json);
-			mMessage = getString(json, K_MESSAGE);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		super.parseJson(json);
+		mMessage = json.optString(K_MESSAGE, null);
 	}
 }

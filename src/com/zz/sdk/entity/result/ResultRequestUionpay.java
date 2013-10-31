@@ -29,11 +29,7 @@ public class ResultRequestUionpay extends ResultRequest {
 	public void parseJson(JSONObject json) {
 		if (json == null)
 			return;
-		try {
-			super.parseJson(json);
-			mTN = getString(json, K_TN);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		super.parseJson(json);
+		mTN = json.optString(K_TN, null);
 	}
 }

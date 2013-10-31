@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -12,9 +13,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.unionpay.UPPayAssistEx;
+import com.unionpay.uppay.PayActivity;
 import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.ParamChain;
-import com.zz.sdk.ParamChain.KeyGlobal;
 import com.zz.sdk.ParamChain.ValType;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
 import com.zz.sdk.protocols.EmptyActivityControlImpl;
@@ -22,6 +23,7 @@ import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
+import com.zz.sdk.util.ResConstants.Config.ZZDimenRect;
 import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
 import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
@@ -134,8 +136,7 @@ class PaymentUnionLayout extends BaseLayout {
 
 		// 设置标题
 		{
-			ZZStr str = getEnv().getOwned(KeyPaymentList.K_PAY_TITLE,
-					ZZStr.class);
+			ZZStr str = getEnv().get(KeyPaymentList.K_PAY_TITLE, ZZStr.class);
 			if (str != null) {
 				String title;
 				if (mTypeName != null) {
@@ -270,11 +271,7 @@ class PaymentUnionLayout extends BaseLayout {
 	}
 
 	private void show_install_plugin() {
-		final int pleft = ZZDimen.CC_ROOTVIEW_PADDING_LEFT.px();
-		final int ptop = ZZDimen.CC_ROOTVIEW_PADDING_TOP.px();
-		final int pright = ZZDimen.CC_ROOTVIEW_PADDING_RIGHT.px();
-		final int pbottom = ZZDimen.CC_ROOTVIEW_PADDING_BOTTOM.px();
-
+		Rect r = ZZDimenRect.CC_ROOTVIEW_PADDING.rect();
 		Context ctx = mContext;
 		LinearLayout ll = new LinearLayout(ctx);
 		{
@@ -282,10 +279,10 @@ class PaymentUnionLayout extends BaseLayout {
 			FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
 					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT,
 					Gravity.CENTER);
-			lp.setMargins(pleft, ptop, pright, pbottom);
+			lp.setMargins(r.left, r.top, r.right, r.bottom);
 			ll.setLayoutParams(lp);
 			ll.setBackgroundDrawable(CCImg.BACKGROUND.getDrawble(ctx));
-			ll.setPadding(pleft, ptop, pright, pbottom);
+			ll.setPadding(r.left, r.top, r.right, r.bottom);
 		}
 
 		{
@@ -297,7 +294,7 @@ class PaymentUnionLayout extends BaseLayout {
 			tv.setCompoundDrawablesWithIntrinsicBounds(
 					CCImg.TUP_YL.getDrawble(ctx), null, null, null);
 			tv.setTextSize(24);
-			tv.setPadding(0, ptop, 0, pbottom);
+			tv.setPadding(0, r.top, 0, r.bottom);
 		}
 		{
 			TextView tv = create_normal_label(ctx, null);
@@ -305,7 +302,7 @@ class PaymentUnionLayout extends BaseLayout {
 			tv.setSingleLine(false);
 			tv.setBackgroundDrawable(CCImg.ZF_XZ.getDrawble(ctx));
 			tv.setText("完成购买需要安装银联支付控件，是否安装？");
-			tv.setPadding(pleft, ptop, pright, pbottom);
+			tv.setPadding(r.left, r.top, r.right, r.bottom);
 		}
 
 		{
@@ -317,20 +314,19 @@ class PaymentUnionLayout extends BaseLayout {
 					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
 					Gravity.CENTER));
 			l2.setOrientation(HORIZONTAL);
-			l2.setPadding(pleft, ptop, pright, pbottom);
+			l2.setPadding(r.left, r.top, r.right, r.bottom);
 
 			Button bt;
 			{
 				bt = new Button(ctx);
 				bt.setId(IDC.BT_INSTALL_UNIONPAYAPK.id());
 				LayoutParams lp = new LayoutParams(LP_WW);
-				lp.setMargins(0, 0, pright, 0);
+				lp.setMargins(0, 0, ZZDimen.CC_COMMIT_SPACE.px(), 0);
 				l2.addView(bt, lp);
-
 				bt.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
-						CCImg.BUTTON, CCImg.BUTTON_CLICK));
+						CCImg.BUY_BUTTON, CCImg.BUY_BUTTON_CLICK));
 				bt.setTextColor(ZZFontColor.CC_RECHARGE_COMMIT.color());
-				bt.setPadding(pleft, 6, pright, 6);
+				ZZDimenRect.CC_RECHARGE_COMMIT.apply_padding(bt);
 				ZZFontSize.CC_RECHARGE_COMMIT.apply(bt);
 				bt.setOnClickListener(this);
 				bt.setText("安装");
@@ -339,11 +335,10 @@ class PaymentUnionLayout extends BaseLayout {
 				bt = new Button(ctx);
 				bt.setId(IDC.BT_RETRY.id());
 				l2.addView(bt, new LayoutParams(LP_WW));
-
 				bt.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
-						CCImg.BUY_BUTTON, CCImg.BUY_BUTTON_CLICK));
+						CCImg.BUTTON, CCImg.BUTTON_CLICK));
 				bt.setTextColor(ZZFontColor.CC_RECHARGE_COMMIT.color());
-				bt.setPadding(pleft, 6, pright, 6);
+				ZZDimenRect.CC_RECHARGE_COMMIT.apply_padding(bt);
 				ZZFontSize.CC_RECHARGE_COMMIT.apply(bt);
 				bt.setOnClickListener(this);
 				bt.setText("重试");
@@ -363,12 +358,21 @@ class PaymentUnionLayout extends BaseLayout {
 		tryPayUnion(activity, mTN);
 	}
 
+	// public static void startPayByJAR(Activity activity, Class<?> payCls,
+	// String spId, String sysProvider, String orderInfo, String mode)
 	private void tryPayUnion(Activity activity, String tn) {
-		int ret = UPPayAssistEx.startPay(activity, null, null, tn, serverMode);
-		if (ret == UPPayAssistEx.PLUGIN_NOT_FOUND) {
-			show_install_plugin();
+		if (false) {
+			int ret = UPPayAssistEx.startPay(activity, null, null, tn,
+					serverMode);
+			if (ret == UPPayAssistEx.PLUGIN_NOT_FOUND) {
+				show_install_plugin();
+			} else {
+				showPopup_Wait(ZZStr.CC_RECHARGE_WAIT_RESULT.str(), null);
+			}
 		} else {
-			showPopup_Wait(ZZStr.CC_RECHARGE_WAIT_RESULT.str(), null);
+			// 独立 so 库方式启动银联
+			UPPayAssistEx.startPayByJAR(activity, PayActivity.class, null,
+					null, tn, serverMode);
 		}
 	}
 

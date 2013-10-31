@@ -121,41 +121,4 @@ public class BaseResult implements Serializable, JsonParseInterface {
 			json.put(key, value);
 		}
 	}
-
-	/** get int数据 **/
-	protected static Integer getInt(JSONObject json, String key)
-			throws Exception {
-		if (!isNullOrEmpty(key) && json.has(key)) {
-			return json.getInt(key);
-		}
-		return null;
-	}
-
-	/** get double数据 **/
-	protected static Double getDouble(JSONObject json, String key)
-			throws Exception {
-		if (!isNullOrEmpty(key) && json.has(key)) {
-			return json.getDouble(key);
-		}
-		return null;
-	}
-
-	/** get String数据 **/
-	protected static String getString(JSONObject json, String key)
-			throws Exception {
-		String value = null;
-		if (!isNullOrEmpty(key) && json.has(key)) {
-			value = json.getString(key);
-		}
-		return value;
-	}
-
-	/** get String数据 **/
-	protected static JSONArray getArray(JSONObject json, String key)
-			throws Exception {
-		if (!isNullOrEmpty(key) && json.has(key)) {
-			return json.getJSONArray(key);
-		}
-		return null;
-	}
 }

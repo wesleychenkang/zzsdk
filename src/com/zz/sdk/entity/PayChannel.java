@@ -44,6 +44,9 @@ public class PayChannel implements JsonParseInterface {
 	public static final int PAY_TYPE_ZZCOIN = 7;
 	public static final int _PAY_TYPE_MAX_ = 8;
 
+	/** 扩展支付·大额支付 */
+	public static final int PAY_TYPE_EX_DEZF = 100;
+
 	/** 话费[短信通知] */
 	public static final int PAY_TYPE_KKFUNPAY_EX = 7;// _PAY_TYPE_MAX_ + 1;
 
@@ -121,14 +124,17 @@ public class PayChannel implements JsonParseInterface {
 		priceList = json.optString(K_CARD_AMOUNT, null);
 
 		// ---- 本地化调整
-		if (type >= 0 && type < _PAY_TYPE_MAX_) {
-			if (channelName == null) {
+		if (channelName == null) {
+			if (type >= 0 && type < _PAY_TYPE_MAX_) {
 				channelName = CHANNEL_NAME[type];
-			}
-			if (priceList == null) {
-				priceList = DEF_PRICE_LIST;
+			} else if (type == PAY_TYPE_EX_DEZF) {
+				channelName = "大额支付";
 			}
 		}
+		if (priceList == null) {
+			priceList = DEF_PRICE_LIST;
+		}
+
 	}
 
 	@Override
@@ -143,7 +149,8 @@ public class PayChannel implements JsonParseInterface {
 	}
 
 	public boolean isValid() {
-		return type >= 0 && type < _PAY_TYPE_MAX_;
+		return type == PayChannel.PAY_TYPE_EX_DEZF
+				|| (type >= 0 && type < _PAY_TYPE_MAX_);
 	}
 
 	final static String K_ID = "id";

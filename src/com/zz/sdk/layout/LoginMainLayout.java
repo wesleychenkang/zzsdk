@@ -191,7 +191,7 @@ class LoginMainLayout extends BaseLayout {
 		env.add(KeyUser.K_SDKUSER_ID, mSdkUserId);
 		env.add(KeyUser.K_LOGIN_STATE_SUCCESS, Boolean.TRUE);
 
-		mUserUtil.syncSdkUser();
+		mUserUtil.syncSdkUser(true);
 	}
 
 	@Override
@@ -268,13 +268,13 @@ class LoginMainLayout extends BaseLayout {
 
 		// 修改密码
 		case BT_UPDATE_PASSWORD:
-			mLoginForModify = idc == IDC.BT_UPDATE_PASSWORD;
 			// 登录
 		case BT_LOGIN: {
 			Pair<View, String> err = checkLoginInput();
-			if (err == null)
+			if (err == null) {
+				mLoginForModify = idc == IDC.BT_UPDATE_PASSWORD;
 				tryLoginWait(mLoginName, mPassword);
-			else {
+			} else {
 				showInputError(err);
 			}
 		}

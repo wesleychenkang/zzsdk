@@ -38,7 +38,6 @@ import com.zz.sdk.ParamChain;
 import com.zz.sdk.ParamChain.ValType;
 import com.zz.sdk.entity.result.BaseResult;
 import com.zz.sdk.entity.result.ResultPayMessage;
-import com.zz.sdk.layout.BaseLayout.ITaskCallBack;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
 import com.zz.sdk.protocols.EmptyActivityControlImpl;
 import com.zz.sdk.util.ConnectionUtil;
@@ -214,8 +213,7 @@ class PaymentOnlineLayout extends BaseLayout {
 
 		// 设置标题
 		{
-			ZZStr str = getEnv().getOwned(KeyPaymentList.K_PAY_TITLE,
-					ZZStr.class);
+			ZZStr str = getEnv().get(KeyPaymentList.K_PAY_TITLE, ZZStr.class);
 			if (str != null) {
 				String title;
 				if (mTypeName != null) {
@@ -500,139 +498,141 @@ class PaymentOnlineLayout extends BaseLayout {
 		mTypeName = null;
 		mPayResultState = MSG_STATUS.EXIT_SDK;
 	}
-}
 
-/** 获取支付列表 */
-class GetPayUrlMessageTask extends AsyncTask<Object, Void, BaseResult> {
+	/** 获取支付列表 */
+	private static class GetPayUrlMessageTask extends
+			AsyncTask<Object, Void, BaseResult> {
 
-	/** 创建并启动任务 */
-	protected static AsyncTask<?, ?, ?> createAndStart(ConnectionUtil cu,
-			ITaskCallBack callback, Object token) {
-		GetPayUrlMessageTask task = new GetPayUrlMessageTask();
-		task.execute(cu, callback, token);
-		return task;
-	}
-
-	ITaskCallBack mCallback;
-	Object mToken;
-
-	@Override
-	protected BaseResult doInBackground(Object... params) {
-		ConnectionUtil cu = (ConnectionUtil) params[0];
-		ITaskCallBack callback = (ITaskCallBack) params[1];
-		Object token = params[2];
-
-		Logger.d("getPayUrlMessage");
-		if (PaymentOnlineLayout.DEBUG) {
-			DebugFlags.debug_TrySleep(0, 60);
+		/** 创建并启动任务 */
+		protected static AsyncTask<?, ?, ?> createAndStart(ConnectionUtil cu,
+				ITaskCallBack callback, Object token) {
+			GetPayUrlMessageTask task = new GetPayUrlMessageTask();
+			task.execute(cu, callback, token);
+			return task;
 		}
 
-		ResultPayMessage ret = cu.getPayUrlMessage();
-		if (!this.isCancelled()) {
-			mCallback = callback;
-			mToken = token;
+		ITaskCallBack mCallback;
+		Object mToken;
+
+		@Override
+		protected BaseResult doInBackground(Object... params) {
+			ConnectionUtil cu = (ConnectionUtil) params[0];
+			ITaskCallBack callback = (ITaskCallBack) params[1];
+			Object token = params[2];
+
+			Logger.d("getPayUrlMessage");
+			if (PaymentOnlineLayout.DEBUG) {
+				DebugFlags.debug_TrySleep(0, 60);
+			}
+
+			ResultPayMessage ret = cu.getPayUrlMessage();
+			if (!this.isCancelled()) {
+				mCallback = callback;
+				mToken = token;
+			}
+			return ret;
 		}
-		return ret;
-	}
 
-	@Override
-	protected void onPostExecute(BaseResult result) {
-		if (mCallback != null) {
-			mCallback.onResult(this, mToken, result);
+		@Override
+		protected void onPostExecute(BaseResult result) {
+			if (mCallback != null) {
+				mCallback.onResult(this, mToken, result);
+			}
+			// clean
+			mCallback = null;
+			mToken = null;
 		}
-		// clean
-		mCallback = null;
-		mToken = null;
-	}
-}
-
-class SMSReceiver extends BroadcastReceiver {
-
-	interface ISRListener {
-		/**
-		 * 收到短信
-		 * 
-		 * @param object
-		 */
-		public void onSMSReceived(Context ctx, Object token, Intent intent);
 	}
 
-	static final String ACTION_SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
+	private static class SMSReceiver extends BroadcastReceiver {
 
-	HashMap<ISRListener, Object> mListener = new HashMap<ISRListener, Object>();
+		interface ISRListener {
+			/**
+			 * 收到短信
+			 * 
+			 * @param object
+			 */
+			public void onSMSReceived(Context ctx, Object token, Intent intent);
+		}
 
-	static class SMSInfo {
-		String mAddress;
-		String mMsgBody;
-		long mTimestampMillis;
+		static final String ACTION_SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
 
-		public StringBuilder toString(StringBuilder sb) {
-			sb.append("From:");
-			sb.append(mAddress);
-			sb.append("\nTime:");
-			sb.append(new Date(mTimestampMillis).toLocaleString());
-			sb.append("\nMessage:");
-			sb.append(mMsgBody);
+		HashMap<ISRListener, Object> mListener = new HashMap<ISRListener, Object>();
+
+		static class SMSInfo {
+			String mAddress;
+			String mMsgBody;
+			long mTimestampMillis;
+
+			public StringBuilder toString(StringBuilder sb) {
+				sb.append("From:");
+				sb.append(mAddress);
+				sb.append("\nTime:");
+				sb.append(new Date(mTimestampMillis).toLocaleString());
+				sb.append("\nMessage:");
+				sb.append(mMsgBody);
+				return sb;
+			}
+		}
+
+		static SMSInfo[] getSMSMessage(Intent intent) {
+			SMSInfo infos[];
+			Bundle bundle = intent.getExtras();
+			if (bundle != null) {
+				Object[] pdus = (Object[]) bundle.get("pdus");
+
+				infos = new SMSInfo[pdus.length];
+				for (int i = 0; i < pdus.length; i++) {
+					SmsMessage msg = SmsMessage.createFromPdu((byte[]) pdus[i]);
+					SMSInfo info = new SMSInfo();
+					info.mAddress = msg.getDisplayOriginatingAddress();
+					info.mMsgBody = msg.getDisplayMessageBody();
+					info.mTimestampMillis = msg.getTimestampMillis();
+					infos[i] = info;
+				}
+				return infos;
+			}
+			return null;
+		}
+
+		static StringBuilder getSMSMessage(StringBuilder sb, Intent intent) {
+			SMSInfo[] info = getSMSMessage(intent);
+			if (info != null) {
+				for (SMSInfo i : info) {
+					sb = i.toString(sb);
+				}
+			}
 			return sb;
 		}
-	}
 
-	static SMSInfo[] getSMSMessage(Intent intent) {
-		SMSInfo infos[];
-		Bundle bundle = intent.getExtras();
-		if (bundle != null) {
-			Object[] pdus = (Object[]) bundle.get("pdus");
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (ACTION_SMS_RECEIVED.equals(intent.getAction())) {
 
-			infos = new SMSInfo[pdus.length];
-			for (int i = 0; i < pdus.length; i++) {
-				SmsMessage msg = SmsMessage.createFromPdu((byte[]) pdus[i]);
-				SMSInfo info = new SMSInfo();
-				info.mAddress = msg.getDisplayOriginatingAddress();
-				info.mMsgBody = msg.getDisplayMessageBody();
-				info.mTimestampMillis = msg.getTimestampMillis();
-				infos[i] = info;
-			}
-			return infos;
-		}
-		return null;
-	}
-
-	static StringBuilder getSMSMessage(StringBuilder sb, Intent intent) {
-		SMSInfo[] info = getSMSMessage(intent);
-		if (info != null) {
-			for (SMSInfo i : info) {
-				sb = i.toString(sb);
+				if (mListener.size() > 0) {
+					dispatchMsg(context, intent);
+				} else {
+					StringBuilder sb = new StringBuilder();
+					sb = getSMSMessage(sb, intent);
+					Toast.makeText(context, sb.toString(), Toast.LENGTH_LONG)
+							.show();
+				}
 			}
 		}
-		return sb;
-	}
 
-	@Override
-	public void onReceive(Context context, Intent intent) {
-		if (ACTION_SMS_RECEIVED.equals(intent.getAction())) {
-
-			if (mListener.size() > 0) {
-				dispatchMsg(context, intent);
-			} else {
-				StringBuilder sb = new StringBuilder();
-				sb = getSMSMessage(sb, intent);
-				Toast.makeText(context, sb.toString(), Toast.LENGTH_LONG)
-						.show();
+		private void dispatchMsg(Context context, Intent intent) {
+			for (Entry<ISRListener, Object> e : mListener.entrySet()) {
+				e.getKey().onSMSReceived(context, e.getValue(), intent);
 			}
 		}
-	}
 
-	private void dispatchMsg(Context context, Intent intent) {
-		for (Entry<ISRListener, Object> e : mListener.entrySet()) {
-			e.getKey().onSMSReceived(context, e.getValue(), intent);
+		public void addListener(Object token, ISRListener listener) {
+			mListener.put(listener, token);
+		}
+
+		public void removeListener(ISRListener listener) {
+			mListener.remove(listener);
 		}
 	}
 
-	public void addListener(Object token, ISRListener listener) {
-		mListener.put(listener, token);
-	}
-
-	public void removeListener(ISRListener listener) {
-		mListener.remove(listener);
-	}
-};
+}

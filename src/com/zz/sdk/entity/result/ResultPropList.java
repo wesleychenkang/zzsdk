@@ -1,7 +1,12 @@
 package com.zz.sdk.entity.result;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import com.zz.sdk.entity.PropsInfo;
 
 /**
  * GetPropList(获取道具列表）
@@ -11,9 +16,8 @@ import org.json.JSONObject;
  * </ul>
  * <ul>
  * 输出
- * <li>props
  * <li>count
- * <li>prop
+ * <li>props
  * <ul>
  * <li>id
  * <li>productId
@@ -32,15 +36,27 @@ public class ResultPropList extends BaseResult {
 
 	protected static final String K_PROPS = "props";
 	protected static final String K_COUNT = "count";
-	protected static final String K_PROP = "prop";
-	protected static final String K_ID = "id";
-	protected static final String K_PRODUCTID = "productid";
-	protected static final String K_NAME = "name";
-	protected static final String K_ICON = "icon";
-	protected static final String K_BIGICON = "bigicon";
-	protected static final String K_PRICE = "price";
-	protected static final String K_DESC = "desc";
-	protected static final String K_GAMEROLE = "gamerole";
+
+	/** 计数 */
+	public int mCount;
+	/** 道具列表 */
+	public PropsInfo[] mProps;
+
+	@Override
+	public boolean isSuccess() {
+		return super.isSuccess() && mCount > 0 && mProps != null
+				&& mCount == mProps.length;
+	}
+
+	@Override
+	public String getErrDesc() {
+		if (super.isSuccess()) {
+			if (!isSuccess()) {
+				return "数据错误！";
+			}
+		}
+		return getErrDesc(ErrMsg, 0);
+	}
 
 	@Override
 	public JSONObject buildJson() {
@@ -59,6 +75,20 @@ public class ResultPropList extends BaseResult {
 		if (json == null)
 			return;
 		super.parseJson(json);
-		JSONArray ja = json.optJSONArray(K_PROP);
+		mCount = json.optInt(K_COUNT);
+
+		mProps = new PropsInfo[0];
+		JSONArray ja = json.optJSONArray(K_PROPS);
+		if (ja != null && ja.length() > 0) {
+			List<PropsInfo> l = new ArrayList<PropsInfo>(mCount);
+			for (int i = 0, c = ja.length(); i < c; i++) {
+				PropsInfo info = new PropsInfo();
+				info.parseJson(ja.optJSONObject(i));
+				if (info.isValid()) {
+					l.add(info);
+				}
+			}
+			mProps = l.toArray(mProps);
+		}
 	}
 }

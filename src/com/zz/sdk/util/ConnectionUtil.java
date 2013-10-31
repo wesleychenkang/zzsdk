@@ -102,6 +102,10 @@ public class ConnectionUtil {
 		T br = null;
 		try {
 			br = clazz.newInstance();
+			if (DebugFlags.DEBUG) {
+				Logger.d("url:" + url);
+				Logger.d("request:" + nvps);
+			}
 			InputStream is = doRequest(url, nvps, attempts);
 			if (is != null) {
 				String json = parseJsonData(is);
@@ -444,6 +448,7 @@ public class ConnectionUtil {
 			clazz = ResultRequestAlipayTenpay.class;
 			break;
 		case PayChannel.PAY_TYPE_UNMPAY:
+		case PayChannel.PAY_TYPE_EX_DEZF:
 			clazz = ResultRequestUionpay.class;
 			break;
 		case PayChannel.PAY_TYPE_YEEPAY_LT:
