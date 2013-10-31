@@ -118,15 +118,6 @@ public class LayoutFactory {
 		public boolean onExit();
 
 		/**
-		 * 对话框被关闭
-		 * 
-		 * @param dialog
-		 * @param cancelTag
-		 * @return
-		 */
-		public boolean onDialogCancel(DialogInterface dialog, Object cancelTag);
-
-		/**
 		 * 获取环境变量
 		 * 
 		 * @return

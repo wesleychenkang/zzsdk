@@ -87,7 +87,8 @@ public class ConnectionUtil {
 	 * 请求数据
 	 * 
 	 * @param clazz
-	 *            数据构造类，基于 {@link JsonParseInterface}
+	 *            数据构造类，基于 {@link JsonParseInterface}。 一般为 &lt;? extends
+	 *            {@link BaseResult}&gt;
 	 * @param url
 	 *            地址
 	 * @param nvps
@@ -95,23 +96,37 @@ public class ConnectionUtil {
 	 * @param attempts
 	 *            尝试次数
 	 * @return 如果返回 null 表示构造类失败，否则自行判断有无经过
-	 *         {@link JsonParseInterface#parseJson(JSONObject)} 构造数据
+	 *         {@link JsonParseInterface#parseJson(JSONObject)} 构造数据。如
+	 *         {@link BaseResult#isUsed()} {@link BaseResult#isSuccess()}等
 	 */
 	private <T> T doRequest(Class<T> clazz, String url,
 			List<BasicNameValuePair> nvps, int attempts) {
 		T br = null;
 		try {
+			// step1: 构造返回值
 			br = clazz.newInstance();
 			if (DebugFlags.DEBUG) {
 				Logger.d("url:" + url);
 				Logger.d("request:" + nvps);
 			}
+			// step2: 向服务器发起请求
 			InputStream is = doRequest(url, nvps, attempts);
 			if (is != null) {
+				// step3: 解析返回值内容
 				String json = parseJsonData(is);
-				JSONObject o = new JSONObject(json);
-				if (DebugFlags.DEBUG) {
-					Logger.d(o);
+				JSONObject o;
+				try {
+					o = new JSONObject(json);
+					if (DebugFlags.DEBUG) {
+						Logger.d(o);
+					}
+				} catch (JSONException e) {
+					e.printStackTrace();
+					if (DebugFlags.DEBUG) {
+						Logger.d("D: 内容无效!");
+					}
+					// 如果内容无效，则使用空数据，表明至少有过返回值
+					o = new JSONObject();
 				}
 				if (br instanceof JsonParseInterface)
 					((JsonParseInterface) br).parseJson(o);
@@ -119,8 +134,11 @@ public class ConnectionUtil {
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
+			if (DebugFlags.DEBUG) {
+				Logger.d("bad class:" + clazz);
+			}
 			e.printStackTrace();
-		} catch (JSONException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return br;

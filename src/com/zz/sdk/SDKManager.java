@@ -1,5 +1,8 @@
 package com.zz.sdk;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -15,15 +18,17 @@ import com.zz.sdk.ParamChain.KeyGlobal;
 import com.zz.sdk.ParamChain.KeyUser;
 import com.zz.sdk.activity.BaseActivity;
 import com.zz.sdk.activity.LAYOUT_TYPE;
+import com.zz.sdk.entity.SMSChannelMessage;
 import com.zz.sdk.out.ZZSDKOut;
 import com.zz.sdk.out.util.Application;
 import com.zz.sdk.out.util.GetDataImpl;
 import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.DebugFlags;
+import com.zz.sdk.util.DebugFlags.KeyDebug;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants;
-import com.zz.sdk.util.Utils;
 import com.zz.sdk.util.ResConstants.ZZStr;
+import com.zz.sdk.util.Utils;
 
 /**
  * SDK 接口管理类. <strong>使用流程（示例）：</strong>
@@ -490,5 +495,90 @@ public class SDKManager {
 		return "Ver:" + ZZSDKConfig.VERSION_CODE + "-"
 				+ ZZSDKConfig.VERSION_NAME + "-" + ZZSDKConfig.VERSION_DATE
 				+ ZZSDKConfig.CONFIG_DESC;
+	}
+
+	public void debug_start(Handler callbackHandler, int what,
+			String gameServerID, final String serverName, final String roleId,
+			final String gameRole) {
+		if (DebugFlags.DEBUG) {
+			final int amount = -1;
+			final boolean amount_is_zycoin = false;
+			final boolean pay_zycoin_disabled = false;
+			final boolean isCloseWindow = true;
+			final String callBackInfo = "这是测试文本，debug_start";
+			LAYOUT_TYPE root_layout = null;
+			String layout_class = null;
+			ParamChain env = mRootEnv.grow(KeyCaller.class.getName());
+			int debug_type = 2;
+			double pay_amount = 0;
+
+			switch (debug_type) {
+			case 2: // 调试话费
+			{
+				layout_class = "com.zz.sdk.layout.PaymentSMSLayout";
+				env.add("global.paymentlist.pay_channel_type", 5);
+				env.add("global.paymentlist.pay_amount", pay_amount);
+				env.add("global.paymentlist.pay_order_number",
+						"1533763KO10001247948A");
+				env.add("global.paymentlist.pay_title", ZZStr.CC_RECHARGE_TITLE);
+				env.add("global.paymentlist.pay_sms_confirm_enabled", false);
+				env.add("global.paymentlist.pay_channel_name", "短信");
+
+				JSONArray ja;
+				try {
+					ja = new JSONArray(
+							"["
+									+ "{'serviceType':'WXSHL_HLD','spCode':'10660657','command':'ma6004451634','price':'100','recognition_rule':'','sp_name':'微信优势','service_name':'欢乐岛','exactly_matching_product':'0','fetch_command_when_billing':'0'},"
+									+ "{'serviceType':'FEIDDX_YMSHH','spCode':'10660078','command':'806004451634','price':'200','recognition_rule':'','sp_name':'飞动乐驰','service_name':'伊媚生活','exactly_matching_product':'0','fetch_command_when_billing':'0'},"
+									+ "{'serviceType':'HZDX_ZXWXHY','spCode':'106601866','command':'50116004451634','price':'500','recognition_rule':'','sp_name':'华中天讯','service_name':'尊享无线会员','exactly_matching_product':'0','fetch_command_when_billing':'0'}"
+									+ "]");
+					SMSChannelMessage[] smsChannel = new SMSChannelMessage[ja
+							.length()];
+					for (int i = 0; i < ja.length(); i++) {
+						smsChannel[i] = new SMSChannelMessage();
+						smsChannel[i].parseJson(ja.optJSONObject(i));
+					}
+					env.add("global.paymentlist.pay_sms_channel_message",
+							smsChannel);
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+				break;
+
+			default:
+				break;
+			}
+			env.add(KeyUser.K_LOGIN_NAME, "zzsdk001");
+			env.add(KeyUser.K_LOGIN_STATE_SUCCESS, true);
+			env.add(KeyCaller.K_MSG_HANDLE, callbackHandler);
+			env.add(KeyCaller.K_MSG_WHAT, what);
+			env.add(KeyCaller.K_GAME_SERVER_ID, gameServerID);
+			env.add(KeyCaller.K_SERVER_NAME, serverName);
+			env.add(KeyCaller.K_ROLE_ID, roleId);
+			env.add(KeyCaller.K_GAME_ROLE, gameRole);
+			env.add(KeyCaller.K_AMOUNT, amount);
+			env.add(KeyCaller.K_AMOUNT_IS_ZYCOIN, amount_is_zycoin);
+			env.add(KeyCaller.K_PAYMENT_ZYCOIN_DISABLED, pay_zycoin_disabled);
+			env.add(KeyCaller.K_IS_CLOSE_WINDOW, isCloseWindow);
+			env.add(KeyCaller.K_CALL_BACK_INFO, callBackInfo);
+
+			Intent intent = new Intent(mContext, BaseActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			if (root_layout != null) {
+				env.add(KeyGlobal.K_UI_VIEW_TYPE, root_layout);
+				env.getParent(BaseActivity.class.getName()).add(
+						root_layout.key(), env, ParamChain.ValType.TEMPORARY);
+				intent.putExtra(KeyGlobal.K_UI_NAME, root_layout.key());
+				mContext.startActivity(intent);
+			} else if (layout_class != null) {
+				env.add(KeyDebug.K_DEBUG_CLASS_NAME, layout_class);
+				env.getParent(BaseActivity.class.getName()).add(layout_class,
+						env, ParamChain.ValType.TEMPORARY);
+				intent.putExtra(KeyGlobal.K_UI_NAME, layout_class);
+				mContext.startActivity(intent);
+			}
+		}
 	}
 }

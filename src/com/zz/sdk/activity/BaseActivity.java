@@ -20,6 +20,8 @@ import com.zz.sdk.layout.LayoutFactory;
 import com.zz.sdk.layout.LayoutFactory.ILayoutView;
 import com.zz.sdk.layout.LayoutFactory.KeyLayoutFactory;
 import com.zz.sdk.protocols.ActivityControlInterface;
+import com.zz.sdk.util.DebugFlags;
+import com.zz.sdk.util.DebugFlags.KeyDebug;
 import com.zz.sdk.util.Logger;
 
 /**
@@ -143,8 +145,18 @@ public class BaseActivity extends Activity {
 		// 创建主视图
 		LAYOUT_TYPE type = mRootEnv.get(KeyGlobal.K_UI_VIEW_TYPE,
 				LAYOUT_TYPE.class);
-		if (!tryEnterView(type, mRootEnv)) {
+		if (type == null || !tryEnterView(type, mRootEnv)) {
 			Logger.e("bad root view");
+
+			if (DebugFlags.DEBUG && DebugFlags.DEBUG_DEMO) {
+				if (tryEnterView(
+						getClassLoader(),
+						mRootEnv.get(KeyDebug.K_DEBUG_CLASS_NAME, String.class),
+						mRootEnv)) {
+					return true;
+				}
+			}
+
 			return false;
 		}
 

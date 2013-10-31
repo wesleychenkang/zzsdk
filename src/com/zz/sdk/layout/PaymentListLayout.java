@@ -139,7 +139,7 @@ public class PaymentListLayout extends CCBaseLayout {
 		/** 充值中心·用于银联，类型{@link String}，取值 {@link Result#tn} */
 		public static final String K_PAY_UNION_TN = _TAG_ + "pay_union_tn";
 
-		/** 充值中心·用于话费支付，类型{@link SMSChannelMessage}，取值 {@link Result#attach2} */
+		/** 充值中心·用于话费支付，类型{@link SMSChannelMessage}[]，取值 {@link Result#attach2} */
 		public static final String K_PAY_SMS_CHANNELMESSAGE = _TAG_
 				+ "pay_sms_channel_message";
 		/**

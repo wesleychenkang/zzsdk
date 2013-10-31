@@ -439,9 +439,11 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		LinearLayout ll = new LinearLayout(ctx);
 		ll.setId(IDC.ACT_WAIT_PANEL.id());
 		ll.setOrientation(VERTICAL);
-		ll.setLayoutParams(new FrameLayout.LayoutParams(
+		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
 				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
-				Gravity.CENTER));
+				Gravity.CENTER);
+		ZZDimenRect.CC_ROOTVIEW_PADDING.apply_margins(lp);
+		ll.setLayoutParams(lp);
 		ll.setBackgroundDrawable(CCImg.BACKGROUND.getDrawble(ctx));
 		ZZDimenRect.CC_ROOTVIEW_PADDING.apply_padding(ll);
 
@@ -488,6 +490,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 			ll.addView(tv, new LayoutParams(LP_MW));
 			tv.setId(IDC.TV_POPUP_WAIT_LABEL.id());
 			tv.setGravity(Gravity.CENTER);
+			tv.setSingleLine(false);
 			if (tip != null)
 				tv.setText(tip);
 		}
@@ -1170,11 +1173,6 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		mExitTriggerLastTime = 0;
 		mExitTriggerInterval = 0;
 		mExitTriggerTip = null;
-	}
-
-	@Override
-	public boolean onDialogCancel(DialogInterface dialog, Object tag) {
-		return false;
 	}
 
 	@Override
