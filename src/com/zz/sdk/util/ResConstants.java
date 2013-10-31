@@ -389,7 +389,9 @@ public class ResConstants {
 		LOGIN_BUTTON_HUANG("login_button_huang.9.png"), //
 		LOGIN_BUTTON_KUAI("login_button_kuai.png"), //
 		LOGIN_BUTTON_KUAI_ANXIA("login_button_kuai_anxia.png"), //
-		LOGIN_EDIT("login_edit_press.png");
+		LOGIN_EDIT("login_edit_press.png"),
+		LOGIN_RADIO("btn_radio_off.png"),
+		LOGIN_RADIO_PRESSED("btn_radio_pressed.png");
 
 		;
 

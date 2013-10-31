@@ -141,7 +141,7 @@ public class LoginLayout extends LinearLayout {
 			//content.setPadding(ZZDimen.dip2px(25), ZZDimen.dip2px(25), ZZDimen.dip2px(25), ZZDimen.dip2px(25));
 			btnLogin.setTextSize(14);
 			btnLogin.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
-			btnLogin.setPadding(ZZDimen.dip2px(40), ZZDimen.dip2px(15),ZZDimen.dip2px(40),ZZDimen.dip2px(15));
+			btnLogin.setPadding(ZZDimen.dip2px(30), ZZDimen.dip2px(15),ZZDimen.dip2px(30),ZZDimen.dip2px(15));
 		}
 		// 第一层，左：账号输入，右：「快速注册」或「注册账号、修改密码」
 		if (true) {
@@ -250,7 +250,7 @@ public class LoginLayout extends LinearLayout {
 						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 				lpregister.setMargins(ZZDimen.dip2px(10), 0, 0, 0);
 				btnRegister.setTextSize(14);
-				btnRegister.setPadding(ZZDimen.dip2px(40), ZZDimen.dip2px(15),ZZDimen.dip2px(40),ZZDimen.dip2px(15));
+				btnRegister.setPadding(ZZDimen.dip2px(30), ZZDimen.dip2px(15),ZZDimen.dip2px(30),ZZDimen.dip2px(15));
 				wrap3.addView(btnRegister, lpregister);
 				btnOther.setTextSize(14);
 				btnOther.setPadding(10, 15,10,15);
