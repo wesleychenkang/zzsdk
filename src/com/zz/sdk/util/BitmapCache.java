@@ -207,5 +207,13 @@ public class BitmapCache {
 		listDrawable.addState(new int[] {  }, picNormal);
 		return listDrawable;
 	}
+   public static  StateListDrawable getStateRadioDrawable(Context ctx,Drawable picChecked, Drawable picNormal){
+	   
+	   StateListDrawable listDrawable = new StateListDrawable();
+		listDrawable.addState(new int[]{android.R.attr.state_checked}, picChecked);
+		// listDrawable.addState(new int[]{android.R.attr.state_focused}, getDrawable(picFocused));
+		listDrawable.addState(new int[]{android.R.attr.state_enabled}, picNormal);
+	   return listDrawable;
+   }
 	
 }

@@ -71,9 +71,9 @@ class LoginMainLayout extends BaseLayout {
 	private FrameLayout main;
 	private Handler mHandler = new Handler();
 	private Context ctx;
-	private LinearLayout content;
 	private String mSdkUserId;
 	private String mNewPassword;
+	private FrameLayout.LayoutParams framly = new  FrameLayout.LayoutParams (LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
 
 	protected static enum IDC implements IIDC {
 		ACT_ERR,
@@ -172,7 +172,6 @@ class LoginMainLayout extends BaseLayout {
 			main.addView(createView_regist(ctx));
 		}
 			break;
-
 		default:
 			break;
 		}
@@ -256,6 +255,9 @@ class LoginMainLayout extends BaseLayout {
 		IDC idc = IDC.fromID(v.getId());
 		switch (idc) {
 		case BT_AUTO_LOGIN_CANCEL:
+			if(mAutoDialog!=null &&mAutoDialog.isShowing()){
+				mAutoDialog.dismiss();
+			}
 			break;
 
 		// 注册账号
@@ -638,20 +640,6 @@ class LoginMainLayout extends BaseLayout {
 	}
 
 	/**
-	 * 服务器请求
-	 */
-	private void doPost() {
-
-	}
-
-	/**
-	 * 服务器返回
-	 */
-	private void doBack() {
-
-	}
-
-	/**
 	 * 创建登录 LinearLayout
 	 * 
 	 * @param ctx
@@ -707,60 +695,41 @@ class LoginMainLayout extends BaseLayout {
 		final boolean isVertical = Utils.isOrientationVertical(getContext());
 		int widthPixels = getResources().getDisplayMetrics().widthPixels;
 		int heightPixels = getResources().getDisplayMetrics().heightPixels;
-		int weight1 = widthPixels * 4 / 5;
-
-		int weight2 = widthPixels * (isVertical ? 8 : 7) / 8;
-
+		int heigth1 = heightPixels * 1 / 20;
+		int weight2 = widthPixels * (isVertical ? 8 : 4) / 8;
 		setOrientation(VERTICAL);
 		// 整体背景图
 		rv.setBackgroundDrawable(BitmapCache.getDrawable(ctx,
 				(isVertical ? Constants.ASSETS_RES_PATH_VERTICAL
 						: Constants.ASSETS_RES_PATH) + "bj.jpg"));
 		setWeightSum(1.0f);
-
-		LinearLayout layout1 = new LinearLayout(ctx);
-		layout1.setOrientation(HORIZONTAL);
-		// layout1.setGravity(Gravity.RIGHT | Gravity.BOTTOM);
-		LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(weight1,
-				0);
-		lp1.weight = 0.27f;
-		addView(layout1, lp1);
-
-		ImageView logo = new ImageView(ctx);
-		// logo.setImageDrawable(BitmapCache.getDrawable(mActivity,
-		// Constants.ASSETS_RES_PATH + "logo.png"));
-		LinearLayout.LayoutParams lpLogo = new LinearLayout.LayoutParams(-2, -2);
-		layout1.addView(logo, lpLogo);
-
-		LinearLayout layout2 = new LinearLayout(ctx);
-		LinearLayout.LayoutParams lp2 = new LinearLayout.LayoutParams(weight2,
-				0);
-		lp2.weight = 0.73f;
-		addView(layout2, lp2);
-		layout2.setGravity(Gravity.RIGHT);
-
+		framly.width = weight2;
+		
 		FrameLayout top = new FrameLayout(ctx);
 		ImageView image = new ImageView(ctx);
 		image.setImageDrawable(BitmapCache.getDrawable(ctx,
 				Constants.ASSETS_RES_PATH + "logo2.png"));
 		top.addView(image);
+		
 		FrameLayout.LayoutParams l = new FrameLayout.LayoutParams(
 				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		rv.addView(top, l);
+		
+		
 		boolean hasAccount = mLoginName != null && mLoginName.length() > 0;
-
 		main = new FrameLayout(ctx);
-		LinearLayout login = createView_login(ctx, hasAccount);
 		main.setBackgroundDrawable(BitmapCache.getDrawable(ctx,
 				Constants.ASSETS_RES_PATH + "landed_bg.png"));
-		FrameLayout.LayoutParams lf =new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
-		lf.gravity = Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL;
+		framly.gravity = Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL;
+		framly.topMargin =isVertical ? -heigth1:0;
+		framly.rightMargin = isVertical ? 0 : -heigth1;
+  	    LinearLayout login = createView_login(ctx, hasAccount);
 		main.addView(login);
-		rv.addView(main,lf);
+		rv.addView(main,framly);
 		// 显示“自动登录”框
 		if (hasAccount) {
 			show_auto_login_wait();
-		}
+		 }
 	}
 
 	private Runnable doAutoLogin = new Runnable() {

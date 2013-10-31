@@ -54,6 +54,7 @@ public class LoginRegisterLayout extends LinearLayout{
 
 		mRegistUserId = new EditText(ctx);
 		mRegistUserId.setSingleLine();
+		mRegistUserId.setId(IDC.ED_REGISTER_NAME.id());
 		mRegistUserId.setBackgroundDrawable(CCImg.LOGIN_EDIT.getDrawble(ctx));
 		mRegistUserId.setHint("请输入帐号");
 		mRegistUserId.setTextColor(Color.BLACK);
@@ -84,6 +85,7 @@ public class LoginRegisterLayout extends LinearLayout{
 		mRegistUserPwd.setSingleLine();
 		mRegistUserPwd.setBackgroundDrawable(CCImg.LOGIN_EDIT.getDrawble(ctx));
 		mRegistUserPwd.setHint("请输入密码");
+		mRegistUserPwd.setId(IDC.ED_REGISTER_PASSWORD.id());
 		mRegistUserPwd.setTextColor(Color.BLACK);
 		wrap2.addView(mRegistUserPwd, -1, -2);
 		content.addView(wrap2,lppwd);
@@ -99,18 +101,18 @@ public class LoginRegisterLayout extends LinearLayout{
 		mBtConfirm.setText("确认");
 		mBtConfirm.setTextSize(14);
 		mBtConfirm.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
-		mBtConfirm.setPadding(30,0, 30, 0);
+		mBtConfirm.setPadding(ZZDimen.dip2px(30),ZZDimen.dip2px(12), ZZDimen.dip2px(30), ZZDimen.dip2px(12));
 		mBtConfirm.setSingleLine();
 		mBtConfirm.setId(IDC.BT_REGISTER_CONFIRM.id());
 		mBtConfirm.setOnClickListener(l);
-		wrap3.addView(mBtConfirm);
+		wrap3.addView(mBtConfirm, new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT));
 
 		//返回按钮
 		Button mBtBack = new Button(ctx);
 		mBtBack.setText("返回");
 		mBtBack.setTextSize(14);
-		mBtBack.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
-		mBtBack.setPadding(30,0, 30, 0);
+		mBtBack.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LAN, CCImg.LOGIN_BUTTON_LAN_CLICK));
+		mBtBack.setPadding(ZZDimen.dip2px(30),ZZDimen.dip2px(12), ZZDimen.dip2px(30), ZZDimen.dip2px(12));
 
 		mBtBack.setId(IDC.BT_BACK.id());
 		LinearLayout.LayoutParams lpbt = new LinearLayout.LayoutParams(-2, -2);

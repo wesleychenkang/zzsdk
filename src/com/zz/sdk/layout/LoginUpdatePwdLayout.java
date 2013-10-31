@@ -1,6 +1,4 @@
 package com.zz.sdk.layout;
-
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.view.Gravity;
@@ -13,8 +11,6 @@ import com.zz.sdk.layout.LoginMainLayout.IDC;
 import com.zz.sdk.util.ResConstants;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
-
-
 public class LoginUpdatePwdLayout extends LinearLayout{
 	public LinearLayout mUpdatePwdLayout;
 	public RelativeLayout mContainer;
@@ -42,38 +38,39 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		wrap1.setFocusableInTouchMode(true);
 
 		TextView rtvUser = new TextView(ctx);
-		rtvUser.setText("旧密码    ");
+		rtvUser.setText("旧密码  ");
 		//黑色
 		rtvUser.setTextColor(Color.BLACK);
-		rtvUser.setTextSize(14);
+		rtvUser.setTextSize(17);
 		wrap1.addView(rtvUser);
 
 		//显示旧密码
 		mOldPwd = new TextView(ctx);
-		mOldPwd.setPadding(ZZDimen.dip2px(10), 0, 0,0);
+		mOldPwd.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(5), ZZDimen.dip2px(5),ZZDimen.dip2px(5));
 		mOldPwd.setSingleLine();
 		mOldPwd.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
-		mOldPwd.setTextSize(15);
+		mOldPwd.setTextSize(20);
 		mOldPwd.setBackgroundDrawable(CCImg.LOGIN_EDIT.getDrawble(ctx));
 		mOldPwd.setTextColor(Color.WHITE);
-		wrap1.addView(mOldPwd, -1, -2);
+		LinearLayout.LayoutParams lold = new LinearLayout.LayoutParams(-1,-2);
+		lold.leftMargin = 8;
+		wrap1.addView(mOldPwd, lold);
 		
 		LinearLayout.LayoutParams lpid = new LinearLayout.LayoutParams(-1,-2);
 		content.addView(wrap1,lpid);
 		
 		// 用来放置密码帐号信息的布局
 		LinearLayout wrap2 = new LinearLayout(ctx);
-		//wrap2.setId(ID_PWDNEWLAYOUT);
 		wrap2.setOrientation(LinearLayout.HORIZONTAL);
 		wrap2.setPadding(0,ZZDimen.dip2px(10), 0, ZZDimen.dip2px(10));
 		
 		LinearLayout.LayoutParams lppwd = new LinearLayout.LayoutParams(-1,
 				-2);
 		TextView rtvUserPwd = new TextView(ctx);
-		rtvUserPwd.setText("新密码   ");
+		rtvUserPwd.setText("新密码  ");
 		//黑色
 		rtvUserPwd.setTextColor(Color.BLACK);
-		rtvUserPwd.setTextSize(14);
+		rtvUserPwd.setTextSize(17);
 		wrap2.addView(rtvUserPwd);
 
 		//用户输入新密码 
@@ -83,7 +80,10 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		mNewPwd.setHint("请输入新密码");
 		mNewPwd.setTextColor(Color.BLACK);
 		mOldPwd.setTextColor(Color.BLACK);
-		wrap2.addView(mNewPwd, -1, -2);
+		mNewPwd.setId(IDC.ED_NEW_PASSOWRD.id());
+		LayoutParams lpwd = new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT);
+		lpwd.leftMargin = 8;
+		wrap2.addView(mNewPwd,lpwd);
 
 		content.addView(wrap2,lppwd);
 	
@@ -99,7 +99,7 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		mBtConfirm.setTextSize(14);
 		mBtConfirm.setId(IDC.BT_MODIFY_CONFIRM.id());
 		mBtConfirm.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
-	    mBtConfirm.setPadding(30,0, 30, 0);
+	    mBtConfirm.setPadding(ZZDimen.dip2px(30),ZZDimen.dip2px(12), ZZDimen.dip2px(30), ZZDimen.dip2px(12));
 	    LayoutParams lbtn = new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
 	    wrap3.addView(mBtConfirm,lbtn);
 		mBtConfirm.setOnClickListener(l);
@@ -107,16 +107,14 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		Button mBtClose = new Button(ctx);
 		mBtClose.setText("返回");
 		mBtClose.setTextSize(14);
-		mBtClose.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
-		mBtClose.setPadding(30,0, 30, 0);
+		mBtClose.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LAN, CCImg.LOGIN_BUTTON_LAN_CLICK));
+		mBtClose.setPadding(ZZDimen.dip2px(30),ZZDimen.dip2px(12), ZZDimen.dip2px(30), ZZDimen.dip2px(12));
 		mBtClose.setId(IDC.BT_BACK.id());
 		mBtClose.setOnClickListener(l);
 		LinearLayout.LayoutParams lpbt = new LinearLayout.LayoutParams(-2, -2);
-		lpbt.leftMargin = ZZDimen.dip2px(30);
+		lpbt.leftMargin = ZZDimen.dip2px(25);
 		wrap3.addView(mBtClose, lpbt);
 		content.addView(wrap3);
-
-		//content.addView(mAllLayout);
 	}
 	
 	public String getInputOldPwd() {
