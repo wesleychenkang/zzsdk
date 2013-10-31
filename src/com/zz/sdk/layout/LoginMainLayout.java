@@ -34,6 +34,8 @@ import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.Loading;
 import com.zz.sdk.util.Logger;
+import com.zz.sdk.util.ResConstants;
+import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
 import com.zz.sdk.util.ResConstants.ZZStr;
 import com.zz.sdk.util.UserUtil;
@@ -767,27 +769,26 @@ class LoginMainLayout extends BaseLayout {
 			// 垂直
 			content.setOrientation(VERTICAL);
 			content.setGravity(Gravity.CENTER_HORIZONTAL);
-			content.setPadding(ZZDimen.dip2px(20), ZZDimen.dip2px(15),
-					ZZDimen.dip2px(20), ZZDimen.dip2px(15));
-			content.setBackgroundDrawable(Utils.getDrawable(ctx,
-					"login_bg_03.png"));
-
+			content.setBackgroundDrawable(CCImg.AUTO_BD.getDrawble(context));
+			content.setPadding(ZZDimen.dip2px(50), ZZDimen.dip2px(10),
+					ZZDimen.dip2px(50), ZZDimen.dip2px(10));
 			// 文字
 			TextView tv = new TextView(ctx);
-			tv.setGravity(Gravity.CENTER_HORIZONTAL);
 			tv.setTextColor(0xfffeef00);
 			tv.setText("剩下2秒自动登陆游戏");
-			tv.setTextSize(18);
+			tv.setTextSize(16);
 			//
 			Loading loading = new Loading(ctx);
-
 			cancel = new Button(ctx);
 			cancel.setId(IDC.BT_AUTO_LOGIN_CANCEL.id());
-			cancel.setBackgroundDrawable(Utils.getStateListDrawable(ctx,
-					"quxiao1.png", "quxiao.png"));
+			cancel.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable
+					(ctx, CCImg.LOGIN_BUTTON_LAN, CCImg.LOGIN_BUTTON_LAN_CLICK));
 			cancel.setOnClickListener(LoginMainLayout.this);
-
-			content.addView(tv);
+			cancel.setPadding(ZZDimen.dip2px(35), ZZDimen.dip2px(12),
+					ZZDimen.dip2px(35), ZZDimen.dip2px(12));
+			cancel.setText("取消");
+			
+			content.addView(tv,LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
 			LinearLayout.LayoutParams lploading = new LinearLayout.LayoutParams(
 					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			lploading.topMargin = ZZDimen.dip2px(10);
