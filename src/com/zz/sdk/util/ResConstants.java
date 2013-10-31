@@ -467,9 +467,12 @@ public class ResConstants {
 		LOGIN_BUTTON_KUAI_ANXIA("login_button_kuai_anxia.png"), //
 		LOGIN_EDIT("login_edit_press.9.png"),
 		LOGIN_RADIO("btn_radio_off.png"),
-		LOGIN_RADIO_PRESSED("btn_radio_pressed.png");
-
+		LOGIN_RADIO_PRESSED("btn_radio_pressed.png"),
+		
+		/** 自动登录框资源*/
+		AUTO_BD("auto_login_bg.9.png"), //自动登录框背景
 		;
+	
 
 		private String context;
 
