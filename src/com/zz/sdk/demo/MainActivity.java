@@ -24,10 +24,9 @@ import com.zz.sdk.LoginCallbackInfo;
 import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.MSG_TYPE;
 import com.zz.sdk.ParamChain;
+import com.zz.sdk.ParamChain.KeyUser;
 import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.SDKManager;
-import com.zz.sdk.ParamChain.KeyGlobal;
-import com.zz.sdk.ParamChain.KeyUser;
 import com.zz.sdk.layout.PaymentListLayout.ChargeStyle;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
 import com.zz.sdk.util.DebugFlags;
@@ -66,6 +65,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final int IDC_CB_CANCEL_AS_SUCCESS = _IDC_START_ + 16;
 	private static final int IDC_BT_LOGIN_MAIN = _IDC_START_ + 17;
 	private static final int IDC_BT_PAY_OUT = _IDC_START_ + 18;
+	private static final int IDC_BT_DEBUG = _IDC_START_ + 19;
 
 	/* 自定义消息 */
 	private static final int _MSG_USER_ = 2013;
@@ -80,6 +80,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private TextView mTvTip;
 
 	private final static int RC_PAYMENT = 2;
+
 	private String ordernumber = "";
 	private boolean isDisplayLoginTip = false;
 	private boolean isDisplayLoginfail = false;
@@ -128,6 +129,14 @@ public class MainActivity extends Activity implements OnClickListener {
 	private View setupVies(Context ctx, OnClickListener onClickListener) {
 		LinearLayout rootLayout = new LinearLayout(ctx);
 		rootLayout.setOrientation(LinearLayout.VERTICAL);
+		{
+			Button btLogin = new Button(ctx);
+			btLogin.setText("调试");
+			btLogin.setId(IDC_BT_DEBUG);
+
+			btLogin.setOnClickListener(onClickListener);
+			rootLayout.addView(btLogin);
+		}
 		{
 			Button btLogin = new Button(ctx);
 			btLogin.setText("登录");
@@ -317,6 +326,12 @@ public class MainActivity extends Activity implements OnClickListener {
 		int id = v.getId();
 
 		switch (id) {
+		case IDC_BT_DEBUG: {
+			mSDKManager.debug_start(mHandler, MSG_ORDER_CALLBACK,
+					CONFIG_GAME_SERVER_ID, CONFIG_GAME_SERVER_NAME,
+					CONFIG_GAME_ROLE_ID, CONFIG_GAME_ROLE);
+		}
+			break;
 
 		/* 登录 */
 		case IDC_BT_LOGIN: {

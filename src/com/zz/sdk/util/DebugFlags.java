@@ -58,6 +58,8 @@ public class DebugFlags {
 		public static final String K_DEBUG_PAY_CANCEL_AS_SUCCESS = _TAG_
 				+ "pay_cancel_as_success";
 
+		/** 调试：目标视图类名，类型{@link String} */
+		public static final String K_DEBUG_CLASS_NAME = _TAG_ + "calss_name";
 	}
 
 	private static ParamChain s_debug_env;

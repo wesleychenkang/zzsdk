@@ -310,7 +310,7 @@ abstract class CCBaseLayout extends BaseLayout {
 
 			ProgressBar pb = new ProgressBar(ctx, null,
 					android.R.attr.progressBarStyleSmallTitle);
-			LayoutParams lp = new LayoutParams(LP_WM);
+			LayoutParams lp = new LayoutParams(LP_WW);
 			lp.gravity = Gravity.CENTER_VERTICAL;
 			ll.addView(pb, lp);
 			pb.setId(IDC.PB_BALANCE.id());
