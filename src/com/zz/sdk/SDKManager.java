@@ -133,6 +133,8 @@ public class SDKManager {
 	/** 初始化「用户」信息 */
 	private ParamChain init_user(Context ctx, ParamChain rootEnv) {
 		ParamChain env = rootEnv.grow(KeyUser.class.getName());
+		if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN)
+			env.add(KeyUser.K_LOGIN_DOUQU_ENABLED, true);
 		return env;
 	}
 
@@ -413,7 +415,7 @@ public class SDKManager {
 			String name = mRootEnv.get(KeyUser.K_LOGIN_NAME_GAME_USER,
 					String.class);
 			if (name == null) {
-				return mRootEnv.get(KeyUser.K_LOGIN_NAME, String.class);
+				return getAccountName();
 			}
 			return name;
 		}

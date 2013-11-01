@@ -94,6 +94,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 		Utils.loack_screen_orientation(this);
 
 		mUserUtil = UserUtil.getInstance(getBaseContext());
+		mUserUtil.init(ZZSDKConfig.SUPPORT_DOUQU_LOGIN);
 
 		check = true;
 		user = new UserAction();
@@ -595,16 +596,20 @@ public class LoginActivity extends Activity implements OnClickListener {
 				if (PojoUtils.isDouquUser(user)) {
 					loginResult = new Result();
 					String newName = PojoUtils.getDouquBaseName(user);
-					String dqName = PojoUtils.login(mUserUtil, newName, pw);
-					int err = PojoUtils.get_last_code();
-					int userid = PojoUtils.get_login_user_id();
-					if (err == PojoUtils.CODE_SUCCESS && dqName != null) {
+
+					String dqName = null;
+					com.zz.lib.pojo.Result douquRet = PojoUtils.login(newName,
+							pw);
+					if (douquRet != null && douquRet.status == 0) {
+						// 登录逗趣成功
+						dqName = PojoUtils.auto_registe(mUserUtil, douquRet,
+								douquRet.account, pw);
+					}
+					if (dqName != null) {
 						loginResult.codes = "0";
-						Application
-								.setLoginName(dqName, String.valueOf(userid));
-						instance.updateLogin(user, pw, userid, 1, ctx);
-						// } else if (err == PojoUtils.CODE_FAILED_ZUOYUE) {
-						// } else if (err == PojoUtils.CODE_FAILED) {
+						Application.setLoginName(dqName,
+								String.valueOf(douquRet.userid));
+						instance.updateLogin(user, pw, douquRet.userid, 1, ctx);
 					} else {
 						loginResult.codes = "1";
 					}
@@ -725,16 +730,33 @@ public class LoginActivity extends Activity implements OnClickListener {
 				if (PojoUtils.isDouquUser(user)) {
 					loginResult = new Result();
 					String newName = PojoUtils.getDouquBaseName(user);
-					String dqName = PojoUtils.login(mUserUtil, newName, pw);
-					int err = PojoUtils.get_last_code();
-					int userid = PojoUtils.get_login_user_id();
-					if (err == PojoUtils.CODE_SUCCESS && dqName != null) {
+//					String dqName = PojoUtils.login(mUserUtil, newName, pw);
+//					int err = PojoUtils.get_last_code();
+//					int userid = PojoUtils.get_login_user_id();
+//					if (err == PojoUtils.CODE_SUCCESS && dqName != null) {
+//						loginResult.codes = "0";
+//						Application
+//								.setLoginName(dqName, String.valueOf(userid));
+//						instance.updateLogin(user, pw, userid, 1, ctx);
+//						// } else if (err == PojoUtils.CODE_FAILED_ZUOYUE) {
+//						// } else if (err == PojoUtils.CODE_FAILED) {
+//					} else {
+//						loginResult.codes = "1";
+//					}
+
+					String dqName = null;
+					com.zz.lib.pojo.Result douquRet = PojoUtils.login(newName,
+							pw);
+					if (douquRet != null && douquRet.status == 0) {
+						// 登录逗趣成功
+						dqName = PojoUtils.auto_registe(mUserUtil, douquRet,
+								douquRet.account, pw);
+					}
+					if (dqName != null) {
 						loginResult.codes = "0";
-						Application
-								.setLoginName(dqName, String.valueOf(userid));
-						instance.updateLogin(user, pw, userid, 1, ctx);
-						// } else if (err == PojoUtils.CODE_FAILED_ZUOYUE) {
-						// } else if (err == PojoUtils.CODE_FAILED) {
+						Application.setLoginName(dqName,
+								String.valueOf(douquRet.userid));
+						instance.updateLogin(user, pw, douquRet.userid, 1, ctx);
 					} else {
 						loginResult.codes = "1";
 					}
@@ -846,8 +868,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 				if (PojoUtils.isDouquUser(user)) {
 					result = new Result();
 					String newName = PojoUtils.getDouquBaseName(user);
-					boolean success = PojoUtils.updatePasswd(mUserUtil,
-							newName, pw, newPW);
+					boolean success = PojoUtils.updatePasswd(newName, pw, newPW);
 					if (success) {
 						Application.password = newPW;
 						GetDataImpl.getInstance(ctx).updateLogin_passwd(newPW);

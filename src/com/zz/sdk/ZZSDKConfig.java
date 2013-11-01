@@ -15,7 +15,7 @@ public final class ZZSDKConfig {
 	public final static String QIHOO_PRODUCT_ID = "D1001";
 
 	/** 支持豆趣的用户登录 */
-	public final static boolean SUPPORT_DOUQU_LOGIN = false;
+	public final static boolean SUPPORT_DOUQU_LOGIN = true;
 
 	/** 方向 */
 	public final static int ORIENTATION = Constants.DIR_AUTO;
@@ -24,7 +24,7 @@ public final class ZZSDKConfig {
 	public final static boolean DEBUG = BuildConfig.DEBUG;
 
 	/** 调试·服务器URL */
-	public final static boolean DEBUG_URL = false; // DEBUG;
+	public final static boolean DEBUG_URL =  DEBUG; // false; // 
 
 	/** 插件模式 */
 	public final static boolean PLUGIN_MODE = false;

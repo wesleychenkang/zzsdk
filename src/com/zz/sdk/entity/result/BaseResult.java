@@ -19,11 +19,16 @@ public class BaseResult implements Serializable, JsonParseInterface {
 
 	public Integer mCodeNumber;
 	public String mCodeStr;
+	public String mErrDesc;
 
 	private boolean mHasUsed = false;
 
 	public boolean isSuccess() {
 		return mCodeNumber != null && mCodeNumber == 0;
+	}
+
+	public int getCodeNumber() {
+		return mCodeNumber == null ? Integer.MIN_VALUE : mCodeNumber;
 	}
 
 	public boolean isUsed() {
@@ -79,7 +84,8 @@ public class BaseResult implements Serializable, JsonParseInterface {
 	}
 
 	protected String getErrDesc(String msg[], int start) {
-		return getErrDesc(msg, ErrMsg_Default, start, mCodeNumber);
+		return mErrDesc != null ? mErrDesc : getErrDesc(msg, ErrMsg_Default,
+				start, mCodeNumber);
 	}
 
 	/**

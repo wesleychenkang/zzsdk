@@ -140,6 +140,10 @@ public interface ParamChain {
 		/** 登录名, {@link String} */
 		public static final String K_LOGIN_NAME = _TAG_ + "login_name";
 
+		/** 登录时是否允许使用逗趣账号，{@link Boolean} */
+		public static final String K_LOGIN_DOUQU_ENABLED = _TAG_
+				+ "login_douqu_enabled";
+
 		/**
 		 * 游戏中账号名, {@link String}，一般而言，应该与 {@link #K_LOGIN_NAME}
 		 * 相同，但在支持逗趣等第3方用户系统时，需要这个转换

@@ -100,12 +100,12 @@ public class LoginLayout extends LinearLayout {
 		
 		// 单选框
 		RadioGroup rg = new RadioGroup(ctx);
-		//rg.setId(IDC_RG_ACCOUNT_TYPE);
+		rg.setId(IDC.RG_ACCOUNT_TYPE.id());
 		rg.setOrientation(HORIZONTAL);
 
 		{
 			RadioButton rb1 = new RadioButton(ctx);
-			//rb1.setId(_IDGROUP_ACCOUNT_TYPE[ACCOUNT_TYPE_DOUQU]);
+			rb1.setId(IDC.RB_ACCOUNT_TYPE_DOUQU.id());
 			rg.addView(rb1, LayoutParams.WRAP_CONTENT,
 					LayoutParams.WRAP_CONTENT);
 			rb1.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
@@ -120,7 +120,7 @@ public class LoginLayout extends LinearLayout {
 
 		{
 			RadioButton rb2 = new RadioButton(ctx);
-			//rb2.setId(_IDGROUP_ACCOUNT_TYPE[ACCOUNT_TYPE_NORMAL]);
+			rb2.setId(IDC.RB_ACCOUNT_TYPE_NORMAL.id());
 			RadioGroup.LayoutParams  lrb2 = new RadioGroup.LayoutParams (LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
 			lrb2.leftMargin = ZZDimen.dip2px(25);
 			rg.addView(rb2,lrb2);

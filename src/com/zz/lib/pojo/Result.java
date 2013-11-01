@@ -12,7 +12,7 @@ import com.zz.lib.utils.Sign;
  * @author RSun
  * @Date 2013-6-15上午11:40:29
  */
-class Result extends JsonParseInterface implements Serializable {
+public class Result extends JsonParseInterface implements Serializable {
 
 	private static final long serialVersionUID = 5780667638751697330L;
 

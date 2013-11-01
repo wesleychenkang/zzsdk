@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.zz.lib.pojo.PojoUtils;
@@ -24,7 +25,6 @@ import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.MSG_TYPE;
 import com.zz.sdk.ParamChain;
 import com.zz.sdk.ParamChain.KeyUser;
-import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.entity.result.BaseResult;
 import com.zz.sdk.entity.result.ResultAutoLogin;
 import com.zz.sdk.entity.result.ResultChangePwd;
@@ -67,6 +67,9 @@ class LoginMainLayout extends BaseLayout {
 	/** 登录状态 */
 	private int mLoginState;
 
+	/** 是否允许逗趣用户 */
+	private boolean mDouquEnabled;
+
 	private boolean mLoginForModify;
 
 	private AutoLoginDialog mAutoDialog;
@@ -75,7 +78,8 @@ class LoginMainLayout extends BaseLayout {
 	private Context ctx;
 	private String mSdkUserId;
 	private String mNewPassword;
-	private FrameLayout.LayoutParams framly = new  FrameLayout.LayoutParams (LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+	private FrameLayout.LayoutParams framly = new FrameLayout.LayoutParams(
+			LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 
 	protected static enum IDC implements IIDC {
 		ACT_ERR,
@@ -90,7 +94,17 @@ class LoginMainLayout extends BaseLayout {
 
 		BT_REGISTER,
 
-		BT_LOGIN, BT_QUICK_LOGIN, BT_UPDATE_PASSWORD, RG_ACCOUNT_TYPE, BT_BACK,
+		BT_LOGIN, BT_QUICK_LOGIN, BT_UPDATE_PASSWORD,
+
+		/** 单选按钮组·账号类别 */
+		RG_ACCOUNT_TYPE,
+
+		/** 单选按钮·账号类别·逗趣 */
+		RB_ACCOUNT_TYPE_DOUQU,
+		/** 单选按钮·账号类别·普通 */
+		RB_ACCOUNT_TYPE_NORMAL,
+
+		BT_BACK,
 
 		/** 修改密码·确认按钮 */
 		BT_MODIFY_CONFIRM,
@@ -145,7 +159,11 @@ class LoginMainLayout extends BaseLayout {
 	protected void onInitEnv(Context ctx, ParamChain env) {
 		mLoginState = MSG_STATUS.EXIT_SDK;
 
+		Boolean b = env.get(KeyUser.K_LOGIN_DOUQU_ENABLED, Boolean.class);
+		mDouquEnabled = b != null && b;
+
 		mUserUtil = UserUtil.getInstance(ctx);
+		mUserUtil.init(mDouquEnabled);
 		mLoginName = env.get(KeyUser.K_LOGIN_NAME, String.class);
 		mPassword = env.get(KeyUser.K_PASSWORD, String.class);
 		if (mLoginName == null) {
@@ -180,6 +198,9 @@ class LoginMainLayout extends BaseLayout {
 
 	}
 
+	/**
+	 * 登录成功。更新到数据库。关闭登录界面。
+	 */
 	private void onLoginSuccess() {
 		mLoginState = MSG_STATUS.SUCCESS;
 		removeExitTrigger();
@@ -192,6 +213,10 @@ class LoginMainLayout extends BaseLayout {
 		env.add(KeyUser.K_PASSWORD, mPassword);
 		env.add(KeyUser.K_SDKUSER_ID, mSdkUserId);
 		env.add(KeyUser.K_LOGIN_STATE_SUCCESS, Boolean.TRUE);
+		
+		if (PojoUtils.isDouquUser(mLoginName)) {
+			
+		}
 
 		mUserUtil.syncSdkUser(true);
 	}
@@ -252,12 +277,19 @@ class LoginMainLayout extends BaseLayout {
 		}
 	}
 
+	private boolean account_type_is_douqu() {
+		RadioGroup rg = (RadioGroup) findViewById(IDC.RG_ACCOUNT_TYPE.id());
+		int id = rg.getCheckedRadioButtonId();
+		IDC idc = IDC.fromID(id);
+		return idc == IDC.RB_ACCOUNT_TYPE_DOUQU;
+	}
+
 	@Override
 	public void onClick(View v) {
 		IDC idc = IDC.fromID(v.getId());
 		switch (idc) {
 		case BT_AUTO_LOGIN_CANCEL:
-			if(mAutoDialog!=null &&mAutoDialog.isShowing()){
+			if (mAutoDialog != null && mAutoDialog.isShowing()) {
 				mAutoDialog.dismiss();
 			}
 			break;
@@ -329,6 +361,21 @@ class LoginMainLayout extends BaseLayout {
 		showToast(err.second);
 	}
 
+	private String read_login_name() {
+		String loginName = get_child_text(IDC.ED_LOGIN_NAME);
+		if (mDouquEnabled) {
+			// TODO: 判断复选框状态
+			if (account_type_is_douqu())
+				loginName = PojoUtils.getDouquName(loginName);
+		}
+		return loginName;
+	}
+
+	private String read_login_password() {
+		String loginPassword = get_child_text(IDC.ED_LOGIN_PASSWORD);
+		return loginPassword;
+	}
+
 	/**
 	 * 检查登录的输入内容是否合法。
 	 * 
@@ -343,11 +390,11 @@ class LoginMainLayout extends BaseLayout {
 
 		View vLoginName = null;
 		View vPassword = null;
-		String loginName = get_child_text(IDC.ED_LOGIN_NAME);
-		String password = get_child_text(IDC.ED_LOGIN_PASSWORD);
+		String loginName = read_login_name();
+		String password = read_login_password();
 		do {
 			Pair<Boolean, String> resultName = null;
-			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+			if (mDouquEnabled) {
 				if (PojoUtils.isDouquUser(loginName)
 						|| PojoUtils.isCMGEUser(loginName)) {
 					resultName = new Pair<Boolean, String>(true, loginName);
@@ -362,7 +409,7 @@ class LoginMainLayout extends BaseLayout {
 			}
 
 			Pair<Boolean, String> resultPW = null;
-			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+			if (mDouquEnabled) {
 				if (PojoUtils.isDouquUser(loginName)) {
 					String desc = PojoUtils.isDouquPasswd(password);
 					resultPW = new Pair<Boolean, String>(desc == null, desc);
@@ -452,7 +499,7 @@ class LoginMainLayout extends BaseLayout {
 		String password = get_child_text(IDC.ED_NEW_PASSOWRD);
 		do {
 			Pair<Boolean, String> resultPW = null;
-			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+			if (mDouquEnabled) {
 				if (PojoUtils.isDouquUser(mLoginName)) {
 					String desc = PojoUtils.isDouquPasswd(password);
 					resultPW = new Pair<Boolean, String>(desc == null, desc);
@@ -706,32 +753,31 @@ class LoginMainLayout extends BaseLayout {
 						: Constants.ASSETS_RES_PATH) + "bj.jpg"));
 		setWeightSum(1.0f);
 		framly.width = weight2;
-		
+
 		FrameLayout top = new FrameLayout(ctx);
 		ImageView image = new ImageView(ctx);
 		image.setImageDrawable(BitmapCache.getDrawable(ctx,
 				Constants.ASSETS_RES_PATH + "logo2.png"));
 		top.addView(image);
-		
+
 		FrameLayout.LayoutParams l = new FrameLayout.LayoutParams(
 				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		rv.addView(top, l);
-		
-		
+
 		boolean hasAccount = mLoginName != null && mLoginName.length() > 0;
 		main = new FrameLayout(ctx);
 		main.setBackgroundDrawable(BitmapCache.getDrawable(ctx,
 				Constants.ASSETS_RES_PATH + "landed_bg.png"));
-		framly.gravity = Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL;
-		framly.topMargin =isVertical ? -heigth1:0;
+		framly.gravity = Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL;
+		framly.topMargin = isVertical ? -heigth1 : 0;
 		framly.rightMargin = isVertical ? 0 : -heigth1;
-  	    LinearLayout login = createView_login(ctx, hasAccount);
+		LinearLayout login = createView_login(ctx, hasAccount);
 		main.addView(login);
-		rv.addView(main,framly);
+		rv.addView(main, framly);
 		// 显示“自动登录”框
 		if (hasAccount) {
 			show_auto_login_wait();
-		 }
+		}
 	}
 
 	private Runnable doAutoLogin = new Runnable() {
@@ -781,14 +827,16 @@ class LoginMainLayout extends BaseLayout {
 			Loading loading = new Loading(ctx);
 			cancel = new Button(ctx);
 			cancel.setId(IDC.BT_AUTO_LOGIN_CANCEL.id());
-			cancel.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable
-					(ctx, CCImg.LOGIN_BUTTON_LAN, CCImg.LOGIN_BUTTON_LAN_CLICK));
+			cancel.setBackgroundDrawable(ResConstants.CCImg
+					.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LAN,
+							CCImg.LOGIN_BUTTON_LAN_CLICK));
 			cancel.setOnClickListener(LoginMainLayout.this);
 			cancel.setPadding(ZZDimen.dip2px(35), ZZDimen.dip2px(12),
 					ZZDimen.dip2px(35), ZZDimen.dip2px(12));
 			cancel.setText("取消");
-			
-			content.addView(tv,LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+
+			content.addView(tv, LayoutParams.WRAP_CONTENT,
+					LayoutParams.WRAP_CONTENT);
 			LinearLayout.LayoutParams lploading = new LinearLayout.LayoutParams(
 					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			lploading.topMargin = ZZDimen.dip2px(10);
@@ -827,7 +875,12 @@ class LoginMainLayout extends BaseLayout {
 			String loginName = (String) params[3];
 			String password = (String) params[4];
 
-			ResultLogin ret = uu.login(loginName, password);
+			ResultLogin ret;
+			if (PojoUtils.isDouquUser(loginName)) {
+				ret = uu.login_douqu(loginName, password);
+			} else {
+				ret = uu.login(loginName, password);
+			}
 			if (!this.isCancelled()) {
 				mCallback = callback;
 				mToken = token;
@@ -968,7 +1021,7 @@ class LoginMainLayout extends BaseLayout {
 	 * @param user
 	 * @return
 	 */
-	private static Pair<Boolean, String> validUserName(String user) {
+	private Pair<Boolean, String> validUserName(String user) {
 		String des = null;
 		boolean result = false;
 		if (user != null) {
@@ -978,7 +1031,7 @@ class LoginMainLayout extends BaseLayout {
 			des = "帐号长度至少6位";
 		} else if (!user.matches("^(?!_)(?!.*?_$)[a-zA-Z0-9_]+$")) {
 			des = "帐号必须由字母、数字或下划线组成,并以数字或字母开头";
-			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+			if (mDouquEnabled) {
 				des += "；\r或使用 CMGE 通行证登录";
 			}
 		} else if (user.length() > 45) {

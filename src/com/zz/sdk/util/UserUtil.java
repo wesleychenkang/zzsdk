@@ -1,5 +1,7 @@
 package com.zz.sdk.util;
 
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.util.Pair;
 
@@ -7,6 +9,7 @@ import com.zz.lib.pojo.PojoUtils;
 import com.zz.sdk.ParamChain;
 import com.zz.sdk.ParamChain.KeyUser;
 import com.zz.sdk.ZZSDKConfig;
+import com.zz.sdk.entity.Result;
 import com.zz.sdk.entity.SdkUser;
 import com.zz.sdk.entity.SdkUserTable;
 import com.zz.sdk.entity.result.BaseResult;
@@ -40,12 +43,11 @@ public class UserUtil {
 	Context mContext;
 	ConnectionUtil mConnectionUtil;
 	private SdkUser mSdkUser;
+	private com.zz.lib.pojo.Result mDouquRet;
 
 	public UserUtil(Context ctx) {
 		mContext = ctx;
 		mConnectionUtil = ConnectionUtil.getInstance(ctx);
-
-		init();
 	}
 
 	public Context getContext() {
@@ -79,23 +81,29 @@ public class UserUtil {
 	}
 
 	/**
-	 * 初始化。读取数据库及SD卡的用户登录记录，主要用于自动登录
+	 * 初始化。读取数据库及SD卡的用户登录记录，主要用于自动登录。
+	 * <p>
+	 * 会改变 {@link #mSdkUser} 的值
+	 * 
+	 * @param support_douqu
+	 *            是否支付逗趣用户登录
 	 */
-	public void init() {
+	public void init(boolean support_douqu) {
 		SdkUserTable t = SdkUserTable.getInstance(mContext);
 		SdkUser sdkUser = t.getSdkUserByAutoLogin();
 		if (sdkUser == null) {
 			SdkUser[] sdkUsers = t.getAllSdkUsers();
 			if (sdkUsers != null && sdkUsers.length > 0) {
-				if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+				if (support_douqu) {
 					for (int i = 0; i < sdkUsers.length; i++) {
 						if (PojoUtils.isCMGEUser(sdkUsers[i].loginName))
 							continue;
 						sdkUser = sdkUsers[i];
 						break;
 					}
-				} else
+				} else {
 					sdkUser = sdkUsers[0];
+				}
 			}
 		}
 
@@ -105,7 +113,7 @@ public class UserUtil {
 				|| "".equals(mSdkUser.loginName)) {
 			Pair<String, String> pair = null;
 
-			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+			if (support_douqu) {
 				/*
 				 * 有：　1,cmge数据库 2,cmge的SD卡 3.zz数据库 4.zz的SD卡 这４个用户信息储存点 ３→１→４→２
 				 */
@@ -116,7 +124,7 @@ public class UserUtil {
 			if (pair == null)
 				pair = Utils.getAccountFromSDcard(mContext);
 
-			if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+			if (support_douqu) {
 				if (pair != null && PojoUtils.isCMGEUser(pair.first)) {
 					pair = null;
 				}
@@ -169,6 +177,14 @@ public class UserUtil {
 		return t.update(user);
 	}
 
+	/** 同步逗趣用户信息到 数据库 */
+	public boolean syncSdkUser_douqu() {
+		SdkUser user = mSdkUser;
+		user.autoLogin = 1;
+		user.loginName = PojoUtils.getDouquName(mDouquRet.account);
+		return syncSdkUser(user);
+	}
+
 	/**
 	 * 登录，如果成功，将自动更新到缓存，但不会保存到文件。需要主动调用 {@link #syncSdkUser()}
 	 * 
@@ -176,8 +192,6 @@ public class UserUtil {
 	 *            登录名
 	 * @param passwd
 	 *            密码
-	 * @param autoLogin
-	 *            是否自动登录
 	 * @return
 	 */
 	public ResultLogin login(String loginName, String passwd) {
@@ -193,7 +207,73 @@ public class UserUtil {
 			}
 			mSdkUser = user;
 		}
+		return ret;
+	}
 
+	/**
+	 * 登录逗趣用户，如果成功，将自动更新到缓存，但不会保存到文件。需要主动调用 {@link #syncSdkUser()}
+	 * 
+	 * @param loginName
+	 *            逗趣用户名
+	 * @param passwd
+	 *            密码
+	 * @return
+	 */
+	public ResultLogin login_douqu(String loginName, String passwd) {
+		ResultLogin ret;
+
+		String newName = PojoUtils.getDouquBaseName(loginName);
+		com.zz.lib.pojo.Result douquRet = PojoUtils.login(newName, passwd);
+		if (douquRet == null || douquRet.status != 0) {
+			Logger.d("D: login failed!" + douquRet);
+			ret = new ResultLogin();
+			if (douquRet != null) {
+				// 普通失败
+				ret.parseJson(new JSONObject());
+				if (douquRet.status == -2) {
+					// 有自己的错误描述
+					ret.mErrDesc = douquRet.statusdescr;
+				} else if (douquRet.status == -1) {
+				}
+			}
+		} else {
+			// 登录逗趣成功，尝试登录或注册卓越
+			Pair<String, String> cmgeUer = PojoUtils.genCmgeUser(douquRet,
+					loginName, passwd);
+			String user_name = cmgeUer.first;
+			String pw = cmgeUer.second;
+			// step1. 尝试登录
+			ret = mConnectionUtil.login(user_name, pw);
+			if (!ret.isSuccess()) {
+				int code = ret.getCodeNumber();
+				if (code == 1) {
+					// 用户不存在，那么，注册!
+					ret = mConnectionUtil.register(user_name, pw);
+					if (!ret.isSuccess()) {
+						// 又失败了
+						code = ret.getCodeNumber();
+						ret.mErrDesc = "登录错误2-(" + (code < 0 ? -1 : code)
+								+ ")，请联系客服！";
+					}
+				} else if (code == 2) {
+					// 密码错误
+					ret.mErrDesc = "密码错误(2)，请联系客服！";
+				} else {
+					ret.mErrDesc = "登录错误1-(" + (code < 0 ? -1 : code)
+							+ ")，请联系客服！";
+				}
+			}
+			if (ret.isSuccess()) {
+				// 登录成功 填字段
+				SdkUser user = new SdkUser();
+				user.loginName = ret.mUserName == null ? user_name
+						: ret.mUserName;
+				user.password = pw;
+				user.sdkUserId = douquRet.userid;
+				mSdkUser = user;
+			}
+		}
+		mDouquRet = douquRet;
 		return ret;
 	}
 
@@ -289,6 +369,10 @@ public class UserUtil {
 	public boolean syncSdkUser(boolean auto_login) {
 		mSdkUser.autoLogin = auto_login ? 1 : 0;
 		return syncSdkUser(mSdkUser);
+	}
+
+	public void syncSdkSDCard() {
+
 	}
 
 	public void updateLogin_passwd(String new_passwd) {

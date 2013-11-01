@@ -71,25 +71,25 @@ public class PojoUtils {
 	//
 
 	/** 未初始化 */
-	public static final int CODE_UNSET = -100;
+	// public static final int CODE_UNSET = -100;
 	/** 成功 */
-	public static final int CODE_SUCCESS = 0;
+	// public static final int CODE_SUCCESS = 0;
 	/** 失败 */
-	public static final int CODE_FAILED = -1;
+	// public static final int CODE_FAILED = -1;
 	/** 其它错误 */
-	public static final int CODE_FAILED_OTHER = -2;
+	// public static final int CODE_FAILED_OTHER = -2;
 	/** 卓越服务器连接错误 */
-	public static final int CODE_FAILED_ZUOYUE = -3;
-	private static int sLastCode;
-	private static int sLoginUserID;
+	// public static final int CODE_FAILED_ZUOYUE = -3;
+	// private static int sLastCode;
+	// private static int sLoginUserID;
 
-	private static void reset_last_code() {
-		set_last_code(CODE_UNSET);
-	}
+	// private static void reset_last_code() {
+	// set_last_code(CODE_UNSET);
+	// }
 
-	private static void set_last_code(int code) {
-		sLastCode = code;
-	}
+	// private static void set_last_code(int code) {
+	// sLastCode = code;
+	// }
 
 	/**
 	 * 
@@ -100,20 +100,20 @@ public class PojoUtils {
 	 * @see #CODE_FAILED_ZUOYUE
 	 * @see #CODE_UNSET
 	 */
-	public static int get_last_code() {
-		return sLastCode;
-	}
+	// public static int get_last_code() {
+	// return sLastCode;
+	// }
 
-	private static void set_login_user_id(int id) {
-		sLoginUserID = id;
-	}
+	// private static void set_login_user_id(int id) {
+	// sLoginUserID = id;
+	// }
 
 	/***
 	 * @return 获取登录的用户ID
 	 */
-	public static int get_login_user_id() {
-		return sLoginUserID;
-	}
+	// public static int get_login_user_id() {
+	// return sLoginUserID;
+	// }
 
 	//
 	// ////////////////////////////////////////////////////////////////////////
@@ -145,6 +145,20 @@ public class PojoUtils {
 	}
 
 	/**
+	 * 拼接 cmge 账号和密码
+	 * 
+	 * @param result
+	 * @param account
+	 * @param passwd
+	 * @return
+	 */
+	public static Pair<String, String> genCmgeUser(Result result,
+			String account, String passwd) {
+		return new Pair<String, String>(result.userid + SIGN,
+				DEF_DOUQU_PASSWD == null ? passwd : DEF_DOUQU_PASSWD);
+	}
+
+	/**
 	 * 自动注册或登录，用于登录　豆趣　成功后。
 	 * 
 	 * @param ctx
@@ -153,12 +167,12 @@ public class PojoUtils {
 	 * @param passwd
 	 * @return 返回用户名，若操作失败，将返回 null
 	 */
-	private static String auto_registe(UserUtil ctx, Result result,
+	public static String auto_registe(UserUtil ctx, Result result,
 			String account, String passwd) {
 		if (DEF_DOUQU_PASSWD != null) {
 			passwd = DEF_DOUQU_PASSWD;
 		}
-		
+
 		String loginName = result.userid + SIGN;
 		if (checkLoginNameExist(ctx, loginName, passwd)) {
 			// 向服务器注册， codes=0成功|1失败|2用户名已经存在
@@ -167,7 +181,7 @@ public class PojoUtils {
 				// 已经存在(2)或注册成功(0)
 				if (r.isSuccess() || r.isExistent()) {
 					com.zz.sdk.util.Utils.writeAccount2DB(ctx.getContext(),
-							loginName, passwd, get_login_user_id(), 0);
+							loginName, passwd, result.userid, 0);
 				} else {
 					loginName = null;
 				}
@@ -441,32 +455,32 @@ public class PojoUtils {
 	// - 对外接口
 	//
 
-	private static void _test(UserUtil ctx, String name, String passwd) {
+	private static void _test(String name, String passwd) {
 		if (BuildConfig.DEBUG) {
 			String s = null;
 			boolean success = false;
 			boolean run = false;
 			if (run) {
-				s = registe(ctx, name, passwd);
+				s = registe(name, passwd);
 			}
 			if (run) {
-				success = updatePasswd(ctx, name, passwd, passwd);
+				success = updatePasswd(name, passwd, passwd);
 			}
 			if (run) {
-				s = login(ctx, name, passwd);
+				Result ret = login(name, passwd);
 			}
 		}
 	}
 
 	/**
-	 * 登录
+	 * 登录 逗趣
 	 * 
 	 * @param name
 	 * @param passwd
-	 * @return 返回可使用的用户名
+	 * @return 返回登录逗趣结果
 	 */
-	public static String login(UserUtil ctx, String name, String passwd) {
-		reset_last_code();
+	public static Result login(final String name, final String passwd) {
+		// reset_last_code();
 
 		Login login = new Login();
 		login.account = name;
@@ -478,7 +492,7 @@ public class PojoUtils {
 		login.updateSign(app_key);
 
 		if (BuildConfig.DEBUG) {
-			_test(ctx, name, passwd);
+			_test(name, passwd);
 		}
 
 		String r = douquPost(login);
@@ -487,16 +501,17 @@ public class PojoUtils {
 		// 检查是否成功
 		if (result != null
 				&& result.checkSign(result.account, result.time, app_key)) {
-			set_last_code(result.status);
-			set_login_user_id(result.userid);
-			if (result.status == 0) {
-				// 登录成功，自动注册
-				String zyName = auto_registe(ctx, result, name, passwd);
-				if (zyName == null) {
-					set_last_code(CODE_FAILED_ZUOYUE);
-				}
-				return zyName;
-			}
+			// set_last_code(result.status);
+			// set_login_user_id(result.userid);
+			// if (result.status == 0) {
+			// // 登录成功，自动注册
+			// String zyName = auto_registe(ctx, result, name, passwd);
+			// if (zyName == null) {
+			// set_last_code(CODE_FAILED_ZUOYUE);
+			// }
+			// return zyName;
+			// }
+			return result;
 		}
 		return null;
 	}
@@ -504,12 +519,11 @@ public class PojoUtils {
 	/**
 	 * 注册账号
 	 * 
-	 * @param ctx
 	 * @param name
 	 * @param passwd
 	 * @return
 	 */
-	static String registe(UserUtil ctx, String name, String passwd) {
+	static String registe(String name, String passwd) {
 		Register register = new Register();
 		register.account = name;
 		register.md5pwd = MD5Util.md5Encode(passwd);
@@ -532,14 +546,13 @@ public class PojoUtils {
 	/**
 	 * 修改用户密码
 	 * 
-	 * @param ctx
 	 * @param name
 	 * @param oldPasswd
 	 * @param newPasswd
 	 * @return
 	 */
-	public static boolean updatePasswd(UserUtil ctx, String name,
-			String oldPasswd, String newPasswd) {
+	public static boolean updatePasswd(String name, String oldPasswd,
+			String newPasswd) {
 		UpdatePwd updatePwd = new UpdatePwd();
 		updatePwd.account = name;
 		updatePwd.md5pwd = MD5Util.md5Encode(oldPasswd);
