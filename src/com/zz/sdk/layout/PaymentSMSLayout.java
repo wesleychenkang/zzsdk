@@ -94,7 +94,7 @@ import com.zz.sdk.util.Utils;
  */
 class PaymentSMSLayout extends CCBaseLayout {
 	protected final static boolean DEBUG = false;
-	
+
 	// "对不起，查询余额失败，请先确认您选择的地区以及运营商信息是否正确，以及请确认您的卡是否已欠费或已失效，如需帮助请联系客服!");
 	//
 	// "对不起，话费支付失败！请确认您的网络是否正常后再尝试，如需帮助请联系客服!"
@@ -253,20 +253,6 @@ class PaymentSMSLayout extends CCBaseLayout {
 		}
 		mSmsChannelMessage = null;
 		mSmsChannelMessages = smsChannel;
-
-		mSMSPayReceiver = SMSPayReceiver.getInstance();
-		mSMSPayReceiver.bindCallback(new SMSPayReceiver.ICallback() {
-			@Override
-			public boolean onSMSPayResult(String cmd, int resultCode,
-					PayParam param) {
-				if (isAlive()) {
-					if (cmd != null) {
-						return onSmsReceiverResult(cmd, resultCode, param);
-					}
-				}
-				return false;
-			}
-		});
 	}
 
 	private void createView_error(Context ctx, FrameLayout rv) {
@@ -527,6 +513,21 @@ class PaymentSMSLayout extends CCBaseLayout {
 		}
 
 		// 监听广播
+		if (mSMSPayReceiver == null) {
+			mSMSPayReceiver = SMSPayReceiver.getInstance();
+			mSMSPayReceiver.bindCallback(new SMSPayReceiver.ICallback() {
+				@Override
+				public boolean onSMSPayResult(String cmd, int resultCode,
+						PayParam param) {
+					if (isAlive()) {
+						if (cmd != null) {
+							return onSmsReceiverResult(cmd, resultCode, param);
+						}
+					}
+					return false;
+				}
+			});
+		}
 		mSMSPayParam = genPayParam(getEnv(), cm);
 		mReceiverAction = mSMSPayReceiver.genAction(mOrderNumber + "\n"
 				+ cm.command, mSMSPayParam);
