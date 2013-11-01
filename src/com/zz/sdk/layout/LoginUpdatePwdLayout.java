@@ -50,7 +50,7 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 
 		//显示旧密码
 		mOldPwd = new TextView(ctx);
-		mOldPwd.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(5), ZZDimen.dip2px(5),ZZDimen.dip2px(5));
+		mOldPwd.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(7), ZZDimen.dip2px(5),ZZDimen.dip2px(7));
 		mOldPwd.setSingleLine();
 		mOldPwd.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
 		mOldPwd.setTextSize(20);
@@ -83,6 +83,7 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		mNewPwd.setSingleLine();
 		mNewPwd.setBackgroundDrawable(CCImg.LOGIN_EDIT.getDrawble(ctx));
 		mNewPwd.setHint("请输入新密码");
+		mNewPwd.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(7), 0, ZZDimen.dip2px(7));
 		mNewPwd.setTextColor(Color.BLACK);
 		mOldPwd.setTextColor(Color.BLACK);
 		mNewPwd.setId(IDC.ED_NEW_PASSOWRD.id());

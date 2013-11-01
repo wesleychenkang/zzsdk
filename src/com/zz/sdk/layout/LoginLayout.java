@@ -89,7 +89,7 @@ public class LoginLayout extends LinearLayout {
 		mInputAccount.setTextColor(Color.BLACK);
 		mInputAccount.setSingleLine(true);
 		mInputAccount.setBackgroundDrawable(CCImg.LOGIN_EDIT.getDrawble(ctx));
-		
+		mInputAccount.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(7), 0, ZZDimen.dip2px(7));
 		// 密码编辑框
 		mInputPW = new EditText(ctx);
 		mInputPW.setHint("请输入密码");
@@ -97,7 +97,7 @@ public class LoginLayout extends LinearLayout {
 		mInputPW.setTextColor(Color.BLACK);
 		mInputPW.setId(IDC.ED_LOGIN_PASSWORD.id());
 		mInputPW.setBackgroundDrawable(CCImg.LOGIN_EDIT.getDrawble(ctx));
-		
+		mInputPW.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(7), 0, ZZDimen.dip2px(7));
 		// 单选框
 		RadioGroup rg = new RadioGroup(ctx);
 		//rg.setId(IDC_RG_ACCOUNT_TYPE);
