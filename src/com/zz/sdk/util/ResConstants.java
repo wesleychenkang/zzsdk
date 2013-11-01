@@ -17,7 +17,6 @@ import android.widget.TextView;
 import com.zz.sdk.entity.PayChannel;
 
 public class ResConstants {
-
 	// private static Context mContext;
 	private static float mDensity = 1.0f;
 

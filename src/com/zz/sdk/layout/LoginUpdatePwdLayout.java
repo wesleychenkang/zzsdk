@@ -7,6 +7,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.LinearLayout.LayoutParams;
+
 import com.zz.sdk.layout.LoginMainLayout.IDC;
 import com.zz.sdk.util.ResConstants;
 import com.zz.sdk.util.ResConstants.CCImg;
@@ -25,8 +27,8 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		setOrientation(LinearLayout.VERTICAL);
 		setGravity(Gravity.CENTER);
 		LinearLayout content = new LinearLayout(ctx);
-		LayoutParams ly =new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
-		content.setPadding(ZZDimen.dip2px(30), ZZDimen.dip2px(35), ZZDimen.dip2px(30), ZZDimen.dip2px(35));
+		LayoutParams ly =new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT);
+		content.setPadding(ZZDimen.dip2px(10), ZZDimen.dip2px(35), ZZDimen.dip2px(10), ZZDimen.dip2px(35));
 		addView(content,ly);
 		content.setOrientation(LinearLayout.VERTICAL);
 		
@@ -36,13 +38,15 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		wrap1.setOrientation(LinearLayout.HORIZONTAL);
 		wrap1.setFocusable(true);
 		wrap1.setFocusableInTouchMode(true);
-
+        
+		LayoutParams lpwd = new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+		lpwd.leftMargin = ZZDimen.dip2px(10);
 		TextView rtvUser = new TextView(ctx);
 		rtvUser.setText("旧密码  ");
 		//黑色
 		rtvUser.setTextColor(Color.BLACK);
 		rtvUser.setTextSize(17);
-		wrap1.addView(rtvUser);
+		wrap1.addView(rtvUser,lpwd);
 
 		//显示旧密码
 		mOldPwd = new TextView(ctx);
@@ -53,7 +57,8 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		mOldPwd.setBackgroundDrawable(CCImg.LOGIN_EDIT.getDrawble(ctx));
 		mOldPwd.setTextColor(Color.WHITE);
 		LinearLayout.LayoutParams lold = new LinearLayout.LayoutParams(-1,-2);
-		lold.leftMargin = 8;
+		lold.leftMargin = ZZDimen.dip2px(8);
+		lold.rightMargin =  ZZDimen.dip2px(10);
 		wrap1.addView(mOldPwd, lold);
 		
 		LinearLayout.LayoutParams lpid = new LinearLayout.LayoutParams(-1,-2);
@@ -71,7 +76,7 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		//黑色
 		rtvUserPwd.setTextColor(Color.BLACK);
 		rtvUserPwd.setTextSize(17);
-		wrap2.addView(rtvUserPwd);
+		wrap2.addView(rtvUserPwd,lpwd);
 
 		//用户输入新密码 
 		mNewPwd = new EditText(ctx);
@@ -81,16 +86,18 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		mNewPwd.setTextColor(Color.BLACK);
 		mOldPwd.setTextColor(Color.BLACK);
 		mNewPwd.setId(IDC.ED_NEW_PASSOWRD.id());
-		LayoutParams lpwd = new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT);
-		lpwd.leftMargin = 8;
-		wrap2.addView(mNewPwd,lpwd);
+		LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT);
+		lp.leftMargin = ZZDimen.dip2px(8);
+		lp.rightMargin = ZZDimen.dip2px(10);
+		wrap2.addView(mNewPwd,lp);
 
 		content.addView(wrap2,lppwd);
 	
 		
 		// 用来放确认和返回按钮的子布局
 		LinearLayout wrap3 = new LinearLayout(ctx);
-		wrap3.setGravity(Gravity.CENTER);
+		wrap3.setGravity(Gravity.CENTER_HORIZONTAL
+				| Gravity.CENTER_VERTICAL);
 		wrap3.setOrientation(LinearLayout.HORIZONTAL);
 		wrap3.setPadding(0, ZZDimen.dip2px(5), 0, 0);
 		
@@ -99,22 +106,25 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		mBtConfirm.setTextSize(14);
 		mBtConfirm.setId(IDC.BT_MODIFY_CONFIRM.id());
 		mBtConfirm.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
-	    mBtConfirm.setPadding(ZZDimen.dip2px(30),ZZDimen.dip2px(12), ZZDimen.dip2px(30), ZZDimen.dip2px(12));
-	    LayoutParams lbtn = new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+	    mBtConfirm.setPadding(ZZDimen.dip2px(5),ZZDimen.dip2px(12), ZZDimen.dip2px(5), ZZDimen.dip2px(12));
+	    LayoutParams lbtn = new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT);
+	    lbtn.weight = 0.5f;
+	    lbtn.leftMargin =ZZDimen.dip2px(10);
 	    wrap3.addView(mBtConfirm,lbtn);
 		mBtConfirm.setOnClickListener(l);
 		
 		Button mBtClose = new Button(ctx);
-		mBtClose.setText("返回");
+		mBtClose.setText("关闭");
 		mBtClose.setTextSize(14);
 		mBtClose.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LAN, CCImg.LOGIN_BUTTON_LAN_CLICK));
-		mBtClose.setPadding(ZZDimen.dip2px(30),ZZDimen.dip2px(12), ZZDimen.dip2px(30), ZZDimen.dip2px(12));
+		mBtClose.setPadding(ZZDimen.dip2px(5),ZZDimen.dip2px(12), ZZDimen.dip2px(5), ZZDimen.dip2px(12));
 		mBtClose.setId(IDC.BT_BACK.id());
 		mBtClose.setOnClickListener(l);
-		LinearLayout.LayoutParams lpbt = new LinearLayout.LayoutParams(-2, -2);
-		lpbt.leftMargin = ZZDimen.dip2px(25);
+		LinearLayout.LayoutParams lpbt = new LinearLayout.LayoutParams(-1, -2);
+		lpbt.weight = 0.5f;
+		lpbt.setMargins(ZZDimen.dip2px(5), 0, ZZDimen.dip2px(10), 0);
 		wrap3.addView(mBtClose, lpbt);
-		content.addView(wrap3);
+		content.addView(wrap3 ,-1,-2);
 	}
 	
 	public String getInputOldPwd() {
