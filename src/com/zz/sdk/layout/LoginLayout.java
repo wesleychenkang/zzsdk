@@ -237,8 +237,8 @@ public class LoginLayout extends LinearLayout {
 			if(hasAccount){
 			lLogin.weight = 0.5f;
 			}else{
-			lLogin.weight = 0.33f;	
-			btnLogin.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(12),ZZDimen.dip2px(5),ZZDimen.dip2px(12));
+			lLogin.weight = 0.1f;	
+			btnLogin.setPadding(ZZDimen.dip2px(1), ZZDimen.dip2px(12),ZZDimen.dip2px(1),ZZDimen.dip2px(12));
 			}
 			// 立即登录
 			wrapBttom.addView(btnLogin,lLogin);
@@ -258,13 +258,13 @@ public class LoginLayout extends LinearLayout {
 				LinearLayout.LayoutParams lpregister = new LinearLayout.LayoutParams(
 						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 				lpregister.setMargins(ZZDimen.dip2px(6), 0, 0, 0);
-				btnRegister.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(12),ZZDimen.dip2px(5),ZZDimen.dip2px(12));
-				lpregister.weight = 0.33f;
+				btnRegister.setPadding(ZZDimen.dip2px(1), ZZDimen.dip2px(12),ZZDimen.dip2px(1),ZZDimen.dip2px(12));
+				lpregister.weight = 0.1f;
 				wrapBttom.addView(btnRegister, lpregister);
 				
 				btnOther.setPadding(ZZDimen.dip2px(1), ZZDimen.dip2px(12),ZZDimen.dip2px(1),ZZDimen.dip2px(12));
 				lother.setMargins(ZZDimen.dip2px(6), 0, ZZDimen.dip2px(10), 0);
-				lother.weight = 0.33f;
+				lother.weight = 0.1f;
 			  }
 			
 			wrapBttom.addView(btnOther,lother);

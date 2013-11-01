@@ -105,7 +105,6 @@ public class LoginRegisterLayout extends LinearLayout{
 		//确认按钮
 		Button mBtConfirm = new Button(ctx);
 		mBtConfirm.setText("确认");
-		mBtConfirm.setTextSize(14);
 		mBtConfirm.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
 		mBtConfirm.setPadding(ZZDimen.dip2px(5),ZZDimen.dip2px(12), ZZDimen.dip2px(5), ZZDimen.dip2px(12));
 		mBtConfirm.setSingleLine();
@@ -119,7 +118,6 @@ public class LoginRegisterLayout extends LinearLayout{
 		//返回按钮
 		Button mBtBack = new Button(ctx);
 		mBtBack.setText("返回");
-		mBtBack.setTextSize(14);
 		mBtBack.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LAN, CCImg.LOGIN_BUTTON_LAN_CLICK));
 		mBtBack.setPadding(ZZDimen.dip2px(5),ZZDimen.dip2px(12), ZZDimen.dip2px(5), ZZDimen.dip2px(12));
 		mBtBack.setId(IDC.BT_BACK.id());

@@ -103,7 +103,6 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		
 		Button mBtConfirm = new Button(ctx);
 		mBtConfirm.setText("确认");
-		mBtConfirm.setTextSize(14);
 		mBtConfirm.setId(IDC.BT_MODIFY_CONFIRM.id());
 		mBtConfirm.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
 	    mBtConfirm.setPadding(ZZDimen.dip2px(5),ZZDimen.dip2px(12), ZZDimen.dip2px(5), ZZDimen.dip2px(12));
@@ -115,7 +114,6 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		
 		Button mBtClose = new Button(ctx);
 		mBtClose.setText("关闭");
-		mBtClose.setTextSize(14);
 		mBtClose.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LAN, CCImg.LOGIN_BUTTON_LAN_CLICK));
 		mBtClose.setPadding(ZZDimen.dip2px(5),ZZDimen.dip2px(12), ZZDimen.dip2px(5), ZZDimen.dip2px(12));
 		mBtClose.setId(IDC.BT_BACK.id());
