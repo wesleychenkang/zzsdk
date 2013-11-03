@@ -373,7 +373,7 @@ class PaymentOnlineLayout extends BaseLayout {
 				mSMSMsg.add(sb.toString());
 				AlertDialog dialog = new AlertDialog.Builder(getActivity())
 						.setIcon(
-								CCImg.getPaychannelIcon(mType).getDrawble(
+								CCImg.getPayChannelIcon(mType).getDrawble(
 										getContext()))
 						.setTitle(title == null ? "提示" : title)
 						.setMessage(sb.toString())

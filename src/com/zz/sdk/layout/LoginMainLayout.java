@@ -284,6 +284,11 @@ class LoginMainLayout extends BaseLayout {
 		return idc == IDC.RB_ACCOUNT_TYPE_DOUQU;
 	}
 
+	private void setAccountType(boolean isDouqu) {
+		RadioGroup rg = (RadioGroup) findViewById(IDC.RG_ACCOUNT_TYPE.id());
+		rg.check(isDouqu ? IDC.RB_ACCOUNT_TYPE_DOUQU.id() : IDC.RB_ACCOUNT_TYPE_NORMAL.id());
+	}
+
 	@Override
 	public void onClick(View v) {
 		IDC idc = IDC.fromID(v.getId());
@@ -295,9 +300,14 @@ class LoginMainLayout extends BaseLayout {
 			break;
 
 		// 注册账号
-		case BT_REGISTER: {
-			tryEnterRegister();
-		}
+			case BT_REGISTER: {
+				if (account_type_is_douqu()) {
+					showToast("请注册卓越通行证！");
+					setAccountType(false);
+				} else {
+					tryEnterRegister();
+				}
+			}
 			break;
 
 		// 修改密码
@@ -617,7 +627,7 @@ class LoginMainLayout extends BaseLayout {
 			public void onResult(AsyncTask<?, ?, ?> task, Object token,
 					BaseResult result) {
 				if (isCurrentTaskFinished(task)) {
-					onRegisterReuslt(result);
+					onRegisterResult(result);
 				}
 			}
 		};
@@ -631,7 +641,7 @@ class LoginMainLayout extends BaseLayout {
 		showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_TIMEOUT);
 	}
 
-	protected void onRegisterReuslt(BaseResult result) {
+	protected void onRegisterResult(BaseResult result) {
 		if (result.isSuccess()) {
 			onLoginSuccess();
 		} else {
@@ -659,7 +669,7 @@ class LoginMainLayout extends BaseLayout {
 			public void onResult(AsyncTask<?, ?, ?> task, Object token,
 					BaseResult result) {
 				if (isCurrentTaskFinished(task)) {
-					onQuickRegisterReuslt(result);
+					onQuickRegisterResult(result);
 				}
 			}
 		};
@@ -673,9 +683,12 @@ class LoginMainLayout extends BaseLayout {
 		showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_TIMEOUT);
 	}
 
-	protected void onQuickRegisterReuslt(BaseResult result) {
+	protected void onQuickRegisterResult(BaseResult result) {
 		if (result.isSuccess() && result instanceof ResultAutoLogin) {
 			ResultAutoLogin r = (ResultAutoLogin) result;
+			if (DEBUG) {
+				Logger.d("D: quickRegisterResult" + r);
+			}
 			mLoginName = r.mUserName;
 			mPassword = r.mPassword;
 			mSdkUserId = r.mSdkUserId;
@@ -698,7 +711,7 @@ class LoginMainLayout extends BaseLayout {
 	 */
 	private LinearLayout createView_login(Context ctx, boolean hasAccount) {
 		LoginLayout login = new LoginLayout(ctx, this, hasAccount);
-		login.setAccount(mLoginName);
+		login.setAccount(mLoginName, mDouquEnabled);
 		login.setPassWord(mPassword);
 		return login;
 	}
@@ -738,7 +751,7 @@ class LoginMainLayout extends BaseLayout {
 	}
 
 	protected void onInitUI(Context ctx) {
-		set_child_visibility(BaseLayout.IDC.ACT_TITLE, VISIBLE);
+		set_child_visibility(BaseLayout.IDC.ACT_TITLE, GONE);
 
 		FrameLayout rv = getSubjectContainer();
 		final boolean isVertical = Utils.isOrientationVertical(getContext());
@@ -750,7 +763,7 @@ class LoginMainLayout extends BaseLayout {
 		// 整体背景图
 		rv.setBackgroundDrawable(BitmapCache.getDrawable(ctx,
 				(isVertical ? Constants.ASSETS_RES_PATH_VERTICAL
-						: Constants.ASSETS_RES_PATH) + "bj.jpg"));
+						: Constants.ASSETS_RES_PATH) + "bg.jpg"));
 		setWeightSum(1.0f);
 		framly.width = weight2;
 
@@ -792,7 +805,12 @@ class LoginMainLayout extends BaseLayout {
 					Logger.d(e.getClass().getName());
 				}
 
-				tryLoginWait(mLoginName, mPassword);
+                // 自动登录，也要对参数进行检查
+                Pair<View, String> err = checkLoginInput();
+                if (err == null) {
+                    mLoginForModify = false;
+                    tryLoginWait(mLoginName, mPassword);
+                }
 			}
 		}
 	};
@@ -800,13 +818,11 @@ class LoginMainLayout extends BaseLayout {
 	/**
 	 * 自动登陆显示进度框
 	 */
-	class AutoLoginDialog extends Dialog {
-		Context ctx;
-		private Button cancel;
+	static class AutoLoginDialog extends Dialog {
 
 		public AutoLoginDialog(Context context) {
 			super(context);
-			this.ctx = context;
+            Context ctx = context;
 
 			getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 			getWindow().setBackgroundDrawable(
@@ -825,12 +841,16 @@ class LoginMainLayout extends BaseLayout {
 			tv.setTextSize(16);
 			//
 			Loading loading = new Loading(ctx);
-			cancel = new Button(ctx);
-			cancel.setId(IDC.BT_AUTO_LOGIN_CANCEL.id());
+            Button cancel = new Button(ctx);
 			cancel.setBackgroundDrawable(ResConstants.CCImg
 					.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LAN,
 							CCImg.LOGIN_BUTTON_LAN_CLICK));
-			cancel.setOnClickListener(LoginMainLayout.this);
+			cancel.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View view) {
+					dismiss();
+				}
+			});
 			cancel.setPadding(ZZDimen.dip2px(35), ZZDimen.dip2px(12),
 					ZZDimen.dip2px(35), ZZDimen.dip2px(12));
 			cancel.setText("取消");

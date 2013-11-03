@@ -23,7 +23,6 @@ import com.zz.sdk.out.util.Application;
  * <b>注意：</b>这里储存的 <i>用户名、密码</i> 等，均为 ZZSDK 服务器上的数据。
  * <p>
  * 用户操作，如
- * <p>
  * <ul>
  * <li>登录</li>
  * <li>自动注册</li>
@@ -84,7 +83,7 @@ public class UserUtil {
 	 * 初始化。读取数据库及SD卡的用户登录记录，主要用于自动登录。
 	 * <p>
 	 * 会改变 {@link #mSdkUser} 的值
-	 * 
+	 *
 	 * @param support_douqu
 	 *            是否支付逗趣用户登录
 	 */
@@ -142,7 +141,7 @@ public class UserUtil {
 
 	/**
 	 * 同步用户基本信息到数据库中
-	 * 
+	 *
 	 * @return
 	 */
 	private boolean syncSdkUser(ParamChain env, Context ctx, String loginName,
@@ -187,7 +186,7 @@ public class UserUtil {
 
 	/**
 	 * 登录，如果成功，将自动更新到缓存，但不会保存到文件。需要主动调用 {@link #syncSdkUser()}
-	 * 
+	 *
 	 * @param loginName
 	 *            登录名
 	 * @param passwd
@@ -212,7 +211,7 @@ public class UserUtil {
 
 	/**
 	 * 登录逗趣用户，如果成功，将自动更新到缓存，但不会保存到文件。需要主动调用 {@link #syncSdkUser()}
-	 * 
+	 *
 	 * @param loginName
 	 *            逗趣用户名
 	 * @param passwd
@@ -231,11 +230,13 @@ public class UserUtil {
 				// 普通失败
 				ret.parseJson(new JSONObject());
 				if (douquRet.status == -2) {
-					// 有自己的错误描述
-					ret.mErrDesc = douquRet.statusdescr;
 				} else if (douquRet.status == -1) {
 				}
-			}
+                // 有自己的错误描述
+                ret.mErrDesc = douquRet.statusdescr;
+			} else {
+                // 这是网络连接失败
+            }
 		} else {
 			// 登录逗趣成功，尝试登录或注册卓越
 			Pair<String, String> cmgeUer = PojoUtils.genCmgeUser(douquRet,
@@ -279,7 +280,7 @@ public class UserUtil {
 
 	/**
 	 * 快速登录，即自动注册。如果成功，将自动更新到缓存，但不会保存到文件。需要主动调用 {@link #syncSdkUser()}
-	 * 
+	 *
 	 * @return
 	 */
 	public ResultAutoLogin quickLogin() {
@@ -300,7 +301,7 @@ public class UserUtil {
 
 	/**
 	 * 修改密码。如果成功，将自动更新到缓存，但不会保存到文件。需要主动调用 {@link #syncSdkUser()}
-	 * 
+	 *
 	 * @return
 	 */
 	public ResultChangePwd modifyPassword(String loginName, String oldPasswd,
@@ -315,7 +316,7 @@ public class UserUtil {
 
 	/**
 	 * 向服务器注册。如果成功，将自动更新到缓存，但不会保存到文件。需要主动调用 {@link #syncSdkUser()}
-	 * 
+	 *
 	 * @param loginName
 	 *            登录名
 	 * @param password
@@ -361,7 +362,7 @@ public class UserUtil {
 
 	/**
 	 * 同步用户信息到数据库
-	 * 
+	 *
 	 * @param auto_login
 	 *            是否自动登录属性
 	 * @return
@@ -383,7 +384,7 @@ public class UserUtil {
 
 	/**
 	 * 单机游戏的登录，有网络访问，必须在线程中调用。登录成功后将更新缓存
-	 * 
+	 *
 	 * @param ctx
 	 * @return 可根据返回值类型来判断登录模式：自动注册或登录
 	 */

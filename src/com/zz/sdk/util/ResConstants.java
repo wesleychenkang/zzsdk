@@ -533,10 +533,10 @@ public class ResConstants {
 		/**
 		 * 获取 支付方式 的图标
 		 * 
-		 * @param type
+		 * @param payType
 		 * @return
 		 */
-		public static CCImg getPaychannelIcon(int payType) {
+		public static CCImg getPayChannelIcon(int payType) {
 			CCImg ret;
 			switch (payType) {
 			case PayChannel.PAY_TYPE_ALIPAY:

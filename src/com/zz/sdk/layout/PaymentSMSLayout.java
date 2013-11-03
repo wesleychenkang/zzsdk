@@ -38,7 +38,6 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.zz.sdk.BuildConfig;
 import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.ParamChain;
 import com.zz.sdk.ParamChain.KeyDevice;
@@ -269,7 +268,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 			tv.setSingleLine(false);
 			tv.setGravity(Gravity.CENTER);
 			tv.setText("提示");
-			CCImg img = CCImg.getPaychannelIcon(mType);
+			CCImg img = CCImg.getPayChannelIcon(mType);
 			if (img != null) {
 				tv.setCompoundDrawablesWithIntrinsicBounds(img.getDrawble(ctx),
 						null, null, null);
@@ -703,7 +702,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 	private void show_seedback_detail() {
 		AlertDialog dialog = new AlertDialog.Builder(getActivity())
 				.setIcon(
-						CCImg.getPaychannelIcon(mType).getDrawble(getContext()))
+						CCImg.getPayChannelIcon(mType).getDrawble(getContext()))
 				.setTitle("订单详情")
 				.setMessage(gen_param_detail(mSMSPayParam))
 				.setPositiveButton(android.R.string.ok,
@@ -782,7 +781,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 			tv.setGravity(Gravity.CENTER);
 			tv.setText("提示");
 			tv.setCompoundDrawablesWithIntrinsicBounds(
-					CCImg.getPaychannelIcon(mType).getDrawble(ctx), null, null,
+					CCImg.getPayChannelIcon(mType).getDrawble(ctx), null, null,
 					null);
 			tv.setTextSize(24);
 			tv.setPadding(0, r.top, 0, r.bottom);

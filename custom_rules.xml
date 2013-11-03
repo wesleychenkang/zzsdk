@@ -96,7 +96,7 @@
 		<do-update-zzsdk-config-java key="VERSION_CODE" value="${zzsdk.config.version.code}" />
 		<do-update-zzsdk-config-java key="VERSION_NAME" value='"${zzsdk.config.version.name}"' />
 		<do-update-zzsdk-config-java key="VERSION_DATE" value='"${zzsdk.config.build.date}"' />
-		<do-update-zzsdk-config-java key="PLUGIN_MODE" value='"${zzsdk.plugin.enabled}"' />
+		<do-update-zzsdk-config-java key="PLUGIN_MODE" value="${zzsdk.plugin.enabled}" />
 	</target>
 	
 	

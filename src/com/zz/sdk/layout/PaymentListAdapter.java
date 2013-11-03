@@ -89,7 +89,7 @@ class PaymentListAdapter extends BaseAdapter {
 					CCImg.ZF_WXZ, CCImg.ZF_XZ));
 		}
 		holder.setText(mPayChannels[position].channelName);
-		CCImg icon = CCImg.getPaychannelIcon(mPayChannels[position].type);
+		CCImg icon = CCImg.getPayChannelIcon(mPayChannels[position].type);
 		if (icon != null)
 			holder.setCompoundDrawablesWithIntrinsicBounds(
 					icon.getDrawble(mContext), null, null, null);

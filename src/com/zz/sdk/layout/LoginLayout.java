@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -14,6 +15,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.LinearLayout.LayoutParams;
 
+import com.zz.lib.pojo.PojoUtils;
 import com.zz.sdk.layout.LoginMainLayout.IDC;
 import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.ResConstants;
@@ -275,9 +277,31 @@ public class LoginLayout extends LinearLayout {
 	/**
 	 * 设置帐号
 	 * 
-	 * @param account
+	 * @param account         账号
+	 * @param douquEnabled    是否支持逗趣账号？
 	 */
-	public void setAccount(String account) {
+	public void setAccount(String account, boolean douquEnabled) {
+		RadioGroup rg;
+		View v = findViewById(IDC.RG_ACCOUNT_TYPE.id());
+		if (v instanceof RadioGroup) {
+			rg = (RadioGroup) v;
+		} else {
+			rg = null;
+		}
+
+		boolean isDouquAccount = true;
+		if (PojoUtils.isDouquUser(account)) {
+			account = PojoUtils.getDouquBaseName(account);
+		} else if (PojoUtils.isCMGEUser(account)) {
+			account = PojoUtils.getCMGEBaseName(account);
+		} else {
+			isDouquAccount = false;
+		}
+		if (rg != null) {
+			rg.setVisibility(douquEnabled ? VISIBLE : GONE);
+			rg.check(isDouquAccount ? IDC.RB_ACCOUNT_TYPE_DOUQU.id() : IDC.RB_ACCOUNT_TYPE_NORMAL.id());
+		}
+
 		mInputAccount.setText(account);
 	}
 
