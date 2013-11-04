@@ -493,14 +493,18 @@ public class PaymentListLayout extends CCBaseLayout {
 			break;
 		}
 		if (str != null) {
+			showPopup_Tip(!autoclose, str);
 			if (autoclose) {
 				removeExitTrigger();
-				callHost_back();
-				showToast(str);
-				hidePopup();
+				postDelayed(new Runnable() {
+					@Override
+					public void run() {
+						hidePopup();
+						callHost_back();
+					}
+				}, 1500);
 			} else {
 				resetExitTrigger();
-				showPopup_Tip(str);
 			}
 		} else {
 			hidePopup();

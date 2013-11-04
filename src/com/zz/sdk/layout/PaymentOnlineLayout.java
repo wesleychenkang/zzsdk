@@ -522,7 +522,7 @@ class PaymentOnlineLayout extends BaseLayout {
 
 			Logger.d("getPayUrlMessage");
 			if (PaymentOnlineLayout.DEBUG) {
-				DebugFlags.debug_TrySleep(0, 60);
+				DebugFlags.debug_TrySleep(0, 3);
 			}
 
 			ResultPayMessage ret = cu.getPayUrlMessage();

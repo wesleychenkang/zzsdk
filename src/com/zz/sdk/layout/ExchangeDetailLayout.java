@@ -1,6 +1,8 @@
 package com.zz.sdk.layout;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
 import android.text.TextPaint;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -10,6 +12,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
@@ -19,11 +22,15 @@ import com.zz.lib.bitmapfun.ui.RecyclingImageView;
 import com.zz.lib.bitmapfun.util.ImageCache;
 import com.zz.lib.bitmapfun.util.ImageFetcher;
 import com.zz.lib.bitmapfun.util.ImageWorker;
+import com.zz.sdk.MSG_STATUS;
+import com.zz.sdk.MSG_TYPE;
 import com.zz.sdk.ParamChain;
 import com.zz.sdk.ParamChain.KeyCaller;
 import com.zz.sdk.activity.LAYOUT_TYPE;
 import com.zz.sdk.entity.PropsInfo;
 import com.zz.sdk.layout.ExchangeLayout.KeyExchange;
+import com.zz.sdk.layout.PaymentListLayout.ChargeStyle;
+import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
 import com.zz.sdk.util.ResConstants.Config.ZZDimenRect;
@@ -37,11 +44,28 @@ class ExchangeDetailLayout extends CCBaseLayout {
 
 	private static final String IMAGE_CACHE_DIR = "images";
 
+	private static final int MSG_RECHARGE = 0x201311;
+
 	private ImageFetcher mImageFetcher;
 
 	private PropsInfo mPropsInfo;
 
 	private ImageView mImageView;
+
+	private boolean mRechargeSuccessed;
+
+	private Handler mHandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			if (msg.what == MSG_RECHARGE) {
+				if (msg.arg1 == MSG_TYPE.PAYMENT
+						&& msg.arg2 == MSG_STATUS.SUCCESS) {
+					mRechargeSuccessed = true;
+				}
+			}
+			super.handleMessage(msg);
+		}
+	};
 
 	static enum IDC implements IIDC {
 
@@ -102,6 +126,15 @@ class ExchangeDetailLayout extends CCBaseLayout {
 		super.onInitEnv(ctx, env);
 
 		mPropsInfo = getEnv().get(KeyExchange.PROPS_INFO, PropsInfo.class);
+		mRechargeSuccessed = false;
+	}
+
+	@Override
+	protected void clean() {
+		super.clean();
+
+		mPropsInfo = null;
+		mImageFetcher = null;
 	}
 
 	private void initImageFetcher(Context ctx) {
@@ -331,19 +364,22 @@ class ExchangeDetailLayout extends CCBaseLayout {
 	private void tryRecharge() {
 		ParamChain env = getEnv().grow();
 		// 覆盖外部设置
-		env.add(KeyCaller.K_MSG_HANDLE, null);
-		env.add(KeyCaller.K_MSG_WHAT, 0);
+		env.add(KeyCaller.K_MSG_HANDLE, mHandler);
+		env.add(KeyCaller.K_MSG_WHAT, MSG_RECHARGE);
 		// env.add(KeyCaller.K_GAME_SERVER_ID, gameServerID);
 		// env.add(KeyCaller.K_SERVER_NAME, serverName);
 		// env.add(KeyCaller.K_ROLE_ID, roleId);
 		// env.add(KeyCaller.K_GAME_ROLE, gameRole);
-		if (mPropsInfo.mPrice > getCoinBalance())
-			env.add(KeyCaller.K_AMOUNT, mPropsInfo.mPrice/*-getCoinBalance()*/);
-		// env.add(KeyCaller.K_IS_CLOSE_WINDOW, isCloseWindow);
+		if (mPropsInfo.mPrice > getCoinBalance()) {
+			env.add(KeyCaller.K_AMOUNT,
+					(int) ((mPropsInfo.mPrice/*-getCoinBalance()*/) * 100));
+		}
+		env.add(KeyCaller.K_IS_CLOSE_WINDOW, true);
 		// env.add(KeyCaller.K_CALL_BACK_INFO, callBackInfo);
 
 		env.add(KeyCaller.K_AMOUNT_IS_ZYCOIN, Boolean.TRUE);
 		env.add(KeyCaller.K_PAYMENT_ZYCOIN_DISABLED, Boolean.TRUE);
+		env.add(KeyPaymentList.K_CHARGE_STYLE, ChargeStyle.RECHARGE);
 
 		getHost().enter(LAYOUT_TYPE.PaymentList, env);
 	}
@@ -402,6 +438,10 @@ class ExchangeDetailLayout extends CCBaseLayout {
 			mImageFetcher.setExitTasksEarly(false);
 			// 恢复时，重新加载图片
 			mImageFetcher.loadImage(mPropsInfo.mBigIcon, mImageView);
+		}
+		if (mRechargeSuccessed) {
+			showPopup_Tip("充值成功，请点击刷新您的卓越币余额！");
+			mRechargeSuccessed = false;
 		}
 		return ret;
 	}
