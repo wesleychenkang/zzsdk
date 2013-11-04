@@ -180,6 +180,14 @@ public class PayParam implements Serializable, JsonParseInterface {
 			listParames.add(new BasicNameValuePair(K_LOGINNAME, loginName));
 			listParames.add(new BasicNameValuePair(K_IMSI, smsImsi));
 			break;
+		case PayChannel.PAY_TYPE_ZZCOIN:
+			listParames.add(new BasicNameValuePair(K_LOGINNAME, loginName));
+			listParames.add(new BasicNameValuePair(K_GAMEROLE, gameRole));
+			listParames.add(new BasicNameValuePair(K_SERVERID, serverId));
+			listParames.add(new BasicNameValuePair(K_PROJECTID, projectId));
+			listParames.add(new BasicNameValuePair(K_AMOUNT, amount));
+			listParames.add(new BasicNameValuePair(K_REQUESTID, requestId));
+			break;
 		}
 		switch (payType) {
 		case PayChannel.PAY_TYPE_ALIPAY:
@@ -202,6 +210,9 @@ public class PayParam implements Serializable, JsonParseInterface {
 			break;
 		case PayChannel.PAY_TYPE_KKFUNPAY_EX:
 			part = "pkkfunnt.lg";
+			break;
+		case PayChannel.PAY_TYPE_ZZCOIN:
+			part = "pzy.lg";
 			break;
 		}
 

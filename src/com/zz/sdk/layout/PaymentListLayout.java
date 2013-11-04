@@ -1486,7 +1486,10 @@ public class PaymentListLayout extends CCBaseLayout {
 			return true;
 
 		case PayChannel.PAY_TYPE_ZZCOIN:
-			break;
+			// 卓越币，没有下一界面，已经是充值成功了
+			nofityPayResult(env, MSG_STATUS.SUCCESS);
+			showPayResult(env, MSG_STATUS.SUCCESS);
+			return true;
 
 		case PayChannel.PAY_TYPE_KKFUNPAY: {
 			clazz = PaymentSMSLayout.class;
@@ -1554,6 +1557,9 @@ public class PaymentListLayout extends CCBaseLayout {
 			break;
 
 		case PayChannel.PAY_TYPE_ZZCOIN:
+			dRequest = UserAction.PZYCOIN;
+			break;
+
 		default:
 			showToast("暂不支持");
 			return false;
@@ -1687,6 +1693,8 @@ public class PaymentListLayout extends CCBaseLayout {
 
 		case PayChannel.PAY_TYPE_KKFUNPAY_EX:
 			payParam.smsImsi = env.get(KeyDevice.K_IMSI, String.class);
+			break;
+		case PayChannel.PAY_TYPE_ZZCOIN:
 			break;
 		}
 		return payParam;

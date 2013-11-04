@@ -43,6 +43,7 @@ import com.zz.sdk.entity.result.ResultRequestAlipayTenpay;
 import com.zz.sdk.entity.result.ResultRequestKKFunPay;
 import com.zz.sdk.entity.result.ResultRequestUionpay;
 import com.zz.sdk.entity.result.ResultRequestYeePay;
+import com.zz.sdk.entity.result.ResultRequestZZCoin;
 
 /**
  * 网络连接工具(与服务器通信获取数据在此写相应的方法) 使用该工具类里的方法时。<b>请在线程中使用。</b>
@@ -477,6 +478,10 @@ public class ConnectionUtil {
 		case PayChannel.PAY_TYPE_KKFUNPAY:
 			clazz = ResultRequestKKFunPay.class;
 			break;
+		case PayChannel.PAY_TYPE_ZZCOIN:
+			clazz = ResultRequestZZCoin.class;
+			break;
+
 		case PayChannel.PAY_TYPE_KKFUNPAY_EX:
 		default:
 			Logger.d("onkonw type!");

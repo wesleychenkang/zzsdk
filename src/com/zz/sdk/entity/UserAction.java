@@ -31,6 +31,8 @@ public class UserAction {
 	public static final String PYEE = "PYEE";
 	/** 银联支付 */
 	public static final String PUNION = "PUNION";
+	/** 卓越币 */
+	public static final String PZYCOIN = "PZYCOIN";
 	/** 取消话费行为 */
 	public static final String CKKFUN = "CKKFUN";
 	/** 取消财付通行为 */

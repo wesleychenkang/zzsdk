@@ -78,7 +78,8 @@ public class BaseResult implements Serializable, JsonParseInterface {
 
 	protected static String getErrDesc(String msg[], String msg_def, int start,
 			Integer code) {
-		if (code == null || code < start || code >= start + msg.length)
+		if (code == null || code < start || code >= start + msg.length
+				|| msg[code - start] == null)
 			return msg_def;
 		return msg[code - start];
 	}
