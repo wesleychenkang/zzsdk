@@ -54,7 +54,7 @@ public class LoginLayout extends LinearLayout {
 		btnRegister.setTextColor(Color.BLACK);
 		btnRegister.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable
 				(ctx, CCImg.LOGIN_BUTTON_HUI, CCImg.LOGIN_BUTTON_HUI_CLICK));
-		btnRegister.setPadding(ZZDimen.dip2px(10),ZZDimen.dip2px(5), ZZDimen.dip2px(10), ZZDimen.dip2px(5));
+		btnRegister.setPadding(ZZDimen.dip2px(5),ZZDimen.dip2px(12), ZZDimen.dip2px(5), ZZDimen.dip2px(12));
 		btnRegister.setOnClickListener(l);
 		
 		// 修改密码
@@ -63,14 +63,14 @@ public class LoginLayout extends LinearLayout {
 		btnModifyPW.setText("修改密码");
 		btnModifyPW.setOnClickListener(l);
 		btnModifyPW.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LAN, CCImg.LOGIN_BUTTON_LAN_CLICK));
-		btnModifyPW.setPadding(ZZDimen.dip2px(10),ZZDimen.dip2px(5), ZZDimen.dip2px(10), ZZDimen.dip2px(5));
+		btnModifyPW.setPadding(ZZDimen.dip2px(5),ZZDimen.dip2px(12), ZZDimen.dip2px(5), ZZDimen.dip2px(12));
 		
 		// 登录
 		Button btnLogin = new Button(ctx);
 		btnLogin.setId(IDC.BT_LOGIN.id());
 		btnLogin.setText("立即登录");
 		btnLogin.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
-	    btnLogin.setPadding(ZZDimen.dip2px(10), ZZDimen.dip2px(5),ZZDimen.dip2px(10),ZZDimen.dip2px(5));
+	    btnLogin.setPadding(ZZDimen.dip2px(10), ZZDimen.dip2px(12),ZZDimen.dip2px(10),ZZDimen.dip2px(12));
 		btnLogin.setOnClickListener(l);
 		
 		//第三方登录
@@ -91,7 +91,7 @@ public class LoginLayout extends LinearLayout {
 		mInputAccount.setTextColor(Color.BLACK);
 		mInputAccount.setSingleLine(true);
 		mInputAccount.setBackgroundDrawable(CCImg.LOGIN_EDIT.getDrawble(ctx));
-		
+		mInputAccount.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(7), 0, ZZDimen.dip2px(7));
 		// 密码编辑框
 		mInputPW = new EditText(ctx);
 		mInputPW.setHint("请输入密码");
@@ -99,7 +99,7 @@ public class LoginLayout extends LinearLayout {
 		mInputPW.setTextColor(Color.BLACK);
 		mInputPW.setId(IDC.ED_LOGIN_PASSWORD.id());
 		mInputPW.setBackgroundDrawable(CCImg.LOGIN_EDIT.getDrawble(ctx));
-		
+		mInputPW.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(7), 0, ZZDimen.dip2px(7));
 		// 单选框
 		RadioGroup rg = new RadioGroup(ctx);
 		rg.setId(IDC.RG_ACCOUNT_TYPE.id());
@@ -124,7 +124,7 @@ public class LoginLayout extends LinearLayout {
 			RadioButton rb2 = new RadioButton(ctx);
 			rb2.setId(IDC.RB_ACCOUNT_TYPE_NORMAL.id());
 			RadioGroup.LayoutParams  lrb2 = new RadioGroup.LayoutParams (LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
-			lrb2.leftMargin = ZZDimen.dip2px(25);
+			lrb2.leftMargin = ZZDimen.dip2px(20);
 			rg.addView(rb2,lrb2);
 			rb2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
 			rb2.setTextScaleX(0.9f);
@@ -182,17 +182,19 @@ public class LoginLayout extends LinearLayout {
 						0.6f);
 				wrapall.addView(wrapRight,lright);
 				wrapRight.setOrientation(VERTICAL);
-				wrapRight.setPadding(ZZDimen.dip2px(15), 0, ZZDimen.dip2px(10), 0);
+				wrapRight.setGravity(Gravity.CENTER_HORIZONTAL);
+				//wrapRight.setPadding(ZZDimen.dip2px(5), 0, ZZDimen.dip2px(5), 0);
 				
 				// 判断本地是否已经保存有帐号信息
 			  if (hasAccount) {
 					LinearLayout.LayoutParams lpmodify = new LinearLayout.LayoutParams(
-							LayoutParams.WRAP_CONTENT,
+							LayoutParams.MATCH_PARENT,
 							LayoutParams.WRAP_CONTENT);
+					lpmodify.setMargins(ZZDimen.dip2px(10), ZZDimen.dip2px(5), ZZDimen.dip2px(10), 0); // 上边距5dp
 					// 添加注册帐号按钮
 					wrapRight.addView(btnRegister,lpmodify);
 					// 添加修改密码按钮
-				    lpmodify.setMargins(0, ZZDimen.dip2px(5), 0, 0); // 上边距5dp
+				    
 					wrapRight.addView(btnModifyPW, lpmodify);
 					
 			      } else {
@@ -237,8 +239,8 @@ public class LoginLayout extends LinearLayout {
 			if(hasAccount){
 			lLogin.weight = 0.5f;
 			}else{
-			lLogin.weight = 0.33f;	
-			btnLogin.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(5),ZZDimen.dip2px(5),ZZDimen.dip2px(5));
+			lLogin.weight = 0.1f;	
+			btnLogin.setPadding(ZZDimen.dip2px(1), ZZDimen.dip2px(12),ZZDimen.dip2px(1),ZZDimen.dip2px(12));
 			}
 			// 立即登录
 			wrapBttom.addView(btnLogin,lLogin);
@@ -250,7 +252,7 @@ public class LoginLayout extends LinearLayout {
 		  
 			if (hasAccount) {
 			   lother.setMargins(ZZDimen.dip2px(5), 0, ZZDimen.dip2px(10), 0);
-			   btnOther.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(5),ZZDimen.dip2px(5),ZZDimen.dip2px(5));
+			   btnOther.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(12),ZZDimen.dip2px(5),ZZDimen.dip2px(12));
 			   lother.weight = 0.5f;
 			}else{
 				// 判断本地是否已经保存有帐号信息
@@ -258,13 +260,13 @@ public class LoginLayout extends LinearLayout {
 				LinearLayout.LayoutParams lpregister = new LinearLayout.LayoutParams(
 						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 				lpregister.setMargins(ZZDimen.dip2px(6), 0, 0, 0);
-				btnRegister.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(5),ZZDimen.dip2px(5),ZZDimen.dip2px(5));
-				lpregister.weight = 0.33f;
+				btnRegister.setPadding(ZZDimen.dip2px(1), ZZDimen.dip2px(12),ZZDimen.dip2px(1),ZZDimen.dip2px(12));
+				lpregister.weight = 0.1f;
 				wrapBttom.addView(btnRegister, lpregister);
 				
-				btnOther.setPadding(ZZDimen.dip2px(1), ZZDimen.dip2px(5),ZZDimen.dip2px(1),ZZDimen.dip2px(5));
+				btnOther.setPadding(ZZDimen.dip2px(1), ZZDimen.dip2px(12),ZZDimen.dip2px(1),ZZDimen.dip2px(12));
 				lother.setMargins(ZZDimen.dip2px(6), 0, ZZDimen.dip2px(10), 0);
-				lother.weight = 0.33f;
+				lother.weight = 0.1f;
 			  }
 			
 			wrapBttom.addView(btnOther,lother);

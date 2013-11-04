@@ -781,7 +781,7 @@ class LoginMainLayout extends BaseLayout {
 		int widthPixels = getResources().getDisplayMetrics().widthPixels;
 		int heightPixels = getResources().getDisplayMetrics().heightPixels;
 		int heigth1 = heightPixels * 1 / 20;
-		int weight2 = widthPixels * (isVertical ? 8 : 4) / 8;
+		int weight2 = widthPixels * (isVertical ? 9 : 6) /10;
 		setOrientation(VERTICAL);
 		// 整体背景图
 		rv.setBackgroundDrawable(BitmapCache.getDrawable(ctx,
