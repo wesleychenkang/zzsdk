@@ -786,7 +786,7 @@ class LoginMainLayout extends BaseLayout {
 		// 整体背景图
 		rv.setBackgroundDrawable(BitmapCache.getDrawable(ctx,
 				(isVertical ? Constants.ASSETS_RES_PATH_VERTICAL
-						: Constants.ASSETS_RES_PATH) + "bg.jpg"));
+						: Constants.ASSETS_RES_PATH) + "bj.jpg"));
 		setWeightSum(1.0f);
 		framly.width = weight2;
 
