@@ -66,6 +66,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final int IDC_BT_LOGIN_MAIN = _IDC_START_ + 17;
 	private static final int IDC_BT_PAY_OUT = _IDC_START_ + 18;
 	private static final int IDC_BT_DEBUG = _IDC_START_ + 19;
+	private static final int IDC_CK_AUTOLOGIN = _IDC_START_ + 20;
 
 	/* 自定义消息 */
 	private static final int _MSG_USER_ = 2013;
@@ -138,12 +139,20 @@ public class MainActivity extends Activity implements OnClickListener {
 			rootLayout.addView(btLogin);
 		}
 		{
+			LinearLayout ll = new LinearLayout(ctx);
+			ll.setOrientation(LinearLayout.HORIZONTAL);
+			rootLayout.addView(ll);
+
 			Button btLogin = new Button(ctx);
 			btLogin.setText("登录");
 			btLogin.setId(IDC_BT_LOGIN_MAIN);
-
 			btLogin.setOnClickListener(onClickListener);
-			rootLayout.addView(btLogin);
+			ll.addView(btLogin, new LinearLayout.LayoutParams(-1, -2, 1.0f));
+
+			CheckBox cb = new CheckBox(ctx);
+			cb.setText("自动登录");
+			cb.setId(IDC_CK_AUTOLOGIN);
+			ll.addView(cb);
 		}
 		{
 			Button btLogin = new Button(ctx);
@@ -339,7 +348,8 @@ public class MainActivity extends Activity implements OnClickListener {
 		}
 			break;
 		case IDC_BT_LOGIN_MAIN: {
-			mSDKManager.showLoginViewEx(mHandler, MSG_LOGIN_CALLBACK);
+			boolean b = ((CheckBox) findViewById(IDC_CK_AUTOLOGIN)).isChecked();
+			mSDKManager.showLoginViewEx(mHandler, MSG_LOGIN_CALLBACK, b);
 		}
 			break;
 

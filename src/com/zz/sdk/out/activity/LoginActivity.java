@@ -868,8 +868,8 @@ public class LoginActivity extends Activity implements OnClickListener {
 				if (PojoUtils.isDouquUser(user)) {
 					result = new Result();
 					String newName = PojoUtils.getDouquBaseName(user);
-					boolean success = PojoUtils.updatePasswd(newName, pw, newPW);
-					if (success) {
+					com.zz.lib.pojo.Result ret = PojoUtils.updatePasswd(newName, pw, newPW);
+					if (ret.status == 0) {
 						Application.password = newPW;
 						GetDataImpl.getInstance(ctx).updateLogin_passwd(newPW);
 						result.codes = "0";

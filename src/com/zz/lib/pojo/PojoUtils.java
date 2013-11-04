@@ -13,7 +13,6 @@ import android.util.Pair;
 import com.zz.lib.utils.Encrypt1;
 import com.zz.lib.utils.MD5Util;
 import com.zz.sdk.BuildConfig;
-import com.zz.sdk.entity.result.BaseResult;
 import com.zz.sdk.entity.result.ResultLogin;
 import com.zz.sdk.entity.result.ResultRegister;
 import com.zz.sdk.util.Logger;
@@ -159,6 +158,9 @@ public class PojoUtils {
 	}
 
 	/**
+	 * TODO: <b>已不用</b>
+	 * <p>
+	 * 
 	 * 自动注册或登录，用于登录　豆趣　成功后。
 	 * 
 	 * @param ctx
@@ -464,7 +466,7 @@ public class PojoUtils {
 				s = registe(name, passwd);
 			}
 			if (run) {
-				success = updatePasswd(name, passwd, passwd);
+				Result ret = updatePasswd(name, passwd, passwd);
 			}
 			if (run) {
 				Result ret = login(name, passwd);
@@ -551,7 +553,7 @@ public class PojoUtils {
 	 * @param newPasswd
 	 * @return
 	 */
-	public static boolean updatePasswd(String name, String oldPasswd,
+	public static Result updatePasswd(String name, String oldPasswd,
 			String newPasswd) {
 		UpdatePwd updatePwd = new UpdatePwd();
 		updatePwd.account = name;
@@ -565,10 +567,11 @@ public class PojoUtils {
 		if (result != null
 				&& result.checkSign(updatePwd.account, updatePwd.newmd5pwd,
 						updatePwd.app_secret, app_key)) {
-			if (result.status == 0) {
-				return true;
-			}
+			return result;
+			// if (result.status == 0) {
+			// return true;
+			// }
 		}
-		return false;
+		return null;
 	}
 }

@@ -307,10 +307,10 @@ public class ConnectionUtil {
 	/**
 	 * 修改密码
 	 * 
-	 * @param newPassword
-	 *            新密码
 	 * @param user
 	 *            用户名
+	 * @param newPassword
+	 *            新密码
 	 * @param oldPassword
 	 *            旧密码
 	 * @return 修改密码结果

@@ -97,6 +97,8 @@
 		<do-update-zzsdk-config-java key="VERSION_NAME" value='"${zzsdk.config.version.name}"' />
 		<do-update-zzsdk-config-java key="VERSION_DATE" value='"${zzsdk.config.build.date}"' />
 		<do-update-zzsdk-config-java key="PLUGIN_MODE" value="${zzsdk.plugin.enabled}" />
+		<do-update-zzsdk-config-java key="DEBUG_URL" value="${zzsdk.debug.url.enabled}" />
+		<do-update-zzsdk-config-java key="ENCRYPT_PASSWORD" value="${zzsdk.config.encrypt_password}" />
 	</target>
 	
 	
@@ -157,6 +159,12 @@
 		
 		<!-- 插件开关 -->
 		<property name="zzsdk.plugin.enabled" value="false" />
+		
+		<!-- 是否加密密码，新的签名处理，必须要加密 -->
+		<property name="zzsdk.config.encrypt_password" value="true" />
+		
+		<!-- 调试·服务器URL，必须要关闭 -->
+		<property name="zzsdk.debug.url.enabled" value="false" />
 	</target>
 	
 	<target name="-set-zzsdk-mode-check">

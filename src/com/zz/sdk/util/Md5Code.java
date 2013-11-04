@@ -9,6 +9,8 @@ import java.util.Set;
 import org.apache.http.message.BasicNameValuePair;
 import org.apaches.commons.codec.binary.Base64;
 
+import com.zz.sdk.ZZSDKConfig;
+
 import android.util.Log;
 
 /**
@@ -105,6 +107,8 @@ public class Md5Code {
 	 * @return
 	 */
 	public static String encodePassword(String password) {
+		if (!ZZSDKConfig.ENCRYPT_PASSWORD)
+			return password;
 		String pass = Base64.encodeBase64String(password.getBytes());
 		char p[] = pass.toCharArray();
 		shuffle(p, 0);

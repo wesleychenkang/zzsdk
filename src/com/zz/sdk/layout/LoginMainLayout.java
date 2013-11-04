@@ -24,6 +24,7 @@ import com.zz.sdk.LoginCallbackInfo;
 import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.MSG_TYPE;
 import com.zz.sdk.ParamChain;
+import com.zz.sdk.ParamChain.KeyCaller;
 import com.zz.sdk.ParamChain.KeyUser;
 import com.zz.sdk.entity.result.BaseResult;
 import com.zz.sdk.entity.result.ResultAutoLogin;
@@ -58,6 +59,8 @@ class LoginMainLayout extends BaseLayout {
 	private UserUtil mUserUtil;
 	/** 当前正在操作的用户名 */
 	private String mLoginName;
+	/** 逗趣id */
+	private int mDouquId;
 	/** 当前正在操作的用户密码 */
 	private String mPassword;
 	/** 登录成功时显示提示 */
@@ -70,13 +73,15 @@ class LoginMainLayout extends BaseLayout {
 	/** 是否允许逗趣用户 */
 	private boolean mDouquEnabled;
 
+	/** 是否允许自动登录 */
+	private boolean mAutoLoginEnabled;
+
 	private boolean mLoginForModify;
 
 	private AutoLoginDialog mAutoDialog;
 	private FrameLayout main;
 	private Handler mHandler = new Handler();
 	private Context ctx;
-	private String mSdkUserId;
 	private String mNewPassword;
 	private FrameLayout.LayoutParams framly = new FrameLayout.LayoutParams(
 			LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -159,17 +164,16 @@ class LoginMainLayout extends BaseLayout {
 	protected void onInitEnv(Context ctx, ParamChain env) {
 		mLoginState = MSG_STATUS.EXIT_SDK;
 
-		Boolean b = env.get(KeyUser.K_LOGIN_DOUQU_ENABLED, Boolean.class);
+		Boolean b = env.get(KeyCaller.K_LOGIN_DOUQU_ENABLED, Boolean.class);
 		mDouquEnabled = b != null && b;
+
+		b = env.get(KeyCaller.K_LOGIN_AUTO_START, Boolean.class);
+		mAutoLoginEnabled = b != null && b;
 
 		mUserUtil = UserUtil.getInstance(ctx);
 		mUserUtil.init(mDouquEnabled);
-		mLoginName = env.get(KeyUser.K_LOGIN_NAME, String.class);
-		mPassword = env.get(KeyUser.K_PASSWORD, String.class);
-		if (mLoginName == null) {
-			mLoginName = mUserUtil.getCachedLoginName();
-			mPassword = mUserUtil.getCachedPassword();
-		}
+		mLoginName = mUserUtil.getCachedLoginName();
+		mPassword = mUserUtil.getCachedPassword();
 
 		// TODO:
 		mTipSuccess = mTipFailed = true;
@@ -199,26 +203,36 @@ class LoginMainLayout extends BaseLayout {
 	}
 
 	/**
-	 * 登录成功。更新到数据库。关闭登录界面。
+	 * 登录成功。刷新缓存到数据库。关闭登录界面。
 	 */
 	private void onLoginSuccess() {
 		mLoginState = MSG_STATUS.SUCCESS;
 		removeExitTrigger();
-		callHost_back();
+		showPopup_Tip(false, "登录成功！");
+		postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				hidePopup();
+				callHost_back();
+			}
+		}, 1500);
 
-		// 同步缓存
-
+		String sdkUserId = mUserUtil.getCachedSdkUserId();
+		String loginName = mUserUtil.getCachedLoginName();
+		String password = mUserUtil.getCachedPassword();
 		ParamChain env = getEnv().getParent(KeyUser.class.getName());
-		env.add(KeyUser.K_LOGIN_NAME, mLoginName);
-		env.add(KeyUser.K_PASSWORD, mPassword);
-		env.add(KeyUser.K_SDKUSER_ID, mSdkUserId);
-		env.add(KeyUser.K_LOGIN_STATE_SUCCESS, Boolean.TRUE);
-		
 		if (PojoUtils.isDouquUser(mLoginName)) {
-			
+			mUserUtil.syncSdkUser_douqu(mLoginName, mPassword, mDouquId);
+			env.add(KeyUser.K_LOGIN_NAME_GAME_USER, String.valueOf(mDouquId));
+			mLoginName = loginName;
+			mPassword = password;
+		} else {
+			mUserUtil.syncSdkUser(true);
 		}
-
-		mUserUtil.syncSdkUser(true);
+		env.add(KeyUser.K_LOGIN_NAME, loginName);
+		env.add(KeyUser.K_PASSWORD, password);
+		env.add(KeyUser.K_SDKUSER_ID, sdkUserId);
+		env.add(KeyUser.K_LOGIN_STATE_SUCCESS, Boolean.TRUE);
 	}
 
 	@Override
@@ -253,8 +267,11 @@ class LoginMainLayout extends BaseLayout {
 
 		LoginCallbackInfo info = new LoginCallbackInfo();
 		info.statusCode = code;
-		info.loginName = mLoginName;
-		info.sdkuserid = mSdkUserId;
+		if (PojoUtils.isCMGEUser(mLoginName))
+			info.loginName = PojoUtils.getCMGEBaseName(mLoginName);
+		else
+			info.loginName = mLoginName;
+		info.sdkuserid = mUserUtil.getCachedSdkUserId();
 
 		notifyCaller(MSG_TYPE.LOGIN, state, info);
 	}
@@ -286,7 +303,8 @@ class LoginMainLayout extends BaseLayout {
 
 	private void setAccountType(boolean isDouqu) {
 		RadioGroup rg = (RadioGroup) findViewById(IDC.RG_ACCOUNT_TYPE.id());
-		rg.check(isDouqu ? IDC.RB_ACCOUNT_TYPE_DOUQU.id() : IDC.RB_ACCOUNT_TYPE_NORMAL.id());
+		rg.check(isDouqu ? IDC.RB_ACCOUNT_TYPE_DOUQU.id()
+				: IDC.RB_ACCOUNT_TYPE_NORMAL.id());
 	}
 
 	@Override
@@ -300,14 +318,14 @@ class LoginMainLayout extends BaseLayout {
 			break;
 
 		// 注册账号
-			case BT_REGISTER: {
-				if (account_type_is_douqu()) {
-					showToast("请注册卓越通行证！");
-					setAccountType(false);
-				} else {
-					tryEnterRegister();
-				}
+		case BT_REGISTER: {
+			if (account_type_is_douqu()) {
+				showToast("请注册卓越通行证！");
+				setAccountType(false);
+			} else {
+				tryEnterRegister();
 			}
+		}
 			break;
 
 		// 修改密码
@@ -482,6 +500,10 @@ class LoginMainLayout extends BaseLayout {
 	 */
 	private void onLoginReuslt(BaseResult result) {
 		if (result.isSuccess()) {
+			if (PojoUtils.isDouquUser(mLoginName)) {
+				mDouquId = mUserUtil.getCachedDouquUserID();
+			}
+
 			if (mLoginForModify) {
 				// 如果是为修改密码而登录
 				hidePopup();
@@ -691,7 +713,6 @@ class LoginMainLayout extends BaseLayout {
 			}
 			mLoginName = r.mUserName;
 			mPassword = r.mPassword;
-			mSdkUserId = r.mSdkUserId;
 			onLoginSuccess();
 		} else {
 			if (result.isUsed()) {
@@ -743,11 +764,13 @@ class LoginMainLayout extends BaseLayout {
 	 * 显示自动游戏登录Dialog
 	 */
 	private void show_auto_login_wait() {
-		mAutoDialog = new AutoLoginDialog(getActivity());
-		// 显示
-		mAutoDialog.show();
-		// 2秒
-		mHandler.postDelayed(doAutoLogin, 2 * 1000);
+		if (mAutoLoginEnabled) {
+			mAutoDialog = new AutoLoginDialog(getActivity());
+			// 显示
+			mAutoDialog.show();
+			// 2秒
+			mHandler.postDelayed(doAutoLogin, 2 * 1000);
+		}
 	}
 
 	protected void onInitUI(Context ctx) {
@@ -805,12 +828,12 @@ class LoginMainLayout extends BaseLayout {
 					Logger.d(e.getClass().getName());
 				}
 
-                // 自动登录，也要对参数进行检查
-                Pair<View, String> err = checkLoginInput();
-                if (err == null) {
-                    mLoginForModify = false;
-                    tryLoginWait(mLoginName, mPassword);
-                }
+				// 自动登录，也要对参数进行检查
+				Pair<View, String> err = checkLoginInput();
+				if (err == null) {
+					mLoginForModify = false;
+					tryLoginWait(mLoginName, mPassword);
+				}
 			}
 		}
 	};
@@ -822,7 +845,7 @@ class LoginMainLayout extends BaseLayout {
 
 		public AutoLoginDialog(Context context) {
 			super(context);
-            Context ctx = context;
+			Context ctx = context;
 
 			getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 			getWindow().setBackgroundDrawable(
@@ -841,7 +864,7 @@ class LoginMainLayout extends BaseLayout {
 			tv.setTextSize(16);
 			//
 			Loading loading = new Loading(ctx);
-            Button cancel = new Button(ctx);
+			Button cancel = new Button(ctx);
 			cancel.setBackgroundDrawable(ResConstants.CCImg
 					.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LAN,
 							CCImg.LOGIN_BUTTON_LAN_CLICK));
@@ -895,12 +918,7 @@ class LoginMainLayout extends BaseLayout {
 			String loginName = (String) params[3];
 			String password = (String) params[4];
 
-			ResultLogin ret;
-			if (PojoUtils.isDouquUser(loginName)) {
-				ret = uu.login_douqu(loginName, password);
-			} else {
-				ret = uu.login(loginName, password);
-			}
+			ResultLogin ret = uu.login(loginName, password);
 			if (!this.isCancelled()) {
 				mCallback = callback;
 				mToken = token;

@@ -24,6 +24,7 @@ import com.zz.sdk.out.util.Application;
 import com.zz.sdk.out.util.GetDataImpl;
 import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.DebugFlags;
+import com.zz.sdk.util.UserUtil;
 import com.zz.sdk.util.DebugFlags.KeyDebug;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants;
@@ -133,8 +134,6 @@ public class SDKManager {
 	/** 初始化「用户」信息 */
 	private ParamChain init_user(Context ctx, ParamChain rootEnv) {
 		ParamChain env = rootEnv.grow(KeyUser.class.getName());
-		if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN)
-			env.add(KeyUser.K_LOGIN_DOUQU_ENABLED, true);
 		return env;
 	}
 
@@ -209,7 +208,10 @@ public class SDKManager {
 			new Thread() {
 				@Override
 				public void run() {
-					GetDataImpl.getInstance(mContext).loginForLone(account);
+					// GetDataImpl.getInstance(mContext).loginForLone(account);
+					UserUtil.loginForLone(
+							mRootEnv.getParent(KeyUser.class.getName()),
+							mContext, ZZSDKConfig.SUPPORT_DOUQU_LOGIN);
 				}
 			}.start();
 		}
@@ -267,10 +269,14 @@ public class SDKManager {
 		ZZSDKOut.showLoginView(mContext, callbackHandler, what);
 	}
 
-	public void showLoginViewEx(Handler callbackHandler, int what) {
+	public void showLoginViewEx(Handler callbackHandler, int what,
+			boolean auto_login) {
 		ParamChain env = mRootEnv.grow(KeyCaller.class.getName());
 		env.add(KeyCaller.K_MSG_HANDLE, callbackHandler);
 		env.add(KeyCaller.K_MSG_WHAT, what);
+		if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN)
+			env.add(KeyCaller.K_LOGIN_DOUQU_ENABLED, true);
+		env.add(KeyCaller.K_LOGIN_AUTO_START, auto_login);
 		startActivity(mContext, env, LAYOUT_TYPE.LoginMain);
 	}
 

@@ -128,6 +128,13 @@ public interface ParamChain {
 
 		/** 键：支付结果通知，{@link String} */
 		static final String K_CALL_BACK_INFO = _TAG_ + "call_back_info";
+
+		/** 登录时是否允许使用逗趣账号，{@link Boolean} */
+		static final String K_LOGIN_DOUQU_ENABLED = _TAG_
+				+ "login_douqu_enabled";
+
+		/** 登录时自动登录，{@link Boolean} */
+		static final String K_LOGIN_AUTO_START = _TAG_ + "login_auto_start";
 	}
 
 	public static interface KeyUser extends KeyGlobal {
@@ -139,10 +146,6 @@ public interface ParamChain {
 
 		/** 登录名, {@link String} */
 		public static final String K_LOGIN_NAME = _TAG_ + "login_name";
-
-		/** 登录时是否允许使用逗趣账号，{@link Boolean} */
-		public static final String K_LOGIN_DOUQU_ENABLED = _TAG_
-				+ "login_douqu_enabled";
 
 		/**
 		 * 游戏中账号名, {@link String}，一般而言，应该与 {@link #K_LOGIN_NAME}
@@ -156,9 +159,6 @@ public interface ParamChain {
 
 		/** 用户密码, {@link String} */
 		public static final String K_PASSWORD = _TAG_ + "password";
-
-		/** 新用户密码, {@link String} */
-		public static final String K_NEW_PASSWORD = _TAG_ + "password_new";
 
 		/** 余额，{@link Double}，格式 0.00 */
 		public static final String K_COIN_BALANCE = _TAG_ + "coin_balance";

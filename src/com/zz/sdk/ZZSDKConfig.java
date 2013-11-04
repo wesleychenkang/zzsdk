@@ -24,10 +24,13 @@ public final class ZZSDKConfig {
 	public final static boolean DEBUG = BuildConfig.DEBUG;
 
 	/** 调试·服务器URL */
-	public final static boolean DEBUG_URL =  DEBUG; // false; // 
+	public final static boolean DEBUG_URL =  false;// DEBUG;// 
 
 	/** 插件模式 */
 	public final static boolean PLUGIN_MODE = false;
+	
+	/** 是否加密密码，新的签名处理，必须要加密 */
+	public final static boolean ENCRYPT_PASSWORD = DEBUG_URL;// true;//
 
 	/* 版本信息 */
 

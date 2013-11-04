@@ -292,8 +292,6 @@ public class LoginLayout extends LinearLayout {
 		boolean isDouquAccount = true;
 		if (PojoUtils.isDouquUser(account)) {
 			account = PojoUtils.getDouquBaseName(account);
-		} else if (PojoUtils.isCMGEUser(account)) {
-			account = PojoUtils.getCMGEBaseName(account);
 		} else {
 			isDouquAccount = false;
 		}
