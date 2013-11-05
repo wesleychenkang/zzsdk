@@ -1,10 +1,7 @@
 package com.zz.sdk.layout;
 
-import java.text.DecimalFormat;
-
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.os.AsyncTask;
@@ -49,6 +46,8 @@ import com.zz.sdk.util.ResConstants.Config.ZZDimenRect;
 import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
 import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
+
+import java.text.DecimalFormat;
 
 /**
  * 基本界面界面，注意：
@@ -429,8 +428,6 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	 *            提示语
 	 * @param timeoutCallback
 	 *            倒计时回调
-	 * @param sTimeout
-	 *            倒计时长，单位[秒]
 	 */
 	protected void showPopup_Wait(View vPopup, CharSequence tip,
 			final IWaitTimeout timeoutCallback) {
@@ -1160,7 +1157,6 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	 * @param tip
 	 *            提示语，表示正在处理的事件，如果为空，则使用默认提示语
 	 * @see {@link ZZStr#CC_EXIT_LOCKED_TIP}
-	 * @see {@link ZZStr#CC_EXIT_LOCKED_TIP_EX}
 	 */
 	protected void setExitTrigger(long interval, String tip) {
 		mExitTriggerLastTime = 0;

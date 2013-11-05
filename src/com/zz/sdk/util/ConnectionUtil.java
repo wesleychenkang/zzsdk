@@ -65,7 +65,7 @@ public class ConnectionUtil {
 	/**
 	 * 将 请求参数二次处理
 	 * 
-	 * @param nvps
+	 * @param params    参数
 	 */
 	private List<BasicNameValuePair> packHttpParams(
 			HashMap<String, String> params) {
@@ -270,11 +270,6 @@ public class ConnectionUtil {
 		return doRequest(ResultAutoLogin.class, Constants.QUICK_LOGIN_REQ, 2 //
 				, "imsi", imsi//
 		);
-		// Application.isLogin = true;
-		// syncSdkUser();
-		// isOperationDeviceSyn(result.username, ctx);
-		// useraction.actionType = UserAction.AUTOREG;
-		// useraction.requestActivon(ctx);
 	}
 
 	/**
@@ -290,11 +285,6 @@ public class ConnectionUtil {
 				, K_LOGIN_NAME, loginName //
 				, K_PASSWORD, e_password //
 		);
-		// Application.isLogin = true;
-		// syncSdkUser();
-		// isOperationDeviceSyn(result.username, ctx);
-		// useraction.actionType = UserAction.REGISTER;
-
 	}
 
 	/** 获取QiHoo返回的token get360UserInfo(获取360用户信息） */
@@ -324,35 +314,8 @@ public class ConnectionUtil {
 				, "newPassword", Md5Code.encodePassword(newPassword) //
 				, "productId", Utils.getProductId(mContext) //
 		);
-		// syncSdkUser();
 	}
 
-	/**
-	 * 同步用户基本信息到数据库中
-	 * 
-	 * @return
-	 */
-	private boolean syncSdkUser() {
-		// TODO:
-		// 更新用户数据到全局变量
-		// Application.password = mSdkUser.password;
-		// SdkUserTable t = SdkUserTable.getInstance(mContext);
-		// // 将用户名保存到sdcard
-		// Utils.writeAccount2SDcard(mContext, mSdkUser.loginName,
-		// mSdkUser.password);
-		//
-		// if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
-		// if (PojoUtils.isDouquUser(mSdkUser.loginName)) {
-		// // 不将逗趣的账户储存到sd卡
-		// PojoUtils.updateDouquUser_SDCard(
-		// PojoUtils.getDouquBaseName(mSdkUser.loginName),
-		// mSdkUser.password);
-		// }
-		// }
-		//
-		// return t.update(mSdkUser);
-		return false;
-	}
 
 	/**
 	 * 取消支付中的结果
@@ -395,42 +358,31 @@ public class ConnectionUtil {
 
 	/**
 	 * 客服端同步设备信息请求
-	 * 
-	 * @param ctx
-	 *            上下文对象
-	 * @param dp
-	 *            设备信息类的对象
+	 *
 	 * @param loginname
 	 *            登录的用户名
 	 * @return
 	 */
-	public BaseResult deviceSyn(String loginname, Context ctx) {
-		DeviceProperties mDeviceProperties = new DeviceProperties(ctx);
+	public BaseResult deviceSyn(String loginname) {
+		DeviceProperties properties = new DeviceProperties(mContext);
 		return doRequest(BaseResult.class, Constants.DSYN_REQ, 1 //
 				, K_LOGIN_NAME, loginname //
-				, "systemVersion", "" + mDeviceProperties.versionCode //
-				, "deviceType", mDeviceProperties.type //
-				, "imei", mDeviceProperties.imei //
-				, "imsi", mDeviceProperties.imsi //
-				, "latitude", "" + mDeviceProperties.latitude //
-				, "longtitude", "" + mDeviceProperties.longitude //
-				, "area", "" + mDeviceProperties.area //
-				, "netType", mDeviceProperties.networkInfo //
-				, "projectId", mDeviceProperties.projectId //
-				, "sdkVersion", mDeviceProperties.sdkVersion //
+				, "systemVersion", "" + properties.versionCode //
+				, "deviceType", properties.type //
+				, "imei", properties.imei //
+				, "imsi", properties.imsi //
+				, "latitude", "" + properties.latitude //
+				, "longtitude", "" + properties.longitude //
+				, "area", "" + properties.area //
+				, "netType", properties.networkInfo //
+				, "projectId", properties.projectId //
+				, "sdkVersion", properties.sdkVersion //
 		);
-		// SharedPreferences prefs = mContext.getSharedPreferences(DEVICESYN,
-		// Context.MODE_PRIVATE);
-		// if ("0".equals(result.codes)) {
-		// prefs.edit().putString(DEVICESYN, "0").commit();
-		// } else {
-		// prefs.edit().putString(DEVICESYN, "1").commit();
-		// }
 	}
 
 	/**
 	 * 平台登入 表示用户打开软件
-	 * 
+	 *
 	 * @return
 	 */
 	public BaseResult online(Context ctx) {
@@ -511,45 +463,6 @@ public class ConnectionUtil {
 		return doRequest(ResultPayList.class, Constants.GPL_REQ, 2,
 				"requestId", "", "serverId", charge.serverId, K_LOGIN_NAME,
 				charge.loginName);
-
-		// parseTelAndQQ(result.payServerDesc);
-		// parseTopic(result.payServerDesc);
-		// Application.cardAmount = result.cardAmount;
-		// Set<Integer> payTypes = PayChannel.getPayType();
-		// ArrayList<PayChannel> payLists = new ArrayList<PayChannel>();
-		// boolean hasSmsPermission = false;
-		//
-		// if (payTypes.contains(PayChannel.PAY_TYPE_KKFUNPAY)) {
-		// Logger.d("有短信充值方式");
-		//
-		// try {
-		// if (PackageManager.PERMISSION_GRANTED == mContext
-		// .getPackageManager().checkPermission(
-		// permission.SEND_SMS, mContext.getPackageName())) {
-		// hasSmsPermission = true;
-		// } else {
-		// hasSmsPermission = false;
-		// }
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// }
-		// }
-		//
-		// for (PayChannel cm : channelMessages) {
-		// if (payTypes.contains(cm.type)) {
-		//
-		// if (cm.type == PayChannel.PAY_TYPE_KKFUNPAY
-		// && !hasSmsPermission) {
-		// continue;
-		// }
-		// payLists.add(cm);
-		// }
-		// }
-		//
-		// channelMessages = payLists.toArray(new PayChannel[payLists.size()]);
-		// // 设置全局静态数据
-		// Application.mPayChannels = channelMessages;
-		// return channelMessages;
 	}
 
 	/**
@@ -559,24 +472,6 @@ public class ConnectionUtil {
 		return doRequest(BaseResult.class, Constants.GPM_QO, 1 //
 				, "cmgeOrderNum", ordrNumber //
 		);
-	}
-
-	/**
-	 * 单机游戏的登录
-	 */
-	private void loginForLone(Pair<String, String> account) {
-		// if (account != null) {
-		// final String loginName = account.first;
-		// final String password = account.second;
-		// if (loginName != null && !"".equals(loginName)) {
-		// login(loginName.trim(), password.trim(), 1, mContext);
-		// } else {
-		// quickLogin(mContext);
-		// }
-		// } else {
-		// quickLogin(mContext);
-		// }
-		int a = 0 / 10;
 	}
 
 	/**
