@@ -298,7 +298,7 @@ abstract class CCBaseLayout extends BaseLayout {
 			tv.setGravity(Gravity.CENTER);
 
 			tv = create_normal_label(ctx, null);
-			ll.addView(tv, new LayoutParams(LP_WM));
+			ll.addView(tv, new LayoutParams(LP_WW));
 			tv.setId(IDC.TV_BALANCE.id());
 			tv.setGravity(Gravity.CENTER);
 			tv.setCompoundDrawablesWithIntrinsicBounds(null, null,
