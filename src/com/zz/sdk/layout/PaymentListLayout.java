@@ -45,12 +45,14 @@ import com.zz.sdk.ParamChain.KeyGlobal;
 import com.zz.sdk.ParamChain.KeyUser;
 import com.zz.sdk.ParamChain.ValType;
 import com.zz.sdk.PaymentCallbackInfo;
+import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.Result;
 import com.zz.sdk.entity.SMSChannelMessage;
 import com.zz.sdk.entity.UserAction;
 import com.zz.sdk.entity.result.BaseResult;
+import com.zz.sdk.entity.result.ResultAutoLogin;
 import com.zz.sdk.entity.result.ResultPayList;
 import com.zz.sdk.entity.result.ResultRequest;
 import com.zz.sdk.entity.result.ResultRequestAlipayTenpay;
@@ -68,6 +70,7 @@ import com.zz.sdk.util.ResConstants.Config.ZZDimenRect;
 import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
 import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
+import com.zz.sdk.util.UserUtil;
 import com.zz.sdk.util.Utils;
 
 //import com.zz.sdk.util.GetDataImpl;
@@ -358,12 +361,49 @@ public class PaymentListLayout extends CCBaseLayout {
 		setCurrentTask(task);
 	}
 
+	/** 检查登录状态 */
+	private boolean check_login_state() {
+		Boolean b = getEnv().get(KeyUser.K_LOGIN_STATE_SUCCESS, Boolean.class);
+		if (b != null && b) {
+			return true;
+		}
+
+		// 当前没有登录，那么，开启后台登录线程
+		Logger.d("D: auto login in background...");
+
+		ITaskCallBack cb = new ITaskCallBack() {
+			@Override
+			public void onResult(
+					AsyncTask<?, ?, ?> task, Object token,
+					BaseResult result) {
+				if (isCurrentTaskFinished(task)) {
+					onLoginResult(result);
+				}
+			}
+		};
+		AsyncTask<?, ?, ?> task = LoginTask.createAndStart(
+				mContext, cb, this, getEnv().getParent(KeyUser.class.getName()), ZZSDKConfig.SUPPORT_DOUQU_LOGIN
+		);
+		setCurrentTask(task);
+		return false;
+	}
+
+	private void onLoginResult(BaseResult result) {
+		if (result != null && result.isSuccess()) {
+			start_paylist_loader();
+		} else {
+			Logger.d("D: login failed(2)!");
+			showPayList(false);
+		}
+	}
+
 	@Override
 	public boolean onEnter() {
 		boolean ret = super.onEnter();
 		if (ret) {
 			resetExitTrigger();
-			start_paylist_loader();
+			if (check_login_state())
+				start_paylist_loader();
 		}
 		return ret;
 	}
@@ -1899,6 +1939,52 @@ public class PaymentListLayout extends CCBaseLayout {
 
 		@Override
 		protected void onPostExecute(ResultPayList result) {
+			if (DEBUG) {
+				Logger.d("PayListTask: result!");
+			}
+			if (mCallback != null) {
+				mCallback.onResult(this, mToken, result);
+			}
+			// clean
+			mCallback = null;
+			mToken = null;
+		}
+	}
+
+	private static class LoginTask extends AsyncTask<Object, Void, BaseResult> {
+
+		protected static AsyncTask<?, ?, ?> createAndStart(
+				Context ctx,
+				ITaskCallBack callback, Object token, ParamChain env, boolean support_douqu) {
+			LoginTask task = new LoginTask();
+			task.execute(ctx, callback, token, env, support_douqu);
+			if (DEBUG) {
+				Logger.d("LoginTask: created!");
+			}
+			return task;
+		}
+
+		ITaskCallBack mCallback;
+		Object mToken;
+
+		@Override
+		protected BaseResult doInBackground(Object... params) {
+			Context ctx = (Context) params[0];
+			ITaskCallBack callback = (ITaskCallBack) params[1];
+			Object token = params[2];
+			ParamChain env = (ParamChain) params[3];
+			boolean support_douqu = (Boolean) params[4];
+
+			BaseResult ret = UserUtil.loginForLone(env, ctx, support_douqu);
+			if (!this.isCancelled()) {
+				mCallback = callback;
+				mToken = token;
+			}
+			return ret;
+		}
+
+		@Override
+		protected void onPostExecute(BaseResult result) {
 			if (DEBUG) {
 				Logger.d("PayListTask: result!");
 			}
