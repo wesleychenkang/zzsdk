@@ -652,7 +652,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 	/**
 	 * 充值结果。从广播中来
 	 * 
-	 * @param command
+	 * @param cmd
 	 *            指令
 	 * @param code
 	 *            状态

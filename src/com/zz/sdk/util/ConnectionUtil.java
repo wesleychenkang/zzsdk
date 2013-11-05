@@ -553,10 +553,9 @@ public class ConnectionUtil {
 	}
 
 	/**
-	 * 查询订单 queryOrder(查询订单状态）
+	 * 查询订单 queryOrder(查询订单状态）0成功|1失败 0成功|其它失败
 	 */
 	public BaseResult checkOrder(String ordrNumber) {
-		// TODO:
 		return doRequest(BaseResult.class, Constants.GPM_QO, 1 //
 				, "cmgeOrderNum", ordrNumber //
 		);

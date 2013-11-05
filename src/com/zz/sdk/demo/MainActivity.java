@@ -2,18 +2,16 @@ package com.zz.sdk.demo;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputType;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -27,10 +25,11 @@ import com.zz.sdk.ParamChain;
 import com.zz.sdk.ParamChain.KeyUser;
 import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.SDKManager;
-import com.zz.sdk.layout.PaymentListLayout.ChargeStyle;
-import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.DebugFlags.KeyDebug;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 演示 SDK 使用
@@ -40,33 +39,35 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	/* 配置 */
 	private static final String CONFIG_GAME_SERVER_ID = "M1001A";
-	private static final String CONFIG_GAME_SERVER_NAME = "乐活测试服务器";
 	private static final String CONFIG_GAME_ROLE_ID = "007";
 	private static final String CONFIG_GAME_ROLE = "战士001";
+
+	private static final String CONFIG_GAME_SERVER_NAME = "乐活测试服务器";
 	private static final String CONFIG_GAME_CALLBACK_INFO = "厂商自定义参数（长度限制250个字符）";
 
 	/* ID */
 	private static final int _IDC_START_ = 0;
-	private static final int IDC_BT_LOGIN = _IDC_START_ + 1;
+	private static final int IDC_BT_OUT_LOGIN = _IDC_START_ + 1;
 	private static final int IDC_BT_PAY = _IDC_START_ + 2;
 	private static final int IDC_BT_PAY_AMOUNT = _IDC_START_ + 3;
 	private static final int IDC_ET_PAY_AMOUNT = _IDC_START_ + 4;
 	private static final int IDC_BT_LOGIN_OFFLINE = _IDC_START_ + 5;
 	private static final int IDC_BT_QUERY = _IDC_START_ + 6;
 	private static final int IDC_TV_LOG = _IDC_START_ + 7;
-	private static final int _IDC_END_ = _IDC_START_ + 8;
-	private static final int IDC_CK_SUCCESS = _IDC_START_ + 9;
-	private static final int IDC_CK_FAILL = _IDC_START_ + 10;
+	private static final int IDC_CB_LOGIN_SUCCESS_TIP = _IDC_START_ + 9;
+	private static final int IDC_CB_LOGIN_FAIL_TIP = _IDC_START_ + 10;
 	private static final int IDC_CHARGE_AUTO_CLOSE = _IDC_START_ + 11;
 	private static final int IDC_CHARGE_MODE_BUY = _IDC_START_ + 12;
 	private static final int IDC_BT_EXCHANGE = _IDC_START_ + 13;
 	private static final int IDC_BT_RECHARGE_RATE = _IDC_START_ + 14;
 	private static final int IDC_ET_RECHARGE_RATE = _IDC_START_ + 15;
 	private static final int IDC_CB_CANCEL_AS_SUCCESS = _IDC_START_ + 16;
-	private static final int IDC_BT_LOGIN_MAIN = _IDC_START_ + 17;
-	private static final int IDC_BT_PAY_OUT = _IDC_START_ + 18;
+	private static final int IDC_BT_LOGIN = _IDC_START_ + 17;
+	private static final int IDC_BT_OUT_PAY = _IDC_START_ + 18;
 	private static final int IDC_BT_DEBUG = _IDC_START_ + 19;
-	private static final int IDC_CK_AUTOLOGIN = _IDC_START_ + 20;
+	private static final int IDC_CB_AUTOLOGIN = _IDC_START_ + 20;
+	private static final int IDC_BT_CHECKORDER = _IDC_START_ + 21;
+	private static final int IDC_ET_ORDER_NUMBER = _IDC_START_ + 22;
 
 	/* 自定义消息 */
 	private static final int _MSG_USER_ = 2013;
@@ -75,16 +76,24 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final int MSG_ORDER_CALLBACK = _MSG_USER_ + 3;
 
 	private SDKManager mSDKManager;
+
 	private ParamChain mDebugEnv;
 
 	private LoginCallbackInfo mLoginCallbackInfo;
 	private TextView mTvTip;
 
-	private final static int RC_PAYMENT = 2;
+	static enum MyOrderState {
+		/** 失败 */
+		FAILED,
+		/** 被取消 */
+		CANCELED,
+		/** 就绪 */
+		READY,
+		/** 验证通过 */
+		SUCCESS
+	}
 
-	private String ordernumber = "";
-	private boolean isDisplayLoginTip = false;
-	private boolean isDisplayLoginfail = false;
+	private List<Pair<PaymentCallbackInfo, MyOrderState>> mOrderCache = new ArrayList<Pair<PaymentCallbackInfo, MyOrderState>>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -101,7 +110,9 @@ public class MainActivity extends Activity implements OnClickListener {
 		{
 			ScrollView sv = new ScrollView(ctx);
 			ll.addView(sv, new LinearLayout.LayoutParams(
-					LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f));
+					LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f
+			)
+			);
 			sv.setVerticalScrollBarEnabled(true);
 			sv.addView(setupVies(ctx, this));
 		}
@@ -109,7 +120,9 @@ public class MainActivity extends Activity implements OnClickListener {
 		{
 			ScrollView sv = new ScrollView(ctx);
 			ll.addView(sv, new LinearLayout.LayoutParams(
-					LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f));
+					LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f
+			)
+			);
 			sv.setVerticalScrollBarEnabled(true);
 
 			TextView tvTip = new TextView(ctx);
@@ -130,146 +143,168 @@ public class MainActivity extends Activity implements OnClickListener {
 	private View setupVies(Context ctx, OnClickListener onClickListener) {
 		LinearLayout rootLayout = new LinearLayout(ctx);
 		rootLayout.setOrientation(LinearLayout.VERTICAL);
-		{
-			Button btLogin = new Button(ctx);
-			btLogin.setText("调试");
-			btLogin.setId(IDC_BT_DEBUG);
+		Button bt;
+		EditText et;
+		CheckBox cb;
+		LinearLayout ll;
 
-			btLogin.setOnClickListener(onClickListener);
-			rootLayout.addView(btLogin);
-		}
 		{
-			LinearLayout ll = new LinearLayout(ctx);
+			ll = new LinearLayout(ctx);
 			ll.setOrientation(LinearLayout.HORIZONTAL);
 			rootLayout.addView(ll);
 
-			Button btLogin = new Button(ctx);
-			btLogin.setText("登录");
-			btLogin.setId(IDC_BT_LOGIN_MAIN);
-			btLogin.setOnClickListener(onClickListener);
-			ll.addView(btLogin, new LinearLayout.LayoutParams(-1, -2, 1.0f));
+			bt = new Button(ctx);
+			bt.setText("登录");
+			bt.setId(IDC_BT_LOGIN);
+			bt.setOnClickListener(onClickListener);
+			ll.addView(bt, new LinearLayout.LayoutParams(-1, -2, 1.0f));
 
-			CheckBox cb = new CheckBox(ctx);
+			cb = new CheckBox(ctx);
 			cb.setText("自动登录");
-			cb.setId(IDC_CK_AUTOLOGIN);
+			cb.setId(IDC_CB_AUTOLOGIN);
 			ll.addView(cb);
 		}
-		{
-			Button btLogin = new Button(ctx);
-			btLogin.setText("登录(旧）");
-			btLogin.setId(IDC_BT_LOGIN);
 
-			btLogin.setOnClickListener(onClickListener);
-			rootLayout.addView(btLogin);
+		{
+			bt = new Button(ctx);
+			bt.setText("单机模式");
+			bt.setId(IDC_BT_LOGIN_OFFLINE);
+			bt.setOnClickListener(onClickListener);
+			rootLayout.addView(bt, new LinearLayout.LayoutParams(-1, -2, 1.0f));
 		}
+		// 设置是否显示登录成功或者失败的信息，用在单机模式的后台登录
 		{
-			Button btCharge = new Button(ctx);
-			btCharge.setText("充值");
-			btCharge.setId(IDC_BT_PAY);
+			ll = new LinearLayout(ctx);
+			ll.setOrientation(LinearLayout.HORIZONTAL);
+			rootLayout.addView(ll);
 
-			btCharge.setOnClickListener(onClickListener);
-			rootLayout.addView(btCharge);
-		}
-		{
-			Button btCharge = new Button(ctx);
-			btCharge.setText("充值(旧)");
-			btCharge.setId(IDC_BT_PAY_OUT);
+			cb = new CheckBox(ctx);
+			cb.setId(IDC_CB_LOGIN_SUCCESS_TIP);
+			cb.setText("登录成功时提示");
+			ll.addView(cb, new LinearLayout.LayoutParams(-1, -2, 1.0f));
 
-			btCharge.setOnClickListener(onClickListener);
-			rootLayout.addView(btCharge);
-		}
-
-		{
-			LinearLayout amountLayout = new LinearLayout(ctx);
-			amountLayout.setOrientation(LinearLayout.HORIZONTAL);
-
-			Button btPayAmount = new Button(ctx);
-			btPayAmount.setText("定额支付");
-			btPayAmount.setId(IDC_BT_PAY_AMOUNT);
-			amountLayout.addView(btPayAmount);
-			EditText etPayAmount = new EditText(ctx);
-			etPayAmount.setHint("{支付金额(单位:元)}");
-			etPayAmount.setId(IDC_ET_PAY_AMOUNT);
-			etPayAmount.setInputType(InputType.TYPE_CLASS_NUMBER);
-			etPayAmount.setText("1234");
-			amountLayout.addView(etPayAmount);
-
-			btPayAmount.setOnClickListener(onClickListener);
-			rootLayout.addView(amountLayout);
+			cb = new CheckBox(ctx);
+			cb.setId(IDC_CB_LOGIN_FAIL_TIP);
+			cb.setText("登录失败时提示");
+			ll.addView(cb, new LinearLayout.LayoutParams(-1, -2, 1.0f));
 		}
 
 		{
-			Button btnSetConfig = new Button(ctx);
-			btnSetConfig.setText("单机设置信息");
-			btnSetConfig.setId(IDC_BT_LOGIN_OFFLINE);
+			ll = new LinearLayout(ctx);
+			ll.setOrientation(LinearLayout.HORIZONTAL);
+			rootLayout.addView(ll);
 
-			btnSetConfig.setOnClickListener(onClickListener);
-			rootLayout.addView(btnSetConfig);
+			bt = new Button(ctx);
+			bt.setText("充值中心");
+			bt.setId(IDC_BT_PAY);
+			bt.setOnClickListener(onClickListener);
+			ll.addView(bt, new LinearLayout.LayoutParams(-1, -2, 1.0f));
+
+			bt = new Button(ctx);
+			bt.setText("定额支付");
+			bt.setId(IDC_BT_PAY_AMOUNT);
+			bt.setOnClickListener(onClickListener);
+			bt.setTextColor(0xccc06020);
+			ll.addView(bt, new LinearLayout.LayoutParams(-1, -2, 1.0f));
+
+			et = new EditText(ctx);
+			et.setHint("金额(分)");
+			et.setId(IDC_ET_PAY_AMOUNT);
+			et.setInputType(InputType.TYPE_CLASS_NUMBER);
+			et.setText("1234");
+			ll.addView(et);
 		}
-		// 设置是否显示登录成功或者失败的信息
+
 		{
-			LinearLayout checkLayout = new LinearLayout(ctx);
-			checkLayout.setOrientation(LinearLayout.HORIZONTAL);
-			CheckBox checksucces = new CheckBox(ctx);
-			checksucces.setId(IDC_CK_SUCCESS);
-			checksucces.setText("是否提示登录成功");
+			ll = new LinearLayout(ctx);
+			ll.setOrientation(LinearLayout.HORIZONTAL);
+			rootLayout.addView(ll);
 
-			checksucces
-					.setOnCheckedChangeListener(setonCheckedSuccessListener());
-			CheckBox checkfaill = new CheckBox(ctx);
-			checkfaill.setId(IDC_CK_FAILL);
-			checkfaill.setText("是否提示登录失败");
-			checkfaill.setOnCheckedChangeListener(setonCheckedFaillListener());
-			checkLayout.addView(checksucces);
-			checkLayout.addView(checkfaill);
-			rootLayout.addView(checkLayout);
+			cb = new CheckBox(ctx);
+			cb.setId(IDC_CHARGE_AUTO_CLOSE);
+			cb.setText("充值后自动关闭");
+			ll.addView(cb, new LinearLayout.LayoutParams(-1, -2, 1.0f));
+
+			cb = new CheckBox(ctx);
+			cb.setId(IDC_CHARGE_MODE_BUY);
+			cb.setText("购买模式");
+			ll.addView(cb, new LinearLayout.LayoutParams(-1, -2, 1.0f));
 		}
+
 		{
-			LinearLayout checkLayout = new LinearLayout(ctx);
-			checkLayout.setOrientation(LinearLayout.HORIZONTAL);
-			CheckBox checksucces = new CheckBox(ctx);
-			checksucces.setId(IDC_CHARGE_AUTO_CLOSE);
-			checksucces.setText("充值成功自动关闭窗口");
-			checkLayout.addView(checksucces);
-			rootLayout.addView(checkLayout);
-		}
+			ll = new LinearLayout(ctx);
+			ll.setOrientation(LinearLayout.HORIZONTAL);
+			rootLayout.addView(ll);
 
-		if (mDebugEnv != null) {
-			LinearLayout checkLayout = new LinearLayout(ctx);
-			checkLayout.setOrientation(LinearLayout.HORIZONTAL);
-			CheckBox checksucces = new CheckBox(ctx);
-			checksucces.setId(IDC_CHARGE_MODE_BUY);
-			checksucces.setText("充值中心·社区入口");
-			checkLayout.addView(checksucces);
-			rootLayout.addView(checkLayout);
+			bt = new Button(ctx);
+			bt.setText("订单查询");
+			bt.setId(IDC_BT_QUERY);
+			bt.setOnClickListener(onClickListener);
+			ll.addView(bt, new LinearLayout.LayoutParams(-1, -2, 1.0f));
+
+			et = new EditText(ctx);
+			et.setHint("订单号");
+			et.setId(IDC_ET_ORDER_NUMBER);
+			et.setInputType(InputType.TYPE_CLASS_NUMBER);
+			ll.addView(et, new LinearLayout.LayoutParams(-1, -2, 1.0f));
 		}
 
 		{
 			Button btnSetConfig = new Button(ctx);
-			btnSetConfig.setText("道具交换");
+			btnSetConfig.setText("道具兑换");
 			btnSetConfig.setId(IDC_BT_EXCHANGE);
 
 			btnSetConfig.setOnClickListener(onClickListener);
 			rootLayout.addView(btnSetConfig);
 		}
 
+		//
+
+		{
+			Button btLogin = new Button(ctx);
+			btLogin.setText("登录(旧）");
+			btLogin.setId(IDC_BT_OUT_LOGIN);
+
+			btLogin.setOnClickListener(onClickListener);
+			rootLayout.addView(btLogin);
+		}
+		{
+			Button btCharge = new Button(ctx);
+			btCharge.setText("充值(旧)");
+			btCharge.setId(IDC_BT_OUT_PAY);
+
+			btCharge.setOnClickListener(onClickListener);
+			rootLayout.addView(btCharge);
+		}
+
+
+		{
+			bt = new Button(ctx);
+			bt.setText("调试");
+			bt.setId(IDC_BT_DEBUG);
+			bt.setOnClickListener(onClickListener);
+			bt.setBackgroundColor(0xcc008020);
+			rootLayout.addView(bt);
+		}
+
 		if (mDebugEnv != null) {
-			LinearLayout ll = new LinearLayout(ctx);
+			ll = new LinearLayout(ctx);
 			rootLayout.addView(ll);
 			ll.setOrientation(LinearLayout.HORIZONTAL);
 
-			Button bt = new Button(ctx);
+			bt = new Button(ctx);
 			ll.addView(bt);
 			bt.setText("汇率");
 			bt.setId(IDC_BT_RECHARGE_RATE);
 			bt.setOnClickListener(onClickListener);
 
-			EditText et = new EditText(ctx);
+			et = new EditText(ctx);
 			ll.addView(et);
 			et.setHint("{RMB→?卓越币，精度为0.01}");
 			et.setId(IDC_ET_RECHARGE_RATE);
 			et.setInputType(InputType.TYPE_CLASS_NUMBER
-					| InputType.TYPE_NUMBER_FLAG_DECIMAL);
+					                | InputType.TYPE_NUMBER_FLAG_DECIMAL
+			);
 		}
 		if (mDebugEnv != null) {
 			CheckBox box = new CheckBox(ctx);
@@ -278,56 +313,8 @@ public class MainActivity extends Activity implements OnClickListener {
 			box.setOnClickListener(onClickListener);
 			box.setText("让「取消」支付变成支付成功");
 		}
-		// {
-		// Button btQuery = new Button(ctx);
-		// btQuery.setText("查询订单");
-		// btQuery.setId(IDC_BT_QUERY);
-		//
-		// btQuery.setOnClickListener(onClickListener);
-		// rootLayout.addView(btQuery);
-		// }
 
 		return rootLayout;
-	}
-
-	private OnCheckedChangeListener setonCheckedSuccessListener() {
-
-		return new OnCheckedChangeListener() {
-
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView,
-					boolean isChecked) {
-
-				if (isChecked) {
-					isDisplayLoginTip = true;
-				} else {
-					isDisplayLoginTip = false;
-				}
-				mSDKManager.setConfigInfo(true, isDisplayLoginTip,
-						isDisplayLoginfail);
-			}
-		};
-	}
-
-	private OnCheckedChangeListener setonCheckedFaillListener() {
-
-		return new OnCheckedChangeListener() {
-
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView,
-					boolean isChecked) {
-
-				if (isChecked) {
-					isDisplayLoginfail = true;
-				} else {
-					isDisplayLoginfail = false;
-				}
-
-				mSDKManager.setConfigInfo(false, isDisplayLoginTip,
-						isDisplayLoginfail);
-			}
-
-		};
 	}
 
 	@Override
@@ -335,161 +322,177 @@ public class MainActivity extends Activity implements OnClickListener {
 		int id = v.getId();
 
 		switch (id) {
-		case IDC_BT_DEBUG: {
-			mSDKManager.debug_start(mHandler, MSG_ORDER_CALLBACK,
-					CONFIG_GAME_SERVER_ID, CONFIG_GAME_SERVER_NAME,
-					CONFIG_GAME_ROLE_ID, CONFIG_GAME_ROLE);
-		}
-			break;
-
-		/* 登录 */
-		case IDC_BT_LOGIN: {
-			mSDKManager.showLoginView(mHandler, MSG_LOGIN_CALLBACK);
-		}
-			break;
-		case IDC_BT_LOGIN_MAIN: {
-			boolean b = ((CheckBox) findViewById(IDC_CK_AUTOLOGIN)).isChecked();
-			mSDKManager.showLoginViewEx(mHandler, MSG_LOGIN_CALLBACK, b);
-		}
-			break;
-
-		case IDC_BT_PAY_OUT: {
-			String s_amount = ((TextView) findViewById(IDC_ET_PAY_AMOUNT))
-					.getText().toString();
-			int amount;
-			try {
-				amount = Integer.parseInt(s_amount);
-			} catch (NumberFormatException e) {
-				amount = 0;
+			/* 登录 */
+			case IDC_BT_LOGIN: {
+				boolean b = ((CheckBox) findViewById(IDC_CB_AUTOLOGIN)).isChecked();
+				mSDKManager.showLoginViewEx(mHandler, MSG_LOGIN_CALLBACK, b);
 			}
-
-			boolean isCloseWindow;
-			View vCloseWindow = findViewById(IDC_CHARGE_AUTO_CLOSE);
-			if (vCloseWindow instanceof CheckBox) {
-				isCloseWindow = ((CheckBox) vCloseWindow).isChecked();
-			} else {
-				isCloseWindow = false;
-			}
-
-			mSDKManager.showPaymentView(mHandler, MSG_PAYMENT_CALLBACK,
-					CONFIG_GAME_SERVER_ID, CONFIG_GAME_SERVER_NAME,
-					CONFIG_GAME_ROLE_ID, CONFIG_GAME_ROLE, amount,
-					isCloseWindow, CONFIG_GAME_CALLBACK_INFO);
-		}
 			break;
 
-		/* 充值 */
-		case IDC_BT_PAY_AMOUNT:
-		case IDC_BT_PAY: {
-			if (!mSDKManager.isLogined()) {
-				String tip = "尚未登录用户, 请选择[单机模式]或[登录].";
-				pushLog(tip);
-				// break;
+			/* 单机 */
+			case IDC_BT_LOGIN_OFFLINE: {
+				boolean isOnlineGame = false;
+				boolean isDisplayLoginTip = ((CheckBox) findViewById(IDC_CB_LOGIN_SUCCESS_TIP)).isChecked();
+				boolean isDisplayLoginFail = ((CheckBox) findViewById(IDC_CB_LOGIN_FAIL_TIP)).isChecked();
+				pushLog("[单机模式] 等待自动注册或登录... 模式:"
+						        + (isOnlineGame ? "网络游戏" : "单机游戏") + ";"
+						        + (isDisplayLoginTip ? "" : "不") + "显示登录成功Toast, "
+						        + (isDisplayLoginFail ? "" : "不") + "显示登录失败Toast", -1, -1
+				);
+				mSDKManager.setConfigInfo(isOnlineGame, isDisplayLoginTip,
+				                          isDisplayLoginFail
+				);
 			}
-
-			if (mLoginCallbackInfo == null) {
-				String tip = "「单机模式」 充值..." + "用户名:"
-						+ String.valueOf(mSDKManager.getAccountName())
-						+ "，游戏用户:"
-						+ String.valueOf(mSDKManager.getGameUserName());
-				pushLog(tip);
-				Toast.makeText(getBaseContext(), tip, Toast.LENGTH_LONG).show();
-			}
-
-			String s_amount = (id == IDC_BT_PAY_AMOUNT ? (((TextView) findViewById(IDC_ET_PAY_AMOUNT))
-					.getText().toString()) : "");
-			int amount;
-			try {
-				amount = Integer.parseInt(s_amount);
-			} catch (NumberFormatException e) {
-				amount = 0;
-			}
-
-			boolean isCloseWindow;
-			View vCloseWindow = findViewById(IDC_CHARGE_AUTO_CLOSE);
-			if (vCloseWindow instanceof CheckBox) {
-				isCloseWindow = ((CheckBox) vCloseWindow).isChecked();
-			} else {
-				isCloseWindow = false;
-			}
-
-			// 设置模式
-			if (mDebugEnv != null) {
-				ChargeStyle chargeMode = ((CheckBox) findViewById(IDC_CHARGE_MODE_BUY))
-						.isChecked() ? ChargeStyle.BUY : ChargeStyle.RECHARGE;
-				mDebugEnv.add(KeyPaymentList.K_CHARGE_STYLE, chargeMode);
-			}
-
-			mSDKManager.showPaymentViewEx(mHandler, MSG_PAYMENT_CALLBACK,
-					CONFIG_GAME_SERVER_ID, CONFIG_GAME_SERVER_NAME,
-					CONFIG_GAME_ROLE_ID, CONFIG_GAME_ROLE, amount,
-					isCloseWindow, CONFIG_GAME_CALLBACK_INFO);
-		}
 			break;
 
-		/* 单机 */
-		case IDC_BT_LOGIN_OFFLINE: {
-			boolean isOnlineGame = false;
-			pushLog("[单机模式] 等待自动注册或登录... 模式:"
-					+ (isOnlineGame ? "网络游戏" : "单机游戏") + ";"
-					+ (isDisplayLoginTip ? "" : "不") + "显示登录成功Toast, "
-					+ (isDisplayLoginfail ? "" : "不") + "显示登录失败Toast", -1, -1);
-			mSDKManager.setConfigInfo(isOnlineGame, isDisplayLoginTip,
-					isDisplayLoginfail);
-		}
+			/* 定额充值 */
+			case IDC_BT_PAY_AMOUNT:
+			/* 充值 */
+			case IDC_BT_PAY: {
+				if (!mSDKManager.isLogined()) {
+					String tip = "尚未登录用户, 请选择[单机模式]或[登录].";
+					pushLog(tip);
+					// break;
+				}
+
+				if (mLoginCallbackInfo == null) {
+					String tip = "「单机模式」 充值..." + "用户名:"
+							+ String.valueOf(mSDKManager.getAccountName())
+							+ "，游戏用户:"
+							+ String.valueOf(mSDKManager.getGameUserName());
+					pushLog(tip);
+					Toast.makeText(getBaseContext(), tip, Toast.LENGTH_LONG).show();
+				}
+
+				String s_amount = (id == IDC_BT_PAY_AMOUNT ? (((TextView) findViewById(IDC_ET_PAY_AMOUNT))
+						.getText().toString()) : "");
+				int amount;
+				try {
+					amount = Integer.parseInt(s_amount);
+				} catch (NumberFormatException e) {
+					amount = 0;
+				}
+
+				// 当前只测试花费人民币
+				boolean isZyCoin = false;
+
+				// 充值成功后是否自动关闭
+				boolean isCloseWindow = ((CheckBox) findViewById(IDC_CHARGE_AUTO_CLOSE)).isChecked();
+
+				// 设置模式，true表示购买支付，false表示充值卓越币到个人账户
+				boolean isBuyMode = ((CheckBox) findViewById(IDC_CHARGE_MODE_BUY)).isChecked();
+
+				// 调用支付或充值
+				mSDKManager.showPaymentViewEx(mHandler, MSG_PAYMENT_CALLBACK, CONFIG_GAME_SERVER_ID,
+				                              CONFIG_GAME_ROLE, amount, isZyCoin, isCloseWindow, isBuyMode
+				);
+			}
 			break;
 
-		case IDC_BT_QUERY: {
-			// pushLog("调用了" + ordernumber);
-			// mSDKManager.queryOrderState(mHandler, this, ordernumber);
-		}
+
+			case IDC_BT_QUERY: {
+				String orderNumber = ((TextView) findViewById(IDC_ET_ORDER_NUMBER)).getText().toString().trim();
+				if (orderNumber.length() == 0) {
+					if (mOrderCache.size() > 0) {
+						Pair<PaymentCallbackInfo, MyOrderState> tmp = mOrderCache.get(0);
+						orderNumber = tmp.first.cmgeOrderNumber;
+					}
+				}
+
+				if (orderNumber != null && orderNumber.length() > 0) {
+					pushLog(" - 查询订单号：" + orderNumber);
+					mSDKManager.queryOrderState(mHandler, MSG_ORDER_CALLBACK, orderNumber);
+				} else {
+					pushLog(" ! 订单号无效！" + orderNumber);
+				}
+			}
 			break;
 
-		// 道具兑换
-		case IDC_BT_EXCHANGE: {
-			mSDKManager.showExchange(mHandler, CONFIG_GAME_SERVER_ID);
-		}
+			// 道具兑换
+			case IDC_BT_EXCHANGE: {
+				mSDKManager.showExchange(mHandler, CONFIG_GAME_SERVER_ID);
+			}
 			break;
 
-		case IDC_BT_RECHARGE_RATE: {
-			if (mDebugEnv != null) {
-				String str = ((TextView) findViewById(IDC_ET_RECHARGE_RATE))
-						.getText().toString().trim();
-				double rate;
-				if (str.length() > 0) {
-					try {
-						rate = Float.parseFloat(str);
-					} catch (NumberFormatException e) {
+			case IDC_BT_DEBUG: {
+				mSDKManager.debug_start(mHandler, MSG_PAYMENT_CALLBACK,
+				                        CONFIG_GAME_SERVER_ID, CONFIG_GAME_ROLE
+				);
+			}
+			break;
+
+			case IDC_BT_OUT_LOGIN: {
+				mSDKManager.showLoginView(mHandler, MSG_LOGIN_CALLBACK);
+			}
+			break;
+
+			case IDC_BT_OUT_PAY: {
+				String s_amount = ((TextView) findViewById(IDC_ET_PAY_AMOUNT))
+						.getText().toString();
+				int amount;
+				try {
+					amount = Integer.parseInt(s_amount);
+				} catch (NumberFormatException e) {
+					amount = 0;
+				}
+
+				boolean isCloseWindow;
+				View vCloseWindow = findViewById(IDC_CHARGE_AUTO_CLOSE);
+				if (vCloseWindow instanceof CheckBox) {
+					isCloseWindow = ((CheckBox) vCloseWindow).isChecked();
+				} else {
+					isCloseWindow = false;
+				}
+
+				mSDKManager.showPaymentView(mHandler, MSG_PAYMENT_CALLBACK,
+				                            CONFIG_GAME_SERVER_ID, CONFIG_GAME_SERVER_NAME,
+				                            CONFIG_GAME_ROLE_ID, CONFIG_GAME_ROLE, amount,
+				                            isCloseWindow, CONFIG_GAME_CALLBACK_INFO
+				);
+			}
+			break;
+
+			case IDC_BT_RECHARGE_RATE: {
+				if (mDebugEnv != null) {
+					String str = ((TextView) findViewById(IDC_ET_RECHARGE_RATE))
+							.getText().toString().trim();
+					double rate;
+					if (str.length() > 0) {
+						try {
+							rate = Float.parseFloat(str);
+						} catch (NumberFormatException e) {
+							rate = 0;
+						}
+					} else {
 						rate = 0;
 					}
-				} else {
-					rate = 0;
-				}
-				if (rate > 0.01f) {
-					mDebugEnv.add(KeyUser.K_COIN_RATE, rate);
-					pushLog("设置默认汇率: " + rate);
-				} else {
-					mDebugEnv.remove(KeyUser.K_COIN_RATE);
-					pushLog("还原默认汇率!");
+					if (rate > 0.01f) {
+						mDebugEnv.add(KeyUser.K_COIN_RATE, rate);
+						pushLog("设置默认汇率: " + rate);
+					} else {
+						mDebugEnv.remove(KeyUser.K_COIN_RATE);
+						pushLog("还原默认汇率!");
+					}
 				}
 			}
-		}
 			break;
 
-		case IDC_CB_CANCEL_AS_SUCCESS: {
-			if (mDebugEnv != null) {
-				CheckBox cb = (CheckBox) v;
-				if (cb.isChecked()) {
-					mDebugEnv.add(KeyDebug.K_DEBUG_PAY_CANCEL_AS_SUCCESS,
-							Boolean.TRUE);
-				} else {
-					mDebugEnv.remove(KeyDebug.K_DEBUG_PAY_CANCEL_AS_SUCCESS);
+			case IDC_CB_CANCEL_AS_SUCCESS: {
+				if (mDebugEnv != null) {
+					CheckBox cb = (CheckBox) v;
+					if (cb.isChecked()) {
+						mDebugEnv.add(KeyDebug.K_DEBUG_PAY_CANCEL_AS_SUCCESS,
+						              Boolean.TRUE
+						);
+					} else {
+						mDebugEnv.remove(KeyDebug.K_DEBUG_PAY_CANCEL_AS_SUCCESS);
+					}
 				}
 			}
-		}
 			break;
 		}
 	}
+
 
 	private void pushLog(String txt) {
 		Log.d(DBG_TAG, txt);
@@ -503,82 +506,87 @@ public class MainActivity extends Activity implements OnClickListener {
 	private Handler mHandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
 			switch (msg.what) {
-			case MSG_LOGIN_CALLBACK: {
-				if (msg.arg1 == MSG_TYPE.LOGIN) {
+				case MSG_LOGIN_CALLBACK: {
+					if (msg.arg1 == MSG_TYPE.LOGIN) {
 
-					if (msg.arg2 == MSG_STATUS.SUCCESS) {
-						if (msg.obj instanceof LoginCallbackInfo) {
-							LoginCallbackInfo info = (LoginCallbackInfo) msg.obj;
+						if (msg.arg2 == MSG_STATUS.SUCCESS) {
+							if (msg.obj instanceof LoginCallbackInfo) {
+								LoginCallbackInfo info = (LoginCallbackInfo) msg.obj;
 
-							String tip = " - 登录成功, 用户名:"
-									+ String.valueOf(mSDKManager
-											.getAccountName())
-									+ "，游戏用户:"
-									+ String.valueOf(mSDKManager
-											.getGameUserName())
-									+ ", \n\t详细信息: " + info.toString();
-							pushLog(tip);
+								String tip = " - 登录成功, 用户名:"
+										+ String.valueOf(mSDKManager
+												                 .getAccountName()
+								)
+										+ "，游戏用户:"
+										+ String.valueOf(mSDKManager
+												                 .getGameUserName()
+								)
+										+ ", \n\t详细信息: " + info.toString();
+								pushLog(tip);
 
-							mLoginCallbackInfo = info;
+								mLoginCallbackInfo = info;
+							} else {
+								// 设计上这里是不可能到达的
+								pushLog(" ! 登录成功，但没有用户数据");
+							}
+						} else if (msg.arg2 == MSG_STATUS.CANCEL) {
+							pushLog(" - 用户取消了登录.");
+						} else if (msg.arg2 == MSG_STATUS.EXIT_SDK) {
+							pushLog(" - 登录业务结束。");
 						} else {
-							// 设计上这里是不可能到达的
-							pushLog(" ! 登录成功，但没有用户数据");
+							pushLog(" ! 未知登录结果，请检查：s=" + msg.arg2 + " info:"
+									        + msg.obj
+							);
 						}
-					} else if (msg.arg2 == MSG_STATUS.CANCEL) {
-						pushLog(" - 用户取消了登录.");
-					} else if (msg.arg2 == MSG_STATUS.EXIT_SDK) {
-						pushLog(" - 登录业务结束。");
 					} else {
-						pushLog(" ! 未知登录结果，请检查：s=" + msg.arg2 + " info:"
-								+ msg.obj);
+						pushLog(" # 未知类型 t=" + msg.arg1 + " s=" + msg.arg2
+								        + " info:" + msg.obj
+						);
 					}
-				} else {
-					pushLog(" # 未知类型 t=" + msg.arg1 + " s=" + msg.arg2
-							+ " info:" + msg.obj);
 				}
-			}
 				break;
 
-			case MSG_PAYMENT_CALLBACK: {
-				if (msg.arg1 == MSG_TYPE.PAYMENT) {
-					PaymentCallbackInfo info; // 支付信息
-					if (msg.obj instanceof PaymentCallbackInfo) {
-						info = (PaymentCallbackInfo) msg.obj;
+				case MSG_PAYMENT_CALLBACK: {
+					if (msg.arg1 == MSG_TYPE.PAYMENT) {
+						PaymentCallbackInfo info; // 支付信息
+						if (msg.obj instanceof PaymentCallbackInfo) {
+							info = (PaymentCallbackInfo) msg.obj;
+						} else {
+							info = null;
+						}
 
-						// 订单号
-						ordernumber = info.cmgeOrderNumber;
+						String tip = "";
+						if (msg.arg2 == MSG_STATUS.SUCCESS) {
+							tip = " - 充值成功, 详细信息: " + (info == null ? "未知" : info);
+							mOrderCache.add(new Pair<PaymentCallbackInfo, MyOrderState>(info, MyOrderState.READY));
+						} else if (msg.arg2 == MSG_STATUS.FAILED) {
+							tip = " ! 充值失败, 详细信息: " + (info == null ? "未知" : info);
+						} else if (msg.arg2 == MSG_STATUS.CANCEL) {
+							tip = " - 充值取消, 详细信息: " + (info == null ? "未知" : info);
+						} else if (msg.arg2 == MSG_STATUS.EXIT_SDK) {
+							tip = " ! 充值业务结束。";
+						} else {
+							tip = " ! 未知登录结果，请检查：s=" + msg.arg2 + " info:"
+									+ msg.obj;
+						}
+						pushLog(tip);
 					} else {
-						info = null;
+						pushLog(" # 未知类型 t=" + msg.arg1 + " s=" + msg.arg2
+								        + " info:" + msg.obj
+						);
 					}
 
-					String tip = "";
-					if (msg.arg2 == MSG_STATUS.SUCCESS) {
-						tip = " - 充值成功, 详细信息: " + (info == null ? "未知" : info);
-					} else if (msg.arg2 == MSG_STATUS.FAILED) {
-						tip = " ! 充值失败, 详细信息: " + (info == null ? "未知" : info);
-					} else if (msg.arg2 == MSG_STATUS.CANCEL) {
-						tip = " - 充值取消, 详细信息: " + (info == null ? "未知" : info);
-					} else if (msg.arg2 == MSG_STATUS.EXIT_SDK) {
-						tip = " ! 充值业务结束。";
-					} else {
-						tip = " ! 未知登录结果，请检查：s=" + msg.arg2 + " info:"
-								+ msg.obj;
-					}
-					pushLog(tip);
-				} else {
-					pushLog(" # 未知类型 t=" + msg.arg1 + " s=" + msg.arg2
-							+ " info:" + msg.obj);
 				}
-
-			}
 				break;
 
-			case MSG_ORDER_CALLBACK: {
-				PaymentCallbackInfo info = (PaymentCallbackInfo) msg.obj;
-				Log.d(DBG_TAG, "zz_sdk" + "info----- : " + info.toString());
-				Log.d(DBG_TAG, "---------订单查询-------");
-				pushLog(info.toString(), msg.arg1, msg.arg2);
-			}
+				case MSG_ORDER_CALLBACK: {
+					if (msg.arg1 == MSG_TYPE.ORDER) {
+						if (msg.obj instanceof String) {
+							String orderNumber = (String) msg.obj;
+							pushLog(" - 订单查询，单号=" + orderNumber + "，状态=" + msg.arg2);
+						}
+					}
+				}
 				break;
 			}
 		}
@@ -590,19 +598,5 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		/* 清理资源 */
 		SDKManager.recycle();
-	}
-
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		switch (requestCode) {
-		case RC_PAYMENT: {
-			if (resultCode == RESULT_OK) {
-			}
-		}
-			break;
-
-		default:
-			break;
-		}
 	}
 }

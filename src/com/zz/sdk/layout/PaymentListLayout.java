@@ -94,9 +94,6 @@ public class PaymentListLayout extends CCBaseLayout {
 		final static String _TAG_ = KeyGlobal._TAG_ + "paymentlist"
 				+ _SEPARATOR_;
 
-		/** 充值中心的风格，分<b> 充值模式 </b>和<b> 购买模式</b>，类型 {@link ChargeStyle} */
-		public static final String K_CHARGE_STYLE = _TAG_ + "charge_style";
-
 		/** 充值中心·支付结果，类型 {@link Integer}，取值{@link MSG_STATUS}，属一次性数据 */
 		public static final String K_PAY_RESULT = _TAG_ + "pay_result";
 
@@ -188,8 +185,8 @@ public class PaymentListLayout extends CCBaseLayout {
 		ACT_PAY_GRID, //
 
 		/**
-		 * 充值数量 标题, 可取 {@link ZZStr#CC_RECHAGRE_COUNT_TITLE_PRICE}或
-		 * {@link ZZStr#CC_RECHAGRE_COUNT_TITLE}
+		 * 充值数量 标题, 可取 {@link ZZStr#CC_RECHARGE_COUNT_TITLE_PRICE}或
+		 * {@link ZZStr#CC_RECHARGE_COUNT_TITLE}
 		 */
 		TV_RECHARGE_COUNT,
 		/** 充值数量 */
@@ -250,7 +247,7 @@ public class PaymentListLayout extends CCBaseLayout {
 	private PaymentListAdapter mPaymentListAdapter;
 	private AdapterView.OnItemClickListener mPaytypeItemListener;
 
-	/** 默认价格，单位[分]，见 {@link KeyGlobal#K_PAY_AMOUNT} */
+	/** 默认价格，单位[分]，见 {@link com.zz.sdk.ParamChain.KeyCaller#K_AMOUNT} */
 	private int mDefAmount;
 	private boolean mDefAmountIsCoin;
 
@@ -284,9 +281,9 @@ public class PaymentListLayout extends CCBaseLayout {
 		super.onInitEnv(ctx, env);
 		mPaymentTypeChoose = -1;
 		mPaymentTypeChoose_ChannelType = -1;
-		Boolean b = env.get(KeyCaller.K_PAYMENT_ZYCOIN_DISABLED, Boolean.class);
-		mPaymentTypeSkipZYCoin = (b != null && b);
+
 		mRechargeFormat = new DecimalFormat(ZZStr.CC_PRICE_FORMAT.str());
+
 		mIMSI = env.get(KeyDevice.K_IMSI, String.class);
 		if (mIMSI != null) {
 			boolean permissionSendSMS = Utils.checkPermission_SendSMS(mContext);
@@ -308,33 +305,26 @@ public class PaymentListLayout extends CCBaseLayout {
 			ZZ_COIN_RATE = 1f;
 		}
 
-		Boolean amount_is_coin = env.get(KeyCaller.K_AMOUNT_IS_ZYCOIN,
-				Boolean.class);
-		mDefAmountIsCoin = amount_is_coin != null && amount_is_coin;
-
 		Integer a = env.get(KeyCaller.K_AMOUNT, Integer.class);
-		if (a != null) {
-			mDefAmount = a;
-			if (DEBUG) {
-				Logger.d("assign amount " + mDefAmount);
-			}
-		} else {
-			if (DEBUG) {
+		if (DEBUG) {
+			if (a == null)
 				Logger.d("no amount assign!");
-			}
-			mDefAmount = 0;
+			else
+				Logger.d("assign amount " + a);
 		}
+		mDefAmount = a == null ? 0 : a;
 
-		ChargeStyle cs = env.get(KeyPaymentList.K_CHARGE_STYLE,
-				ChargeStyle.class);
-		if (cs != null) {
-			mChargeStyle = cs;
-		} else {
-			if (BuildConfig.DEBUG) {
-				Logger.d("E:bad charge style!");
-			}
-			mChargeStyle = ChargeStyle.UNKNOW;
-		}
+		Boolean amount_is_coin = env.get(KeyCaller.K_AMOUNT_IS_ZYCOIN,
+		                                 Boolean.class
+		);
+		mDefAmountIsCoin = (amount_is_coin != null && amount_is_coin);
+
+		Boolean b = env.get(KeyCaller.K_PAYMENT_ZYCOIN_DISABLED, Boolean.class);
+		mPaymentTypeSkipZYCoin = (b != null && b);
+
+		b = env.get(KeyCaller.K_PAYMENT_IS_BUY_MODE, Boolean.class);
+		mChargeStyle = (b != null && b) ? ChargeStyle.BUY : ChargeStyle.RECHARGE;
+
 
 		ZZStr title;
 		if (mChargeStyle == ChargeStyle.BUY) {
@@ -732,7 +722,7 @@ public class PaymentListLayout extends CCBaseLayout {
 	 * @see {@link #prepparePayType(Context, LinearLayout, PayChannel)}
 	 * @param count
 	 *            单位 卓越币
-	 * @param v
+	 * @param rv
 	 *            主view，必须有设置 tag 为支付类别(见 {@link PayChannel})
 	 */
 	private void updatePayTypeByCost(double count, LinearLayout rv) {
@@ -1302,8 +1292,8 @@ public class PaymentListLayout extends CCBaseLayout {
 				if (!p.isValid()) {
 					continue;
 				}
-				if (mPaymentTypeSkipZYCoin
-						&& p.type == PayChannel.PAY_TYPE_ZZCOIN) {
+				if (p.type == PayChannel.PAY_TYPE_ZZCOIN &&
+						(mPaymentTypeSkipZYCoin || mChargeStyle == ChargeStyle.RECHARGE)) {
 					continue;
 				}
 				tmp.add(p);

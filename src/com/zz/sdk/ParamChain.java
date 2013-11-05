@@ -98,14 +98,8 @@ public interface ParamChain {
 		/** 键：消息类型, {@link Integer} 用于处理回调 */
 		public static final String K_MSG_WHAT = _TAG_ + "msg_what";
 
-		/** 键：游戏服务器名称，{@link String} */
-		static final String K_SERVER_NAME = _TAG_ + "server_name";
-
 		/** 键：游戏服务器ID，{@link String} */
 		static final String K_GAME_SERVER_ID = _TAG_ + "game_server_id";
-
-		/** 键：角色ID，{@link String} */
-		static final String K_ROLE_ID = _TAG_ + "role_id";
 
 		/** 键：角色名称，{@link String} */
 		static final String K_GAME_ROLE = _TAG_ + "game_role";
@@ -123,11 +117,11 @@ public interface ParamChain {
 		static final String K_PAYMENT_ZYCOIN_DISABLED = _TAG_
 				+ "payment_zycoin_disabled";
 
+		/** 键：是否是购买模式, {@link Boolean}。如果为假（即默认的充值模式），则将忽略 {@link #K_PAYMENT_ZYCOIN_DISABLED} 的设置而认为是 true */
+		static final String K_PAYMENT_IS_BUY_MODE = _TAG_ + "pay_is_buy_mode";
+
 		/** 键：支付成功是否自动关闭支付SDK, 如果是 true 则在充值成功后自动退出SDK，{@link Boolean} */
 		static final String K_IS_CLOSE_WINDOW = _TAG_ + "is_close_window";
-
-		/** 键：支付结果通知，{@link String} */
-		static final String K_CALL_BACK_INFO = _TAG_ + "call_back_info";
 
 		/** 登录时是否允许使用逗趣账号，{@link Boolean} */
 		static final String K_LOGIN_DOUQU_ENABLED = _TAG_
