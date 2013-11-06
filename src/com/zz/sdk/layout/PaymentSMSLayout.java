@@ -1,11 +1,5 @@
 package com.zz.sdk.layout;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.apache.http.message.BasicNameValuePair;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
@@ -38,6 +32,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.zz.sdk.BuildConfig;
 import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.ParamChain;
 import com.zz.sdk.ParamChain.KeyDevice;
@@ -48,6 +43,7 @@ import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.SMSChannelMessage;
 import com.zz.sdk.entity.result.BaseResult;
 import com.zz.sdk.entity.result.ResultRequest;
+import com.zz.sdk.entity.result.ResultRequestKKFunPay;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
 import com.zz.sdk.layout.PaymentListLayout.TypeGridView;
 import com.zz.sdk.util.ConnectionUtil;
@@ -61,6 +57,12 @@ import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
 import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
 import com.zz.sdk.util.Utils;
+
+import org.apache.http.message.BasicNameValuePair;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * 短信支付
@@ -122,6 +124,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 
 	private SMSPayReceiver mSMSPayReceiver;
 	private PayParam mSMSPayParam;
+	private String mDefPrompt;
 
 	public PaymentSMSLayout(Context context, ParamChain env) {
 		super(context, env);
@@ -137,6 +140,9 @@ class PaymentSMSLayout extends CCBaseLayout {
 
 		/** 等待发送 */
 		WAIT_SEND,
+
+		/** 等待 fmm */
+		WAIT_FETCHCOMMAND,
 
 		/** 等待结果 */
 		WAIT_RECEIVER,
@@ -460,6 +466,11 @@ class PaymentSMSLayout extends CCBaseLayout {
 	private void tryChoose(SMSChannelMessage cm) {
 		mSmsChannelMessage = cm;
 
+		if (cm.checkFetchCommand()) {
+			tryFetchCommand(cm);
+			return;
+		}
+
 		if ("0".equals(cm.isBlockPrompt)) {
 			// 直接支付
 			tryPay(cm);
@@ -470,14 +481,16 @@ class PaymentSMSLayout extends CCBaseLayout {
 		{
 			String companyName = "??";
 			String goodsName = "??";
-			if (cm.prompt != null) {
-				String[] spilt = cm.prompt.split(",");
+
+			String prompt = cm.prompt == null ? mDefPrompt : cm.prompt;
+			if (prompt != null) {
+				String[] spilt = prompt.split(",");
 				if (spilt != null && spilt.length >= 2) {
 					companyName = spilt[0];
 					goodsName = spilt[1];
 				} else {
 					if (DEBUG) {
-						Logger.d("E: bad prompt info{" + cm.prompt + "}");
+						Logger.d("E: bad prompt info{" + prompt + "}");
 					}
 				}
 			}
@@ -489,10 +502,70 @@ class PaymentSMSLayout extends CCBaseLayout {
 		changeActivePanel(IDC.ACT_PROMPT);
 	}
 
+	/** 尝试刷新FMM通道 */
+	private void tryFetchCommand(SMSChannelMessage cm) {
+		if(cm.prompt!=null && cm.prompt.length()>0) {
+			mDefPrompt = cm.prompt;
+		}
+		mPayWaitState = STATE.WAIT_FETCHCOMMAND;
+		ITaskCallBack cb = new ITaskCallBack() {
+			@Override
+			public void onResult(AsyncTask<?, ?, ?> task, Object token, BaseResult result) {
+				if (isCurrentTaskFinished(task)) {
+					onFetchCommandResult(result);
+				}
+			}
+		};
+		FMMTask task = FMMTask.createAndStart(getConnectionUtil(), cb, this, genFetchCommandParam(cm));
+		setCurrentTask(task);
+
+		resetExitTrigger();
+		showPopup_Wait_FetchCommand();
+	}
+
+	private PayParam genFetchCommandParam(SMSChannelMessage cm) {
+		PayParam param = new PayParam();
+		ParamChain env = getEnv();
+		param.loginName = env.get(KeyUser.K_LOGIN_NAME, String.class);
+		param.smsImsi = env.get(KeyDevice.K_IMSI, String.class);
+		param.projectId = env.get(KeyDevice.K_PROJECT_ID, String.class);
+		HashMap<String, String> map = new HashMap<String, String>();
+		map.put("ua", env.get(KeyDevice.K_PHONE_MODEL, String.class));
+		map.put(SMSChannelMessage.K_SERVICETYPE, cm.serviceType);
+		map.put(SMSChannelMessage.K_COMMAND, cm.command);
+		map.put(SMSChannelMessage.K_SPCODE, cm.sendToAddress);
+		map.put(SMSChannelMessage.K_PRICE, Utils.price2str(cm.price));
+		param.attachParam = map;
+		return param;
+	}
+
+	private void onFetchCommandResult(BaseResult result) {
+		resetExitTrigger();
+		mPayWaitState = STATE.NORMAL;
+		hidePopup();
+		SMSChannelMessage cm = null;
+		if (result instanceof ResultRequestKKFunPay && result.isSuccess()) {
+			ResultRequestKKFunPay pay = (ResultRequestKKFunPay) result;
+			if (pay.mChannels != null && pay.mChannels.length > 0) {
+				Logger.d("D: fmm size=" + pay.mChannels.length);
+				// TODO: 暂定为默认使用第一个通道
+				cm = pay.mChannels[0];
+			}
+		}
+		if (cm != null) {
+			tryChoose(cm);
+		} else {
+			if (BuildConfig.DEBUG) {
+				Logger.d("D: fetch-command failed!");
+			}
+			showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
+		}
+	}
+
 	private PayParam genPayParam(ParamChain env, SMSChannelMessage cm) {
 		PayParam payParam = new PayParam();
 		HashMap<String, String> ap = new HashMap<String, String>();
-		ap.put("dueFee", String.valueOf(cm.price / 100));
+		ap.put("dueFee", String.valueOf(cm.price /*/ 100*/));
 		ap.put("serviceType", cm.serviceType);
 		ap.put("status", "0");
 		ap.put("cmgeOrderNum", mOrderNumber);
@@ -581,6 +654,24 @@ class PaymentSMSLayout extends CCBaseLayout {
 			hidePopup();
 			removeExitTrigger();
 		}
+	}
+
+	private void showPopup_Wait_FetchCommand() {
+		showPopup_Wait("正在与服务器通信……", new SimpleWaitTimeout() {
+			public void onTimeOut() {
+				on_wait_time_out_fetchCommand();
+			}
+
+			public int getTimeout() {
+				return 90;
+			}
+		});
+	}
+
+	private void on_wait_time_out_fetchCommand() {
+		showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
+		resetExitTrigger();
+		mPayWaitState = STATE.NORMAL;
 	}
 
 	private void showPopup_Wait_SMS_Send() {
@@ -848,7 +939,6 @@ class PaymentSMSLayout extends CCBaseLayout {
 				return 90;
 			}
 		});
-		mPayWaitState = STATE.WAIT_RECEIVER;
 	}
 
 	private void on_wait_time_out_seedback() {
@@ -922,6 +1012,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 		mSmsChannelMessage = null;
 		mSmsChannelMessages = null;
 		mOrderNumber = null;
+		mDefPrompt = null;
 	}
 
 	@Override
@@ -1239,6 +1330,45 @@ class PaymentSMSLayout extends CCBaseLayout {
 			PayParam charge = (PayParam) params[3];
 			ResultRequest ret = SMSPayReceiver.sendSmsFeedback(cu, charge);
 			if (!this.isCancelled()) {
+				mCallback = callback;
+				mToken = token;
+			}
+			return ret;
+		}
+	}
+
+	private static class FMMTask extends AsyncTask<Object, Void, ResultRequest> {
+
+		static FMMTask createAndStart(
+				ConnectionUtil cu,
+				ITaskCallBack callback, Object token, PayParam param) {
+			FMMTask task = new FMMTask();
+			task.execute(cu, callback, token, param);
+			return task;
+		}
+
+		ITaskCallBack mCallback;
+		Object mToken;
+
+		@Override
+		protected void onPostExecute(ResultRequest result) {
+			if (mCallback != null) {
+				mCallback.onResult(this, mToken, result);
+			}
+			// clean
+			mCallback = null;
+			mToken = null;
+		}
+
+		@Override
+		protected ResultRequest doInBackground(Object... params) {
+			ConnectionUtil cu = (ConnectionUtil) params[0];
+			ITaskCallBack callback = (ITaskCallBack) params[1];
+			Object token = params[2];
+			PayParam param = (PayParam) params[3];
+
+			ResultRequest ret = cu.charge(PayChannel.PAY_TYPE_KKFUNPAY_NEW_FMM, param);
+			if (!isCancelled()) {
 				mCallback = callback;
 				mToken = token;
 			}

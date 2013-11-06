@@ -87,6 +87,12 @@ public interface ParamChain {
 
 		/** 键：SDK版本，{@link Integer} */
 		public static final String K_SDK_VERSION = _TAG_ + "sdk_version";
+
+		/** 键：IP地址, {@link String} */
+		public static final String K_IP = _TAG_ + "ip";
+
+		/** 键：手机型号, {@link String} */
+		public static final String K_PHONE_MODEL = _TAG_ + "phone_model";
 	}
 
 	public static interface KeyCaller extends KeyGlobal {

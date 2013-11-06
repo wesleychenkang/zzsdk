@@ -172,9 +172,22 @@ public class PayParam implements Serializable, JsonParseInterface {
 			listParames.add(new BasicNameValuePair(K_REQUESTID, requestId));
 			listParames.add(new BasicNameValuePair(K_IMSI, smsImsi));
 			if (DebugFlags.DEBUG) {
-				listParames.add(new BasicNameValuePair("ip",
-						DebugFlags.DEF_DEBUG_IP));
+				listParames.add(new BasicNameValuePair("ip", DebugFlags.DEF_DEBUG_IP));
 			}
+			break;
+		case PayChannel.PAY_TYPE_KKFUNPAY_NEW_FMM:
+			listParames.add(new BasicNameValuePair(K_LOGINNAME, loginName));
+			listParames.add(new BasicNameValuePair(K_IMSI, smsImsi));
+			listParames.add(new BasicNameValuePair(K_PROJECTID, projectId));
+			if (DebugFlags.DEBUG) {
+				listParames.add(new BasicNameValuePair("ip", DebugFlags.DEF_DEBUG_IP));
+			}
+			// ua : 手机型号，如android
+			// serviceType
+			// spCode
+			// command
+			// price
+			// ip
 			break;
 		case PayChannel.PAY_TYPE_KKFUNPAY_EX:
 			listParames.add(new BasicNameValuePair(K_LOGINNAME, loginName));
@@ -206,10 +219,13 @@ public class PayParam implements Serializable, JsonParseInterface {
 			part = "pyee.lg";
 			break;
 		case PayChannel.PAY_TYPE_KKFUNPAY:
-			part = "pkkfun.lg";
+			part = "pkkfun0.lg"; // "pkkfun.lg";
+			break;
+		case PayChannel.PAY_TYPE_KKFUNPAY_NEW_FMM:
+			part = "pkfmm0.lg";
 			break;
 		case PayChannel.PAY_TYPE_KKFUNPAY_EX:
-			part = "pkkfunnt.lg";
+			part = "pkkfunnt0.lg"; //"pkkfunnt.lg";
 			break;
 		case PayChannel.PAY_TYPE_ZZCOIN:
 			part = "pzy.lg";

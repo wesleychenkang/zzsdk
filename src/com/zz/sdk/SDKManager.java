@@ -162,6 +162,9 @@ public class SDKManager {
 
 		env.add(KeyDevice.K_PROJECT_ID, Utils.getProjectId(ctx));
 
+		env.add(KeyDevice.K_PHONE_MODEL, "android");
+		// env.add(KeyDevice.K_IP, );
+
 		return env;
 	}
 
@@ -611,6 +614,8 @@ public class SDKManager {
 				env.add("global.paymentlist.pay_title", ZZStr.CC_RECHARGE_TITLE);
 				env.add("global.paymentlist.pay_sms_confirm_enabled", false);
 				env.add("global.paymentlist.pay_channel_name", "短信");
+				env.add(KeyDevice.K_IMSI, DebugFlags.DEF_DEBUG_IMSI);
+
 
 				JSONArray ja;
 				try {
@@ -618,7 +623,12 @@ public class SDKManager {
 							"["
 									+ "{'serviceType':'WXSHL_HLD','spCode':'10660657','command':'ma6004451634','price':'100','recognition_rule':'','sp_name':'微信优势','service_name':'欢乐岛','exactly_matching_product':'0','fetch_command_when_billing':'0'},"
 									+ "{'serviceType':'FEIDDX_YMSHH','spCode':'10660078','command':'806004451634','price':'200','recognition_rule':'','sp_name':'飞动乐驰','service_name':'伊媚生活','exactly_matching_product':'0','fetch_command_when_billing':'0'},"
-									+ "{'serviceType':'HZDX_ZXWXHY','spCode':'106601866','command':'50116004451634','price':'500','recognition_rule':'','sp_name':'华中天讯','service_name':'尊享无线会员','exactly_matching_product':'0','fetch_command_when_billing':'0'}"
+									+ "{'serviceType':'HZDX_ZXWXHY','spCode':'106601866','command':'50116004451634','price':'500','recognition_rule':'','sp_name':'华中天讯','service_name':'尊享无线会员','exactly_matching_product':'0','fetch_command_when_billing':'0'},"
+									+ "{'spCode':'1065842412','price':'100','command':'wq','fetchCommand':'1','payConfirmText':'中国移动,金币宝的1元','serviceType':'WQ_FMM_JBB_1Y'}," +
+									"{'spCode':'1065842412','price':'200','command':'wq','fetchCommand':'1','payConfirmText':'中国移动,金币宝的2元','serviceType':'WQ_FMM_JBB_2Y'}," +
+									"{'spCode':'1065842412','price':'400','command':'wq','fetchCommand':'1','payConfirmText':'中国移动,金币宝的4元','serviceType':'WQ_FMM_JBB_4Y'}," +
+									"{'spCode':'1065842412','price':'500','command':'wq','fetchCommand':'1','payConfirmText':'中国移动,金币宝的5元','serviceType':'WQ_FMM_JBB_5Y'}," +
+									"{'spCode':'1065842412','price':'600','command':'wq','fetchCommand':'1','payConfirmText':'中国移动,金币宝的6元','serviceType':'WQ_FMM_JBB_6Y'}"
 									+ "]");
 					SMSChannelMessage[] smsChannel = new SMSChannelMessage[ja
 							.length()];

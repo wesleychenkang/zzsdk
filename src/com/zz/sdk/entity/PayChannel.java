@@ -47,8 +47,13 @@ public class PayChannel implements JsonParseInterface {
 	/** 扩展支付·大额支付 */
 	public static final int PAY_TYPE_EX_DEZF = 100;
 
+	private static final int __PRIVATE_TYPE__ = 1000;
+
 	/** 话费[短信通知] */
-	public static final int PAY_TYPE_KKFUNPAY_EX = 1000;// _PAY_TYPE_MAX_ + 1;
+	public static final int PAY_TYPE_KKFUNPAY_EX = __PRIVATE_TYPE__ + 1;
+
+	/** 新的话费接口：获取移动FMM详情单 */
+	public static final int PAY_TYPE_KKFUNPAY_NEW_FMM = __PRIVATE_TYPE__ + 2;
 
 	/** 标准的「充值」方式名称 */
 	public static final String CHANNEL_NAME[] = new String[_PAY_TYPE_MAX_];

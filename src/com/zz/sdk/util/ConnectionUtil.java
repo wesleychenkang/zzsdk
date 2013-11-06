@@ -430,6 +430,9 @@ public class ConnectionUtil {
 		case PayChannel.PAY_TYPE_KKFUNPAY:
 			clazz = ResultRequestKKFunPay.class;
 			break;
+		case PayChannel.PAY_TYPE_KKFUNPAY_NEW_FMM:
+			clazz = ResultRequestKKFunPay.class;
+			break;
 		case PayChannel.PAY_TYPE_ZZCOIN:
 			clazz = ResultRequestZZCoin.class;
 			break;

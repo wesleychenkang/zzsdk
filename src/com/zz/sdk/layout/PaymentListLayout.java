@@ -1542,7 +1542,7 @@ public class PaymentListLayout extends CCBaseLayout {
 		}
 
 		if (clazz != null) {
-			host.enter(getClass().getClassLoader(), clazz.getName(), env);
+			host.enter((((Object)this).getClass()).getClassLoader(), clazz.getName(), env);
 		}
 
 		showPopup_Wait(ZZStr.CC_RECHARGE_WAIT_RESULT.str(),
