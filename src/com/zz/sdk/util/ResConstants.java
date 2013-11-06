@@ -429,7 +429,7 @@ public class ResConstants {
 		HELP("cc_help.png"), //
 		MONEY("cc_money.png"), //
 		PAYMENT_INPUT("cc_payment_input.9.png"), //
-		RECHARGE_BAN("cc_recharge_ban.png"), //
+		RECHARGE_BAN("cc_recharge_ban.9.png"), //
 		RECHARGE_INPUT("cc_recharge_input.9.png"), //
 		TUP_CFT("cc_tup_cft.png"), //
 		TUP_DX("cc_tup_dx.png"), //
