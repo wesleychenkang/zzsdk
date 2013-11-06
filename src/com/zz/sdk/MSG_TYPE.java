@@ -12,4 +12,6 @@ public final class MSG_TYPE {
 	public final static int LOGIN = 0;
 	/** 业务: 支付 */
 	public final static int PAYMENT = 1;
+	/** 业务：订单查询 */
+	public final static int ORDER = 2;
 }

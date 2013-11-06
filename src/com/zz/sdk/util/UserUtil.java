@@ -4,6 +4,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Pair;
 
 import com.zz.lib.pojo.PojoUtils;
@@ -40,6 +41,8 @@ public class UserUtil {
 	Context mContext;
 
 	ConnectionUtil mConnectionUtil;
+
+	private String mDefName, mDefPassword;
 
 	/** 用户信息的缓存：用于初始化读取或登录、注册等操作 */
 	private SdkUser mSdkUser;
@@ -111,6 +114,9 @@ public class UserUtil {
 					sdkUser = sdkUsers[0];
 				}
 			}
+		} else {
+			mDefName = sdkUser.loginName;
+			mDefPassword = sdkUser.password;
 		}
 
 		mSdkUser = sdkUser;
@@ -153,6 +159,12 @@ public class UserUtil {
 	 * @return
 	 */
 	public boolean syncSdkUser(SdkUser user) {
+		if (mDefName != null && mDefPassword != null && mDefName.equals(user.loginName) &&
+				mDefPassword.equals(user.password)) {
+			// 如果是数据库中的默认用户，就不必更新保存了
+			return false;
+		}
+
 		SdkUserTable t = SdkUserTable.getInstance(mContext);
 
 		if (PojoUtils.isDouquUser(user.loginName)) {
@@ -164,6 +176,9 @@ public class UserUtil {
 			// 将用户名保存到sdcard
 			Utils.writeAccount2SDcard(mContext, user.loginName, user.password);
 		}
+
+		// 同步设备信息到服务器，目前定义的时机为第一次登录成功
+		DeviceUtil.checkAndSync(mContext, user.loginName);
 
 		return t.update(user);
 	}

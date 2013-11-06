@@ -51,11 +51,15 @@ public class SMSChannelMessage implements JsonParseInterface{
 	 */
 	public String ereg;
 
+	/** 1-使用移动FMM方式 */
+	public String fetchCommand;
+
 	public String toString() {
 		return "SMSChannelMessage [serviceType=" + serviceType
 				+ ", sendToAddress=" + sendToAddress + ", command=" + command
 				+ ", price=" + price + ", prompt=" + prompt + ", isBlockPrompt="
-				+ isBlockPrompt + ", isBlockSMS="+ isBlockSMS + ", ereg=" + ereg + "]";
+				+ isBlockPrompt + ", isBlockSMS=" + isBlockSMS + ", ereg=" + ereg + ", " + K_FETCHCOMMAND + "=" +
+				fetchCommand + "]";
 	}
 
 	@Override
@@ -65,10 +69,10 @@ public class SMSChannelMessage implements JsonParseInterface{
 
 	@Override
 	public void parseJson(JSONObject json) {
-		
-		if (json == null)     	
+
+		if (json == null)
 			return;
-		try {
+//		try {
 //			serviceType = json.isNull("a") ? null : json.getString("a");
 //			sendToAddress = json.isNull("b") ? null : json.getString("b");
 //			command = json.isNull("c") ? null:json.getString("c");
@@ -77,18 +81,21 @@ public class SMSChannelMessage implements JsonParseInterface{
 //			isBlockPrompt = json.isNull("f") ? null : json.getString("f");
 //			isBlockSMS = json.isNull("g") ? null : json.getString("g");
 //			ereg = json.isNull("h") ? null : json.getString("h");
-			
-			command = json.isNull(K_COMMAND) ? null : json.getString(K_COMMAND);           
-			prompt = json.isNull(K_PAYCONFIRMTEXT) ? null : json.getString(K_PAYCONFIRMTEXT);                                                                     
-			price = json.isNull(K_PRICE) ? -1 : json.getDouble(K_PRICE);                 
-			serviceType = json.isNull(K_SERVICETYPE) ? null : json.getString(K_SERVICETYPE); 
-			sendToAddress = json.isNull(K_SPCODE) ? null : json.getString(K_SPCODE);
-			isBlockPrompt = json.isNull(K_ISBLOCKPROMPT) ? null : json.getString(K_ISBLOCKPROMPT);
-	 
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		
+//		} catch (JSONException e) {
+//			e.printStackTrace();
+//		}
+
+		command = json.optString(K_COMMAND, null);
+		prompt = json.optString(K_PAYCONFIRMTEXT, null);
+		price = json.optInt(K_PRICE, -1);
+		serviceType = json.optString(K_SERVICETYPE, null);
+		sendToAddress = json.optString(K_SPCODE, null);
+		isBlockPrompt = json.optString(K_ISBLOCKPROMPT, null);
+		fetchCommand = json.optString(K_FETCHCOMMAND);
+	}
+
+	public boolean checkFetchCommand() {
+		return "1".equals(fetchCommand);
 	}
 
 	@Override
@@ -102,5 +109,5 @@ public class SMSChannelMessage implements JsonParseInterface{
 	public static final String K_SERVICETYPE = "serviceType";                      
 	public static final String K_SPCODE = "spCode"; 
 	public static final String K_ISBLOCKPROMPT ="isBlockPrompt";
-	
+	public static final String K_FETCHCOMMAND = "fetchCommand";
 }

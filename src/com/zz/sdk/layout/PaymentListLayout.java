@@ -45,12 +45,14 @@ import com.zz.sdk.ParamChain.KeyGlobal;
 import com.zz.sdk.ParamChain.KeyUser;
 import com.zz.sdk.ParamChain.ValType;
 import com.zz.sdk.PaymentCallbackInfo;
+import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.Result;
 import com.zz.sdk.entity.SMSChannelMessage;
 import com.zz.sdk.entity.UserAction;
 import com.zz.sdk.entity.result.BaseResult;
+import com.zz.sdk.entity.result.ResultAutoLogin;
 import com.zz.sdk.entity.result.ResultPayList;
 import com.zz.sdk.entity.result.ResultRequest;
 import com.zz.sdk.entity.result.ResultRequestAlipayTenpay;
@@ -68,6 +70,7 @@ import com.zz.sdk.util.ResConstants.Config.ZZDimenRect;
 import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
 import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
+import com.zz.sdk.util.UserUtil;
 import com.zz.sdk.util.Utils;
 
 //import com.zz.sdk.util.GetDataImpl;
@@ -93,9 +96,6 @@ public class PaymentListLayout extends CCBaseLayout {
 	public static interface KeyPaymentList extends KeyGlobal {
 		final static String _TAG_ = KeyGlobal._TAG_ + "paymentlist"
 				+ _SEPARATOR_;
-
-		/** 充值中心的风格，分<b> 充值模式 </b>和<b> 购买模式</b>，类型 {@link ChargeStyle} */
-		public static final String K_CHARGE_STYLE = _TAG_ + "charge_style";
 
 		/** 充值中心·支付结果，类型 {@link Integer}，取值{@link MSG_STATUS}，属一次性数据 */
 		public static final String K_PAY_RESULT = _TAG_ + "pay_result";
@@ -188,8 +188,8 @@ public class PaymentListLayout extends CCBaseLayout {
 		ACT_PAY_GRID, //
 
 		/**
-		 * 充值数量 标题, 可取 {@link ZZStr#CC_RECHAGRE_COUNT_TITLE_PRICE}或
-		 * {@link ZZStr#CC_RECHAGRE_COUNT_TITLE}
+		 * 充值数量 标题, 可取 {@link ZZStr#CC_RECHARGE_COUNT_TITLE_PRICE}或
+		 * {@link ZZStr#CC_RECHARGE_COUNT_TITLE}
 		 */
 		TV_RECHARGE_COUNT,
 		/** 充值数量 */
@@ -250,7 +250,7 @@ public class PaymentListLayout extends CCBaseLayout {
 	private PaymentListAdapter mPaymentListAdapter;
 	private AdapterView.OnItemClickListener mPaytypeItemListener;
 
-	/** 默认价格，单位[分]，见 {@link KeyGlobal#K_PAY_AMOUNT} */
+	/** 默认价格，单位[分]，见 {@link com.zz.sdk.ParamChain.KeyCaller#K_AMOUNT} */
 	private int mDefAmount;
 	private boolean mDefAmountIsCoin;
 
@@ -284,9 +284,9 @@ public class PaymentListLayout extends CCBaseLayout {
 		super.onInitEnv(ctx, env);
 		mPaymentTypeChoose = -1;
 		mPaymentTypeChoose_ChannelType = -1;
-		Boolean b = env.get(KeyCaller.K_PAYMENT_ZYCOIN_DISABLED, Boolean.class);
-		mPaymentTypeSkipZYCoin = (b != null && b);
+
 		mRechargeFormat = new DecimalFormat(ZZStr.CC_PRICE_FORMAT.str());
+
 		mIMSI = env.get(KeyDevice.K_IMSI, String.class);
 		if (mIMSI != null) {
 			boolean permissionSendSMS = Utils.checkPermission_SendSMS(mContext);
@@ -308,33 +308,26 @@ public class PaymentListLayout extends CCBaseLayout {
 			ZZ_COIN_RATE = 1f;
 		}
 
-		Boolean amount_is_coin = env.get(KeyCaller.K_AMOUNT_IS_ZYCOIN,
-				Boolean.class);
-		mDefAmountIsCoin = amount_is_coin != null && amount_is_coin;
-
 		Integer a = env.get(KeyCaller.K_AMOUNT, Integer.class);
-		if (a != null) {
-			mDefAmount = a;
-			if (DEBUG) {
-				Logger.d("assign amount " + mDefAmount);
-			}
-		} else {
-			if (DEBUG) {
+		if (DEBUG) {
+			if (a == null)
 				Logger.d("no amount assign!");
-			}
-			mDefAmount = 0;
+			else
+				Logger.d("assign amount " + a);
 		}
+		mDefAmount = a == null ? 0 : a;
 
-		ChargeStyle cs = env.get(KeyPaymentList.K_CHARGE_STYLE,
-				ChargeStyle.class);
-		if (cs != null) {
-			mChargeStyle = cs;
-		} else {
-			if (BuildConfig.DEBUG) {
-				Logger.d("E:bad charge style!");
-			}
-			mChargeStyle = ChargeStyle.UNKNOW;
-		}
+		Boolean amount_is_coin = env.get(KeyCaller.K_AMOUNT_IS_ZYCOIN,
+		                                 Boolean.class
+		);
+		mDefAmountIsCoin = (amount_is_coin != null && amount_is_coin);
+
+		Boolean b = env.get(KeyCaller.K_PAYMENT_ZYCOIN_DISABLED, Boolean.class);
+		mPaymentTypeSkipZYCoin = (b != null && b);
+
+		b = env.get(KeyCaller.K_PAYMENT_IS_BUY_MODE, Boolean.class);
+		mChargeStyle = (b != null && b) ? ChargeStyle.BUY : ChargeStyle.RECHARGE;
+
 
 		ZZStr title;
 		if (mChargeStyle == ChargeStyle.BUY) {
@@ -368,12 +361,49 @@ public class PaymentListLayout extends CCBaseLayout {
 		setCurrentTask(task);
 	}
 
+	/** 检查登录状态 */
+	private boolean check_login_state() {
+		Boolean b = getEnv().get(KeyUser.K_LOGIN_STATE_SUCCESS, Boolean.class);
+		if (b != null && b) {
+			return true;
+		}
+
+		// 当前没有登录，那么，开启后台登录线程
+		Logger.d("D: auto login in background...");
+
+		ITaskCallBack cb = new ITaskCallBack() {
+			@Override
+			public void onResult(
+					AsyncTask<?, ?, ?> task, Object token,
+					BaseResult result) {
+				if (isCurrentTaskFinished(task)) {
+					onLoginResult(result);
+				}
+			}
+		};
+		AsyncTask<?, ?, ?> task = LoginTask.createAndStart(
+				mContext, cb, this, getEnv().getParent(KeyUser.class.getName()), ZZSDKConfig.SUPPORT_DOUQU_LOGIN
+		);
+		setCurrentTask(task);
+		return false;
+	}
+
+	private void onLoginResult(BaseResult result) {
+		if (result != null && result.isSuccess()) {
+			start_paylist_loader();
+		} else {
+			Logger.d("D: login failed(2)!");
+			showPayList(false);
+		}
+	}
+
 	@Override
 	public boolean onEnter() {
 		boolean ret = super.onEnter();
 		if (ret) {
 			resetExitTrigger();
-			start_paylist_loader();
+			if (check_login_state())
+				start_paylist_loader();
 		}
 		return ret;
 	}
@@ -732,7 +762,7 @@ public class PaymentListLayout extends CCBaseLayout {
 	 * @see {@link #prepparePayType(Context, LinearLayout, PayChannel)}
 	 * @param count
 	 *            单位 卓越币
-	 * @param v
+	 * @param rv
 	 *            主view，必须有设置 tag 为支付类别(见 {@link PayChannel})
 	 */
 	private void updatePayTypeByCost(double count, LinearLayout rv) {
@@ -1302,8 +1332,8 @@ public class PaymentListLayout extends CCBaseLayout {
 				if (!p.isValid()) {
 					continue;
 				}
-				if (mPaymentTypeSkipZYCoin
-						&& p.type == PayChannel.PAY_TYPE_ZZCOIN) {
+				if (p.type == PayChannel.PAY_TYPE_ZZCOIN &&
+						(mPaymentTypeSkipZYCoin || mChargeStyle == ChargeStyle.RECHARGE)) {
 					continue;
 				}
 				tmp.add(p);
@@ -1512,7 +1542,7 @@ public class PaymentListLayout extends CCBaseLayout {
 		}
 
 		if (clazz != null) {
-			host.enter(getClass().getClassLoader(), clazz.getName(), env);
+			host.enter((((Object)this).getClass()).getClassLoader(), clazz.getName(), env);
 		}
 
 		showPopup_Wait(ZZStr.CC_RECHARGE_WAIT_RESULT.str(),
@@ -1909,6 +1939,52 @@ public class PaymentListLayout extends CCBaseLayout {
 
 		@Override
 		protected void onPostExecute(ResultPayList result) {
+			if (DEBUG) {
+				Logger.d("PayListTask: result!");
+			}
+			if (mCallback != null) {
+				mCallback.onResult(this, mToken, result);
+			}
+			// clean
+			mCallback = null;
+			mToken = null;
+		}
+	}
+
+	private static class LoginTask extends AsyncTask<Object, Void, BaseResult> {
+
+		protected static AsyncTask<?, ?, ?> createAndStart(
+				Context ctx,
+				ITaskCallBack callback, Object token, ParamChain env, boolean support_douqu) {
+			LoginTask task = new LoginTask();
+			task.execute(ctx, callback, token, env, support_douqu);
+			if (DEBUG) {
+				Logger.d("LoginTask: created!");
+			}
+			return task;
+		}
+
+		ITaskCallBack mCallback;
+		Object mToken;
+
+		@Override
+		protected BaseResult doInBackground(Object... params) {
+			Context ctx = (Context) params[0];
+			ITaskCallBack callback = (ITaskCallBack) params[1];
+			Object token = params[2];
+			ParamChain env = (ParamChain) params[3];
+			boolean support_douqu = (Boolean) params[4];
+
+			BaseResult ret = UserUtil.loginForLone(env, ctx, support_douqu);
+			if (!this.isCancelled()) {
+				mCallback = callback;
+				mToken = token;
+			}
+			return ret;
+		}
+
+		@Override
+		protected void onPostExecute(BaseResult result) {
 			if (DEBUG) {
 				Logger.d("PayListTask: result!");
 			}

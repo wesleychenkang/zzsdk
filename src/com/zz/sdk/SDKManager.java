@@ -11,6 +11,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Pair;
 
+import com.qihoopay.insdk.h;
 import com.zz.lib.pojo.PojoUtils;
 import com.zz.sdk.ParamChain.KeyCaller;
 import com.zz.sdk.ParamChain.KeyDevice;
@@ -19,6 +20,7 @@ import com.zz.sdk.ParamChain.KeyUser;
 import com.zz.sdk.activity.BaseActivity;
 import com.zz.sdk.activity.LAYOUT_TYPE;
 import com.zz.sdk.entity.SMSChannelMessage;
+import com.zz.sdk.entity.result.BaseResult;
 import com.zz.sdk.out.ZZSDKOut;
 import com.zz.sdk.out.util.Application;
 import com.zz.sdk.out.util.GetDataImpl;
@@ -141,14 +143,12 @@ public class SDKManager {
 		ParamChain env = rootEnv.grow(KeyDevice.class.getName());
 
 		String imsi = Utils.getIMSI(ctx);
+		env.add(KeyDevice.K_IMSI, imsi);
 		if (DebugFlags.DEBUG_DEMO) {
 			if ("310260000000000".equals(imsi)) {
 				Logger.d("D: emulator's IMSI");
-			} else {
-				env.add(KeyDevice.K_IMSI, imsi);
+				env.remove(KeyDevice.K_IMSI);
 			}
-		} else {
-			env.add(KeyDevice.K_IMSI, imsi);
 		}
 
 		Object service = ctx.getSystemService(Context.TELEPHONY_SERVICE);
@@ -161,6 +161,9 @@ public class SDKManager {
 		}
 
 		env.add(KeyDevice.K_PROJECT_ID, Utils.getProjectId(ctx));
+
+		env.add(KeyDevice.K_PHONE_MODEL, "android");
+		// env.add(KeyDevice.K_IP, );
 
 		return env;
 	}
@@ -356,25 +359,89 @@ public class SDKManager {
 			final String gameRole, final int amount,
 			final boolean isCloseWindow, final String callBackInfo) {
 		ZZSDKOut.showPaymentView(mContext, callbackHandler, what, gameServerID,
-				serverName, roleId, gameRole, amount, isCloseWindow,
-				callBackInfo);
+		                         serverName, roleId, gameRole, amount, isCloseWindow,
+		                         callBackInfo
+		);
 	}
 
-	public void showPaymentViewEx(Handler callbackHandler, int what,
-			String gameServerID, final String serverName, final String roleId,
-			final String gameRole, final int amount,
-			final boolean isCloseWindow, final String callBackInfo) {
+	/**
+	 * 调用支付功能，支付结果以回调消息形式通知游戏调用方。<br/>
+	 * <i>消息规则如下：</i>
+	 * <p/>
+	 * <table>
+	 * <tr>
+	 * <th>{@link Message android.os.Message:}</th>
+	 * </tr>
+	 * <tr>
+	 * <td>{@link Message#arg1 .arg1}
+	 * <td>{@link Message#arg2 .arg2}
+	 * <td>{@link Message#obj .obj}
+	 * <td>描述</td>
+	 * <tr>
+	 * <tr>
+	 * <td>{@link MSG_TYPE#PAYMENT .PAYMENT}</td>
+	 * <td>{@link MSG_STATUS#SUCCESS .SUCCESS}</td>
+	 * <td>{@link PaymentCallbackInfo}</td>
+	 * <td>支付成功，可获取支付金额方式等</td>
+	 * </tr>
+	 * <tr>
+	 * <td></td>
+	 * <td>{@link MSG_STATUS#FAILED .FAILED}</td>
+	 * <td>..</td>
+	 * <td>支付失败，无其它信息</td>
+	 * </tr>
+	 * <tr>
+	 * <td></td>
+	 * <td>{@link MSG_STATUS#CANCEL .CANCEL}</td>
+	 * <td>..</td>
+	 * <td>支付取消，无其它信息</td>
+	 * </tr>
+	 * <tr>
+	 * <td></td>
+	 * <td>{@link MSG_STATUS#EXIT_SDK .EXIT_SDK}</td>
+	 * <td>..</td>
+	 * <td>此次业务结束，或成功或失败，原因见前面的消息</td>
+	 * </tr>
+	 * </table>
+	 *
+	 * @param callbackHandler 支付结果通知　Handle
+	 * @param what            支付结果消息号
+	 * @param gameServerID    游戏服务器ID
+	 * @param gameRole        角色名称
+	 * @param amount          定额价格, 单位为 [分], 如果 >0表示此次充值只能以指定的价格交易.
+	 * @param isZyCoin 当前价格单位是卓越币还是人民币
+	 * @param isCloseWindow   支付成功是否自动关闭支付SDK, 如果是 true 则在充值成功后自动退出SDK
+	 * @param isBuyMode 是否为购买模式，如果是true则将支付人民币，否则充值卓越币到个人账户
+	 * @see MSG_TYPE#PAYMENT
+	 * @see MSG_STATUS#SUCCESS
+	 * @see MSG_STATUS#FAILED
+	 * @see MSG_STATUS#CANCEL
+	 * @see MSG_STATUS#EXIT_SDK
+	 * @see PaymentCallbackInfo
+	 */
+	public void showPaymentViewEx(
+			Handler callbackHandler, int what, String gameServerID, String gameRole, int amount, boolean isZyCoin,
+			boolean isCloseWindow, boolean isBuyMode) {
 		ParamChain env = mRootEnv.grow(KeyCaller.class.getName());
 		env.add(KeyCaller.K_MSG_HANDLE, callbackHandler);
 		env.add(KeyCaller.K_MSG_WHAT, what);
 		env.add(KeyCaller.K_GAME_SERVER_ID, gameServerID);
-		env.add(KeyCaller.K_SERVER_NAME, serverName);
-		env.add(KeyCaller.K_ROLE_ID, roleId);
 		env.add(KeyCaller.K_GAME_ROLE, gameRole);
 		env.add(KeyCaller.K_AMOUNT, amount);
 		env.add(KeyCaller.K_IS_CLOSE_WINDOW, isCloseWindow);
-		env.add(KeyCaller.K_CALL_BACK_INFO, callBackInfo);
+		env.add(KeyCaller.K_AMOUNT_IS_ZYCOIN, isZyCoin);
+		// 用户模式不需要关闭卓越币的支付方式
+		env.add(KeyCaller.K_PAYMENT_ZYCOIN_DISABLED, false);
+		env.add(KeyCaller.K_PAYMENT_IS_BUY_MODE, isBuyMode);
 		startActivity(mContext, env, LAYOUT_TYPE.PaymentList);
+	}
+
+	public void showPaymentViewEx(
+			Handler callbackHandler, int what, String gameServerID, String gameRole, int amount,
+			boolean isCloseWindow) {
+		showPaymentViewEx(callbackHandler, what, gameServerID, gameRole, amount, false, isCloseWindow,
+		                  true
+		);
 	}
 
 	public void showExchange(Handler callbackHandler, String gameServerID) {
@@ -447,42 +514,59 @@ public class SDKManager {
 	}
 
 	/**
-	 * 查询订单的状态
+	 * 查询订单的状态。<b>需要网络访问，请在非UI线程中调用！</b>
 	 * 
-	 * @param callbackHandler
+	 * @param orderNumber 订单号
+	 * @return 见 {@link com.zz.sdk.MSG_STATUS}
+	 * @see com.zz.sdk.MSG_STATUS#CANCEL
+	 * @see com.zz.sdk.MSG_STATUS#FAILED
+	 * @see com.zz.sdk.MSG_STATUS#SUCCESS
 	 */
-	private void queryOrderState(final Handler callbackHandler,
-			final Context context, final String orderNumber) {
-		// if("".equals(orderNumber)||orderNumber==null||orderNumber.length()<5){
-		// Toast.makeText(context, "输入的订单号无效!", Toast.LENGTH_SHORT).show();
-		// return;
-		// }
-		// Thread thread = new Thread(new Runnable() {
-		// public void run() {
-		// PaymentCallbackInfo info = new PaymentCallbackInfo();
-		// PayResult p = GetDataImpl.getInstance(context).checkOrder(
-		// orderNumber);
-		// if (p != null) {
-		// if ("0".equals(p.resultCode) && "0".equals(p.statusCode)) {
-		// info.statusCode = 0;
-		// } else if ("1".equals(p.resultCode)) {
-		// info.statusCode = -1;
-		// } else {
-		// info.statusCode = -1;
-		// }
-		// } else {
-		// info.statusCode = -2;
-		//
-		// }
-		//
-		// Message msg = callbackHandler.obtainMessage();
-		// msg.obj = info;
-		// msg.what = WHAT_ORDER_CALLBACK_DEFAULT;
-		// callbackHandler.sendMessage(msg);
-		// }
-		// });
-		// thread.start();
-		//
+	public int queryOrderState(final String orderNumber) {
+		BaseResult ret = ConnectionUtil.getInstance(mContext).checkOrder(orderNumber);
+		if (ret == null || !ret.isUsed()) {
+			return MSG_STATUS.CANCEL;
+		} else if (ret.isSuccess()) {
+			return MSG_STATUS.SUCCESS;
+		} else {
+			return MSG_STATUS.FAILED;
+		}
+	}
+
+	/**
+	 * 开启线程查询订单。
+	 * @param handler        回调
+	 * @param what           回调消息
+	 * @param orderNumber    订单号
+	 * @see com.zz.sdk.MSG_STATUS#CANCEL
+	 * @see com.zz.sdk.MSG_STATUS#FAILED
+	 * @see com.zz.sdk.MSG_STATUS#SUCCESS
+	 */
+	public void queryOrderState(final Handler handler, final int what, final String orderNumber) {
+		Thread thread = new Thread("order-query") {
+			private ConnectionUtil cu = ConnectionUtil.getInstance(mContext);
+			private Handler h = handler;
+			private int w = what;
+			private String on = orderNumber;
+
+			@Override
+			public void run() {
+				BaseResult ret = cu.checkOrder(on);
+				int err;
+				if (ret == null || !ret.isUsed())
+					err = MSG_STATUS.CANCEL;
+				else if (ret.isSuccess())
+					err = MSG_STATUS.SUCCESS;
+				else
+					err = MSG_STATUS.FAILED;
+
+				if (h != null) {
+					final Message msg = h.obtainMessage(w, MSG_TYPE.ORDER, err, on);
+					msg.sendToTarget();
+				}
+			}
+		};
+		thread.start();
 	}
 
 	/**
@@ -505,9 +589,8 @@ public class SDKManager {
 				+ ZZSDKConfig.CONFIG_DESC;
 	}
 
-	public void debug_start(Handler callbackHandler, int what,
-			String gameServerID, final String serverName, final String roleId,
-			final String gameRole) {
+	public void debug_start(Handler callbackHandler, int what, String gameServerID,
+	                        final String gameRole) {
 		if (DebugFlags.DEBUG) {
 			final int amount = -1;
 			final boolean amount_is_zycoin = false;
@@ -531,6 +614,8 @@ public class SDKManager {
 				env.add("global.paymentlist.pay_title", ZZStr.CC_RECHARGE_TITLE);
 				env.add("global.paymentlist.pay_sms_confirm_enabled", false);
 				env.add("global.paymentlist.pay_channel_name", "短信");
+				env.add(KeyDevice.K_IMSI, DebugFlags.DEF_DEBUG_IMSI);
+
 
 				JSONArray ja;
 				try {
@@ -538,7 +623,12 @@ public class SDKManager {
 							"["
 									+ "{'serviceType':'WXSHL_HLD','spCode':'10660657','command':'ma6004451634','price':'100','recognition_rule':'','sp_name':'微信优势','service_name':'欢乐岛','exactly_matching_product':'0','fetch_command_when_billing':'0'},"
 									+ "{'serviceType':'FEIDDX_YMSHH','spCode':'10660078','command':'806004451634','price':'200','recognition_rule':'','sp_name':'飞动乐驰','service_name':'伊媚生活','exactly_matching_product':'0','fetch_command_when_billing':'0'},"
-									+ "{'serviceType':'HZDX_ZXWXHY','spCode':'106601866','command':'50116004451634','price':'500','recognition_rule':'','sp_name':'华中天讯','service_name':'尊享无线会员','exactly_matching_product':'0','fetch_command_when_billing':'0'}"
+									+ "{'serviceType':'HZDX_ZXWXHY','spCode':'106601866','command':'50116004451634','price':'500','recognition_rule':'','sp_name':'华中天讯','service_name':'尊享无线会员','exactly_matching_product':'0','fetch_command_when_billing':'0'},"
+									+ "{'spCode':'1065842412','price':'100','command':'wq','fetchCommand':'1','payConfirmText':'中国移动,金币宝的1元','serviceType':'WQ_FMM_JBB_1Y'}," +
+									"{'spCode':'1065842412','price':'200','command':'wq','fetchCommand':'1','payConfirmText':'中国移动,金币宝的2元','serviceType':'WQ_FMM_JBB_2Y'}," +
+									"{'spCode':'1065842412','price':'400','command':'wq','fetchCommand':'1','payConfirmText':'中国移动,金币宝的4元','serviceType':'WQ_FMM_JBB_4Y'}," +
+									"{'spCode':'1065842412','price':'500','command':'wq','fetchCommand':'1','payConfirmText':'中国移动,金币宝的5元','serviceType':'WQ_FMM_JBB_5Y'}," +
+									"{'spCode':'1065842412','price':'600','command':'wq','fetchCommand':'1','payConfirmText':'中国移动,金币宝的6元','serviceType':'WQ_FMM_JBB_6Y'}"
 									+ "]");
 					SMSChannelMessage[] smsChannel = new SMSChannelMessage[ja
 							.length()];
@@ -563,14 +653,11 @@ public class SDKManager {
 			env.add(KeyCaller.K_MSG_HANDLE, callbackHandler);
 			env.add(KeyCaller.K_MSG_WHAT, what);
 			env.add(KeyCaller.K_GAME_SERVER_ID, gameServerID);
-			env.add(KeyCaller.K_SERVER_NAME, serverName);
-			env.add(KeyCaller.K_ROLE_ID, roleId);
 			env.add(KeyCaller.K_GAME_ROLE, gameRole);
 			env.add(KeyCaller.K_AMOUNT, amount);
 			env.add(KeyCaller.K_AMOUNT_IS_ZYCOIN, amount_is_zycoin);
 			env.add(KeyCaller.K_PAYMENT_ZYCOIN_DISABLED, pay_zycoin_disabled);
 			env.add(KeyCaller.K_IS_CLOSE_WINDOW, isCloseWindow);
-			env.add(KeyCaller.K_CALL_BACK_INFO, callBackInfo);
 
 			Intent intent = new Intent(mContext, BaseActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

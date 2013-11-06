@@ -367,19 +367,16 @@ class ExchangeDetailLayout extends CCBaseLayout {
 		env.add(KeyCaller.K_MSG_HANDLE, mHandler);
 		env.add(KeyCaller.K_MSG_WHAT, MSG_RECHARGE);
 		// env.add(KeyCaller.K_GAME_SERVER_ID, gameServerID);
-		// env.add(KeyCaller.K_SERVER_NAME, serverName);
-		// env.add(KeyCaller.K_ROLE_ID, roleId);
 		// env.add(KeyCaller.K_GAME_ROLE, gameRole);
 		if (mPropsInfo.mPrice > getCoinBalance()) {
 			env.add(KeyCaller.K_AMOUNT,
 					(int) ((mPropsInfo.mPrice/*-getCoinBalance()*/) * 100));
 		}
 		env.add(KeyCaller.K_IS_CLOSE_WINDOW, true);
-		// env.add(KeyCaller.K_CALL_BACK_INFO, callBackInfo);
 
 		env.add(KeyCaller.K_AMOUNT_IS_ZYCOIN, Boolean.TRUE);
 		env.add(KeyCaller.K_PAYMENT_ZYCOIN_DISABLED, Boolean.TRUE);
-		env.add(KeyPaymentList.K_CHARGE_STYLE, ChargeStyle.RECHARGE);
+		env.add(KeyCaller.K_PAYMENT_IS_BUY_MODE, Boolean.FALSE);
 
 		getHost().enter(LAYOUT_TYPE.PaymentList, env);
 	}
