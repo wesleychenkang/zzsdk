@@ -257,19 +257,18 @@ public class ExchangeLayout extends CCBaseLayout {
 				if (DEBUG) {
 					showToast("调试：列表项数量不足，没有更多项");
 				}
-				mListView.setPullLoadEnable(false);
+//				mListView.setPullLoadEnable(false);
 				mRowsStart = mPropsInfos.size();
 			}
-
-			mListView.stopRefresh();
-			mListView.stopLoadMore();
-			mListView.setRefreshTime(new Date().toLocaleString());
 		} else {
 			if (result.isUsed())
 				showPopup_Tip(result.getErrDesc());
 			else
 				showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
 		}
+		mListView.stopRefresh();
+		mListView.stopLoadMore();
+		mListView.setRefreshTime(new Date().toLocaleString());
 	}
 
 	private void enterDetail(int pos) {

@@ -1653,18 +1653,25 @@ public class PaymentListLayout extends CCBaseLayout {
 
 	private boolean tryEnterPayDetail(ILayoutHost host, PayChannel channel,
 			BaseResult result) {
-		hidePopup();
+		if (result==null || !result.isUsed()) {
+			// 连接服务器失败
+			showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
+			return false;
+		}
 
 		if (host != null && channel != null) {
 			if (result instanceof ResultRequest && result.isSuccess()) {
+				// 成功
+				hidePopup();
 				return enterPayDetail(host, channel, (ResultRequest) result);
 			}
 		}
 
+		// 支付失败
 		if (channel != null && channel.type == PayChannel.PAY_TYPE_KKFUNPAY) {
 			showPopup_Tip(ZZStr.CC_TRY_SMS_NO_CHANNEL);
 		} else {
-			showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
+			showPopup_Tip(ZZStr.CC_TRY_CHARGE_FAILED);
 		}
 		return false;
 	}

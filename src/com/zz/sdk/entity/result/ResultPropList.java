@@ -52,7 +52,7 @@ public class ResultPropList extends BaseResult {
 	public String getErrDesc() {
 		if (super.isSuccess()) {
 			if (!isSuccess()) {
-				return "数据错误！";
+				return "数据为空！";
 			}
 		}
 		return getErrDesc(ErrMsg, 0);

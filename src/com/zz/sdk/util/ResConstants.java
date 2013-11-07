@@ -88,6 +88,9 @@ public class ResConstants {
 		/** 连接服务器超时，请继续等待或稍候重试！ */
 		CC_TRY_CONNECT_SERVER_TIMEOUT("连接服务器超时，请继续等待或稍候重试！"),
 
+		/** 暂时不能使用，请选择其它支付方式！ */
+		CC_TRY_CHARGE_FAILED("暂时不能使用，请尝试其它支付方式！\n如有疑问请与客服联系！"),
+
 		/** 如需中止操作，请立即再次按下[返回] */
 		CC_EXIT_LOCKED_TIP("如需中止操作，请立即再次按下[返回]"), //
 
