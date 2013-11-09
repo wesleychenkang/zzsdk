@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.zz.sdk.demo"
+      android:versionCode="1"
+      android:versionName="1.0">
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="14" />
+
+    <!-- SDK 需要的权限列表 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <!-- 需要短信支付才配置 -->
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <!-- 接收短信的权限，用于显示 支付宝、财付通 的验证码短信，可选 -->
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+
+    <supports-screens
+        android:anyDensity="true"
+        android:largeScreens="true"
+        android:normalScreens="true"
+        android:resizeable="true"
+        android:smallScreens="true" />
+
+    <application android:label="@string/app_name" >
+        <!-- 演示窗体 -->
+        <activity
+            android:name="com.zz.sdk.demo.MainActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- 游戏服务器ID，由SDK方提供 -->
+        <meta-data
+            android:name="SERVER_ID"
+            android:value="M1002A"/>
+        <!-- 项目ID，由SDK方提供 -->
+        <meta-data
+            android:name="PROJECT_ID"
+            android:value="P10002A"/>
+        <!-- 产品ID,由SDK方提供 -->
+        <meta-data
+            android:name="PRODUCT_ID"
+            android:value="D10002"/>
+        <!-- SDK 的窗体 -->
+        <activity
+            android:name="com.zz.sdk.activity.BaseActivity"
+            android:configChanges="orientation|keyboardHidden|navigation"
+            android:theme="@android:style/Theme.Black.NoTitleBar"/>
+
+        <!-- 银联窗体，依赖风格文件 unionpay_style.xml -->
+        <activity
+            android:name="com.unionpay.uppay.PayActivityEx"
+            android:configChanges="orientation|keyboardHidden"
+            android:excludeFromRecents="true"
+            android:label="@string/app_name"
+            android:windowSoftInputMode="adjustResize">
+        </activity>
+        <activity
+            android:name="com.unionpay.uppay.PayActivity"
+            android:configChanges="orientation|keyboardHidden|screenLayout"
+            android:excludeFromRecents="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.UPPay"/>
+
+    </application>
+</manifest> 

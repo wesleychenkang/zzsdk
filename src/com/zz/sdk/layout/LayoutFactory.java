@@ -49,8 +49,8 @@ public class LayoutFactory {
 		/**
 		 * 进入新界面
 		 * 
-		 * @param type
-		 * @param env
+		 * @param type 上下文
+		 * @param rootEnv 环境变量
 		 */
 		public void enter(LAYOUT_TYPE type, ParamChain rootEnv);
 
@@ -70,7 +70,7 @@ public class LayoutFactory {
 		/**
 		 * 设置窗体事件监听器，调用者自己维护生命周期
 		 * 
-		 * @param controlInterface
+		 * @param controlInterface 监听器
 		 */
 		public void addActivityControl(ActivityControlInterface controlInterface);
 
@@ -83,21 +83,17 @@ public class LayoutFactory {
 		/***
 		 * 进入，此时可启动初始化代码
 		 * 
-		 * @return
+		 * @return 是否成功响应
 		 */
 		public boolean onEnter();
 
 		/**
-		 * 被纳入缓存，即 pause
-		 * 
-		 * @return
+		 * @return 是否成功响应暂停
 		 */
 		public boolean onPause();
 
 		/**
-		 * 即 resume
-		 * 
-		 * @return
+		 * @return 是否成功响应恢复
 		 */
 		public boolean onResume();
 
@@ -111,30 +107,26 @@ public class LayoutFactory {
 		public boolean isExitEnabled(boolean isBack);
 
 		/**
-		 * 被关闭
-		 * 
-		 * @return
+		 * @return 是否成功响应被关闭
 		 */
 		public boolean onExit();
 
 		/**
-		 * 获取环境变量
-		 * 
-		 * @return
+		 * @return 获取环境变量
 		 */
 		public ParamChain getEnv();
 
 		/***
 		 * 是否有效
 		 * 
-		 * @return
+		 * @return 是否有效
 		 */
 		public boolean isAlive();
 
 		/**
 		 * 获取主视图，用于窗体显示
 		 * 
-		 * @return
+		 * @return 主视图
 		 */
 		public View getMainView();
 	}
@@ -142,9 +134,9 @@ public class LayoutFactory {
 	/**
 	 * 创建 视图
 	 * 
-	 * @param ctx
-	 * @param type
-	 * @param params
+	 * @param ctx 上下文
+	 * @param type 类型
+	 * @param rootEnv 环境变量
 	 * @return
 	 */
 	public static ILayoutView createLayout(Context ctx, LAYOUT_TYPE type,
@@ -188,6 +180,7 @@ public class LayoutFactory {
 			}
 		} catch (Exception e) {
 			Logger.d("Cannot instanciate layout [" + className + "]");
+			e.printStackTrace();
 		}
 		return null;
 	}

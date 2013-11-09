@@ -21,12 +21,8 @@ import android.widget.Toast;
 import com.zz.sdk.LoginCallbackInfo;
 import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.MSG_TYPE;
-import com.zz.sdk.ParamChain;
-import com.zz.sdk.ParamChain.KeyUser;
 import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.SDKManager;
-import com.zz.sdk.util.DebugFlags;
-import com.zz.sdk.util.DebugFlags.KeyDebug;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,8 +72,6 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final int MSG_ORDER_CALLBACK = _MSG_USER_ + 3;
 
 	private SDKManager mSDKManager;
-
-	private ParamChain mDebugEnv;
 
 	private LoginCallbackInfo mLoginCallbackInfo;
 	private TextView mTvTip;
@@ -136,7 +130,6 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	private void init(Context ctx) {
 		mSDKManager = SDKManager.getInstance(ctx);
-		mDebugEnv = DebugFlags.get_env();
 	}
 
 	/** 创建所有的视图 */
@@ -256,63 +249,6 @@ public class MainActivity extends Activity implements OnClickListener {
 			btnSetConfig.setOnClickListener(onClickListener);
 			rootLayout.addView(btnSetConfig);
 		}
-
-		//
-
-		{
-			Button btLogin = new Button(ctx);
-			btLogin.setText("登录(旧）");
-			btLogin.setId(IDC_BT_OUT_LOGIN);
-
-			btLogin.setOnClickListener(onClickListener);
-			rootLayout.addView(btLogin);
-		}
-		{
-			Button btCharge = new Button(ctx);
-			btCharge.setText("充值(旧)");
-			btCharge.setId(IDC_BT_OUT_PAY);
-
-			btCharge.setOnClickListener(onClickListener);
-			rootLayout.addView(btCharge);
-		}
-
-
-		{
-			bt = new Button(ctx);
-			bt.setText("调试");
-			bt.setId(IDC_BT_DEBUG);
-			bt.setOnClickListener(onClickListener);
-			bt.setBackgroundColor(0xcc008020);
-			rootLayout.addView(bt);
-		}
-
-		if (mDebugEnv != null) {
-			ll = new LinearLayout(ctx);
-			rootLayout.addView(ll);
-			ll.setOrientation(LinearLayout.HORIZONTAL);
-
-			bt = new Button(ctx);
-			ll.addView(bt);
-			bt.setText("汇率");
-			bt.setId(IDC_BT_RECHARGE_RATE);
-			bt.setOnClickListener(onClickListener);
-
-			et = new EditText(ctx);
-			ll.addView(et);
-			et.setHint("{RMB→?卓越币，精度为0.01}");
-			et.setId(IDC_ET_RECHARGE_RATE);
-			et.setInputType(InputType.TYPE_CLASS_NUMBER
-					                | InputType.TYPE_NUMBER_FLAG_DECIMAL
-			);
-		}
-		if (mDebugEnv != null) {
-			CheckBox box = new CheckBox(ctx);
-			box.setId(IDC_CB_CANCEL_AS_SUCCESS);
-			rootLayout.addView(box);
-			box.setOnClickListener(onClickListener);
-			box.setText("让「取消」支付变成支付成功");
-		}
-
 		return rootLayout;
 	}
 
@@ -388,7 +324,6 @@ public class MainActivity extends Activity implements OnClickListener {
 			}
 			break;
 
-
 			case IDC_BT_QUERY: {
 				String orderNumber = ((TextView) findViewById(IDC_ET_ORDER_NUMBER)).getText().toString().trim();
 				if (orderNumber.length() == 0) {
@@ -410,83 +345,6 @@ public class MainActivity extends Activity implements OnClickListener {
 			// 道具兑换
 			case IDC_BT_EXCHANGE: {
 				mSDKManager.showExchange(mHandler, CONFIG_GAME_SERVER_ID);
-			}
-			break;
-
-			case IDC_BT_DEBUG: {
-				mSDKManager.debug_start(mHandler, MSG_PAYMENT_CALLBACK,
-				                        CONFIG_GAME_SERVER_ID, CONFIG_GAME_ROLE
-				);
-			}
-			break;
-
-			case IDC_BT_OUT_LOGIN: {
-				mSDKManager.showLoginView(mHandler, MSG_LOGIN_CALLBACK);
-			}
-			break;
-
-			case IDC_BT_OUT_PAY: {
-				String s_amount = ((TextView) findViewById(IDC_ET_PAY_AMOUNT))
-						.getText().toString();
-				int amount;
-				try {
-					amount = Integer.parseInt(s_amount);
-				} catch (NumberFormatException e) {
-					amount = 0;
-				}
-
-				boolean isCloseWindow;
-				View vCloseWindow = findViewById(IDC_CHARGE_AUTO_CLOSE);
-				if (vCloseWindow instanceof CheckBox) {
-					isCloseWindow = ((CheckBox) vCloseWindow).isChecked();
-				} else {
-					isCloseWindow = false;
-				}
-
-				mSDKManager.showPaymentView(mHandler, MSG_PAYMENT_CALLBACK,
-				                            CONFIG_GAME_SERVER_ID, CONFIG_GAME_SERVER_NAME,
-				                            CONFIG_GAME_ROLE_ID, CONFIG_GAME_ROLE, amount,
-				                            isCloseWindow, CONFIG_GAME_CALLBACK_INFO
-				);
-			}
-			break;
-
-			case IDC_BT_RECHARGE_RATE: {
-				if (mDebugEnv != null) {
-					String str = ((TextView) findViewById(IDC_ET_RECHARGE_RATE))
-							.getText().toString().trim();
-					double rate;
-					if (str.length() > 0) {
-						try {
-							rate = Float.parseFloat(str);
-						} catch (NumberFormatException e) {
-							rate = 0;
-						}
-					} else {
-						rate = 0;
-					}
-					if (rate > 0.01f) {
-						mDebugEnv.add(KeyUser.K_COIN_RATE, rate);
-						pushLog("设置默认汇率: " + rate);
-					} else {
-						mDebugEnv.remove(KeyUser.K_COIN_RATE);
-						pushLog("还原默认汇率!");
-					}
-				}
-			}
-			break;
-
-			case IDC_CB_CANCEL_AS_SUCCESS: {
-				if (mDebugEnv != null) {
-					CheckBox cb = (CheckBox) v;
-					if (cb.isChecked()) {
-						mDebugEnv.add(KeyDebug.K_DEBUG_PAY_CANCEL_AS_SUCCESS,
-						              Boolean.TRUE
-						);
-					} else {
-						mDebugEnv.remove(KeyDebug.K_DEBUG_PAY_CANCEL_AS_SUCCESS);
-					}
-				}
 			}
 			break;
 		}

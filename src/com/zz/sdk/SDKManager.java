@@ -525,12 +525,21 @@ public class SDKManager {
 	public int queryOrderState(final String orderNumber) {
 		BaseResult ret = ConnectionUtil.getInstance(mContext).checkOrder(orderNumber);
 		if (ret == null || !ret.isUsed()) {
+			// 连接失败
 			return MSG_STATUS.CANCEL;
-		} else if (ret.isSuccess()) {
-			return MSG_STATUS.SUCCESS;
-		} else {
-			return MSG_STATUS.FAILED;
+//		} else if (ret.isSuccess()) {
+//			return MSG_STATUS.SUCCESS;
+//		} else {
+//			return MSG_STATUS.FAILED;
 		}
+
+		// 20131107
+		int err = ret.getCodeNumber();
+		if (err==1 || err==0) {
+			// 0 或 1 都是成功
+			return MSG_STATUS.SUCCESS;
+		}
+		return MSG_STATUS.FAILED;
 	}
 
 	/**
@@ -544,22 +553,13 @@ public class SDKManager {
 	 */
 	public void queryOrderState(final Handler handler, final int what, final String orderNumber) {
 		Thread thread = new Thread("order-query") {
-			private ConnectionUtil cu = ConnectionUtil.getInstance(mContext);
 			private Handler h = handler;
 			private int w = what;
 			private String on = orderNumber;
 
 			@Override
 			public void run() {
-				BaseResult ret = cu.checkOrder(on);
-				int err;
-				if (ret == null || !ret.isUsed())
-					err = MSG_STATUS.CANCEL;
-				else if (ret.isSuccess())
-					err = MSG_STATUS.SUCCESS;
-				else
-					err = MSG_STATUS.FAILED;
-
+				int err = queryOrderState(on);
 				if (h != null) {
 					final Message msg = h.obtainMessage(w, MSG_TYPE.ORDER, err, on);
 					msg.sendToTarget();
