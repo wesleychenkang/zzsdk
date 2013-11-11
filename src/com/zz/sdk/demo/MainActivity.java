@@ -404,7 +404,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			/* 登录 */
 			case IDC_BT_LOGIN: {
 				boolean b = ((CheckBox) findViewById(IDC_CB_AUTOLOGIN)).isChecked();
-				mSDKManager.showLoginViewEx(mHandler, MSG_LOGIN_CALLBACK, b);
+				mSDKManager.showLoginView(mHandler, MSG_LOGIN_CALLBACK, b);
 			}
 			break;
 
@@ -462,8 +462,8 @@ public class MainActivity extends Activity implements OnClickListener {
 				boolean isBuyMode = ((CheckBox) findViewById(IDC_CHARGE_MODE_BUY)).isChecked();
 
 				// 调用支付或充值
-				mSDKManager.showPaymentViewEx(mHandler, MSG_PAYMENT_CALLBACK, CONFIG_GAME_SERVER_ID,
-				                              CONFIG_GAME_ROLE, amount, isZyCoin, isCloseWindow, isBuyMode
+				mSDKManager.showPaymentView(mHandler, MSG_PAYMENT_CALLBACK, CONFIG_GAME_SERVER_ID,
+				                            CONFIG_GAME_ROLE, amount, isZyCoin, isCloseWindow, isBuyMode
 				);
 			}
 			break;
@@ -495,7 +495,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			break;
 
 			case IDC_BT_OUT_LOGIN: {
-				mSDKManager.showLoginView(mHandler, MSG_LOGIN_CALLBACK);
+				mSDKManager.showLoginView_out(mHandler, MSG_LOGIN_CALLBACK);
 			}
 			break;
 
@@ -517,10 +517,10 @@ public class MainActivity extends Activity implements OnClickListener {
 					isCloseWindow = false;
 				}
 
-				mSDKManager.showPaymentView(mHandler, MSG_PAYMENT_CALLBACK,
-				                            CONFIG_GAME_SERVER_ID, CONFIG_GAME_SERVER_NAME,
-				                            CONFIG_GAME_ROLE_ID, CONFIG_GAME_ROLE, amount,
-				                            isCloseWindow, CONFIG_GAME_CALLBACK_INFO
+				mSDKManager.showPaymentView_out(mHandler, MSG_PAYMENT_CALLBACK,
+				                                CONFIG_GAME_SERVER_ID, CONFIG_GAME_SERVER_NAME,
+				                                CONFIG_GAME_ROLE_ID, CONFIG_GAME_ROLE, amount,
+				                                isCloseWindow, CONFIG_GAME_CALLBACK_INFO
 				);
 			}
 			break;

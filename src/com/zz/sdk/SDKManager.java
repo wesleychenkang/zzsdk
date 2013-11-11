@@ -11,7 +11,6 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Pair;
 
-import com.qihoopay.insdk.h;
 import com.zz.lib.pojo.PojoUtils;
 import com.zz.sdk.ParamChain.KeyCaller;
 import com.zz.sdk.ParamChain.KeyDevice;
@@ -20,7 +19,6 @@ import com.zz.sdk.ParamChain.KeyUser;
 import com.zz.sdk.activity.BaseActivity;
 import com.zz.sdk.activity.LAYOUT_TYPE;
 import com.zz.sdk.entity.SMSChannelMessage;
-import com.zz.sdk.entity.result.BaseResult;
 import com.zz.sdk.entity.result.ResultOrder;
 import com.zz.sdk.out.ZZSDKOut;
 import com.zz.sdk.out.util.Application;
@@ -39,16 +37,16 @@ import com.zz.sdk.util.Utils;
  * <ol>
  * <li>调用 {@link #getInstance(Context)} 获取 SDK 实例</li>
  * 
- * <li>启动<strong>登录</strong>界面: {@link #showLoginView(Handler, int)}</li>
+ * <li>启动<strong>登录</strong>界面: {@link #showLoginView(android.os.Handler, int, boolean)} </li>
  * <li>启动<strong>支付</strong>界面:
- * {@link #showPaymentView(Handler, int, String, String, String, String, int, boolean, String)}
+ * {@link #showPaymentView(android.os.Handler, int, String, String, int, boolean)}
  * </li>
  * <li>启动<strong>登录</strong>或<strong>支付</strong>时，消息类型 {@link Message#arg2} 为
  * {@link MSG_STATUS#EXIT_SDK} 时表示此次SDK操作结束。</li>
  * <li>退出游戏时，调用 {@link #recycle()} 释放资源</li>
  * </ol>
  * 
- * @author roger
+ * @author roger jason.liao
  */
 
 public class SDKManager {
@@ -184,8 +182,7 @@ public class SDKManager {
 	 * 
 	 * @param gameServerId
 	 *            默认的游戏服务器ID，由SDK分配给游戏方，类似
-	 *            {@link #showPaymentView(Handler, int, String, String, String, String, int, boolean, String)
-	 *            showPaymentView}
+	 *            {@link #showPaymentView(android.os.Handler, int, String, String, int, boolean) showPaymentView}
 	 */
 	public static void setGameServerId(String gameServerId) {
 		Utils.setGameServerID(gameServerId);
@@ -203,12 +200,11 @@ public class SDKManager {
 	 */
 	public void setConfigInfo(boolean isOnlineGame, boolean isDisplayLoginTip,
 			boolean isDisplayLoginfail) {
-		final boolean flag = isOnlineGame;
 		final Pair<String, String> account = Utils
 				.getAccountFromSDcard(mContext);
 		Application.isDisplayLoginTip = isDisplayLoginTip;
 		Application.isDisplayLoginfail = isDisplayLoginfail;
-		if (!flag) { // 单机
+		if (!isOnlineGame) { // 单机
 			new Thread() {
 				@Override
 				public void run() {
@@ -223,58 +219,46 @@ public class SDKManager {
 
 	/**
 	 * 启动 SDK 登录界面，登录结果以回调消息形式通知游戏调用方。<br/>
-	 * <i>消息规则如下：</i>
-	 * 
+	 * <i>消息{@link Message android.os.Message}规则如下：</i>
+	 * <ul>
+	 * <li>Message.what ，即参数中的 what </li>
+	 * <li>Message.arg1 ，这里固定为 {@link com.zz.sdk.MSG_TYPE#LOGIN LOGIN}</li>
+	 * <li>Message.arg2 和 Message.obj 说明：
 	 * <table>
 	 * <tr>
-	 * <th>{@link Message android.os.Message:}</th>
-	 * </tr>
-	 * <tr>
-	 * <th>{@link Message#what .what}</th>
-	 * <th>{@link Message#arg1 .arg1}</th>
 	 * <th>{@link Message#arg2 .arg2}</th>
 	 * <th>{@link Message#obj .obj}</th>
 	 * <td>描述</td>
 	 * <tr>
 	 * <tr>
-	 * <td></td>
-	 * <td>{@link MSG_TYPE#LOGIN}</td>
 	 * <td>{@link MSG_STATUS#SUCCESS}</td>
 	 * <td>{@link LoginCallbackInfo}</td>
 	 * <td>登录成功，可获取用户信息</td>
 	 * </tr>
 	 * <tr>
-	 * <td></td>
-	 * <td></td>
 	 * <td>{@link MSG_STATUS#CANCEL}</td>
 	 * <td>..</td>
 	 * <td>用户取消登录，无其它信息</td>
 	 * </tr>
 	 * <tr>
-	 * <td></td>
-	 * <td></td>
 	 * <td>{@link MSG_STATUS#EXIT_SDK}</td>
 	 * <td>..</td>
 	 * <td>登录业务结束，无其它信息</td>
 	 * </tr>
 	 * </table>
-	 * 
-	 * @param callbackHandler
-	 *            游戏登录回调接口
-	 * @param what
-	 *            回调消息
+	 * </li>
+	 * </ul>
+	 *
+	 * @param callbackHandler 游戏登录回调接口
+	 * @param what            回调消息
+	 * @param auto_login      是否自动登录
 	 * @see MSG_TYPE#LOGIN
 	 * @see MSG_STATUS#SUCCESS
 	 * @see MSG_STATUS#FAILED
 	 * @see MSG_STATUS#EXIT_SDK
 	 * @see LoginCallbackInfo
 	 */
-	public void showLoginView(Handler callbackHandler, int what) {
-		ZZSDKOut.showLoginView(mContext, callbackHandler, what);
-	}
-
-	public void showLoginViewEx(Handler callbackHandler, int what,
-			boolean auto_login) {
+	public void showLoginView(Handler callbackHandler, int what, boolean auto_login) {
 		ParamChain env = mRootEnv.grow(KeyCaller.class.getName());
 		env.add(KeyCaller.K_MSG_HANDLE, callbackHandler);
 		env.add(KeyCaller.K_MSG_WHAT, what);
@@ -284,78 +268,11 @@ public class SDKManager {
 		startActivity(mContext, env, LAYOUT_TYPE.LoginMain);
 	}
 
-	/**
-	 * 调用支付功能，支付结果以回调消息形式通知游戏调用方。<br/>
-	 * <i>消息规则如下：</i>
-	 * 
-	 * <table>
-	 * <tr>
-	 * <th>{@link Message android.os.Message:}</th>
-	 * </tr>
-	 * <tr>
-	 * <th>{@link Message#what .what}</th>
-	 * <th>{@link Message#arg1 .arg1}</th>
-	 * <th>{@link Message#arg2 .arg2}</th>
-	 * <th>{@link Message#obj .obj}</th>
-	 * <td>描述</td>
-	 * <tr>
-	 * <tr>
-	 * <td></td>
-	 * <td>{@link MSG_TYPE#PAYMENT .PAYMENT}</td>
-	 * <td>{@link MSG_STATUS#SUCCESS .SUCCESS}</td>
-	 * <td>{@link PaymentCallbackInfo}</td>
-	 * <td>支付成功，可获取支付金额方式等</td>
-	 * </tr>
-	 * <tr>
-	 * <td></td>
-	 * <td></td>
-	 * <td>{@link MSG_STATUS#FAILED .FAILED}</td>
-	 * <td>..</td>
-	 * <td>支付失败，无其它信息</td>
-	 * </tr>
-	 * <tr>
-	 * <td></td>
-	 * <td></td>
-	 * <td>{@link MSG_STATUS#CANCEL .CANCEL}</td>
-	 * <td>..</td>
-	 * <td>支付取消，无其它信息</td>
-	 * </tr>
-	 * <tr>
-	 * <td></td>
-	 * <td></td>
-	 * <td>{@link MSG_STATUS#EXIT_SDK .EXIT_SDK}</td>
-	 * <td>..</td>
-	 * <td>此次业务结束，或成功或失败，原因见前面的消息</td>
-	 * </tr>
-	 * </table>
-	 * 
-	 * @param callbackHandler
-	 *            支付结果通知　Handle
-	 * @param what
-	 *            支付结果消息号
-	 * @param gameServerID
-	 *            游戏服务器ID
-	 * @param serverName
-	 *            游戏服务器名称
-	 * @param roleId
-	 *            角色ID
-	 * @param gameRole
-	 *            角色名称
-	 * @param amount
-	 *            定额价格, 单位为 [分], 如果 >0表示此次充值只能以指定的价格交易.
-	 * @param isCloseWindow
-	 *            支付成功是否自动关闭支付SDK, 如果是 true 则在充值成功后自动退出SDK
-	 * @param callBackInfo
-	 *            厂家自定义参数
-	 * 
-	 * @see MSG_TYPE#PAYMENT
-	 * @see MSG_STATUS#SUCCESS
-	 * @see MSG_STATUS#FAILED
-	 * @see MSG_STATUS#CANCEL
-	 * @see MSG_STATUS#EXIT_SDK
-	 * @see PaymentCallbackInfo
-	 */
-	public void showPaymentView(Handler callbackHandler, int what,
+	public void showLoginView_out(Handler callbackHandler, int what) {
+		ZZSDKOut.showLoginView(mContext, callbackHandler, what);
+	}
+
+	public void showPaymentView_out(Handler callbackHandler, int what,
 			String gameServerID, final String serverName, final String roleId,
 			final String gameRole, final int amount,
 			final boolean isCloseWindow, final String callBackInfo) {
@@ -367,52 +284,48 @@ public class SDKManager {
 
 	/**
 	 * 调用支付功能，支付结果以回调消息形式通知游戏调用方。<br/>
-	 * <i>消息规则如下：</i>
-	 * <p/>
+	 * <i>消息{@link Message android.os.Message}规则如下：</i>
+	 * <ul>
+	 * <li>Message.what ，即参数中的 what </li>
+	 * <li>Message.arg1 ，这里固定为 {@link com.zz.sdk.MSG_TYPE#PAYMENT PAYMENT}</li>
+	 * <li>Message.arg2 和 Message.obj 说明：
 	 * <table>
 	 * <tr>
-	 * <th>{@link Message android.os.Message:}</th>
-	 * </tr>
-	 * <tr>
-	 * <td>{@link Message#arg1 .arg1}
 	 * <td>{@link Message#arg2 .arg2}
 	 * <td>{@link Message#obj .obj}
 	 * <td>描述</td>
 	 * <tr>
 	 * <tr>
-	 * <td>{@link MSG_TYPE#PAYMENT .PAYMENT}</td>
 	 * <td>{@link MSG_STATUS#SUCCESS .SUCCESS}</td>
 	 * <td>{@link PaymentCallbackInfo}</td>
 	 * <td>支付成功，可获取支付金额方式等</td>
 	 * </tr>
 	 * <tr>
-	 * <td></td>
 	 * <td>{@link MSG_STATUS#FAILED .FAILED}</td>
 	 * <td>..</td>
 	 * <td>支付失败，无其它信息</td>
 	 * </tr>
 	 * <tr>
-	 * <td></td>
 	 * <td>{@link MSG_STATUS#CANCEL .CANCEL}</td>
 	 * <td>..</td>
 	 * <td>支付取消，无其它信息</td>
 	 * </tr>
 	 * <tr>
-	 * <td></td>
 	 * <td>{@link MSG_STATUS#EXIT_SDK .EXIT_SDK}</td>
 	 * <td>..</td>
 	 * <td>此次业务结束，或成功或失败，原因见前面的消息</td>
 	 * </tr>
 	 * </table>
+	 * </li></ul>
 	 *
 	 * @param callbackHandler 支付结果通知　Handle
 	 * @param what            支付结果消息号
 	 * @param gameServerID    游戏服务器ID
 	 * @param gameRole        角色名称
 	 * @param amount          定额价格, 单位为 [分], 如果 >0表示此次充值只能以指定的价格交易.
-	 * @param isZyCoin 当前价格单位是卓越币还是人民币
+	 * @param isZyCoin        当前价格单位是卓越币还是人民币
 	 * @param isCloseWindow   支付成功是否自动关闭支付SDK, 如果是 true 则在充值成功后自动退出SDK
-	 * @param isBuyMode 是否为购买模式，如果是true则将支付人民币，否则充值卓越币到个人账户
+	 * @param isBuyMode       是否为购买模式，如果是true则将支付人民币，否则充值卓越币到个人账户
 	 * @see MSG_TYPE#PAYMENT
 	 * @see MSG_STATUS#SUCCESS
 	 * @see MSG_STATUS#FAILED
@@ -420,7 +333,7 @@ public class SDKManager {
 	 * @see MSG_STATUS#EXIT_SDK
 	 * @see PaymentCallbackInfo
 	 */
-	public void showPaymentViewEx(
+	public void showPaymentView(
 			Handler callbackHandler, int what, String gameServerID, String gameRole, int amount, boolean isZyCoin,
 			boolean isCloseWindow, boolean isBuyMode) {
 		ParamChain env = mRootEnv.grow(KeyCaller.class.getName());
@@ -437,11 +350,21 @@ public class SDKManager {
 		startActivity(mContext, env, LAYOUT_TYPE.PaymentList);
 	}
 
-	public void showPaymentViewEx(
+	/**
+	 * 调用支付功能，支付结果以回调消息形式通知游戏调用方。
+	 * @param callbackHandler    消息回调
+	 * @param what               消息
+	 * @param gameServerID       SERVER_ID
+	 * @param gameRole           角色信息，此文本将原样传递给游戏服务器
+	 * @param amount             金额，单位<b>分</b>，0表示不限制
+	 * @param isCloseWindow      支付成功是否自动关闭支付SDK, 如果是 true 则在充值成功后自动退出SDK
+	 * @see #showPaymentView_out(android.os.Handler, int, String, String, String, String, int, boolean, String)
+	 */
+	public void showPaymentView(
 			Handler callbackHandler, int what, String gameServerID, String gameRole, int amount,
 			boolean isCloseWindow) {
-		showPaymentViewEx(callbackHandler, what, gameServerID, gameRole, amount, false, isCloseWindow,
-		                  true
+		showPaymentView(callbackHandler, what, gameServerID, gameRole, amount, false, isCloseWindow,
+		                true
 		);
 	}
 
@@ -455,7 +378,8 @@ public class SDKManager {
 			LAYOUT_TYPE root_layout) {
 		env.add(KeyGlobal.K_UI_VIEW_TYPE, root_layout);
 		env.getParent(BaseActivity.class.getName()).add(root_layout.key(), env,
-				ParamChain.ValType.TEMPORARY);
+		                                                ParamChain.ValType.TEMPORARY
+		);
 		Intent intent = new Intent(ctx, BaseActivity.class);
 		intent.putExtra(KeyGlobal.K_UI_NAME, root_layout.key());
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

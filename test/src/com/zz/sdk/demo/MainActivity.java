@@ -32,9 +32,6 @@ import com.zz.sdk.MSG_TYPE;
 import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.SDKManager;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * 演示 SDK 使用
  */
@@ -343,7 +340,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			/* 登录 */
 			case IDC_BT_LOGIN: {
 				boolean b = ((CheckBox) findViewById(IDC_CB_AUTOLOGIN)).isChecked();
-				mSDKManager.showLoginViewEx(mHandler, MSG_LOGIN_CALLBACK, b);
+				mSDKManager.showLoginView(mHandler, MSG_LOGIN_CALLBACK, b);
 			}
 			break;
 
@@ -401,8 +398,8 @@ public class MainActivity extends Activity implements OnClickListener {
 				boolean isBuyMode = ((CheckBox) findViewById(IDC_CHARGE_MODE_BUY)).isChecked();
 
 				// 调用支付或充值
-				mSDKManager.showPaymentViewEx(mHandler, MSG_PAYMENT_CALLBACK, CONFIG_GAME_SERVER_ID,
-				                              CONFIG_GAME_ROLE, amount, isZyCoin, isCloseWindow, isBuyMode
+				mSDKManager.showPaymentView(mHandler, MSG_PAYMENT_CALLBACK, CONFIG_GAME_SERVER_ID,
+				                            CONFIG_GAME_ROLE, amount, isZyCoin, isCloseWindow, isBuyMode
 				);
 			}
 			break;
