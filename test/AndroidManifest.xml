@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="com.zz.sdk"
+      package="com.zz.sdk.demo"
       android:versionCode="1"
       android:versionName="1.0">
     <uses-sdk
@@ -56,6 +56,7 @@
         <activity
             android:name="com.zz.sdk.activity.BaseActivity"
             android:configChanges="orientation|keyboardHidden|navigation"
+            android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Black.NoTitleBar"/>
 
         <!-- 银联窗体，依赖风格文件 unionpay_style.xml -->
