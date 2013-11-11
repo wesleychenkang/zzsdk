@@ -2,14 +2,22 @@ package com.zz.sdk.demo;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.InputFilter;
 import android.text.InputType;
 import android.util.Log;
-import android.util.Pair;
+import android.util.TypedValue;
+import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -76,18 +84,57 @@ public class MainActivity extends Activity implements OnClickListener {
 	private LoginCallbackInfo mLoginCallbackInfo;
 	private TextView mTvTip;
 
-	static enum MyOrderState {
-		/** 失败 */
-		FAILED,
-		/** 被取消 */
-		CANCELED,
-		/** 就绪 */
-		READY,
-		/** 验证通过 */
-		SUCCESS
-	}
+	private int mCmageOrderCount = 0;
+	/** 演示：订单记录 */
+	private ArrayAdapter<MyOrderNode> mCmgeOrderAdapter;
 
-	private List<Pair<PaymentCallbackInfo, MyOrderState>> mOrderCache = new ArrayList<Pair<PaymentCallbackInfo, MyOrderState>>();
+	/** 演示：订单状态 */
+	private final static class MyOrderNode {
+		static enum State {
+			/** 失败 */
+			FAILED("失败", Color.MAGENTA),
+			/** 被取消 */
+			CANCELED("再试", Color.CYAN),
+			/** 就绪 */
+			READY("就绪", Color.LTGRAY),
+			/** 验证通过 */
+			SUCCESS("通过", Color.GREEN),
+			/** 无效订单 */
+			INVALID("无效", Color.RED),;
+
+			private String mDesc;
+			private int mColor;
+
+			private State(String desc, int c) {
+				mDesc = desc;
+				mColor = c;
+			}
+
+			public String desc() {
+				return mDesc;
+			}
+
+			public int color() {
+				return mColor;
+			}
+		}
+
+		/** 订单号 */
+		String cmgeOrderNumber;
+
+		/** 状态 */
+		State status;
+
+		MyOrderNode(String order) {
+			cmgeOrderNumber = order;
+			status = State.READY;
+		}
+
+		@Override
+		public String toString() {
+			return cmgeOrderNumber;
+		}
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -233,12 +280,48 @@ public class MainActivity extends Activity implements OnClickListener {
 			bt.setText("订单查询");
 			bt.setId(IDC_BT_QUERY);
 			bt.setOnClickListener(onClickListener);
-			ll.addView(bt, new LinearLayout.LayoutParams(-1, -2, 1.0f));
+			ll.addView(bt, new LinearLayout.LayoutParams(-2, -2));
 
-			et = new EditText(ctx);
-			et.setHint("订单号");
-			et.setId(IDC_ET_ORDER_NUMBER);
-			ll.addView(et, new LinearLayout.LayoutParams(-1, -2, 1.0f));
+			MyOrderNode[] test_data = new MyOrderNode[] {
+				new MyOrderNode("1559444TO10000040840A"), // 一个成功的订单
+				new MyOrderNode("1556231KO10001266419A"), // 一个失败的订单
+				new MyOrderNode("0123456abcdefghigjklm"), // 一个无效的订单
+			};
+			mCmgeOrderAdapter = new ArrayAdapter<MyOrderNode>(ctx, android.R.layout.simple_list_item_1, test_data) {
+				@Override
+				public View getView(int position, View convertView, ViewGroup parent) {
+					TextView tv = (TextView) super.getView(position, convertView, parent);
+					// tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, mTextView.getTextSize());
+					tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
+
+					// 使用自己定义的风格 :-)
+					MyOrderNode info = getItem(position);
+					tv.setText(info.status.desc()+":"+info.cmgeOrderNumber);
+					tv.setTextColor(info.status.color());
+					return tv;
+				}
+			};
+			AutoCompleteTextView act = new AutoCompleteTextView(ctx) {
+				@Override
+				public boolean enoughToFilter() {
+					return true;
+				}
+
+				@Override
+				protected void onFocusChanged(boolean focused, int direction, Rect previouslyFocusedRect) {
+					super.onFocusChanged(focused, direction, previouslyFocusedRect);
+					performFiltering(getText(), KeyEvent.KEYCODE_UNKNOWN);
+				}
+			};
+			act.setAdapter(mCmgeOrderAdapter);
+			act.setCompletionHint("---订单查询---");
+			act.setHint("订单号");
+			act.setId(IDC_ET_ORDER_NUMBER);
+			act.setGravity(Gravity.CENTER);
+			act.setSelectAllOnFocus(true);
+			act.setThreshold(1);
+			act.setFilters(new InputFilter[]{new InputFilter.LengthFilter(21)});
+			ll.addView(act, new LinearLayout.LayoutParams(-1, -2));
 		}
 
 		{
@@ -326,12 +409,6 @@ public class MainActivity extends Activity implements OnClickListener {
 
 			case IDC_BT_QUERY: {
 				String orderNumber = ((TextView) findViewById(IDC_ET_ORDER_NUMBER)).getText().toString().trim();
-				if (orderNumber.length() == 0) {
-					if (mOrderCache.size() > 0) {
-						Pair<PaymentCallbackInfo, MyOrderState> tmp = mOrderCache.get(0);
-						orderNumber = tmp.first.cmgeOrderNumber;
-					}
-				}
 
 				if (orderNumber != null && orderNumber.length() > 0) {
 					pushLog(" - 查询订单号：" + orderNumber);
@@ -371,13 +448,9 @@ public class MainActivity extends Activity implements OnClickListener {
 								LoginCallbackInfo info = (LoginCallbackInfo) msg.obj;
 
 								String tip = " - 登录成功, 用户名:"
-										+ String.valueOf(mSDKManager
-												                 .getAccountName()
-								)
+										+ String.valueOf(mSDKManager.getAccountName())
 										+ "，游戏用户:"
-										+ String.valueOf(mSDKManager
-												                 .getGameUserName()
-								)
+										+ String.valueOf(mSDKManager.getGameUserName())
 										+ ", \n\t详细信息: " + info.toString();
 								pushLog(tip);
 
@@ -408,6 +481,13 @@ public class MainActivity extends Activity implements OnClickListener {
 						PaymentCallbackInfo info; // 支付信息
 						if (msg.obj instanceof PaymentCallbackInfo) {
 							info = (PaymentCallbackInfo) msg.obj;
+							if (info.cmgeOrderNumber != null) {
+								if (mCmageOrderCount++ == 0) {
+									// 清除演示订单
+									mCmgeOrderAdapter.clear();
+								}
+								mCmgeOrderAdapter.add(new MyOrderNode(info.cmgeOrderNumber));
+							}
 						} else {
 							info = null;
 						}
@@ -415,7 +495,6 @@ public class MainActivity extends Activity implements OnClickListener {
 						String tip = "";
 						if (msg.arg2 == MSG_STATUS.SUCCESS) {
 							tip = " - 充值成功, 详细信息: " + (info == null ? "未知" : info);
-							mOrderCache.add(new Pair<PaymentCallbackInfo, MyOrderState>(info, MyOrderState.READY));
 						} else if (msg.arg2 == MSG_STATUS.FAILED) {
 							tip = " ! 充值失败, 详细信息: " + (info == null ? "未知" : info);
 						} else if (msg.arg2 == MSG_STATUS.CANCEL) {
@@ -440,7 +519,38 @@ public class MainActivity extends Activity implements OnClickListener {
 					if (msg.arg1 == MSG_TYPE.ORDER) {
 						if (msg.obj instanceof String) {
 							String orderNumber = (String) msg.obj;
-							pushLog(" - 订单查询，单号=" + orderNumber + "，状态=" + msg.arg2);
+
+							MyOrderNode node = null;
+							for (int i = 0, c = mCmgeOrderAdapter.getCount(); i < c; i++) {
+								MyOrderNode n = mCmgeOrderAdapter.getItem(i);
+								if (n.cmgeOrderNumber.equals(orderNumber)) {
+									node = n;
+									break;
+								}
+							}
+							if (node == null) {
+								node = new MyOrderNode(orderNumber);
+								mCmgeOrderAdapter.add(node);
+							}
+
+							String status;
+							if (msg.arg2 == MSG_STATUS.SUCCESS) {
+								status = "成功";
+								node.status = MyOrderNode.State.SUCCESS;
+							} else if (msg.arg2 == MSG_STATUS.FAILED) {
+								status = "未成功或尚未确定";
+								node.status = MyOrderNode.State.FAILED;
+							} else if (msg.arg2 == MSG_STATUS.CANCEL) {
+								status = "无效订单";
+								node.status = MyOrderNode.State.INVALID;
+							} else {
+								status = "连接错误";
+								node.status = MyOrderNode.State.CANCELED;
+							}
+							pushLog(" - 订单查询，单号=" + orderNumber + "，状态=" + status);
+
+							// 更新下拉缓存记录
+							mCmgeOrderAdapter.notifyDataSetChanged();
 						}
 					}
 				}

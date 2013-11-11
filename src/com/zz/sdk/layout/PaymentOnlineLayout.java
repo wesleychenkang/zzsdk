@@ -301,7 +301,7 @@ class PaymentOnlineLayout extends BaseLayout {
 							} catch (UnsupportedEncodingException e1) {
 								e1.printStackTrace();
 							}
-							cu.canclePay(order, newmessage, submitAmount);
+							cu.cancelPay(order, newmessage, submitAmount);
 						}
 					}.start();
 				}

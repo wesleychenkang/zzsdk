@@ -21,6 +21,7 @@ import com.zz.sdk.activity.BaseActivity;
 import com.zz.sdk.activity.LAYOUT_TYPE;
 import com.zz.sdk.entity.SMSChannelMessage;
 import com.zz.sdk.entity.result.BaseResult;
+import com.zz.sdk.entity.result.ResultOrder;
 import com.zz.sdk.out.ZZSDKOut;
 import com.zz.sdk.out.util.Application;
 import com.zz.sdk.out.util.GetDataImpl;
@@ -522,24 +523,23 @@ public class SDKManager {
 	 * @see com.zz.sdk.MSG_STATUS#FAILED
 	 * @see com.zz.sdk.MSG_STATUS#SUCCESS
 	 */
-	public int queryOrderState(final String orderNumber) {
-		BaseResult ret = ConnectionUtil.getInstance(mContext).checkOrder(orderNumber);
+	public int queryOrderState(String orderNumber) {
+		ResultOrder ret = ConnectionUtil.getInstance(mContext).checkOrder(orderNumber);
 		if (ret == null || !ret.isUsed()) {
 			// 连接失败
+			return MSG_STATUS.EXIT_SDK;
+		} else if (ret.isSuccess()) {
+			if (ret.isOrderSuccess()) {
+				// 订单成功
+				return MSG_STATUS.SUCCESS;
+			} else {
+				// 订单不成功或未知状态
+				return MSG_STATUS.FAILED;
+			}
+		} else {
+			// 无效订单
 			return MSG_STATUS.CANCEL;
-//		} else if (ret.isSuccess()) {
-//			return MSG_STATUS.SUCCESS;
-//		} else {
-//			return MSG_STATUS.FAILED;
 		}
-
-		// 20131107
-		int err = ret.getCodeNumber();
-		if (err==1 || err==0) {
-			// 0 或 1 都是成功
-			return MSG_STATUS.SUCCESS;
-		}
-		return MSG_STATUS.FAILED;
 	}
 
 	/**

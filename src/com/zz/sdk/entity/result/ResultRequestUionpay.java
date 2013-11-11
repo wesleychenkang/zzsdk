@@ -17,7 +17,7 @@ public class ResultRequestUionpay extends ResultRequest {
 	public JSONObject buildJson() {
 		try {
 			JSONObject json = super.buildJson();
-			setString(json, K_TN, mTN);
+			json.put(K_TN, mTN);
 			return json;
 		} catch (Exception e) {
 			e.printStackTrace();

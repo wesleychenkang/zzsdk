@@ -33,6 +33,7 @@ import com.zz.sdk.entity.result.ResultAutoLogin;
 import com.zz.sdk.entity.result.ResultBalance;
 import com.zz.sdk.entity.result.ResultChangePwd;
 import com.zz.sdk.entity.result.ResultLogin;
+import com.zz.sdk.entity.result.ResultOrder;
 import com.zz.sdk.entity.result.ResultPayList;
 import com.zz.sdk.entity.result.ResultPayMessage;
 import com.zz.sdk.entity.result.ResultPropList;
@@ -100,7 +101,7 @@ public class ConnectionUtil {
 	 *         {@link JsonParseInterface#parseJson(JSONObject)} 构造数据。如
 	 *         {@link BaseResult#isUsed()} {@link BaseResult#isSuccess()}等
 	 */
-	private <T> T doRequest(Class<T> clazz, String url,
+	private <T extends JsonParseInterface> T doRequest(Class<T> clazz, String url,
 			List<BasicNameValuePair> nvps, int attempts) {
 		T br = null;
 		try {
@@ -129,8 +130,7 @@ public class ConnectionUtil {
 					// 如果内容无效，则使用空数据，表明至少有过返回值
 					o = new JSONObject();
 				}
-				if (br instanceof JsonParseInterface)
-					((JsonParseInterface) br).parseJson(o);
+				br.parseJson(o);
 			}
 		} catch (InstantiationException e) {
 			e.printStackTrace();
@@ -145,7 +145,7 @@ public class ConnectionUtil {
 		return br;
 	}
 
-	private <T> T doRequest(Class<T> clazz, String url, int attempts,
+	private <T extends JsonParseInterface> T doRequest(Class<T> clazz, String url, int attempts,
 			String... key_val) {
 		HashMap<String, String> param = new HashMap<String, String>();
 		if (key_val != null && key_val.length > 0) {
@@ -327,8 +327,7 @@ public class ConnectionUtil {
 	 * @param submitAmount
 	 *            金额（可选）
 	 */
-	public BaseResult canclePay(String OrderNum, String payMsg,
-			String submitAmount) {
+	public BaseResult cancelPay(String OrderNum, String payMsg, String submitAmount) {
 		return doRequest(BaseResult.class, Constants.NPM_REQ, 1 //
 				, "cmgeOrderNum", OrderNum //
 				, "payMsg", payMsg //
@@ -471,8 +470,8 @@ public class ConnectionUtil {
 	/**
 	 * 查询订单 queryOrder(查询订单状态）0成功|1失败 0成功|其它失败
 	 */
-	public BaseResult checkOrder(String ordrNumber) {
-		return doRequest(BaseResult.class, Constants.GPM_QO, 1 //
+	public ResultOrder checkOrder(String ordrNumber) {
+		return doRequest(ResultOrder.class, Constants.GPM_QO, 1 //
 				, "cmgeOrderNum", ordrNumber //
 		);
 	}

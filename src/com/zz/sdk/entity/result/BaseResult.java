@@ -39,7 +39,7 @@ public class BaseResult implements Serializable, JsonParseInterface {
 	public JSONObject buildJson() {
 		try {
 			JSONObject json = new JSONObject();
-			setString(json, K_CODES, mCodeStr);
+			json.put(K_CODES, mCodeStr);
 			return json;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -99,33 +99,5 @@ public class BaseResult implements Serializable, JsonParseInterface {
 	@Override
 	public String toString() {
 		return getShortName() + " [code=" + mCodeStr;
-	}
-
-	private static boolean isNullOrEmpty(String k) {
-		return k == null || k.length() == 0;
-	}
-
-	/** set int数据 **/
-	protected static void setInt(JSONObject json, String key, int value)
-			throws Exception {
-		if (!isNullOrEmpty(key)) {
-			json.put(key, value);
-		}
-	}
-
-	/** set double数据 **/
-	protected static void setDouble(JSONObject json, String key, double value)
-			throws Exception {
-		if (!isNullOrEmpty(key) && 0 != value) {
-			json.put(key, value);
-		}
-	}
-
-	/** set String数据 **/
-	protected static void setString(JSONObject json, String key, String value)
-			throws Exception {
-		if (!isNullOrEmpty(key) && !isNullOrEmpty(value)) {
-			json.put(key, value);
-		}
 	}
 }

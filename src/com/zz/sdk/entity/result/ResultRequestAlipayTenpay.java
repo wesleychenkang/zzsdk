@@ -33,7 +33,7 @@ public class ResultRequestAlipayTenpay extends ResultRequest {
 	public JSONObject buildJson() {
 		try {
 			JSONObject json = super.buildJson();
-			setString(json, K_URL, mUrl);
+			json.put(K_URL, mUrl);
 			return json;
 		} catch (Exception e) {
 			e.printStackTrace();

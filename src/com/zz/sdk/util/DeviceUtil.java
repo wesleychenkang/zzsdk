@@ -8,11 +8,11 @@ import com.zz.sdk.entity.result.BaseResult;
 /**
  * Created by nxliao on 13-11-5.
  */
-public class DeviceUtil {
+class DeviceUtil {
 
-	public static final String DEVICESYN = "devicesyn";
+	private static final String DEVICESYN = "devicesyn";
 
-	private static Object LOCKER = new Object();
+	private static final Object LOCKER = new Object();
 	private static boolean bIsLocked = false;
 
 	private DeviceUtil(Context ctx) {

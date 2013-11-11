@@ -25,8 +25,7 @@ public class ResultRequestKKFunPay extends ResultRequest {
 			JSONObject json = super.buildJson();
 			// TODO: mChannels
 
-			setString(json, K_ENABLE_PAY_CONFIRM,
-					String.valueOf(mEnablePayConfirm));
+			json.put(K_ENABLE_PAY_CONFIRM, String.valueOf(mEnablePayConfirm));
 			return json;
 		} catch (Exception e) {
 			e.printStackTrace();
