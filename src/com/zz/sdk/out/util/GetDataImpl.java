@@ -619,9 +619,9 @@ public class GetDataImpl {
 	 * @return
 	 */
 	public Result charge(int type, PayParam payParam) {
-		if (DebugFlags.DEBUG) {
-			payParam.loginName = DebugFlags.DEF_LOGIN_NAME;
-		}
+//		if (DebugFlags.DEBUG) {
+//			payParam.loginName = DebugFlags.DEF_LOGIN_NAME;
+//		}
 		ArrayList<BasicNameValuePair> all = payParam.getChargeParameters(type);
 		all.add(new BasicNameValuePair("productId",Utils.getProductId(mContext)));
 		if (all == null) {
