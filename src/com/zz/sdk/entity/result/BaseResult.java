@@ -68,7 +68,7 @@ public class BaseResult implements Serializable, JsonParseInterface {
 
 	@Override
 	public String getShortName() {
-		return getClass().getName();
+		return (((Object)this).getClass()).getName();
 	}
 
 	/** 未知错误 */

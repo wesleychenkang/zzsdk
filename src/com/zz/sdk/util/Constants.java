@@ -85,6 +85,11 @@ public final class Constants {
 	 */
 	public static final String GPRO_REQ = URL_SERVER_SRV + "gpro.do";
 
+	/**
+	 * DeviceRegister（注册）
+	 */
+	public static final String GPRO_DREG = URL_SERVER_SRV + "dreg.lg";
+
 	/** web 版本「支付宝」交易成功后的url */
 	public static final String GUARD_Alipay_callback = CALL_BACK_URL_SERVER
 			+ "andsrv/" + "palicb.lg";
