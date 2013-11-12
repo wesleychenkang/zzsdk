@@ -1,5 +1,4 @@
 package com.zz.sdk.util;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -16,10 +15,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apaches.commons.codec.binary.Base64;
-import org.apaches.commons.codec.digest.DigestUtils;
-
+import org.apache.commons.codec.binary.Base64;
 import android.Manifest.permission;
 import android.app.Activity;
 import android.content.ComponentName;
@@ -35,14 +31,12 @@ import android.os.Environment;
 import android.telephony.TelephonyManager;
 import android.util.Pair;
 import android.widget.Toast;
-
 import com.zz.lib.pojo.PojoUtils;
 import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.SdkUser;
 import com.zz.sdk.entity.SdkUserTable;
 import com.zz.sdk.entity.UserAction;
-
 /**
  * @Description: 工具类
  * @author roger
@@ -114,7 +108,8 @@ public class Utils {
 		}
 		return s;
 	}
-
+ 
+	
 	/**
 	 * md5 簽名
 	 * 
@@ -126,8 +121,7 @@ public class Utils {
 			return "";
 		}
 		try {
-
-			return DigestUtils.md5Hex(s);
+			return MD5.md5Hex(s);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Logger.d("md5 encode exception");

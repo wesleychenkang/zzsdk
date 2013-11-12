@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.http.message.BasicNameValuePair;
-import org.apaches.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Base64;
 
 import com.zz.sdk.ZZSDKConfig;
 
@@ -109,7 +109,7 @@ public class Md5Code {
 	public static String encodePassword(String password) {
 		if (!ZZSDKConfig.ENCRYPT_PASSWORD)
 			return password;
-		String pass = Base64.encodeBase64String(password.getBytes());
+		String pass =new String(Base64.encodeBase64(password.getBytes()));
 		char p[] = pass.toCharArray();
 		shuffle(p, 0);
 		shuffle(p, 1);

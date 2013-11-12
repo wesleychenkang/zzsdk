@@ -245,7 +245,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			et = new EditText(ctx);
 			et.setHint("订单号");
 			et.setId(IDC_ET_ORDER_NUMBER);
-			et.setInputType(InputType.TYPE_CLASS_NUMBER);
+//			et.setInputType(InputType.TYPE_CLASS_NUMBER);
 			ll.addView(et, new LinearLayout.LayoutParams(-1, -2, 1.0f));
 		}
 
