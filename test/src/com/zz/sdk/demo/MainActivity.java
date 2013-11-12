@@ -32,6 +32,8 @@ import com.zz.sdk.MSG_TYPE;
 import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.SDKManager;
 
+import java.util.ArrayList;
+
 /**
  * 演示 SDK 使用
  */
@@ -279,11 +281,10 @@ public class MainActivity extends Activity implements OnClickListener {
 			bt.setOnClickListener(onClickListener);
 			ll.addView(bt, new LinearLayout.LayoutParams(-2, -2));
 
-			MyOrderNode[] test_data = new MyOrderNode[] {
-				new MyOrderNode("1559444TO10000040840A"), // 一个成功的订单
-				new MyOrderNode("1556231KO10001266419A"), // 一个失败的订单
-				new MyOrderNode("0123456abcdefghigjklm"), // 一个无效的订单
-			};
+			ArrayList<MyOrderNode> test_data = new ArrayList<com.zz.sdk.demo.MainActivity.MyOrderNode>();
+			test_data.add(new MyOrderNode("1559444TO10000040840A")); // 一个成功的订单
+			test_data.add(new MyOrderNode("1556231KO10001266419A")); // 一个失败的订单
+			test_data.add(new MyOrderNode("0123456abcdefghigjklm")); // 一个无效的订单
 			mCmgeOrderAdapter = new ArrayAdapter<MyOrderNode>(ctx, android.R.layout.simple_list_item_1, test_data) {
 				@Override
 				public View getView(int position, View convertView, ViewGroup parent) {
@@ -403,6 +404,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				);
 			}
 			break;
+
 
 			case IDC_BT_QUERY: {
 				String orderNumber = ((TextView) findViewById(IDC_ET_ORDER_NUMBER)).getText().toString().trim();
