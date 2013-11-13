@@ -273,7 +273,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 			ll.addView(tv, new LayoutParams(LP_WW));
 			tv.setSingleLine(false);
 			tv.setGravity(Gravity.CENTER);
-			tv.setText("提示");
+			tv.setText(ZZStr.CC_PROMPT_TITLE.str());
 			CCImg img = CCImg.getPayChannelIcon(mType);
 			if (img != null) {
 				tv.setCompoundDrawablesWithIntrinsicBounds(img.getDrawble(ctx),
@@ -657,7 +657,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 	}
 
 	private void showPopup_Wait_FetchCommand() {
-		showPopup_Wait("正在与服务器通信……", new SimpleWaitTimeout() {
+		showPopup_Wait(ZZStr.CC_TRY_CONNECT_SERVER.str(), new SimpleWaitTimeout() {
 			public void onTimeOut() {
 				on_wait_time_out_fetchCommand();
 			}
@@ -676,7 +676,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 
 	private void showPopup_Wait_SMS_Send() {
 		mPayWaitState = STATE.WAIT_SEND;
-		showPopup_Wait("正在为您充值……", new SimpleWaitTimeout() {
+		showPopup_Wait(ZZStr.CC_SMS_TIP_WAIT_SENDMSG.str(), new SimpleWaitTimeout() {
 			public void onTimeOut() {
 				on_wait_time_out_sms_send();
 			}
@@ -689,7 +689,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 
 	private void resetExitTrigger() {
 		if (mPayWaitState != STATE.NORMAL) {
-			setExitTrigger(-1, "正在充值！");
+			setExitTrigger(-1, ZZStr.CC_SMS_TIP_PAYING.str());
 		} else {
 			setExitTrigger(-1, null);
 		}
@@ -697,14 +697,14 @@ class PaymentSMSLayout extends CCBaseLayout {
 
 	/** 发送超时 */
 	private void on_wait_time_out_sms_send() {
-		showPopup_Tip("短信发送超时，请稍候重试或继续等待！");
+		showPopup_Tip(ZZStr.CC_SMS_TIP_WAIT_SENDMSG_TIMEOUT);
 		resetExitTrigger();
 		mPayWaitState = STATE.NORMAL;
 	}
 
 	private void showPopup_Wait_SMS_Receiver() {
 		mPayWaitState = STATE.WAIT_RECEIVER;
-		showPopup_Wait("正在等待充值结果……", new SimpleWaitTimeout() {
+		showPopup_Wait(ZZStr.CC_SMS_TIP_WAIT_RESULT.str(), new SimpleWaitTimeout() {
 			public void onTimeOut() {
 				on_wait_time_out_receiver();
 			}
@@ -719,7 +719,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 		mPayWaitState = STATE.FAILED;
 		resetExitTrigger();
 		showPopup_Tip(false,
-				Html.fromHtml("等待充值结果超时，请<a>联系客服</a>或<a>继续等待</a>！"));
+				Html.fromHtml(ZZStr.CC_SMS_TIP_WAIT_RESULT_TIMEOUT_HTML.str()));
 	}
 
 	private void changeActivePanel(IDC idc, IDC target) {
@@ -870,7 +870,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 			ll.addView(tv, new LayoutParams(LP_WW));
 			tv.setSingleLine(false);
 			tv.setGravity(Gravity.CENTER);
-			tv.setText("提示");
+			tv.setText(ZZStr.CC_PROMPT_TITLE.str());
 			tv.setCompoundDrawablesWithIntrinsicBounds(
 					CCImg.getPayChannelIcon(mType).getDrawble(ctx), null, null,
 					null);
@@ -882,7 +882,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 			ll.addView(tv, new LayoutParams(LP_MW));
 			tv.setSingleLine(false);
 			tv.setBackgroundDrawable(CCImg.ZF_XZ.getDrawble(ctx));
-			tv.setText("连接服务器失败，请联系客服或重试！");
+			tv.setText(ZZStr.CC_SMS_TIP_SEEDBACK_FAILED.str());
 			tv.setPadding(r.left, r.top, r.right, r.bottom);
 		}
 
@@ -930,7 +930,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 	}
 
 	private void showPopup_Wait_SMS_SeedBack() {
-		showPopup_Wait("正在通知服务器，请保持网络畅通并耐心等待……", new SimpleWaitTimeout() {
+		showPopup_Wait(ZZStr.CC_SMS_TIP_WAIT_SEEDBACK.str(), new SimpleWaitTimeout() {
 			public void onTimeOut() {
 				on_wait_time_out_seedback();
 			}
@@ -943,7 +943,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 
 	private void on_wait_time_out_seedback() {
 		mPayWaitState = STATE.FAILED;
-		showPopup_Tip(false, Html.fromHtml("等待超时，请<a>联系客服</a>或<a>继续等待</a>！"));
+		showPopup_Tip(false, Html.fromHtml(ZZStr.CC_SMS_TIP_WAIT_SEEDBACK_TIMEOUT_HTML.str()));
 		resetExitTrigger();
 	}
 
@@ -1020,7 +1020,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 		if (mPayWaitState == STATE.WAIT_RECEIVER
 				|| mPayWaitState == STATE.WAIT_SEND
 				|| mPayWaitState == STATE.WAIT_SEEDBACK) {
-			showToast("请耐心等待!");
+			showToast(ZZStr.CC_SMS_TIP_WAIT_PLEASE);
 			return false;
 		} else {
 			// TODO: 如果在二次确认界面，则返回到列表选择状态

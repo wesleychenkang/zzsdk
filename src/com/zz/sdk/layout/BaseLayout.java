@@ -1,7 +1,9 @@
 package com.zz.sdk.layout;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.os.AsyncTask;
@@ -48,6 +50,7 @@ import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 /**
  * 基本界面界面，注意：
@@ -168,6 +171,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	protected Context mContext;
 	private ParamChain mEnv;
 	private AsyncTask<?, ?, ?> mTask;
+	private ArrayList<Dialog> mDialogList;
 	private ActivityControlInterface mActivityControlInterface;
 	private RUNSTATE mRunState;
 	private long mExitTriggerLastTime, mExitTriggerInterval;
@@ -275,6 +279,9 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 			mEnv.add(KeyGlobal.K_UTIL_CONNECT, mConnectionUtil,
 					ValType.TEMPORARY);
 		}
+		mTask = null;
+		mDialogList = new ArrayList<Dialog>();
+
 		onInitEnv(context, mEnv);
 	}
 
@@ -1087,6 +1094,8 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		removeActivityControlInterface();
 		removeExitTrigger();
 
+		cleanDialogMonitor();
+
 		if (mEnv.containsKeyOwn(KeyGlobal.K_UTIL_CONNECT) != null) {
 			ConnectionUtil.detachInstance(mConnectionUtil);
 		}
@@ -1222,6 +1231,27 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 				mTask.cancel(true);
 			mTask = null;
 		}
+	}
+
+	// ////////////////////////////////////////////////////////////////////////
+	//
+	// - Dialog 控制 -
+	//
+	protected void addDialogMonitor(Dialog dialog) {
+		mDialogList.add(dialog);
+	}
+
+	protected void removeDialogMonitor(DialogInterface dialog) {
+		mDialogList.remove(dialog);
+	}
+
+	protected void cleanDialogMonitor() {
+		for (Dialog dialog:mDialogList) {
+			if (dialog.isShowing()) {
+				dialog.dismiss();
+			}
+		}
+		mDialogList.clear();
 	}
 
 	// ////////////////////////////////////////////////////////////////////////

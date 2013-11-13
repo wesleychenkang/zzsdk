@@ -46,6 +46,9 @@ public class ResConstants {
 		/** 余额显示，基于 {@link #CC_PRICE_FORMAT} */
 		CC_BALANCE_UNIT("%s"), //
 
+		/** 提示 */
+		CC_PROMPT_TITLE("提示"), //
+
 		/** 默认·帮助·标题 */
 		DEFAULT_HELP_TITLE(""),
 		/** 默认·帮助·内容 */
@@ -94,6 +97,9 @@ public class ResConstants {
 		/** 如需中止操作，请立即再次按下[返回] */
 		CC_EXIT_LOCKED_TIP("如需中止操作，请立即再次按下[返回]"), //
 
+		/** 交易尚未完成，是否要结束交易？ */
+		CC_RECHARGE_WEB_TIP_ABORT("交易尚未完成，是否要结束交易？"),
+
 		/** 等待充值结果…… */
 		CC_RECHARGE_WAIT_RESULT("等待充值结果……"), //
 
@@ -127,6 +133,24 @@ public class ResConstants {
 		/** 您将使用%s公司提供的%s业务进行代支付,资费是%s元，您将收到相关的短信提示，请注意查收！(ffea00) */
 		CC_TRY_SMS_PROMPT_HTML(
 				"您将使用<font color='#F17040'>%s</font>公司提供的<font color='#F17040'>%s</font>业务进行代支付,资费是<font color='#F17040'> %s </font>元，您将收到相关的短信提示，请注意查收！"),
+		/** 请耐心等待! */
+		CC_SMS_TIP_WAIT_PLEASE("请耐心等待!"),
+		/** 正在为您充值…… */
+		CC_SMS_TIP_WAIT_SENDMSG("正在为您充值……"),
+		/** 正在充值！ */
+		CC_SMS_TIP_PAYING("正在充值！"),
+		/** 短信发送超时，请稍候重试或继续等待！ */
+		CC_SMS_TIP_WAIT_SENDMSG_TIMEOUT("短信发送超时，请稍候重试或继续等待！"),
+		/** 正在等待充值结果…… */
+		CC_SMS_TIP_WAIT_RESULT("正在等待充值结果……"),
+		/** 等待充值结果超时，请<a>联系客服</a>或<a>继续等待</a> */
+		CC_SMS_TIP_WAIT_RESULT_TIMEOUT_HTML("等待充值结果超时，请<a>联系客服</a>或<a>继续等待</a>！"),
+		/** 正在通知服务器，请保持网络畅通并耐心等待…… */
+		CC_SMS_TIP_WAIT_SEEDBACK("正在通知服务器，请保持网络畅通并耐心等待……"),
+		/** 等待超时，请<a>联系客服</a>或<a>继续等待</a>！ */
+		CC_SMS_TIP_WAIT_SEEDBACK_TIMEOUT_HTML("等待超时，请<a>联系客服</a>或<a>继续等待</a>！"),
+		/** 连接服务器失败，请联系客服或重试！ */
+		CC_SMS_TIP_SEEDBACK_FAILED("连接服务器失败，请联系客服或重试！"),
 
 		/** 拼命加载中... */
 		CC_HINT_LOADING("拼命加载中..."),
