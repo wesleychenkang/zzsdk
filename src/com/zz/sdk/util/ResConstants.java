@@ -272,7 +272,7 @@ public class ResConstants {
 			/** 余额文本 */
 			CC_RECHARGE_BALANCE(22),
 			/** 充值界面输入文本 */
-			CC_RECHARGE_INPUT(18),
+			CC_RECHARGE_INPUT(16),
 			/** 充值界面应付金额文本 */
 			CC_RECHARGE_COST(20),
 			/** 充值界面·支付方式子项文本 */
@@ -319,9 +319,6 @@ public class ResConstants {
 			/** 充值界面·各面板垂直方向间隔 */
 			CC_SAPCE_PANEL_V(12),
 
-			/** 充值数量输入框的边距 */
-			CC_RECHARGE_COUNT_PADDING_H(16), CC_RECHARGE_COUNT_PADDING_V(8),
-
 			/** 充值界面·GridView 的单元格间距 */
 			CC_GRIDVIEW_SPACE_H(8), CC_GRIDVIEW_SPACE_V(4),
 
@@ -366,6 +363,9 @@ public class ResConstants {
 		public static enum ZZDimenRect {
 			/** 充值界面·主活动区的边距 */
 			CC_ROOTVIEW_PADDING(24, 16, 24, 12),
+
+			/** 充值数量输入框的边距 */
+			CC_RECHARGE_INPUT(16, 8, 16, 8),
 
 			/** 确认充值等提交类按钮 */
 			CC_RECHARGE_COMMIT(16, 4, 16, 4),

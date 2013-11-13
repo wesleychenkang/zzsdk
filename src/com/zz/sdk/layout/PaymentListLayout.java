@@ -946,8 +946,6 @@ public class PaymentListLayout extends CCBaseLayout {
 		tv = create_normal_label(ctx, ZZStr.CC_CARDNUM_DESC);
 		rv.addView(tv, new LayoutParams(LP_WW));
 
-		int padding_h = ZZDimen.CC_RECHARGE_COUNT_PADDING_H.px();
-		int padding_v = ZZDimen.CC_RECHARGE_COUNT_PADDING_V.px();
 		// 卡号
 		tv = create_normal_input(ctx, null, ZZFontColor.CC_RECHARGE_INPUT,
 				ZZFontSize.CC_RECHARGE_INPUT, limitCard);
@@ -961,7 +959,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			String hint = String.format(ZZStr.CC_CARDNUM_HINT.str(), limitCard);
 			tv.setHint(hint);
 		}
-		tv.setPadding(padding_h, padding_v, padding_h, padding_v);
+		ZZDimenRect.CC_RECHARGE_INPUT.apply_padding(tv);
 
 		tv = create_normal_label(ctx, ZZStr.CC_PASSWD_DESC);
 		rv.addView(tv, new LayoutParams(LP_WW));
@@ -980,7 +978,7 @@ public class PaymentListLayout extends CCBaseLayout {
 					limitPasswd);
 			tv.setHint(hint);
 		}
-		tv.setPadding(padding_h, padding_v, padding_h, padding_v);
+		ZZDimenRect.CC_RECHARGE_INPUT.apply_padding(tv);
 	}
 
 	private void postUIChangedMsg(int id) {
@@ -1025,7 +1023,7 @@ public class PaymentListLayout extends CCBaseLayout {
 					tv.setTextColor(ZZFontColor.CC_RECHARGE_INPUT.color());
 				}
 				ll2.addView(tv, new LayoutParams(LayoutParams.MATCH_PARENT,
-						LayoutParams.MATCH_PARENT, 1.0f));
+						LayoutParams.WRAP_CONTENT, 1.0f));
 				tv.setId(IDC.ED_RECHARGE_COUNT.id());
 				tv.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
 						CCImg.RECHARGE_BAN, CCImg.RECHARGE_INPUT));
@@ -1033,9 +1031,7 @@ public class PaymentListLayout extends CCBaseLayout {
 						IDC.ED_RECHARGE_COUNT.id()));
 				tv.setInputType(EditorInfo.TYPE_CLASS_NUMBER
 				/* | EditorInfo.TYPE_NUMBER_FLAG_DECIMAL */);
-				int padding_h = ZZDimen.CC_RECHARGE_COUNT_PADDING_H.px();
-				int padding_v = ZZDimen.CC_RECHARGE_COUNT_PADDING_V.px();
-				tv.setPadding(padding_h, padding_v, padding_h, padding_v);
+				ZZDimenRect.CC_RECHARGE_INPUT.apply_padding(tv);
 
 				tv = create_normal_label(ctx, ZZStr.CC_RECHAGRE_COUNT_DESC);
 				ll2.addView(tv, new LayoutParams(LP_WM));
@@ -1043,7 +1039,9 @@ public class PaymentListLayout extends CCBaseLayout {
 				tv.setVisibility(GONE);
 
 				ImageButton ib = new ImageButton(ctx);
-				ll2.addView(ib, new LayoutParams(LP_WW));
+				LayoutParams lp = new LayoutParams(LP_WW);
+				lp.gravity = Gravity.CENTER_VERTICAL;
+				ll2.addView(ib, lp);
 				ib.setId(IDC.BT_RECHARGE_PULL.id());
 				ib.setBackgroundDrawable(null);
 				ib.setImageDrawable(CCImg.CHARGE_PULL.getDrawble(ctx));
