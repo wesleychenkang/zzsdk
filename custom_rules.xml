@@ -647,7 +647,9 @@
 				linkoffline="http://developer.android.com/reference file:/${sdk.dir}/docs/reference" >
 			<fileset dir="src/com/zz/sdk" defaultexcludes="yes">
 				<include name="*"/>
-				<exclude name="ZZSDKConfig.java"/>
+                <exclude name="ZZSDKConfig.java"/>
+                <exclude name="ParamChain.java"/>
+                <exclude name="ZZDebugKit.java"/>
 			</fileset>
 		</javadoc>
 	</target>

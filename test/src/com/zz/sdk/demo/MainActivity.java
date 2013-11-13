@@ -322,14 +322,6 @@ public class MainActivity extends Activity implements OnClickListener {
 			ll.addView(act, new LinearLayout.LayoutParams(-1, -2));
 		}
 
-		{
-			Button btnSetConfig = new Button(ctx);
-			btnSetConfig.setText("道具兑换");
-			btnSetConfig.setId(IDC_BT_EXCHANGE);
-
-			btnSetConfig.setOnClickListener(onClickListener);
-			rootLayout.addView(btnSetConfig);
-		}
 		return rootLayout;
 	}
 
@@ -415,12 +407,6 @@ public class MainActivity extends Activity implements OnClickListener {
 				} else {
 					pushLog(" ! 订单号无效！" + orderNumber);
 				}
-			}
-			break;
-
-			// 道具兑换
-			case IDC_BT_EXCHANGE: {
-				mSDKManager.showExchange(mHandler, CONFIG_GAME_SERVER_ID);
 			}
 			break;
 		}

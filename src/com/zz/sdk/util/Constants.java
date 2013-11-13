@@ -23,9 +23,11 @@ public final class Constants {
 	public static final String URL_SERVER = ZZSDKConfig.DEBUG_URL ? URL_SERVER_DEBUG
 			: URL_SERVER_RELEASE;
 
-	// public static final String CALL_BACK_URL_SERVER =
-	// "http://testsdk.kkfun.cn:8081/";
-	public static final String CALL_BACK_URL_SERVER = "http://andrs.tisgame.com/";
+	public static final String CALL_BACK_URL_SERVER_RELEASE = "http://andrs.tisgame.com/" + "andsrv/";
+	public static final String CALL_BACK_URL_SERVER_DEBUG = "http://and124.msprit.com:8081/" + "srv/";
+	// public static final String CALL_BACK_URL_SERVER = "http://testsdk.kkfun.cn:8081/";
+	public static final String CALL_BACK_URL_SERVER = ZZSDKConfig.DEBUG_URL ? CALL_BACK_URL_SERVER_DEBUG : CALL_BACK_URL_SERVER_RELEASE;
+
 	/**
 	 * lbs接口
 	 */
@@ -91,11 +93,9 @@ public final class Constants {
 	public static final String GPRO_DREG = URL_SERVER_SRV + "dreg.lg";
 
 	/** web 版本「支付宝」交易成功后的url */
-	public static final String GUARD_Alipay_callback = CALL_BACK_URL_SERVER
-			+ "andsrv/" + "palicb.lg";
+	public static final String GUARD_Alipay_callback = CALL_BACK_URL_SERVER + "palicb.lg";
 	/** web 版本「财富通」交易成功后的url */
-	public static final String GUARD_Tenpay_callback = CALL_BACK_URL_SERVER
-			+ "andsrv/" + "ptencb.lg";
+	public static final String GUARD_Tenpay_callback = CALL_BACK_URL_SERVER + "ptencb.lg";
 	/**
 	 * serviceId
 	 */

@@ -33,6 +33,7 @@ import com.zz.sdk.ParamChain;
 import com.zz.sdk.ParamChain.KeyUser;
 import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.SDKManager;
+import com.zz.sdk.ZZDebugKit;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.DebugFlags.KeyDebug;
 
@@ -484,19 +485,19 @@ public class MainActivity extends Activity implements OnClickListener {
 
 			// 道具兑换
 			case IDC_BT_EXCHANGE: {
-				mSDKManager.showExchange(mHandler, CONFIG_GAME_SERVER_ID);
+				ZZDebugKit.showExchange(mSDKManager, mHandler, CONFIG_GAME_SERVER_ID);
 			}
 			break;
 
 			case IDC_BT_DEBUG: {
-				mSDKManager.debug_start(mHandler, MSG_PAYMENT_CALLBACK,
+				ZZDebugKit.debug_start(mSDKManager,mHandler, MSG_PAYMENT_CALLBACK,
 				                        CONFIG_GAME_SERVER_ID, CONFIG_GAME_ROLE
 				);
 			}
 			break;
 
 			case IDC_BT_OUT_LOGIN: {
-				mSDKManager.showLoginView_out(mHandler, MSG_LOGIN_CALLBACK);
+				ZZDebugKit.showLoginView_out(mSDKManager,mHandler, MSG_LOGIN_CALLBACK);
 			}
 			break;
 
@@ -518,7 +519,7 @@ public class MainActivity extends Activity implements OnClickListener {
 					isCloseWindow = false;
 				}
 
-				mSDKManager.showPaymentView_out(mHandler, MSG_PAYMENT_CALLBACK,
+				ZZDebugKit.showPaymentView_out(mSDKManager, mHandler, MSG_PAYMENT_CALLBACK,
 				                                CONFIG_GAME_SERVER_ID, CONFIG_GAME_SERVER_NAME,
 				                                CONFIG_GAME_ROLE_ID, CONFIG_GAME_ROLE, amount,
 				                                isCloseWindow, CONFIG_GAME_CALLBACK_INFO

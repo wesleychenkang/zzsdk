@@ -268,18 +268,25 @@ public class SDKManager {
 		startActivity(mContext, env, LAYOUT_TYPE.LoginMain);
 	}
 
-	public void showLoginView_out(Handler callbackHandler, int what) {
-		ZZSDKOut.showLoginView(mContext, callbackHandler, what);
+
+	/** 旧的登录界面，<b>已经弃用</b> */
+	protected void showLoginView_out(Handler callbackHandler, int what) {
+		if (DebugFlags.DEBUG_DEMO) {
+			ZZSDKOut.showLoginView(mContext, callbackHandler, what);
+		}
 	}
 
-	public void showPaymentView_out(Handler callbackHandler, int what,
+	/** 旧的支付界面，<b>已经弃用</b> */
+	protected void showPaymentView_out(Handler callbackHandler, int what,
 			String gameServerID, final String serverName, final String roleId,
 			final String gameRole, final int amount,
 			final boolean isCloseWindow, final String callBackInfo) {
-		ZZSDKOut.showPaymentView(mContext, callbackHandler, what, gameServerID,
-		                         serverName, roleId, gameRole, amount, isCloseWindow,
-		                         callBackInfo
-		);
+		if (DebugFlags.DEBUG_DEMO) {
+			ZZSDKOut.showPaymentView(mContext, callbackHandler, what, gameServerID,
+			                         serverName, roleId, gameRole, amount, isCloseWindow,
+			                         callBackInfo
+			);
+		}
 	}
 
 	/**
@@ -368,10 +375,13 @@ public class SDKManager {
 		);
 	}
 
-	public void showExchange(Handler callbackHandler, String gameServerID) {
-		ParamChain env = mRootEnv.grow(KeyCaller.class.getName());
-		env.add(KeyCaller.K_GAME_SERVER_ID, gameServerID);
-		startActivity(mContext, env, LAYOUT_TYPE.Exchange);
+	protected void showExchange(Handler callbackHandler, String gameServerID) {
+		// TODO: 功能未完成，屏蔽
+		if (DebugFlags.DEBUG_DEMO) {
+			ParamChain env = mRootEnv.grow(KeyCaller.class.getName());
+			env.add(KeyCaller.K_GAME_SERVER_ID, gameServerID);
+			startActivity(mContext, env, LAYOUT_TYPE.Exchange);
+		}
 	}
 
 	private static void startActivity(Context ctx, ParamChain env,
@@ -406,6 +416,8 @@ public class SDKManager {
 	}
 
 	/**
+	 * 获取已经登录的游戏用户名
+	 *
 	 * @return 获取已经登录的游戏用户名，如果未登录则返回 null
 	 */
 	public String getGameUserName() {
@@ -513,7 +525,7 @@ public class SDKManager {
 				+ ZZSDKConfig.CONFIG_DESC;
 	}
 
-	public void debug_start(Handler callbackHandler, int what, String gameServerID,
+	protected void debug_start(Handler callbackHandler, int what, String gameServerID,
 	                        final String gameRole) {
 		if (DebugFlags.DEBUG) {
 			final int amount = -1;
