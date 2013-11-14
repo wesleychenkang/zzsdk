@@ -538,6 +538,11 @@ public class PaymentListLayout extends CCBaseLayout {
 			}
 		} else {
 			hidePopup();
+
+			// 强制让支付方式获取焦点，修改　
+			//   "华为U9200手机上：从话费支付返回到支付列表界面时，列表不可操作"　
+			// 的问题.  nxliao 2013.11.14
+			set_child_focuse(IDC.ACT_PAY_GRID);
 		}
 	}
 
