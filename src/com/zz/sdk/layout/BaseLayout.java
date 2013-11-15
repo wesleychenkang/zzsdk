@@ -157,10 +157,10 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	protected DecimalFormat mRechargeFormat = new DecimalFormat(
 			ZZStr.CC_PRICE_FORMAT.str());
 
-	protected static final String HELPINFO = "客服热线：020-85525051   客服QQ：915590000";
-	protected static final String ORDERIFO = "订单提交验证中，可返回游戏等待结果...";
-	protected static final String SUBMIT = "正在提交数据给运营商...";
-	protected static final int MAXAMOUNT = 10000;
+//	protected static final String HELPINFO = "客服热线：020-85525051   客服QQ：915590000";
+//	protected static final String ORDERIFO = "订单提交验证中，可返回游戏等待结果...";
+//	protected static final String SUBMIT = "正在提交数据给运营商...";
+//	protected static final int MAXAMOUNT = 10000;
 
 	/** 默认间隔，2s */
 	protected static final long DEFAULT_EXITTRIGGER_INTERVAL = 2 * 1000;
@@ -200,6 +200,12 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		tv.setTextColor(ZZFontColor.CC_RECHARGE_NORMAL.color());
 		tv.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
 		ZZFontSize.CC_RECHARGE_NORMAL.apply(tv);
+		return tv;
+	}
+
+	protected static TextView create_normal_label_shadow(Context ctx, ZZStr title) {
+		TextView tv = create_normal_label(ctx, title);
+		tv.setShadowLayer(1.5f, 1, 1, ZZFontColor.CC_SHADOW_NORMAL.color());
 		return tv;
 	}
 
@@ -244,7 +250,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		LinearLayout ll = new LinearLayout(ctx);
 		ll.setOrientation(VERTICAL);
 		LayoutParams lp = new LayoutParams(LP_MW);
-		lp.bottomMargin = ZZDimen.CC_SAPCE_PANEL_V.px();
+		lp.topMargin = ZZDimen.CC_SPACE_PANEL_V.px();
 		rv.addView(ll, lp);
 		return ll;
 	}
@@ -270,7 +276,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	public BaseLayout(Context context, ParamChain env) {
 		super(context);
 		mContext = context;
-		mEnv = env.grow(getClass().getName());
+		mEnv = env.grow(((Object)this).getClass().getName());
 		mRunState = RUNSTATE.UNINITIALIZED;
 		mConnectionUtil = env.get(KeyGlobal.K_UTIL_CONNECT,
 				ConnectionUtil.class);
@@ -858,71 +864,61 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	}
 
 	private void createView(Context ctx, LinearLayout rv) {
-		LayoutParams lp;
 
-		// 充值页面 页眉
+		// 充值页面 标题区
 		{
-			TextView tv;
-
-			LinearLayout header = new LinearLayout(ctx);
-			header.setOrientation(HORIZONTAL);
-			header.setBackgroundDrawable(CCImg.TITLE_BG.getDrawble(ctx));
-			header.setGravity(Gravity.CENTER);
-			rv.addView(header, new LayoutParams(LP_MW));
-			header.setId(IDC.ACT_TITLE.id());
-
-			// 取消按钮
-			{
-				tv = new Button(ctx);
-				tv.setId(IDC.BT_CANCEL.id());
-				lp = new LayoutParams(LP_WW);
-				lp.topMargin = ZZDimen.dip2px(1);
-				lp.leftMargin = ZZDimen.dip2px(3);
-				header.addView(tv, lp);
-				tv.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
-						CCImg.TITLE_BACK_DEFAULT, CCImg.TITLE_BACK_PRESSED));
-				tv.setOnClickListener(this);
-			}
+			FrameLayout title = new FrameLayout(ctx);
+			title.setBackgroundDrawable(CCImg.TITLE_BACKGROUND.getDrawble(ctx));
+			rv.addView(title, new LayoutParams(LP_MW));
+			title.setId(IDC.ACT_TITLE.id());
 
 			// 标题条
 			{
-				tv = new TextView(ctx);
+				TextView tv = create_normal_label(ctx, null);
+				title.addView(tv, new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.CENTER));
 				tv.setId(IDC.TV_TITLE.id());
-				lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
-						LayoutParams.WRAP_CONTENT);
-				lp.bottomMargin = ZZDimen.dip2px(2);
-				lp.topMargin = ZZDimen.dip2px(2);
-				lp.weight = 1;
-				header.addView(tv, lp);
-				tv.setTextColor(0xffffe5c5);
-				tv.setTextSize(20);
-				tv.setPadding(ZZDimen.dip2px(4), ZZDimen.dip2px(2), 0,
-						ZZDimen.dip2px(2));
+				tv.setTextSize(24);
 				tv.setGravity(Gravity.CENTER);
-				// mTileType = tv;
+				ZZDimenRect.CC_LABEL_PADDING.apply_padding(tv);
 			}
 
-			// 退出按钮
+			// 按钮组
 			{
-				tv = new Button(ctx);
-				lp = new LayoutParams(LP_WW);
-				lp.topMargin = ZZDimen.dip2px(1);
-				lp.rightMargin = ZZDimen.dip2px(3);
-				header.addView(tv, lp);
-				tv.setId(IDC.BT_EXIT.id());
-				tv.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
-						CCImg.TITLE_EXIT_DEFAULT, CCImg.TITLE_EXIT_PRESSED));
-				tv.setOnClickListener(this);
-			}
-		}
+				LinearLayout ll = new LinearLayout(ctx);
+				title.addView(ll, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+				ll.setOrientation(HORIZONTAL);
 
-		// 分隔线
-		if (false) {
-			ImageView imageLine = new ImageView(ctx);
-			lp = new LayoutParams(LP_MW);
-			imageLine.setBackgroundDrawable(BitmapCache.getDrawable(ctx,
-					Constants.ASSETS_RES_PATH + "title_line.9.png"));
-			rv.addView(imageLine, lp);
+				// 返回按钮
+				{
+					ImageView iv = new ImageView(ctx);
+					iv.setId(IDC.BT_CANCEL.id());
+					ll.addView(iv, new LayoutParams(LP_WW));
+					iv.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+					iv.setImageDrawable(CCImg.getStateListDrawable(ctx, CCImg.BACK, CCImg.BACK_CLICK));
+					iv.setClickable(true);
+					iv.setOnClickListener(this);
+					ZZDimenRect.CC_TITLE_BT_PADDING.apply_padding(iv);
+				}
+
+				// 空位，仅用于撑开
+				if (false) {
+					View empty = new View(ctx);
+					ll.addView(empty, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f));
+				}
+
+				// 退出按钮
+				if (false) {
+					Button tv = new Button(ctx);
+					LayoutParams lp = new LayoutParams(LP_WW);
+					lp.topMargin = ZZDimen.dip2px(1);
+					lp.rightMargin = ZZDimen.dip2px(3);
+					ll.addView(tv, lp);
+					tv.setId(IDC.BT_EXIT.id());
+					Drawable d = CCImg.getStateListDrawable(ctx, CCImg.TITLE_EXIT_DEFAULT, CCImg.TITLE_EXIT_PRESSED);
+					tv.setBackgroundDrawable(d);
+					tv.setOnClickListener(this);
+				}
+			}
 		}
 
 		// 客户区
@@ -953,8 +949,6 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	protected View createView_subject(Context ctx) {
 		FrameLayout fl = new FrameLayout(ctx);
 		fl.setId(IDC.ACT_SUBJECT.id());
-		ZZDimenRect.CC_ROOTVIEW_PADDING.apply_padding(fl);
-		fl.setBackgroundDrawable(CCImg.BACKGROUND.getDrawble(ctx));
 		return fl;
 	}
 
@@ -965,7 +959,8 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 
 		setOrientation(VERTICAL);
 		// 设置半透明的音色背景，当此界面子view未铺满时，可用于遮挡底层视图
-		setBackgroundColor(0xa0000000);
+//		setBackgroundColor(0xa0000000);
+		setBackgroundDrawable(CCImg.BACKGROUND.getDrawble(ctx));
 		setGravity(Gravity.CENTER);
 		// LinearLayout.LayoutParams lp = new LayoutParams(LP_MM);
 		// setLayoutParams(lp);
@@ -1027,7 +1022,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	public boolean onEnter() {
 		// TODO Auto-generated method stub
 		if (BuildConfig.DEBUG) {
-			Logger.d("onEnter-" + getClass().getName());
+			Logger.d("onEnter-" + ((Object)this).getClass().getName());
 		}
 
 		if (mRunState != RUNSTATE.UNINITIALIZED) {
@@ -1046,7 +1041,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	@Override
 	public boolean onPause() {
 		if (BuildConfig.DEBUG) {
-			Logger.d("onPause-" + getClass().getName());
+			Logger.d("onPause-" + ((Object)this).getClass().getName());
 		}
 
 		if (mRunState == RUNSTATE.ACTIVE) {
@@ -1068,7 +1063,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	@Override
 	public boolean onResume() {
 		if (BuildConfig.DEBUG) {
-			Logger.d("onResume-" + getClass().getName());
+			Logger.d("onResume-" + ((Object)this).getClass().getName());
 		}
 
 		if (mRunState == RUNSTATE.ACTIVE) {
@@ -1117,7 +1112,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	@Override
 	public boolean onExit() {
 		if (BuildConfig.DEBUG) {
-			Logger.d("onExit-" + getClass().getName());
+			Logger.d("onExit-" + ((Object)this).getClass().getName());
 		}
 
 		if (mRunState == RUNSTATE.UNINITIALIZED) {

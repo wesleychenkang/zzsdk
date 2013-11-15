@@ -46,11 +46,11 @@ import com.zz.sdk.util.ResConstants.ZZStr;
  */
 abstract class CCBaseLayout extends BaseLayout {
 
-	static final boolean DEBUG_UI = false; // DebugFlags.DEBUG;
+	static final boolean DEBUG_UI = false;//DebugFlags.DEBUG;//
 
 	static enum IDC implements IIDC {
 
-		/** 页眉， {@link FrameLayout} */
+		/** 页眉，默认为空并不可见 */
 		ACT_HEADER,
 
 		/** 余额 */
@@ -77,7 +77,7 @@ abstract class CCBaseLayout extends BaseLayout {
 		}
 
 		/** 从 id 反查，如果失败则返回 {@link #_MAX_} */
-		public final static IDC fromID(int id) {
+		public static IDC fromID(int id) {
 			id -= __start__;
 			if (id >= 0 && id < _MAX_.ordinal()) {
 				return values()[id];
@@ -108,8 +108,6 @@ abstract class CCBaseLayout extends BaseLayout {
 	}
 
 	private CharSequence getHelpTitle() {
-		// return null == Application.topicTitle ? null : Html
-		// .fromHtml(Application.topicTitle);
 		String title = getEnv().get(KeyGlobal.K_HELP_TITLE, String.class);
 		if (title != null)
 			return Html.fromHtml(title);
@@ -117,9 +115,7 @@ abstract class CCBaseLayout extends BaseLayout {
 	}
 
 	private CharSequence getHelpTopic() {
-		String topic;
-		// topic = Application.topicDes;
-		topic = getEnv().get(KeyGlobal.K_HELP_TOPIC, String.class);
+		String topic = getEnv().get(KeyGlobal.K_HELP_TOPIC, String.class);
 		if (topic != null) {
 			return Html.fromHtml(ToDBC(topic));
 		}
@@ -133,10 +129,11 @@ abstract class CCBaseLayout extends BaseLayout {
 		ll.setOrientation(VERTICAL);
 		ll.setLayoutParams(new FrameLayout.LayoutParams(
 				LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT,
-				Gravity.BOTTOM));
+				Gravity.BOTTOM
+		)
+		);
 		ll.setBackgroundDrawable(CCImg.BACKGROUND.getDrawble(ctx));
-		ll.setPadding(ZZDimen.dip2px(48), ZZDimen.dip2px(5),
-				ZZDimen.dip2px(48), ZZDimen.dip2px(24));
+		ZZDimenRect.CC_ROOTVIEW_PADDING.apply_padding(ll);
 
 		AnimationSet in = new AnimationSet(true);
 		in.addAnimation(new AlphaAnimation(0f, 0.8f));
@@ -152,7 +149,11 @@ abstract class CCBaseLayout extends BaseLayout {
 			ll.addView(mTopicTitle, new LayoutParams(LP_WW));
 			mTopicTitle.setTextColor(0xffe7c5aa);
 			mTopicTitle.setTextSize(16);
-			mTopicTitle.setText(getHelpTitle());
+			CharSequence str = getHelpTitle();
+			if (str == null || str.length() == 0 )
+				mTopicTitle.setVisibility(GONE);
+			else
+				mTopicTitle.setText(str);
 		}
 		{
 			TextView mTopicDes;
@@ -262,59 +263,106 @@ abstract class CCBaseLayout extends BaseLayout {
 		updateBalance();
 	}
 
+	protected void resetHeader(Context ctx) {
+		LinearLayout header = getHeaderContainer();
+		createView_balance(ctx, header);
+		header.setVisibility(VISIBLE);
+		ZZDimenRect.CC_ROOTVIEW_PADDING.apply_padding(header);
+	}
+
+	/** 余额视图 */
+	protected void createView_balance(Context ctx, LinearLayout header) {
+		LinearLayout ll = new LinearLayout(ctx);
+		header.addView(ll, new LayoutParams(LP_MW));
+		ll.setOrientation(HORIZONTAL);
+		ll.setId(IDC.BT_BALANCE.id());
+		ll.setOnClickListener(this);
+		if (DEBUG_UI) {
+			ll.setBackgroundColor(0x80c06000);
+		}
+
+		TextView tv;
+
+		tv = create_normal_label(ctx, ZZStr.CC_BALANCE_TITLE);
+		ll.addView(tv, new LayoutParams(LP_WM));
+		tv.setGravity(Gravity.CENTER);
+
+		tv = create_normal_label_shadow(ctx, null);
+		ll.addView(tv, new LayoutParams(LP_WW));
+		tv.setId(IDC.TV_BALANCE.id());
+		tv.setGravity(Gravity.CENTER);
+		tv.setCompoundDrawablesWithIntrinsicBounds(null, null, CCImg.MONEY.getDrawble(ctx), null);
+		tv.setCompoundDrawablePadding(ZZDimen.dip2px(4));
+		tv.setTextColor(ZZFontColor.CC_RECHARGE_COST.color());
+		ZZFontSize.CC_RECHARGE_BALANCE.apply(tv);
+		if (DEBUG_UI) {
+			tv.setBackgroundColor(0xc0c00000);
+		}
+
+		ProgressBar pb = new ProgressBar(ctx, null, android.R.attr.progressBarStyleSmallTitle);
+		LayoutParams lp = new LayoutParams(LP_WW);
+		lp.gravity = Gravity.CENTER_VERTICAL;
+		ll.addView(pb, lp);
+		pb.setId(IDC.PB_BALANCE.id());
+		pb.setVisibility(GONE);
+	}
+
+	/** 创建页脚区：帮助按钮等 */
+	protected void createView_footer(Context ctx, LinearLayout footer) {
+		LinearLayout ll = new LinearLayout(ctx);
+		footer.addView(ll, new LayoutParams(LayoutParams.MATCH_PARENT, ZZDimen.dip2px(36)));
+		ll.setOrientation(HORIZONTAL);
+		ll.setId(IDC.BT_HELP.id());
+		ll.setOnClickListener(this);
+		if (DEBUG_UI) {
+			ll.setBackgroundColor(0x80ff0000);
+		}
+
+		TextView tvHelp = create_normal_label(ctx, ZZStr.CC_HELP_TITLE);
+		ll.addView(tvHelp, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f));
+		tvHelp.setCompoundDrawablesWithIntrinsicBounds(CCImg.HELP.getDrawble(ctx), null, null, null);
+		tvHelp.setCompoundDrawablePadding(ZZDimen.dip2px(8));
+		tvHelp.setTextColor(ZZFontColor.CC_RECHARGE_HELP.color());
+		tvHelp.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
+		ZZFontSize.CC_RECHARGE_HELP.apply(tvHelp);
+		if (DEBUG_UI) {
+			tvHelp.setBackgroundColor(0x8000ff00);
+		}
+
+		TextView tvDesc = create_normal_label(ctx, ZZStr.CC_HELP_TEL);
+		ll.addView(tvDesc, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f));
+		tvDesc.setText(ZZStr.CC_HELP_TEL.str());
+		tvDesc.setTextColor(ZZFontColor.CC_RECHARGE_HELP.color());
+		tvDesc.setGravity(Gravity.CENTER_VERTICAL);
+		ZZFontSize.CC_RECHARGE_HELP.apply(tvDesc);
+		if (DEBUG_UI) {
+			tvDesc.setBackgroundColor(0x800000ff);
+		}
+	}
+
+	protected LinearLayout getHeaderContainer() {
+		return (LinearLayout) findViewById(IDC.ACT_HEADER.id());
+	}
+
+	protected LinearLayout getFooterContainer() {
+		return (LinearLayout) findViewById(IDC.ACT_FOOTER.id());
+	}
+
 	/** 支付界面·主工作视图，页首：余额描述，页尾：帮助 */
 	@Override
 	protected View createView_subject(Context ctx) {
 		// 主视图
 		LinearLayout rv = new LinearLayout(ctx);
-		ZZDimenRect.CC_ROOTVIEW_PADDING.apply_padding(rv);
 		rv.setOrientation(LinearLayout.VERTICAL);
-		rv.setBackgroundDrawable(CCImg.BACKGROUND.getDrawble(ctx));
-
-		LinearLayout ll;
-		TextView tv;
+//		ZZDimenRect.CC_ROOTVIEW_PADDING.apply_padding(rv);
 
 		// 余额描述
 		{
-			FrameLayout header = new FrameLayout(ctx);
+			LinearLayout header = new LinearLayout(ctx);
+			rv.addView(header, new LayoutParams(LP_MW));
 			header.setId(IDC.ACT_HEADER.id());
-			rv.addView(header, new LayoutParams(LayoutParams.MATCH_PARENT,
-					LayoutParams.WRAP_CONTENT));
-
-			ll = new LinearLayout(ctx);
-			header.addView(ll, new FrameLayout.LayoutParams(
-					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-			ll.setOrientation(HORIZONTAL);
-			ll.setId(IDC.BT_BALANCE.id());
-			ll.setOnClickListener(this);
-			final int pv = ZZDimen.CC_SAPCE_PANEL_V.px();
-			ll.setPadding(pv, pv, pv, pv / 4);
-			if (DEBUG_UI) {
-				ll.setBackgroundColor(0x80c06000);
-			}
-
-			tv = create_normal_label(ctx, ZZStr.CC_BALANCE_TITLE);
-			ll.addView(tv, new LayoutParams(LP_WM));
-			tv.setGravity(Gravity.CENTER);
-
-			tv = create_normal_label(ctx, null);
-			ll.addView(tv, new LayoutParams(LP_WW));
-			tv.setId(IDC.TV_BALANCE.id());
-			tv.setGravity(Gravity.CENTER);
-			tv.setCompoundDrawablesWithIntrinsicBounds(null, null,
-					CCImg.MONEY.getDrawble(ctx), null);
-			ZZFontSize.CC_RECHARGE_BALANCE.apply(tv);
-			if (DEBUG_UI) {
-				tv.setBackgroundColor(0xc0c00000);
-			}
-
-			ProgressBar pb = new ProgressBar(ctx, null,
-					android.R.attr.progressBarStyleSmallTitle);
-			LayoutParams lp = new LayoutParams(LP_WW);
-			lp.gravity = Gravity.CENTER_VERTICAL;
-			ll.addView(pb, lp);
-			pb.setId(IDC.PB_BALANCE.id());
-			pb.setVisibility(GONE);
+			header.setVisibility(GONE);
+			header.setOrientation(VERTICAL);
 		}
 
 		// 客户区
@@ -323,6 +371,7 @@ abstract class CCBaseLayout extends BaseLayout {
 			fl.setId(BaseLayout.IDC.ACT_SUBJECT.id());
 			rv.addView(fl, new LayoutParams(LayoutParams.MATCH_PARENT,
 					LayoutParams.MATCH_PARENT, 1.0f));
+			ZZDimenRect.CC_ROOTVIEW_PADDING.apply_padding(fl);
 			if (DEBUG_UI) {
 				fl.setBackgroundColor(0x803060c0);
 			}
@@ -330,44 +379,11 @@ abstract class CCBaseLayout extends BaseLayout {
 
 		// 帮助区
 		{
-			FrameLayout footer = new FrameLayout(ctx);
+			LinearLayout footer = new LinearLayout(ctx);
+			rv.addView(footer, new LayoutParams(LP_MW));
 			footer.setId(IDC.ACT_FOOTER.id());
-			rv.addView(footer, new LayoutParams(LayoutParams.MATCH_PARENT,
-					ZZDimen.dip2px(36)));
-
-			ll = new LinearLayout(ctx);
-			footer.addView(ll, new LayoutParams(LP_MM));
-			ll.setOrientation(HORIZONTAL);
-			ll.setId(IDC.BT_HELP.id());
-			ll.setOnClickListener(this);
-			if (DEBUG_UI) {
-				ll.setBackgroundColor(0x80ff0000);
-			}
-
-			TextView tvHelp = new TextView(ctx);
-			ll.addView(tvHelp, new LayoutParams(LayoutParams.MATCH_PARENT,
-					LayoutParams.MATCH_PARENT, 1.0f));
-			tvHelp.setCompoundDrawablesWithIntrinsicBounds(
-					CCImg.HELP.getDrawble(ctx), null, null, null);
-			tvHelp.setText(ZZStr.CC_HELP_TITLE.str());
-			tvHelp.setTextColor(ZZFontColor.CC_RECHARGE_HELP.color());
-			tvHelp.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
-			tvHelp.setCompoundDrawablePadding(ZZDimen.dip2px(8));
-			ZZFontSize.CC_RECHARGE_HELP.apply(tvHelp);
-			if (DEBUG_UI) {
-				tvHelp.setBackgroundColor(0x8000ff00);
-			}
-
-			TextView tvDesc = new TextView(ctx);
-			ll.addView(tvDesc, new LayoutParams(LayoutParams.MATCH_PARENT,
-					LayoutParams.MATCH_PARENT, 1.0f));
-			tvDesc.setText(ZZStr.CC_HELP_TEL.str());
-			tvDesc.setTextColor(ZZFontColor.CC_RECHARGE_HELP.color());
-			tvDesc.setGravity(Gravity.CENTER_VERTICAL);
-			ZZFontSize.CC_RECHARGE_HELP.apply(tvDesc);
-			if (DEBUG_UI) {
-				tvDesc.setBackgroundColor(0x800000ff);
-			}
+			footer.setOrientation(VERTICAL);
+			createView_footer(ctx, footer);
 		}
 		return rv;
 	}

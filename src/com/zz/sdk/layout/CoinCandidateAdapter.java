@@ -1,16 +1,16 @@
 package com.zz.sdk.layout;
 
-import java.text.NumberFormat;
-
 import android.content.Context;
-import android.graphics.Color;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import com.zz.sdk.util.Utils;
+import com.zz.sdk.util.ResConstants;
+import com.zz.sdk.util.ResConstants.CCImg;
+
+import java.text.NumberFormat;
 
 /** 候选列表 */
 class CoinCandidateAdapter extends BaseAdapter {
@@ -34,14 +34,12 @@ class CoinCandidateAdapter extends BaseAdapter {
 	}
 
 	public float getValue(int position) {
-		return (mData == null || position < 0 || position >= mData.length) ? 0
-				: mData[position];
+		return (mData == null || position < 0 || position >= mData.length) ? 0 : mData[position];
 	}
 
 	@Override
 	public Object getItem(int position) {
-		return (mData == null || position < 0 || position >= mData.length) ? null
-				: mData[position];
+		return (mData == null || position < 0 || position >= mData.length) ? null : mData[position];
 	}
 
 	@Override
@@ -54,12 +52,11 @@ class CoinCandidateAdapter extends BaseAdapter {
 		TextView holder;
 		if (convertView == null) {
 			holder = new TextView(mContext);
-
 			holder.setGravity(Gravity.CENTER);
-			holder.setBackgroundDrawable(Utils.getStateListDrawable(mContext,
-					"money_bg1.png", "money_bg.png"));
+			holder.setBackgroundDrawable(CCImg.getStateListDrawable(mContext, CCImg.PANEL_BACKGROUND, CCImg.CHARGE_PULL_CANDIDATE_SEL));
 			holder.setTextSize(20);
-			holder.setTextColor(Color.WHITE);
+			holder.setTextColor(ResConstants.Config.ZZFontColor.CC_RECHARGE_COST.color());
+			ResConstants.Config.ZZDimenRect.CC_GRIDVIEW_CANDIDATE_PADDING.apply_padding(holder);
 		} else {
 			holder = (TextView) convertView;
 		}
@@ -67,7 +64,7 @@ class CoinCandidateAdapter extends BaseAdapter {
 			holder.setText(String.format(mDescFormat,
 					mFormat.format(mData[position])));
 		} else {
-			holder.setText("Unknown:" + position);
+			holder.setText("??:" + position);
 		}
 		return holder;
 	}

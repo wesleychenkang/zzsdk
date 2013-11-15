@@ -575,7 +575,6 @@ public class SDKManager {
 					env.add("global.paymentlist.pay_sms_channel_message",
 							smsChannel);
 				} catch (JSONException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

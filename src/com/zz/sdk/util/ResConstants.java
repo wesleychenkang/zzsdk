@@ -125,7 +125,8 @@ public class ResConstants {
 		/** 对不起，话费支付失败！请确认您的卡是否已欠费或已失效，如需帮助请联系客服! */
 		CC_TRY_SMS_FAILED("对不起，话费支付失败！请确认您的卡是否已欠费或已失效，如需帮助请联系客服!"),
 		/** 请选择充值金额： */
-		CC_TRY_SMS_CHOOSE_TITILE("请选择充值金额："),
+		CC_TRY_SMS_CHOOSE_TITILE("请选择充值金额："), //
+		CC_TRY_SMS_OTHER_MODE("其他支付方式"), //
 		/** 充值 */
 		CC_TRY_SMS_CHOOSE_PREFIX("充值"),
 		/** %s元 */
@@ -230,6 +231,9 @@ public class ResConstants {
 		 * 字体颜色配置
 		 */
 		public static enum ZZFontColor {
+			/** 阴影·普通 */
+			CC_SHADOW_NORMAL(0xc0444444),
+
 			/** 充值界面·普通文本 */
 			CC_RECHARGE_NORMAL(Color.BLACK),
 			/** 充值界面·描述文本 */
@@ -241,9 +245,11 @@ public class ResConstants {
 			/** 充值界面输入文本 */
 			CC_RECHARGE_INPUT(Color.DKGRAY),
 			/** 充值界面·应付金额文本 */
-			CC_RECHARGE_COST(0xffccaa00),
+			CC_RECHARGE_COST(0xfffe7201),
 			/** 充值界面·支付方式子项文本 */
 			CC_PAYTYPE_ITEM(Color.BLACK),
+			/** 充值界面·支付方式子项文本·未选中 */
+			CC_PAYTYPE_ITEM_NORMAL(Color.DKGRAY),
 			/** 充值界面·确认充值按钮 文本 */
 			CC_RECHARGE_COMMIT(Color.WHITE),
 			/** 充值界面·帮助按钮 文本 */
@@ -341,13 +347,15 @@ public class ResConstants {
 		 */
 		public static enum ZZDimen {
 			/** 充值界面·各面板垂直方向间隔 */
-			CC_SAPCE_PANEL_V(12),
+			CC_SPACE_PANEL_V(18), //
+
+			CC_SPACE_PANEL_H(16), //
 
 			/** 充值界面·GridView 的单元格间距 */
-			CC_GRIDVIEW_SPACE_H(8), CC_GRIDVIEW_SPACE_V(4),
+			CC_GRIDVIEW_SPACE_H(2), CC_GRIDVIEW_SPACE_V(0),
 
 			/** 充值界面·GridView 的单元格子项的边距 */
-			CC_GRIDVIEW_ITEM_HEIGHT(52), //
+			CC_GRIDVIEW_ITEM_HEIGHT(62), //
 
 			/** 充值界面·GridView 单元格大小 */
 			CC_GRIDVIEW_COLUMN_WIDTH(96),
@@ -385,8 +393,16 @@ public class ResConstants {
 
 		/** 尺寸配置, DIP */
 		public static enum ZZDimenRect {
+			CC_TITLE_BT_PADDING(16, 8, 16, 8),
+
 			/** 充值界面·主活动区的边距 */
-			CC_ROOTVIEW_PADDING(24, 16, 24, 12),
+			CC_ROOTVIEW_PADDING(16, 16, 16, 16),
+
+			/** 充值界面·普通面板的边距 */
+			CC_PANEL_PADDING(8, 8, 8, 8),
+
+			/** 普通标签的上下行距 */
+			CC_LABEL_PADDING(0, 4, 0, 4), //
 
 			/** 充值数量输入框的边距 */
 			CC_RECHARGE_INPUT(16, 8, 16, 8),
@@ -395,10 +411,16 @@ public class ResConstants {
 			CC_RECHARGE_COMMIT(16, 4, 16, 4),
 
 			/** 充值界面·GridView 的单元格子项的边距 */
-			CC_GRIDVIEW_ITEM_PADDDING(16, 12, 16, 12),
+			CC_GRIDVIEW_ITEM_PADDDING(16, 8, 16, 8),
+
+			/** 充值界面·候选金额的单元格子项的边距 */
+			CC_GRIDVIEW_CANDIDATE_PADDING(12, 6, 12, 6),
 
 			/** 充值界面·话费·GridView 的单元格子项的边距 */
 			CC_GRIDVIEW_SMS_PADDDING(8, 4, 8, 4),
+
+			/** 话费界面常规边距 */
+			CC_SMS_PADDING(8, 8, 8, 8),
 
 			/** 兑换详情 */
 			CC_EX_DETAIL_PADDING(12, 8, 12, 8),
@@ -449,6 +471,8 @@ public class ResConstants {
 		BUY_BUTTON("cc_buy_button.9.png"), //
 		BUY_BUTTON_CLICK("cc_buy_button_click.9.png"), //
 		CHARGE_PULL("cc_charge_pull.png"), //
+		CHARGE_PULL_CLICK("cc_charge_pull_click.png"),//
+		CHARGE_PULL_CANDIDATE_SEL("cc_cand_sel.9.png"),//
 		EX_BUTTON("cc_ex_button.9.png"), //
 		EX_BUTTON_CLICK("cc_ex_button_click.9.png"), //
 		EX_RIGHT("cc_ex_Right.png"), //
@@ -458,6 +482,7 @@ public class ResConstants {
 		PAYMENT_INPUT("cc_payment_input.9.png"), //
 		RECHARGE_BAN("cc_recharge_ban.9.png"), //
 		RECHARGE_INPUT("cc_recharge_input.9.png"), //
+		RECHARGE_INPUT_BG("cc_input_bg.9.png"),//
 		TUP_CFT("cc_tup_cft.png"), //
 		TUP_DX("cc_tup_dx.png"), //
 		TUP_LT("cc_tup_lt.png"), //
@@ -474,6 +499,13 @@ public class ResConstants {
 		TITLE_BG("title_bg.png"), //
 		TITLE_EXIT_DEFAULT("title_exit_default.png"), //
 		TITLE_EXIT_PRESSED("title_exit_pressed.png"),
+
+		BACK("cc_bt_back.png"),//
+		BACK_CLICK("cc_bt_back_click.png"),//
+		PANEL_BACKGROUND("cc_panel.9.png"),//
+		PAYLIST_SELECTED("cc_paylist_sel.9.png"),//
+		PAYLIST_NORMAL("cc_paylist_nor.9.png"),//
+		TITLE_BACKGROUND("cc_title_bg.9.png"),//
 
 		/** XListView */
 		XLISTVIEW_ARROW("xlistview_arrow.png"), //
@@ -551,8 +583,8 @@ public class ResConstants {
 		 */
 		public static StateListDrawable getStateListDrawable(Context ctx,
 				CCImg picNormal, CCImg picPressed) {
-			Drawable dn = picNormal.getDrawble(ctx);
-			Drawable dp = picPressed.getDrawble(ctx);
+			Drawable dn = picNormal == null ? null : picNormal.getDrawble(ctx);
+			Drawable dp = picPressed == null ? null : picPressed.getDrawble(ctx);
 			return BitmapCache.getStateListDrawable(ctx, dp, dn);
 		}
 

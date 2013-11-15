@@ -50,6 +50,7 @@ import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.Md5Code;
+import com.zz.sdk.util.ResConstants;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
 import com.zz.sdk.util.ResConstants.Config.ZZDimenRect;
@@ -261,46 +262,48 @@ class PaymentSMSLayout extends CCBaseLayout {
 	}
 
 	private void createView_error(Context ctx, FrameLayout rv) {
-		Rect r = ZZDimenRect.CC_ROOTVIEW_PADDING.rect();
-
 		LinearLayout ll = new LinearLayout(ctx);
 		rv.addView(ll, new LayoutParams(LP_MW));
 		ll.setOrientation(VERTICAL);
-		ll.setPadding(r.left, r.top, r.right, r.bottom);
+		ZZDimenRect.CC_SMS_PADDING.apply_padding(ll);
 
 		{
-			TextView tv = create_normal_label(ctx, null);
+			TextView tv = create_normal_label_shadow(ctx, ZZStr.CC_PROMPT_TITLE);
 			ll.addView(tv, new LayoutParams(LP_WW));
 			tv.setSingleLine(false);
 			tv.setGravity(Gravity.CENTER);
-			tv.setText(ZZStr.CC_PROMPT_TITLE.str());
 			CCImg img = CCImg.getPayChannelIcon(mType);
 			if (img != null) {
 				tv.setCompoundDrawablesWithIntrinsicBounds(img.getDrawble(ctx),
 						null, null, null);
+				tv.setCompoundDrawablePadding(ZZDimen.dip2px(8));
 			}
 			tv.setTextSize(24);
-			tv.setPadding(ZZDimen.dip2px(8), 0, 0, r.bottom);
+			ZZDimenRect.CC_SMS_PADDING.apply_padding(tv);
 		}
+
 		{
 			TextView tv = create_normal_label(ctx, null);
 			ll.addView(tv, new LayoutParams(LP_MW));
 			tv.setId(IDC.TV_ERROR.id());
 			tv.setSingleLine(false);
 			tv.setBackgroundDrawable(CCImg.ZF_XZ.getDrawble(ctx));
-			ZZDimenRect.CC_ROOTVIEW_PADDING.apply_padding(tv);
+			ZZDimenRect.CC_SMS_PADDING.apply_padding(tv);
 			tv.setTextColor(ZZFontColor.CC_RECHARGE_SMS_NORMAL.color());
 			ZZFontSize.CC_RECHARGE_SMS_NORMAL.apply(tv);
 		}
 	}
 
 	private void createView_choose(Context ctx, ScrollView rv) {
-		Rect r = ZZDimenRect.CC_ROOTVIEW_PADDING.rect();
+		LayoutParams lp;
 
 		LinearLayout ll = new LinearLayout(ctx);
 		rv.addView(ll, new LayoutParams(LP_MW));
 		ll.setOrientation(VERTICAL);
-		ll.setPadding(r.left, 0, r.right, 0);
+		ZZDimenRect.CC_SMS_PADDING.apply_padding(ll);
+		if (DEBUG_UI) {
+			ll.setBackgroundColor(0xcc804000);
+		}
 
 		// TODO: 类别标题
 		// chargeTypeView.mPaymentDesc.setText(Html
@@ -310,23 +313,18 @@ class PaymentSMSLayout extends CCBaseLayout {
 		{
 			// "您的话费余额充足，请选择充值金额："
 			// "请选择充值金额："
-			TextView tv = create_normal_label(ctx,
-					ZZStr.CC_TRY_SMS_CHOOSE_TITILE);
-			LayoutParams lp = new LayoutParams(LP_MW);
-			lp.gravity = Gravity.LEFT;
-			// lp.topMargin = ZZDimen.dip2px(10);
-			// lp.leftMargin = ZZDimen.dip2px(25);
-			ll.addView(tv, lp);
-			tv.setPadding(0, 0, 0, r.bottom);
+			TextView tv = create_normal_label_shadow(ctx, ZZStr.CC_TRY_SMS_CHOOSE_TITILE);
+			ll.addView(tv, new LayoutParams(LP_MW));
 			// tv.setTextColor(0xff92acbc);
 			// tv.setTextSize(20);
 		}
 
 		{
 			GridView gv = new TypeGridView(mContext);
-			LayoutParams lp = new LayoutParams(LP_WW);
+			lp = new LayoutParams(LP_WW);
 			lp.gravity = Gravity.CENTER;
 			ll.addView(gv, lp);
+			ZZDimenRect.CC_SMS_PADDING.apply_padding(gv);
 
 			gv.setSelector(android.R.color.transparent);
 			gv.setColumnWidth(ZZDimen.dip2px(100));
@@ -352,37 +350,29 @@ class PaymentSMSLayout extends CCBaseLayout {
 		}
 
 		{
-			LinearLayout l2 = new LinearLayout(ctx);
-			ll.addView(l2, new LayoutParams(LP_MW));
-			l2.setOrientation(VERTICAL);
-			l2.setGravity(Gravity.RIGHT);
-			l2.setPadding(0, 64, 0, 0);
-
-			TextView tv = create_normal_label(ctx, null);
-			l2.addView(tv, new LayoutParams(LP_WW));
+			TextView tv = create_normal_label(ctx, ZZStr.CC_TRY_SMS_OTHER_MODE);
+			lp = new LayoutParams(LP_WW);
+			lp.gravity = Gravity.RIGHT;
+			lp.topMargin = ZZDimen.CC_SPACE_PANEL_V.px();
+			ll.addView(tv, lp);
 			tv.setId(IDC.BT_OTHER_PAYMENT.id());
-			tv.setText("其他支付方式");
 			tv.getPaint().setFlags(
 					Paint.UNDERLINE_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
 			tv.setTextSize(16); // 14
 			tv.setGravity(Gravity.RIGHT);
-			tv.setPadding(0, 20, 0, 20);
+			ZZDimenRect.CC_ROOTVIEW_PADDING.apply_padding(tv);
 			tv.setTextColor(Color.BLACK/* 0xff92acbc */);
 			tv.setOnClickListener(this);
 		}
 	}
 
 	private void createView_prompt(Context ctx, ScrollView rv) {
-		Rect g = ZZDimenRect.CC_GRIDVIEW_ITEM_PADDDING.rect();
-		Rect r = ZZDimenRect.CC_ROOTVIEW_PADDING.rect();
-
 		LinearLayout ll = new LinearLayout(ctx);
 		rv.addView(ll, new LayoutParams(LP_MW));
 		ll.setOrientation(VERTICAL);
-		ll.setPadding(r.left + g.left, r.top + g.top, r.right + g.right,
-				r.bottom + g.bottom);
+		ZZDimenRect.CC_SMS_PADDING.apply_padding(ll);
 
-		//
+		// 提示内容
 		{
 			TextView tv = new TextView(ctx);
 			ll.addView(tv, new LayoutParams(LP_MW));
@@ -391,13 +381,16 @@ class PaymentSMSLayout extends CCBaseLayout {
 			tv.setAutoLinkMask(Linkify.PHONE_NUMBERS);
 			tv.setLinkTextColor(ZZFontColor.CC_RECHARGE_SMS_HIGHLIGHT.color());// 0xffffea00
 			tv.setBackgroundDrawable(CCImg.ZF_XZ.getDrawble(ctx));
-			tv.setPadding(g.left, g.top, g.right, g.bottom);
+			ZZDimenRect.CC_SMS_PADDING.apply_padding(tv);
 			ZZFontSize.CC_RECHARGE_SMS_NORMAL.apply(tv); // 20
 		}
+
+		// 确认按钮
 		{
 			Button bt = new Button(ctx);
-			LayoutParams lp = new LayoutParams(LP_WW);
+			LayoutParams lp = new LayoutParams(LP_MW);
 			lp.gravity = Gravity.CENTER_HORIZONTAL;
+			ZZDimenRect.CC_SMS_PADDING.apply_margins(lp);
 			lp.topMargin = ZZDimen.dip2px(30);
 			ll.addView(bt, lp);
 			bt.setId(IDC.BT_PROMPT.id());
@@ -414,6 +407,8 @@ class PaymentSMSLayout extends CCBaseLayout {
 	@Override
 	protected void onInitUI(Context ctx) {
 		FrameLayout fl = getSubjectContainer();
+
+		resetHeader(ctx);
 
 		// 出错提示界面
 		{
@@ -1457,18 +1452,14 @@ class SMSAmountAdapter extends BaseAdapter {
 		Holder h = new Holder();
 
 		FrameLayout rv = new FrameLayout(ctx);
-		Drawable d = CCImg.getStateListDrawable(ctx, CCImg.ZF_WXZ, CCImg.ZF_XZ);
+		Drawable d = ResConstants.CCImg.getStateListDrawable(mContext, ResConstants.CCImg.PANEL_BACKGROUND, ResConstants.CCImg.CHARGE_PULL_CANDIDATE_SEL);
 		rv.setBackgroundDrawable(d);
-		// rv.setBackgroundDrawable(Utils.getStateListDrawable(mContext,
-		// "money_dx1.png", "money_dx.png"));
 		rv.setTag(h);
 
 		LinearLayout ll = new LinearLayout(ctx);
-		ll.setPadding(mItemPadding.left, mItemPadding.top, mItemPadding.right,
-				mItemPadding.bottom);
+		ll.setPadding(mItemPadding.left, mItemPadding.top, mItemPadding.right, mItemPadding.bottom);
 		ll.setOrientation(LinearLayout.HORIZONTAL);
-		rv.addView(ll, new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
-				LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+		rv.addView(ll, new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.CENTER));
 
 		TextView tv;
 		{

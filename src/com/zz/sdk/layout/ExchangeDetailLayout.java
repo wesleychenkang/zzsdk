@@ -172,6 +172,8 @@ class ExchangeDetailLayout extends CCBaseLayout {
 	}
 
 	protected void onInitUI(Context ctx) {
+		resetHeader(ctx);
+
 		FrameLayout rv = getSubjectContainer();
 		{
 			ScrollView sv = new ScrollView(ctx);
