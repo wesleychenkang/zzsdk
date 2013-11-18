@@ -32,7 +32,9 @@ import com.zz.sdk.entity.result.BaseResult;
 import com.zz.sdk.entity.result.ResultAutoLogin;
 import com.zz.sdk.entity.result.ResultBalance;
 import com.zz.sdk.entity.result.ResultChangePwd;
+import com.zz.sdk.entity.result.ResultDeviceRegister;
 import com.zz.sdk.entity.result.ResultLogin;
+import com.zz.sdk.entity.result.ResultOrder;
 import com.zz.sdk.entity.result.ResultPayList;
 import com.zz.sdk.entity.result.ResultPayMessage;
 import com.zz.sdk.entity.result.ResultPropList;
@@ -55,7 +57,8 @@ public class ConnectionUtil {
 	private static final String K_SERVER_ID = "serverId";
 	private static final String K_LOGIN_NAME = "loginName";
 	private static final String K_PASSWORD = "password";
-
+	private static final String K_DEVICE_NUM = "deviceNum";
+	private static final String K_IMSI = "imsi";
 	private Context mContext;
 
 	public ConnectionUtil(Context ctx) {
@@ -75,6 +78,8 @@ public class ConnectionUtil {
 			params.put(K_PROJECT_ID, Utils.getProjectId(mContext));
 		if (!params.containsKey(K_SERVER_ID))
 			params.put(K_SERVER_ID, Utils.getGameServerId(mContext));
+		if (!params.containsKey(K_DEVICE_NUM))
+			params.put(K_DEVICE_NUM, Utils.getDeviceNum(mContext));
 		String sign = Md5Code.encodeMd5Parameter(params);
 		List<BasicNameValuePair> npv = new ArrayList<BasicNameValuePair>();
 		for (Entry<String, String> e : params.entrySet()) {
@@ -100,7 +105,7 @@ public class ConnectionUtil {
 	 *         {@link JsonParseInterface#parseJson(JSONObject)} 构造数据。如
 	 *         {@link BaseResult#isUsed()} {@link BaseResult#isSuccess()}等
 	 */
-	private <T> T doRequest(Class<T> clazz, String url,
+	private <T extends JsonParseInterface> T doRequest(Class<T> clazz, String url,
 			List<BasicNameValuePair> nvps, int attempts) {
 		T br = null;
 		try {
@@ -129,8 +134,7 @@ public class ConnectionUtil {
 					// 如果内容无效，则使用空数据，表明至少有过返回值
 					o = new JSONObject();
 				}
-				if (br instanceof JsonParseInterface)
-					((JsonParseInterface) br).parseJson(o);
+				br.parseJson(o);
 			}
 		} catch (InstantiationException e) {
 			e.printStackTrace();
@@ -145,7 +149,7 @@ public class ConnectionUtil {
 		return br;
 	}
 
-	private <T> T doRequest(Class<T> clazz, String url, int attempts,
+	private <T extends JsonParseInterface> T doRequest(Class<T> clazz, String url, int attempts,
 			String... key_val) {
 		HashMap<String, String> param = new HashMap<String, String>();
 		if (key_val != null && key_val.length > 0) {
@@ -268,7 +272,7 @@ public class ConnectionUtil {
 			imsi = Utils.getIMSI(mContext);
 		}
 		return doRequest(ResultAutoLogin.class, Constants.QUICK_LOGIN_REQ, 2 //
-				, "imsi", imsi//
+				, K_IMSI, imsi//
 		);
 	}
 
@@ -281,7 +285,7 @@ public class ConnectionUtil {
 		String imsi = Utils.getIMSI(mContext);
 		String e_password = Md5Code.encodePassword(password);
 		return doRequest(ResultRegister.class, Constants.REG_REQ, 2 //
-				, "imsi", imsi //
+				, K_IMSI, imsi //
 				, K_LOGIN_NAME, loginName //
 				, K_PASSWORD, e_password //
 		);
@@ -290,7 +294,7 @@ public class ConnectionUtil {
 	/** 获取QiHoo返回的token get360UserInfo(获取360用户信息） */
 	public ResultQihoo getAcessToken(String productId, String authCode) {
 		return doRequest(ResultQihoo.class, Constants.GET_TOKEN, 2 //
-				, "productId", productId //
+				, K_PRODUCT_ID, productId //
 				, "authCode", authCode //
 		);
 	}
@@ -312,7 +316,7 @@ public class ConnectionUtil {
 				, K_LOGIN_NAME, user //
 				, K_PASSWORD, Md5Code.encodePassword(oldPassword) //
 				, "newPassword", Md5Code.encodePassword(newPassword) //
-				, "productId", Utils.getProductId(mContext) //
+				, K_PRODUCT_ID, Utils.getProductId(mContext) //
 		);
 	}
 
@@ -327,8 +331,7 @@ public class ConnectionUtil {
 	 * @param submitAmount
 	 *            金额（可选）
 	 */
-	public BaseResult canclePay(String OrderNum, String payMsg,
-			String submitAmount) {
+	public BaseResult cancelPay(String OrderNum, String payMsg, String submitAmount) {
 		return doRequest(BaseResult.class, Constants.NPM_REQ, 1 //
 				, "cmgeOrderNum", OrderNum //
 				, "payMsg", payMsg //
@@ -450,8 +453,9 @@ public class ConnectionUtil {
 			// result1.codes = "-1";
 			return null;
 		}
-		all.add(new BasicNameValuePair("productId", Utils
+		all.add(new BasicNameValuePair(K_PRODUCT_ID, Utils
 				.getProductId(mContext)));
+		all.add(new BasicNameValuePair(K_DEVICE_NUM, Utils.getDeviceNum(mContext)));
 		Md5Code.addMd5Parameter(all);
 		return doRequest(clazz, Constants.URL_SERVER_SRV + payParam.part, all,
 				1);
@@ -464,15 +468,15 @@ public class ConnectionUtil {
 	 */
 	public ResultPayList getPaymentList(PayParam charge) {
 		return doRequest(ResultPayList.class, Constants.GPL_REQ, 2,
-				"requestId", "", "serverId", charge.serverId, K_LOGIN_NAME,
+				"requestId", "", K_SERVER_ID, charge.serverId, K_LOGIN_NAME,
 				charge.loginName);
 	}
 
 	/**
 	 * 查询订单 queryOrder(查询订单状态）0成功|1失败 0成功|其它失败
 	 */
-	public BaseResult checkOrder(String ordrNumber) {
-		return doRequest(BaseResult.class, Constants.GPM_QO, 1 //
+	public ResultOrder checkOrder(String ordrNumber) {
+		return doRequest(ResultOrder.class, Constants.GPM_QO, 1 //
 				, "cmgeOrderNum", ordrNumber //
 		);
 	}
@@ -500,6 +504,11 @@ public class ConnectionUtil {
 				, "rowstart", String.valueOf(rowstart) //
 				, "rowcount", String.valueOf(rowcount) //
 		);
+	}
+
+	/** 向服务器注册设备 */
+	public ResultDeviceRegister registerDevice() {
+		return doRequest(ResultDeviceRegister.class, Constants.GPRO_DREG, 2, "deviceNum", Utils.getDeviceNum(mContext));
 	}
 
 	//

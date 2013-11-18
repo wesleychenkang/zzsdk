@@ -48,7 +48,7 @@ public class ResultPayList extends BaseResult {
 			JSONObject json = super.buildJson();
 			// TODO: mPaies
 
-			setString(json, K_ZYCOIN, String.valueOf(mZYCoin));
+			json.put(K_ZYCOIN, String.valueOf(mZYCoin));
 			return json;
 		} catch (Exception e) {
 			e.printStackTrace();

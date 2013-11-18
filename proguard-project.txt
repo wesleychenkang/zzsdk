@@ -52,7 +52,7 @@
 
 # 保存留构造函数
 -keepclassmembers  class * extends com.zz.sdk.layout.BaseLayout {  
-    <init>(android.content.Context, com.zz.sdk.activity.ParamChain);  
+    <init>(android.content.Context, com.zz.sdk.ParamChain);  
 } 
 
 -keep public class com.zz.sdk.ParamChain {

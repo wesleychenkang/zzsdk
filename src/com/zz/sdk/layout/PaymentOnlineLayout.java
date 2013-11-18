@@ -33,6 +33,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.zz.sdk.BuildConfig;
 import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.ParamChain;
 import com.zz.sdk.ParamChain.ValType;
@@ -86,6 +87,7 @@ class PaymentOnlineLayout extends BaseLayout {
 
 	/** 支付状态 */
 	private int mPayResultState;
+	private boolean mIsExitForce;
 
 	static enum IDC implements IIDC {
 		ACT_WAIT,
@@ -116,6 +118,7 @@ class PaymentOnlineLayout extends BaseLayout {
 	}
 
 	protected void onInitEnv(Context ctx, ParamChain env) {
+		mIsExitForce = false;
 		mUrl = env.get(KeyPaymentList.K_PAY_ONLINE_URL, String.class);
 		mUrlGuard = env
 				.get(KeyPaymentList.K_PAY_ONLINE_URL_GUARD, String.class);
@@ -301,7 +304,7 @@ class PaymentOnlineLayout extends BaseLayout {
 							} catch (UnsupportedEncodingException e1) {
 								e1.printStackTrace();
 							}
-							cu.canclePay(order, newmessage, submitAmount);
+							cu.cancelPay(order, newmessage, submitAmount);
 						}
 					}.start();
 				}
@@ -309,8 +312,49 @@ class PaymentOnlineLayout extends BaseLayout {
 		}
 	}
 
+
+	private boolean show_exit_dialog() {
+		if (mIsExitForce) {
+			return false;
+		}
+
+		DialogInterface.OnClickListener ok = new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				mIsExitForce = true;
+				removeDialogMonitor(dialog);
+				removeExitTrigger();
+				callHost_exit();
+			}
+		};
+		DialogInterface.OnClickListener cancel = new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				removeDialogMonitor(dialog);
+				dialog.dismiss();
+			}
+		};
+
+		AlertDialog dialog = new AlertDialog.Builder(getActivity())
+				.setIcon(CCImg.getPayChannelIcon(mType).getDrawble(getContext()))
+				.setTitle(ZZStr.CC_PROMPT_TITLE.str())
+				.setMessage(ZZStr.CC_RECHARGE_WEB_TIP_ABORT.str())
+				.setPositiveButton(android.R.string.yes, ok)
+				.setNegativeButton(android.R.string.cancel, cancel).create();
+		dialog.setCancelable(true);
+		dialog.setCanceledOnTouchOutside(true);
+		dialog.show();
+		addDialogMonitor(dialog);
+
+		return true;
+	}
+
 	@Override
 	public boolean isExitEnabled(boolean isBack) {
+		if (!isBack) {
+			if (show_exit_dialog())
+				return false;
+		}
 		boolean ret = super.isExitEnabled(isBack);
 		if (ret) {
 		}
@@ -375,7 +419,7 @@ class PaymentOnlineLayout extends BaseLayout {
 						.setIcon(
 								CCImg.getPayChannelIcon(mType).getDrawble(
 										getContext()))
-						.setTitle(title == null ? "提示" : title)
+						.setTitle(title == null ? ZZStr.CC_PROMPT_TITLE.str() : title)
 						.setMessage(sb.toString())
 						.setPositiveButton(android.R.string.ok,
 								new DialogInterface.OnClickListener() {

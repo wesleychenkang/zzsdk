@@ -25,7 +25,7 @@ public class ResultBalance extends BaseResult {
 	public JSONObject buildJson() {
 		try {
 			JSONObject json = super.buildJson();
-			setString(json, K_ZYCOIN, String.valueOf(mZYCoin));
+			json.put(K_ZYCOIN, String.valueOf(mZYCoin));
 			return json;
 		} catch (Exception e) {
 			e.printStackTrace();

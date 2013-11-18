@@ -5,7 +5,7 @@ package com.zz.lib.utils;
  */
 public class Sign {
 
-	public static final String calc(final String[] ss) throws Exception {
+	public static final String calc(final String[] ss) {
 		if (ss == null)
 			return "";
 		StringBuffer sb = new StringBuffer();
@@ -17,11 +17,11 @@ public class Sign {
 		return MD5Util.calc(sb.toString());
 	}
 
-	public static final String calc(final Object... p) {
+	public static final String calcObj(final Object... p) {
 		String pp[] = new String[p.length];
 		for (int i = 0, c = p.length; i < c; i++) {
 			pp[i] = (p == null ? null : p.toString());
 		}
-		return null;
+		return calc(pp);
 	}
 }

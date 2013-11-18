@@ -196,7 +196,7 @@ class PaymentUnionLayout extends BaseLayout {
 
 						@Override
 						public void run() {
-							cu.canclePay(order, "银联内取消支付", submitAmount);
+							cu.cancelPay(order, "银联内取消支付", submitAmount);
 						}
 					}.start();
 				}

@@ -35,7 +35,7 @@ public class ResultRequestYeePay extends ResultRequest {
 	public JSONObject buildJson() {
 		try {
 			JSONObject json = super.buildJson();
-			setString(json, K_MESSAGE, mMessage);
+			json.put(K_MESSAGE, mMessage);
 			return json;
 		} catch (Exception e) {
 			e.printStackTrace();

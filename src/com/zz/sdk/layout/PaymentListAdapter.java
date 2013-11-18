@@ -54,8 +54,7 @@ class PaymentListAdapter extends BaseAdapter {
 
 	@Override
 	public Object getItem(int position) {
-		return (mPayChannels == null || position < 0 || position >= mPayChannels.length) ? null
-				: mPayChannels[position];
+		return (mPayChannels == null || position < 0 || position >= mPayChannels.length) ? null : mPayChannels[position];
 	}
 
 	@Override
@@ -72,27 +71,25 @@ class PaymentListAdapter extends BaseAdapter {
 		TextView holder = (TextView) convertView;
 		if (holder == null) {
 			holder = new TextView(mContext);
-			// holder.setBackgroundDrawable(Utils.getStateListDrawable(
-			// mActivity, "type_bg1.png", "type_bg.png"));
-			holder.setGravity(Gravity.CENTER);
+			holder.setGravity(Gravity.CENTER_HORIZONTAL|Gravity.BOTTOM);
 			holder.setSingleLine();
-			holder.setTextColor(ZZFontColor.CC_PAYTYPE_ITEM.color());
-			holder.setLayoutParams(new AbsListView.LayoutParams(
-					LayoutParams.MATCH_PARENT, mItemHeight));
-			ZZDimenRect.CC_GRIDVIEW_ITEM_PADDDING.apply_padding(holder);
+			holder.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT, mItemHeight));
 			ZZFontSize.CC_PAYTYPE_ITEM.apply(holder);
 		}
 		if (position == mCurPos) {
-			holder.setBackgroundDrawable(CCImg.ZF_XZ.getDrawble(mContext));
+			holder.setTextColor(ZZFontColor.CC_PAYTYPE_ITEM.color());
+			holder.setBackgroundDrawable(CCImg.PAYLIST_SELECTED.getDrawble(mContext));
 		} else {
-			holder.setBackgroundDrawable(CCImg.getStateListDrawable(mContext,
-					CCImg.ZF_WXZ, CCImg.ZF_XZ));
+			holder.setTextColor(ZZFontColor.CC_PAYTYPE_ITEM_NORMAL.color());
+			holder.setBackgroundDrawable(CCImg.getStateListDrawable(mContext, CCImg.PAYLIST_NORMAL, CCImg.ZF_XZ));
 		}
+		ZZDimenRect.CC_GRIDVIEW_ITEM_PADDDING.apply_padding(holder);
 		holder.setText(mPayChannels[position].channelName);
 		CCImg icon = CCImg.getPayChannelIcon(mPayChannels[position].type);
-		if (icon != null)
-			holder.setCompoundDrawablesWithIntrinsicBounds(
-					icon.getDrawble(mContext), null, null, null);
+		if (icon != null) {
+			holder.setCompoundDrawablesWithIntrinsicBounds(null, icon.getDrawble(mContext), null, null);
+			holder.setCompoundDrawablePadding(ZZDimen.dip2px(4));
+		}
 		return holder;
 	}
 }

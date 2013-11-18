@@ -1,13 +1,9 @@
 package com.zz.sdk.layout;
 
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
@@ -30,7 +26,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
@@ -52,7 +47,6 @@ import com.zz.sdk.entity.Result;
 import com.zz.sdk.entity.SMSChannelMessage;
 import com.zz.sdk.entity.UserAction;
 import com.zz.sdk.entity.result.BaseResult;
-import com.zz.sdk.entity.result.ResultAutoLogin;
 import com.zz.sdk.entity.result.ResultPayList;
 import com.zz.sdk.entity.result.ResultRequest;
 import com.zz.sdk.entity.result.ResultRequestAlipayTenpay;
@@ -72,6 +66,11 @@ import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
 import com.zz.sdk.util.UserUtil;
 import com.zz.sdk.util.Utils;
+
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 //import com.zz.sdk.util.GetDataImpl;
 
@@ -538,6 +537,11 @@ public class PaymentListLayout extends CCBaseLayout {
 			}
 		} else {
 			hidePopup();
+
+			// 强制让支付方式获取焦点，修改　
+			//   "华为U9200手机上：从话费支付返回到支付列表界面时，列表不可操作"　
+			// 的问题.  nxliao 2013.11.14
+			set_child_focuse(IDC.ACT_PAY_GRID);
 		}
 	}
 
@@ -943,11 +947,10 @@ public class PaymentListLayout extends CCBaseLayout {
 	private void prepparePayType_Card(Context ctx, LinearLayout rv,
 			int limitCard, int limitPasswd) {
 		TextView tv;
-		tv = create_normal_label(ctx, ZZStr.CC_CARDNUM_DESC);
+		tv = create_normal_label_shadow(ctx, ZZStr.CC_CARDNUM_DESC);
 		rv.addView(tv, new LayoutParams(LP_WW));
+		ZZDimenRect.CC_LABEL_PADDING.apply_padding(tv);
 
-		int padding_h = ZZDimen.CC_RECHARGE_COUNT_PADDING_H.px();
-		int padding_v = ZZDimen.CC_RECHARGE_COUNT_PADDING_V.px();
 		// 卡号
 		tv = create_normal_input(ctx, null, ZZFontColor.CC_RECHARGE_INPUT,
 				ZZFontSize.CC_RECHARGE_INPUT, limitCard);
@@ -955,16 +958,16 @@ public class PaymentListLayout extends CCBaseLayout {
 				LayoutParams.WRAP_CONTENT/* ZZDimen.CC_CARD_HEIGHT.px() */));
 		tv.setId(IDC.ED_CARD.id());
 		tv.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
-		tv.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
-				CCImg.RECHARGE_BAN, CCImg.RECHARGE_INPUT));
+		tv.setBackgroundDrawable(CCImg.RECHARGE_INPUT_BG.getDrawble(ctx));
 		if (limitCard > 0) {
 			String hint = String.format(ZZStr.CC_CARDNUM_HINT.str(), limitCard);
 			tv.setHint(hint);
 		}
-		tv.setPadding(padding_h, padding_v, padding_h, padding_v);
+		ZZDimenRect.CC_RECHARGE_INPUT.apply_padding(tv);
 
-		tv = create_normal_label(ctx, ZZStr.CC_PASSWD_DESC);
+		tv = create_normal_label_shadow(ctx, ZZStr.CC_PASSWD_DESC);
 		rv.addView(tv, new LayoutParams(LP_WW));
+		ZZDimenRect.CC_LABEL_PADDING.apply_padding(tv);
 
 		// 密码
 		tv = create_normal_input(ctx, null, ZZFontColor.CC_RECHARGE_INPUT,
@@ -973,14 +976,13 @@ public class PaymentListLayout extends CCBaseLayout {
 				LayoutParams.WRAP_CONTENT/* ZZDimen.CC_CARD_HEIGHT.px() */));
 		tv.setId(IDC.ED_PASSWD.id());
 		tv.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
-		tv.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
-				CCImg.RECHARGE_BAN, CCImg.RECHARGE_INPUT));
+		tv.setBackgroundDrawable(CCImg.RECHARGE_INPUT_BG.getDrawble(ctx));
 		if (limitPasswd > 0) {
 			String hint = String.format(ZZStr.CC_CARDNUM_HINT.str(),
 					limitPasswd);
 			tv.setHint(hint);
 		}
-		tv.setPadding(padding_h, padding_v, padding_h, padding_v);
+		ZZDimenRect.CC_RECHARGE_INPUT.apply_padding(tv);
 	}
 
 	private void postUIChangedMsg(int id) {
@@ -993,19 +995,31 @@ public class PaymentListLayout extends CCBaseLayout {
 	private View createView_Charge(Context ctx) {
 		// 主视图
 		LinearLayout rv = new LinearLayout(ctx);
-		ZZDimenRect.CC_ROOTVIEW_PADDING.apply_padding(rv);
 		rv.setOrientation(LinearLayout.VERTICAL);
 
 		LinearLayout ll;
-		TextView tv;
+		LayoutParams lp;
 
 		// 充值数量输入
 		{
-			ll = create_normal_pannel(ctx, rv);
+			LinearLayout header = new LinearLayout(ctx);
+			rv.addView(header, new LayoutParams(LP_MW));
+			header.setOrientation(VERTICAL);
+			header.setBackgroundDrawable(CCImg.PANEL_BACKGROUND.getDrawble(ctx));
+			ZZDimenRect.CC_PANEL_PADDING.apply_padding(header);
 
-			tv = create_normal_label(ctx, ZZStr.CC_RECHARGE_COUNT_TITLE);
+			// 余额
+			createView_balance(ctx, header);
+
+			ll = new LinearLayout(ctx); // create_normal_pannel(ctx, header);
+			header.addView(ll, new LayoutParams(LP_MW));
+			ll.setOrientation(VERTICAL);
+
+			TextView tv;
+			tv = create_normal_label_shadow(ctx, ZZStr.CC_RECHARGE_COUNT_TITLE);
 			ll.addView(tv, new LayoutParams(LP_MW));
 			tv.setId(IDC.TV_RECHARGE_COUNT.id());
+			ZZDimenRect.CC_LABEL_PADDING.apply_padding(tv);
 
 			LinearLayout ll2;
 
@@ -1018,24 +1032,21 @@ public class PaymentListLayout extends CCBaseLayout {
 				// TODO: 如果是定额不可编辑，则这里使用 TextView 即可
 				if (isCanModifyAmount()) {
 					tv = create_normal_input(ctx, ZZStr.CC_RECHAGRE_COUNT_HINT,
-							ZZFontColor.CC_RECHARGE_INPUT,
-							ZZFontSize.CC_RECHARGE_INPUT, 8);
+					                         ZZFontColor.CC_RECHARGE_INPUT,
+					                         ZZFontSize.CC_RECHARGE_INPUT, 8);
 				} else {
 					tv = create_normal_label(ctx, null);
 					tv.setTextColor(ZZFontColor.CC_RECHARGE_INPUT.color());
 				}
 				ll2.addView(tv, new LayoutParams(LayoutParams.MATCH_PARENT,
-						LayoutParams.MATCH_PARENT, 1.0f));
+				                                 LayoutParams.WRAP_CONTENT, 1.0f));
 				tv.setId(IDC.ED_RECHARGE_COUNT.id());
-				tv.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
-						CCImg.RECHARGE_BAN, CCImg.RECHARGE_INPUT));
+				tv.setBackgroundDrawable(CCImg.RECHARGE_INPUT_BG.getDrawble(ctx));
 				tv.addTextChangedListener(new MyTextWatcher(
 						IDC.ED_RECHARGE_COUNT.id()));
 				tv.setInputType(EditorInfo.TYPE_CLASS_NUMBER
 				/* | EditorInfo.TYPE_NUMBER_FLAG_DECIMAL */);
-				int padding_h = ZZDimen.CC_RECHARGE_COUNT_PADDING_H.px();
-				int padding_v = ZZDimen.CC_RECHARGE_COUNT_PADDING_V.px();
-				tv.setPadding(padding_h, padding_v, padding_h, padding_v);
+				ZZDimenRect.CC_RECHARGE_INPUT.apply_padding(tv);
 
 				tv = create_normal_label(ctx, ZZStr.CC_RECHAGRE_COUNT_DESC);
 				ll2.addView(tv, new LayoutParams(LP_WM));
@@ -1043,10 +1054,12 @@ public class PaymentListLayout extends CCBaseLayout {
 				tv.setVisibility(GONE);
 
 				ImageButton ib = new ImageButton(ctx);
-				ll2.addView(ib, new LayoutParams(LP_WW));
+				lp = new LayoutParams(LP_WW);
+				lp.gravity = Gravity.CENTER_VERTICAL;
+				ll2.addView(ib, lp);
 				ib.setId(IDC.BT_RECHARGE_PULL.id());
 				ib.setBackgroundDrawable(null);
-				ib.setImageDrawable(CCImg.CHARGE_PULL.getDrawble(ctx));
+				ib.setImageDrawable(CCImg.getStateListDrawable(ctx, CCImg.CHARGE_PULL, CCImg.CHARGE_PULL_CLICK));
 				ib.setScaleType(ScaleType.CENTER_INSIDE);
 				ib.setOnClickListener(this);
 
@@ -1076,21 +1089,24 @@ public class PaymentListLayout extends CCBaseLayout {
 
 			// 附加显示
 			{
-				tv = create_normal_label(ctx, ZZStr.CC_RECHARGE_COST_SUMMARY);
+				tv = create_normal_label_shadow(ctx, ZZStr.CC_RECHARGE_COST_SUMMARY);
 				ll.addView(tv, new LayoutParams(LP_MW));
 				tv.setSingleLine(false);
 				tv.setId(IDC.TV_RECHARGE_COST_SUMMARY.id());
 				tv.setTextColor(ZZFontColor.CC_RECHARGE_WARN.color());
 				tv.setVisibility(GONE);
+				ZZDimenRect.CC_LABEL_PADDING.apply_padding(tv);
 			}
 		}
 
 		// 支付方式
 		{
+			TextView tv;
 			ll = create_normal_pannel(ctx, rv);
-
-			tv = create_normal_label(ctx, ZZStr.CC_PAYCHANNEL_TITLE);
+			ll.setBackgroundDrawable(CCImg.PANEL_BACKGROUND.getDrawble(ctx));
+			tv = create_normal_label_shadow(ctx, ZZStr.CC_PAYCHANNEL_TITLE);
 			ll.addView(tv, new LayoutParams(LP_MW));
+			ZZDimenRect.CC_PANEL_PADDING.apply_padding(tv);
 
 			// GridView 展示支付方式
 			GridView gv = new TypeGridView(ctx);
@@ -1112,28 +1128,34 @@ public class PaymentListLayout extends CCBaseLayout {
 
 			mPaymentListAdapter = new PaymentListAdapter(ctx, null);
 			gv.setAdapter(mPaymentListAdapter);
+
+			// 应付金额
+			if (true) {
+				LinearLayout ll2;
+				ll2 = new LinearLayout(ctx);
+				ll2.setOrientation(HORIZONTAL);
+				lp = new LayoutParams(LP_WW);
+				lp.gravity = Gravity.CENTER_VERTICAL|Gravity.RIGHT;
+				lp.rightMargin = ZZDimen.dip2px(24);
+				ll.addView(ll2,lp);
+				ZZDimenRect.CC_LABEL_PADDING.apply_padding(ll2);
+
+				tv = create_normal_label(ctx, ZZStr.CC_RECHAGRE_COST_DESC);
+				ll2.addView(tv, new LayoutParams(LP_WM));
+
+				tv = create_normal_label_shadow(ctx, null);
+				ll2.addView(tv, new LayoutParams(LP_WM));
+				tv.setId(IDC.TV_RECHARGE_COST.id());
+				tv.setTextColor(ZZFontColor.CC_RECHARGE_COST.color());
+				ZZFontSize.CC_RECHARGE_COST.apply(tv);
+			}
 		}
 
-		// 应付金额
-		if (true) {
-			LinearLayout ll2;
-			ll2 = new LinearLayout(ctx);
-			ll2.setOrientation(HORIZONTAL);
-			ll.addView(ll2);
-
-			tv = create_normal_label(ctx, ZZStr.CC_RECHAGRE_COST_DESC);
-			ll2.addView(tv, new LayoutParams(LP_WM));
-
-			tv = create_normal_label(ctx, null);
-			ll2.addView(tv, new LayoutParams(LP_WM));
-			tv.setId(IDC.TV_RECHARGE_COST.id());
-			tv.setTextColor(ZZFontColor.CC_RECHARGE_COST.color());
-			ZZFontSize.CC_RECHARGE_COST.apply(tv);
-		}
 
 		// 输入面板
 		{
 			ll = create_normal_pannel(ctx, rv);
+			ZZDimenRect.CC_PANEL_PADDING.apply_padding(ll);
 
 			ViewSwitcher vs = new ViewSwitcher(ctx);
 			ll.addView(vs, new LayoutParams(LP_MW));
@@ -1160,10 +1182,16 @@ public class PaymentListLayout extends CCBaseLayout {
 
 		// 确认充值
 		{
-			ll = create_normal_pannel(ctx, rv);
+//			ll = create_normal_pannel(ctx, rv);
+
+			ll = getFooterContainer();
 
 			Button bt = new Button(ctx);
-			ll.addView(bt, new LayoutParams(LP_WW));
+			lp = new LayoutParams(LP_MW);
+			Rect rc = ZZDimenRect.CC_ROOTVIEW_PADDING.rect();
+			lp.setMargins(rc.left, 0, rc.right, 0);
+			ll.addView(bt, 0, lp);
+			bt.setVisibility(GONE);
 			bt.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
 					CCImg.BUTTON, CCImg.BUTTON_CLICK));
 			bt.setId(IDC.BT_RECHARGE_COMMIT.id());
@@ -1184,27 +1212,26 @@ public class PaymentListLayout extends CCBaseLayout {
 
 		// 等待加载列表
 		{
-			RelativeLayout rl = new RelativeLayout(ctx);
-			rl.setId(IDC.ACT_WAIT.id());
-			rl.setVisibility(VISIBLE);
-			actView.addView(rl, new FrameLayout.LayoutParams(LP_MM));
+			LinearLayout ll = new LinearLayout(ctx);
+			actView.addView(ll, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+			ll.setId(IDC.ACT_WAIT.id());
+			ll.setVisibility(VISIBLE);
+			ll.setOrientation(VERTICAL);
 
-			RelativeLayout.LayoutParams lp;
 			// 添加一个初始显示
 			ProgressBar pb = new ProgressBar(ctx);
 			pb.setIndeterminate(true);
 			pb.setId(IDC.PB_WAIT.id());
-			lp = new RelativeLayout.LayoutParams(LP_WW);
-			lp.addRule(RelativeLayout.CENTER_IN_PARENT);
-			rl.addView(pb, lp);
+			LayoutParams lp = new LayoutParams(LP_WW);
+			lp.gravity = Gravity.CENTER_HORIZONTAL;
+			ll.addView(pb, lp);
 
+			// 等待提示语
 			TextView tv = create_normal_label(ctx, ZZStr.CC_HINT_LOADING);
 			tv.setGravity(Gravity.CENTER);
-			lp = new RelativeLayout.LayoutParams(LP_WW);
-			lp.addRule(RelativeLayout.CENTER_IN_PARENT);
-			lp.addRule(RelativeLayout.BELOW, IDC.PB_WAIT.id());
-			rl.addView(tv, lp);
-			tv.setTextColor(Color.GRAY);
+			ll.addView(tv, new LayoutParams(LP_MW));
+			tv.setTextColor(ZZFontColor.CC_RECHARGE_DESC.color());
+			tv.setShadowLayer(0, 0, 0, 0);
 		}
 
 		// 工作区
@@ -1213,6 +1240,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			ScrollView sv = new ScrollView(ctx);
 			sv.setId(IDC.ACT_PAY.id());
 			sv.setVisibility(GONE);
+			sv.setVerticalScrollBarEnabled(false);
 			actView.addView(sv, new FrameLayout.LayoutParams(LP_MM));
 
 			View rv = createView_Charge(ctx);
@@ -1222,14 +1250,12 @@ public class PaymentListLayout extends CCBaseLayout {
 		// 加载列表失败
 		{
 			TextView mErr;
-			mErr = new TextView(mContext);
+			mErr = create_normal_label_shadow(ctx, ZZStr.CC_PAYCHANNEL_ERROR);
 			mErr.setVisibility(View.GONE);
 			mErr.setId(IDC.ACT_ERR.id());
-			actView.addView(mErr, new FrameLayout.LayoutParams(
-					LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-			mErr.setText("很抱歉！未能获取到可用的支付通道。");
-			mErr.setTextColor(0xfffdc581);
-			mErr.setTextSize(16);
+			actView.addView(mErr, new FrameLayout.LayoutParams(LP_MM));
+			mErr.setTextColor(ZZFontColor.CC_RECHARGE_COST.color());
+			mErr.setTextSize(18);
 			mErr.setGravity(Gravity.CENTER);
 		}
 
@@ -1250,6 +1276,7 @@ public class PaymentListLayout extends CCBaseLayout {
 				((ViewGroup) v).removeAllViews();
 			}
 		}
+		set_child_visibility(IDC.BT_RECHARGE_COMMIT, visibility ? VISIBLE : GONE);
 
 		set_child_visibility(IDC.ACT_PAY, visibility ? VISIBLE : GONE);
 		set_child_visibility(IDC.ACT_ERR, visibility ? GONE : VISIBLE);
@@ -1817,11 +1844,13 @@ public class PaymentListLayout extends CCBaseLayout {
 			ll.addView(tv, new LayoutParams(LP_WW));
 		} else {
 			GridView gv = new TypeGridView(mContext);
+			gv.setBackgroundDrawable(CCImg.BACKGROUND.getDrawble(ctx));
+			ZZDimenRect.CC_PANEL_PADDING.apply_padding(gv);
 			ll.addView(gv, new LayoutParams(LP_MW));
 			gv.setSelector(android.R.color.transparent);
 			gv.setColumnWidth(ZZDimen.dip2px(80));
-			gv.setHorizontalSpacing(0);
-			gv.setVerticalSpacing(0);
+			gv.setHorizontalSpacing(ZZDimen.dip2px(2));
+			gv.setVerticalSpacing(ZZDimen.dip2px(2));
 			gv.setNumColumns(GridView.AUTO_FIT);
 
 			CoinCandidateAdapter adapter = new CoinCandidateAdapter(mContext,
@@ -1930,6 +1959,7 @@ public class PaymentListLayout extends CCBaseLayout {
 
 			if (DEBUG) {
 				Logger.d("PayListTask: run!");
+				DebugFlags.debug_TrySleep(0, 2);
 			}
 
 			if (charge.loginName == null) {

@@ -111,6 +111,8 @@ public class ExchangeLayout extends CCBaseLayout {
 
 	protected void onInitUI(Context ctx) {
 
+		resetHeader(ctx);
+
 		mHandler = new Handler();
 
 		CustomListView lv = new CustomListView(ctx);
@@ -120,7 +122,6 @@ public class ExchangeLayout extends CCBaseLayout {
 		lv.startRefresh();
 		lv.setDivider(null);
 		lv.setDividerHeight(16);
-		ZZDimenRect.CC_ROOTVIEW_PADDING.apply_padding(lv);
 
 		getSubjectContainer().addView(lv, new FrameLayout.LayoutParams(LP_MM));
 		mListView = lv;

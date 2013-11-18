@@ -9,3 +9,6 @@ proguard/
 bak/
 javadoc/
 tmp/
+
+out/
+/test/res/

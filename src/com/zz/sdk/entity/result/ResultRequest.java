@@ -14,7 +14,7 @@ public class ResultRequest extends BaseResult {
 	public JSONObject buildJson() {
 		try {
 			JSONObject json = super.buildJson();
-			setString(json, K_CMGE_ORDER_NUM, mCmgeOrderNum);
+			json.put(K_CMGE_ORDER_NUM, mCmgeOrderNum);
 			return json;
 		} catch (Exception e) {
 			e.printStackTrace();

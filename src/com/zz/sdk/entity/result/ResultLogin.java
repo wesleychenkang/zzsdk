@@ -25,9 +25,9 @@ public class ResultLogin extends BaseResult {
 	public JSONObject buildJson() {
 		try {
 			JSONObject json = super.buildJson();
-			setString(json, K_ID, mId);
-			setString(json, K_SDKUSERID, mSdkUserId);
-			setString(json, K_USERNAME, mUserName);
+			json.put(K_ID, mId);
+			json.put(K_SDKUSERID, mSdkUserId);
+			json.put(K_USERNAME, mUserName);
 			return json;
 		} catch (Exception e) {
 			e.printStackTrace();

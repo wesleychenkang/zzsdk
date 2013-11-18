@@ -16,8 +16,8 @@ public class ResultAutoLogin extends ResultLogin {
 	public JSONObject buildJson() {
 		try {
 			JSONObject json = super.buildJson();
-			setString(json, K_USER, mUser);
-			setString(json, K_PASSWORD, mPassword);
+			json.put(K_USER, mUser);
+			json.put(K_PASSWORD, mPassword);
 			return json;
 		} catch (Exception e) {
 			e.printStackTrace();

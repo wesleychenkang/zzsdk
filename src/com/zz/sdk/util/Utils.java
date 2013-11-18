@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.codec.binary.Base64;
@@ -65,6 +66,8 @@ public class Utils {
 	private static String CACHE_GAME_SERVER_ID = null;
 
 	private static String CACHE_PRODUCT_ID = null;
+
+	private static String CACHE_DEVICE_NUM = null;
 
 	private static final NumberFormat PRICE_FORMAT = new DecimalFormat("#.##");
 
@@ -733,5 +736,13 @@ public class Utils {
 
 	public static boolean checkPermission_ReceiveSMS(Context ctx) {
 		return checkPermission(ctx, permission.RECEIVE_SMS);
+	}
+
+	/** 获取设备号 */
+	public static String getDeviceNum(Context context) {
+		if (CACHE_DEVICE_NUM == null) {
+			CACHE_DEVICE_NUM = DeviceUtil.genDeviceID(context);
+		}
+		return CACHE_DEVICE_NUM;
 	}
 }

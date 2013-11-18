@@ -38,9 +38,9 @@ import com.zz.sdk.entity.result.ResultRegister;
  */
 public class UserUtil {
 
-	Context mContext;
+	private Context mContext;
 
-	ConnectionUtil mConnectionUtil;
+	private ConnectionUtil mConnectionUtil;
 
 	private String mDefName, mDefPassword;
 
@@ -51,7 +51,7 @@ public class UserUtil {
 	/** 逗趣用户 ID */
 	private int mDouquUserid;
 
-	public UserUtil(Context ctx) {
+	protected UserUtil(Context ctx) {
 		mContext = ctx;
 		mConnectionUtil = ConnectionUtil.getInstance(ctx);
 	}
@@ -494,7 +494,7 @@ public class UserUtil {
 		return ret;
 	}
 
-	static UserUtil sInstance;
+	private static UserUtil sInstance;
 
 	public static synchronized UserUtil getInstance(Context ctx) {
 		if (sInstance == null) {
