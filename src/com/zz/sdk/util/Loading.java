@@ -4,8 +4,6 @@
  */
 package com.zz.sdk.util;
 
-import com.zz.sdk.out.util.DimensionUtil;
-
 import android.content.Context;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -41,7 +39,7 @@ public class Loading extends LinearLayout {
 	}
 	
 	private int dp2px(int dp) {
-		return DimensionUtil.dip2px(mContext, dp);
+		return ResConstants.Config.ZZDimen.dip2px(dp);
 	}
 
 	private void init() {

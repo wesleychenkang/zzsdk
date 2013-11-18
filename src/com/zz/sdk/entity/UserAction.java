@@ -1,8 +1,9 @@
 package com.zz.sdk.entity;
 
-import com.zz.sdk.out.util.GetDataImpl;
-
 import android.content.Context;
+
+import com.zz.sdk.entity.result.BaseResult;
+import com.zz.sdk.util.ConnectionUtil;
 
 /**
  * 此类负责用户用户行为
@@ -48,7 +49,7 @@ public class UserAction {
 	public String actionType = "";
 	public String serverId = "";
 
-	public Result requestActivon(Context context) {
-		return GetDataImpl.getInstance(context).request(context, this);
+	public BaseResult requestActivon(Context context) {
+		return ConnectionUtil.getInstance(context).request(this);
 	}
 }

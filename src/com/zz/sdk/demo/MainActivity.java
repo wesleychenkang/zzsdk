@@ -55,7 +55,6 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	/* ID */
 	private static final int _IDC_START_ = 0;
-	private static final int IDC_BT_OUT_LOGIN = _IDC_START_ + 1;
 	private static final int IDC_BT_PAY = _IDC_START_ + 2;
 	private static final int IDC_BT_PAY_AMOUNT = _IDC_START_ + 3;
 	private static final int IDC_ET_PAY_AMOUNT = _IDC_START_ + 4;
@@ -71,10 +70,8 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final int IDC_ET_RECHARGE_RATE = _IDC_START_ + 15;
 	private static final int IDC_CB_CANCEL_AS_SUCCESS = _IDC_START_ + 16;
 	private static final int IDC_BT_LOGIN = _IDC_START_ + 17;
-	private static final int IDC_BT_OUT_PAY = _IDC_START_ + 18;
 	private static final int IDC_BT_DEBUG = _IDC_START_ + 19;
 	private static final int IDC_CB_AUTOLOGIN = _IDC_START_ + 20;
-	private static final int IDC_BT_CHECKORDER = _IDC_START_ + 21;
 	private static final int IDC_ET_ORDER_NUMBER = _IDC_START_ + 22;
 
 	/* 自定义消息 */
@@ -339,26 +336,6 @@ public class MainActivity extends Activity implements OnClickListener {
 			rootLayout.addView(btnSetConfig);
 		}
 
-		//
-
-		{
-			Button btLogin = new Button(ctx);
-			btLogin.setText("登录(旧）");
-			btLogin.setId(IDC_BT_OUT_LOGIN);
-
-			btLogin.setOnClickListener(onClickListener);
-			rootLayout.addView(btLogin);
-		}
-		{
-			Button btCharge = new Button(ctx);
-			btCharge.setText("充值(旧)");
-			btCharge.setId(IDC_BT_OUT_PAY);
-
-			btCharge.setOnClickListener(onClickListener);
-			rootLayout.addView(btCharge);
-		}
-
-
 		{
 			bt = new Button(ctx);
 			bt.setText("调试");
@@ -492,37 +469,6 @@ public class MainActivity extends Activity implements OnClickListener {
 			case IDC_BT_DEBUG: {
 				ZZDebugKit.debug_start(mSDKManager,mHandler, MSG_PAYMENT_CALLBACK,
 				                        CONFIG_GAME_SERVER_ID, CONFIG_GAME_ROLE
-				);
-			}
-			break;
-
-			case IDC_BT_OUT_LOGIN: {
-				ZZDebugKit.showLoginView_out(mSDKManager,mHandler, MSG_LOGIN_CALLBACK);
-			}
-			break;
-
-			case IDC_BT_OUT_PAY: {
-				String s_amount = ((TextView) findViewById(IDC_ET_PAY_AMOUNT))
-						.getText().toString();
-				int amount;
-				try {
-					amount = Integer.parseInt(s_amount);
-				} catch (NumberFormatException e) {
-					amount = 0;
-				}
-
-				boolean isCloseWindow;
-				View vCloseWindow = findViewById(IDC_CHARGE_AUTO_CLOSE);
-				if (vCloseWindow instanceof CheckBox) {
-					isCloseWindow = ((CheckBox) vCloseWindow).isChecked();
-				} else {
-					isCloseWindow = false;
-				}
-
-				ZZDebugKit.showPaymentView_out(mSDKManager, mHandler, MSG_PAYMENT_CALLBACK,
-				                                CONFIG_GAME_SERVER_ID, CONFIG_GAME_SERVER_NAME,
-				                                CONFIG_GAME_ROLE_ID, CONFIG_GAME_ROLE, amount,
-				                                isCloseWindow, CONFIG_GAME_CALLBACK_INFO
 				);
 			}
 			break;

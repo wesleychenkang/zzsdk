@@ -24,22 +24,4 @@ public class ZZDebugKit {
 			                        configGameServerId, configGameRole
 			);
 	}
-
-	public static void showLoginView_out(SDKManager mSDKManager, Handler mHandler, int msgLoginCallback) {
-		if (DEBUG)
-			mSDKManager.showLoginView_out(mHandler, msgLoginCallback);
-	}
-
-	public static void showPaymentView_out(
-			SDKManager mSDKManager, Handler mHandler, int msgPaymentCallback, String configGameServerId,
-			String configGameServerName, String configGameRoleId, String configGameRole, int amount,
-			boolean isCloseWindow, String configGameCallbackInfo) {
-		if (DEBUG) {
-			mSDKManager.showPaymentView_out(mHandler, msgPaymentCallback,
-			                                configGameServerId, configGameServerName,
-			                                configGameRoleId, configGameRole, amount,
-			                                isCloseWindow, configGameCallbackInfo
-			);
-		}
-	}
 }

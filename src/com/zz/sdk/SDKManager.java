@@ -20,9 +20,6 @@ import com.zz.sdk.activity.BaseActivity;
 import com.zz.sdk.activity.LAYOUT_TYPE;
 import com.zz.sdk.entity.SMSChannelMessage;
 import com.zz.sdk.entity.result.ResultOrder;
-import com.zz.sdk.out.ZZSDKOut;
-import com.zz.sdk.out.util.Application;
-import com.zz.sdk.out.util.GetDataImpl;
 import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.UserUtil;
@@ -35,6 +32,7 @@ import com.zz.sdk.util.Utils;
 /**
  * SDK 接口管理类. <strong>使用流程（示例）：</strong>
  * <ol>
+ * <li>&lt;<b>可选</b>&gt;调用 {@link #setProductId(String)}、{@link #setProjectId(String)}、{@link #setGameServerId(String)}等配置SDK；</li>
  * <li>调用 {@link #getInstance(Context)} 获取 SDK 实例</li>
  * 
  * <li>启动<strong>登录</strong>界面: {@link #showLoginView(android.os.Handler, int, boolean)} </li>
@@ -61,8 +59,8 @@ public class SDKManager {
 	/**
 	 * 获取 SDK 实例
 	 * 
-	 * @param ctx
-	 * @return
+	 * @param ctx 上下文
+	 * @return 如果成功则返回SDK实现，否则返回 null
 	 */
 	public static synchronized SDKManager getInstance(Context ctx) {
 		// mContext = ctx;
@@ -165,15 +163,15 @@ public class SDKManager {
 		return env;
 	}
 
-	private void init() {
-		Thread thread = new Thread(new Runnable() {
-			public void run() {
-				GetDataImpl data_impl = GetDataImpl.getInstance(mContext);
-				data_impl.online(mContext);
-			}
-		});
-		thread.start();
-	}
+//	private void init() {
+//		Thread thread = new Thread(new Runnable() {
+//			public void run() {
+//				GetDataImpl data_impl = GetDataImpl.getInstance(mContext);
+//				data_impl.online(mContext);
+//			}
+//		});
+//		thread.start();
+//	}
 
 	/**
 	 * 配置自定义的 ServerID，用于区分游戏服务器
@@ -210,8 +208,8 @@ public class SDKManager {
 			boolean isDisplayLoginfail) {
 		final Pair<String, String> account = Utils
 				.getAccountFromSDcard(mContext);
-		Application.isDisplayLoginTip = isDisplayLoginTip;
-		Application.isDisplayLoginfail = isDisplayLoginfail;
+//		Application.isDisplayLoginTip = isDisplayLoginTip;
+//		Application.isDisplayLoginfail = isDisplayLoginfail;
 		if (!isOnlineGame) { // 单机
 			new Thread() {
 				@Override
@@ -274,27 +272,6 @@ public class SDKManager {
 			env.add(KeyCaller.K_LOGIN_DOUQU_ENABLED, true);
 		env.add(KeyCaller.K_LOGIN_AUTO_START, auto_login);
 		startActivity(mContext, env, LAYOUT_TYPE.LoginMain);
-	}
-
-
-	/** 旧的登录界面，<b>已经弃用</b> */
-	protected void showLoginView_out(Handler callbackHandler, int what) {
-		if (DebugFlags.DEBUG_DEMO) {
-			ZZSDKOut.showLoginView(mContext, callbackHandler, what);
-		}
-	}
-
-	/** 旧的支付界面，<b>已经弃用</b> */
-	protected void showPaymentView_out(Handler callbackHandler, int what,
-			String gameServerID, final String serverName, final String roleId,
-			final String gameRole, final int amount,
-			final boolean isCloseWindow, final String callBackInfo) {
-		if (DebugFlags.DEBUG_DEMO) {
-			ZZSDKOut.showPaymentView(mContext, callbackHandler, what, gameServerID,
-			                         serverName, roleId, gameRole, amount, isCloseWindow,
-			                         callBackInfo
-			);
-		}
 	}
 
 	/**
@@ -373,7 +350,7 @@ public class SDKManager {
 	 * @param gameRole           角色信息，此文本将原样传递给游戏服务器
 	 * @param amount             金额，单位<b>分</b>，0表示不限制
 	 * @param isCloseWindow      支付成功是否自动关闭支付SDK, 如果是 true 则在充值成功后自动退出SDK
-	 * @see #showPaymentView_out(android.os.Handler, int, String, String, String, String, int, boolean, String)
+	 * @see #showPaymentView(android.os.Handler, int, String, String, int, boolean, boolean, boolean)
 	 */
 	public void showPaymentView(
 			Handler callbackHandler, int what, String gameServerID, String gameRole, int amount,
