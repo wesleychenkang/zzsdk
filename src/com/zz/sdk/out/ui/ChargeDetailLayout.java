@@ -23,6 +23,7 @@ import com.zz.sdk.out.util.DimensionUtil;
 import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.Utils;
+import com.zz.sdk.out.util.ResUtils;
 
 /**
  * 
@@ -182,14 +183,14 @@ public class ChargeDetailLayout extends ChargeAbstractLayout {
 
 		mCharge = new Button(activity);
 		mCharge.setId(ID_PAY);
-		mCharge.setBackgroundDrawable(Utils.getStateListDrawable(activity,
+		mCharge.setBackgroundDrawable(ResUtils.getStateListDrawable(activity,
 				"zhifu_pressed.png", "zhifu_normal.png"));
 		lp = new LayoutParams(-2, -2);
 		buttonLayout.addView(mCharge, lp);
 
 		mCancel = new Button(activity);
 		mCancel.setId(ID_CANCEL);
-		mCancel.setBackgroundDrawable(Utils.getStateListDrawable(activity,
+		mCancel.setBackgroundDrawable(ResUtils.getStateListDrawable(activity,
 				"cancel_pressed.png", "cancel_normal.png"));
 		lp = new LayoutParams(-2, -2);
 		lp.leftMargin = DimensionUtil.dip2px(activity, 20);
@@ -233,7 +234,7 @@ public class ChargeDetailLayout extends ChargeAbstractLayout {
 
 		@Override
 		public void onClick(View v) {
-			List<String> list = Utils.payMoneyList(payChannel);
+			List<String> list = ResUtils.payMoneyList(payChannel);
 			if (list.size() == 0) {
 				Utils.toastInfo(mActivity, "没有可供选择的金额!");
 				return;

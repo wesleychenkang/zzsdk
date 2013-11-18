@@ -19,6 +19,7 @@ import com.zz.sdk.out.util.DimensionUtil;
 import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.Utils;
+import com.zz.sdk.out.util.ResUtils;
 
 public class MyDialog extends Dialog{
 	TextView textView;
@@ -55,7 +56,7 @@ public class MyDialog extends Dialog{
 		ll.addView(textView, lp);
 
 		Button imageButton = new Button(activity);
-		imageButton.setBackgroundDrawable(Utils.getStateListDrawable(activity,
+		imageButton.setBackgroundDrawable(ResUtils.getStateListDrawable(activity,
 				"pay_result_pressed.png", "pay_result_normal.png"));
 		lp = new LinearLayout.LayoutParams(-2, -2);
 		lp.topMargin = DimensionUtil.dip2px(activity, 25);

@@ -458,23 +458,6 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		ZZDimenRect.CC_ROOTVIEW_PADDING.apply_padding(ll);
 
 		{
-			// RotateAnimation anim = new RotateAnimation(0, 360,
-			// Animation.RELATIVE_TO_SELF, 0.5f,
-			// Animation.RELATIVE_TO_SELF, 0.5f);
-			// anim.setDuration(1500);
-			// anim.setRepeatCount(Animation.INFINITE);
-			// // anim.setFillAfter(true);
-			// anim.setInterpolator(new LinearInterpolator());
-			// anim.setRepeatMode(Animation.RESTART);
-			// ImageView iv = new ImageView(ctx);
-			// iv.setImageDrawable(BitmapCache.getDrawable(ctx,
-			// Constants.ASSETS_RES_PATH + "loading_icon.png"));
-			// iv.setScaleType(ScaleType.CENTER_INSIDE);
-			// iv.startAnimation(anim);
-			// LayoutParams lp = new LayoutParams(LP_MW);
-			// lp.gravity = Gravity.CENTER;
-			// ll.addView(iv, lp);
-
 			FrameLayout fl = new FrameLayout(ctx);
 			ll.addView(fl, new LayoutParams(LP_MW));
 			ProgressBar pb = new ProgressBar(ctx, null,

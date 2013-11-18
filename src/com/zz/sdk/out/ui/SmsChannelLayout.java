@@ -22,6 +22,7 @@ import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.SMSChannelMessage;
 import com.zz.sdk.out.util.Application;
 import com.zz.sdk.out.util.DimensionUtil;
+import com.zz.sdk.out.util.ResUtils;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.Utils;
 
@@ -205,8 +206,9 @@ public class SmsChannelLayout extends ChargeAbstractLayout {
 			TextView holder = (TextView) convertView;
 			if (holder == null) {
 				holder = new TextView(mActivity);
-				holder.setBackgroundDrawable(Utils.getStateListDrawable(
-						mActivity, "money_dx1.png", "money_dx.png"));
+				holder.setBackgroundDrawable(ResUtils.getStateListDrawable(
+						mActivity, "money_dx1.png", "money_dx.png"
+				));
 				holder.setTextSize(18);
 				holder.setGravity(Gravity.CENTER);
 				holder.setTextColor(0xff3c2110);

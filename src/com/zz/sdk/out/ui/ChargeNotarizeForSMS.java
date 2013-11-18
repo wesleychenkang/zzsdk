@@ -16,6 +16,7 @@ import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.out.util.Application;
 import com.zz.sdk.out.util.DimensionUtil;
 import com.zz.sdk.util.Utils;
+import com.zz.sdk.out.util.ResUtils;
 public class ChargeNotarizeForSMS extends ChargeAbstractLayout {
 	protected static final int ID_PLAY = 20001;
 	private PayChannel payChannel;
@@ -90,7 +91,7 @@ public class ChargeNotarizeForSMS extends ChargeAbstractLayout {
 		parent.addView(buttonLayout, lp);
 
 		btn_play = new Button(activity);
-		btn_play.setBackgroundDrawable(Utils.getStateListDrawable(activity,
+		btn_play.setBackgroundDrawable(ResUtils.getStateListDrawable(activity,
 				"tijiao_pressed.png", "tijiao_normal.png"));
 
 		btn_play.setId(ID_PLAY);

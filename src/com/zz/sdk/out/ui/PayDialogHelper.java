@@ -16,6 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.zz.sdk.out.util.DimensionUtil;
+import com.zz.sdk.out.util.ResUtils;
 import com.zz.sdk.util.Utils;
 
 class PayDialogHelper extends Dialog {
@@ -121,8 +122,7 @@ class PayDialogHelper extends Dialog {
 
 				setOrientation(LinearLayout.HORIZONTAL);
 				setGravity(Gravity.CENTER);
-				setBackgroundDrawable(Utils.getStateListDrawable(context,
-						"money_bg1.png", "money_bg.png"));
+				setBackgroundDrawable(ResUtils.getStateListDrawable(context,"money_bg1.png", "money_bg.png"));
 				LayoutParams lp = new LayoutParams(-2, -2);
 				mPaymentNumber = new TextView(context);
 				mPaymentNumber.setGravity(Gravity.CENTER);

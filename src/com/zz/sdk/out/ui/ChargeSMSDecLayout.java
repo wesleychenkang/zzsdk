@@ -15,6 +15,7 @@ import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.out.util.Application;
 import com.zz.sdk.out.util.DimensionUtil;
 import com.zz.sdk.util.Utils;
+import com.zz.sdk.out.util.ResUtils;
 
 public class ChargeSMSDecLayout extends ChargeAbstractLayout {
 
@@ -74,7 +75,7 @@ public class ChargeSMSDecLayout extends ChargeAbstractLayout {
 		lp.gravity = Gravity.CENTER_HORIZONTAL;
 		lp.topMargin = DimensionUtil.dip2px(activity, 30);
 		mConfirm.setId(ID_NOTE);
-		mConfirm.setBackgroundDrawable(Utils.getStateListDrawable(mActivity,
+		mConfirm.setBackgroundDrawable(ResUtils.getStateListDrawable(mActivity,
 				"renque_confim1.png", "renque_confim.png"));
 		mConfirm.setTextSize(18);
 		parent.addView(mConfirm, lp);

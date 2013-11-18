@@ -70,12 +70,6 @@ public interface ParamChain {
 	public static interface KeyDevice extends KeyGlobal {
 		static final String _TAG_ = KeyGlobal._TAG_ + "device" + _SEPARATOR_;
 
-		/**
-		 * 键：ProjectID, {@link String}, 参考
-		 * {@link Utils#getProjectId(android.content.Context)}
-		 */
-		public static final String K_PROJECT_ID = _TAG_ + "project_id";
-
 		/** 键：IMSI, {@link String} */
 		public static final String K_IMSI = _TAG_ + "imsi";
 

@@ -355,6 +355,10 @@ public class Utils {
 		return ret;
 	}
 
+	public static synchronized void setProjectID(String id) {
+		CACHE_PROJECT_ID = id;
+	}
+
 	/**
 	 * 获取工程ID
 	 * 
@@ -381,6 +385,10 @@ public class Utils {
 		} else {
 			return CACHE_PROJECT_ID;
 		}
+	}
+
+	public static synchronized void setProductId(String id) {
+		CACHE_PRODUCT_ID = id;
 	}
 
 	public static synchronized String getProductId(Context cxt) {
@@ -517,67 +525,6 @@ public class Utils {
 	public static void toastInfo(Context context, String text) {
 		Toast.makeText(context, text, Toast.LENGTH_LONG).show();
 	}
-
-	public static StateListDrawable getStateListDrawable(Context context,
-			String picPressed, String picNormal) {
-		StateListDrawable listDrawable = new StateListDrawable();
-		listDrawable.addState(
-				new int[] { android.R.attr.state_pressed },
-				BitmapCache.getDrawable(context, Constants.ASSETS_RES_PATH
-						+ picPressed));
-		listDrawable.addState(
-				new int[] { android.R.attr.state_selected },
-				BitmapCache.getDrawable(context, Constants.ASSETS_RES_PATH
-						+ picPressed));
-		listDrawable.addState(
-				new int[] { android.R.attr.state_checked },
-				BitmapCache.getDrawable(context, Constants.ASSETS_RES_PATH
-						+ picPressed));
-		listDrawable.addState(
-				new int[] { android.R.attr.state_enabled },
-				BitmapCache.getDrawable(context, Constants.ASSETS_RES_PATH
-						+ picNormal));
-		return listDrawable;
-	}
-
-	public static Drawable getDrawable(Context ctx,String path) {
-		return BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH + path);
-	}
-	
-	public static String substringStatusStr(String str, String start, String end) {
-		String ss = str;
-		try {
-			if (null == str || "".equals(start)) {
-				return "";
-			}
-			ss = ss.substring(ss.indexOf(start) + start.length());
-			ss = ss.substring(0, ss.indexOf(end));
-		} catch (Exception e) {
-			ss = "";
-			e.printStackTrace();
-		}
-		return ss;
-	}
-
-	public static List<String> payMoneyList(PayChannel payChannel) {
-		List<String> list = new ArrayList<String>();
-		String moneys = payChannel.priceList;
-		if (moneys != null) {
-			String[] split = moneys.split(",");
-			if (split != null) {
-				for (String s : split) {
-					// 以分为单位， 去掉两面两位
-					list.add(s.trim().substring(0, s.trim().length() - 2));
-				}
-			}
-		}
-		return list;
-	}
-
-	// public static void writeProjectId2cache(Context ctx, String projectId) {
-	// if (projectId != null)
-	// CACHE_PROJECT_ID = projectId;
-	// }
 
 	//
 	// ------------------------------------------------------------------------

@@ -523,7 +523,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 		ParamChain env = getEnv();
 		param.loginName = env.get(KeyUser.K_LOGIN_NAME, String.class);
 		param.smsImsi = env.get(KeyDevice.K_IMSI, String.class);
-		param.projectId = env.get(KeyDevice.K_PROJECT_ID, String.class);
+		param.projectId = Utils.getProjectId(getContext());
 		HashMap<String, String> map = new HashMap<String, String>();
 		map.put("ua", env.get(KeyDevice.K_PHONE_MODEL, String.class));
 		map.put(SMSChannelMessage.K_SERVICETYPE, cm.serviceType);

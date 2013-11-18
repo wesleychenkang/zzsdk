@@ -159,8 +159,6 @@ public class SDKManager {
 			}
 		}
 
-		env.add(KeyDevice.K_PROJECT_ID, Utils.getProjectId(ctx));
-
 		env.add(KeyDevice.K_PHONE_MODEL, "android");
 		// env.add(KeyDevice.K_IP, );
 
@@ -186,6 +184,16 @@ public class SDKManager {
 	 */
 	public static void setGameServerId(String gameServerId) {
 		Utils.setGameServerID(gameServerId);
+	}
+
+	/** 配置自定义的 ProjectID */
+	public static void setProjectId(String projectId) {
+		Utils.setProjectID(projectId);
+	}
+
+	/** 配置自定义的 ProductID */
+	public static void setProductId(String productId) {
+		Utils.setProductId(productId);
 	}
 
 	/**

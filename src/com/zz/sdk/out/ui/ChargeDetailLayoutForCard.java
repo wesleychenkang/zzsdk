@@ -25,6 +25,7 @@ import com.zz.sdk.out.util.DimensionUtil;
 import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.Utils;
+import com.zz.sdk.out.util.ResUtils;
 
 public class ChargeDetailLayoutForCard extends ChargeAbstractLayout {
 
@@ -231,7 +232,7 @@ public class ChargeDetailLayoutForCard extends ChargeAbstractLayout {
 		accountLayout.addView(buttonLayout,lp);
 
 		btnSubmit = new Button(mActivity);
-		btnSubmit.setBackgroundDrawable(Utils.getStateListDrawable(activity,
+		btnSubmit.setBackgroundDrawable(ResUtils.getStateListDrawable(activity,
 				"tijiao_pressed.png", "tijiao_normal.png"));
 		if (mPayChannel.type == PayChannel.PAY_TYPE_YEEPAY_LT) {
 			btnSubmit.setId(ID_BTNSUBMIT_LT);
@@ -244,7 +245,7 @@ public class ChargeDetailLayoutForCard extends ChargeAbstractLayout {
 		buttonLayout.addView(btnSubmit, lp);
 
 		btnCannel = new Button(mActivity);
-		btnCannel.setBackgroundDrawable(Utils.getStateListDrawable(activity,
+		btnCannel.setBackgroundDrawable(ResUtils.getStateListDrawable(activity,
 				"cancel_pressed.png", "cancel_normal.png"));
 		btnCannel.setId(ID_CANCEL);
 		lp = new LayoutParams(-2,-2);
@@ -341,7 +342,7 @@ public class ChargeDetailLayoutForCard extends ChargeAbstractLayout {
 		@Override
 		public void onClick(View v) {
 
-			moneyList = Utils.payMoneyList(mPayChannel);
+			moneyList = ResUtils.payMoneyList(mPayChannel);
 			if (moneyList == null || moneyList.size() == 0) {
 				Utils.toastInfo(mActivity, "没有可供选择的金额！");
 				return;

@@ -183,7 +183,7 @@ class CustomDialog extends Dialog {
 		layout.addView(tv, lp);
 
 		Button btn = new Button(context);
-		btn.setBackgroundDrawable(Utils.getStateListDrawable(context,
+		btn.setBackgroundDrawable(ResUtils.getStateListDrawable(context,
 				"pay_result_pressed.png", "pay_result_normal.png"));
 		lp = new LinearLayout.LayoutParams(-2, -2);
 		lp.gravity = Gravity.CENTER;

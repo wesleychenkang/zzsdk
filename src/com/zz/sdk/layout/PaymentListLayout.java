@@ -1733,7 +1733,7 @@ public class PaymentListLayout extends CCBaseLayout {
 		payParam.loginName = env.get(KeyUser.K_LOGIN_NAME, String.class);
 		payParam.gameRole = env.get(KeyCaller.K_GAME_ROLE, String.class);
 		payParam.serverId = env.get(KeyCaller.K_GAME_SERVER_ID, String.class);
-		payParam.projectId = env.get(KeyDevice.K_PROJECT_ID, String.class);
+		payParam.projectId = Utils.getProjectId(ctx);
 
 		Double amount = env.get(KeyPaymentList.K_PAY_AMOUNT, Double.class);
 		payParam.amount = Utils.price2str(amount == null ? 0 : amount);

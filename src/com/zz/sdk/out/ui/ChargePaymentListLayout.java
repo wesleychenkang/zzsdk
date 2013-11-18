@@ -19,6 +19,7 @@ import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.out.util.Application;
 import com.zz.sdk.out.util.DimensionUtil;
 import com.zz.sdk.util.Utils;
+import com.zz.sdk.out.util.ResUtils;
 
 public class ChargePaymentListLayout extends ChargeAbstractLayout {
 
@@ -147,7 +148,7 @@ public class ChargePaymentListLayout extends ChargeAbstractLayout {
 			TextView holder = (TextView) convertView;
 			if (holder == null) {
 				holder = new TextView(mActivity);
-				holder.setBackgroundDrawable(Utils.getStateListDrawable(
+				holder.setBackgroundDrawable(ResUtils.getStateListDrawable(
 						mActivity, "type_bg1.png", "type_bg.png"));
 				holder.setTextSize(18);
 				holder.setGravity(Gravity.CENTER);
