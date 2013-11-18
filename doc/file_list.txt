@@ -1,4 +1,4 @@
-文件功能说明(20131109)
+文件功能说明(20131118)
 ======================
 
 
@@ -9,7 +9,11 @@
 * zzsdk-lib-assets.jar - assets资源，请复制到游戏工程的 libs/ 目录下。
 
 * zzsdk-lib-extern.zip - 第三方库和资源文件。在工程目录下直接解压。基本组成如下：
-    .
+    zzsdk-lib-extern/
+    |-- assets
+    |   `-- zz_res
+    |       |-- login_bg_h.jpg  // 登录背景：横屏
+    |       `-- login_bg_v.jpg  // 登录背景：竖屏
     |-- libs
     |   |-- android-support-v4.jar
     |   |-- armeabi
@@ -31,6 +35,10 @@
 
     zzsdk-demo
     |-- AndroidManifest.xml
+    |-- assets
+    |   `-- zz_res
+    |       |-- login_bg_h.jpg
+    |       `-- login_bg_v.jpg
     |-- libs
     |   |-- android-support-v4.jar
     |   |-- armeabi
@@ -51,5 +59,4 @@
                 `-- sdk
                     `-- demo
                         `-- MainActivity.java
-
 
