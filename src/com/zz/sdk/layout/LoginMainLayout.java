@@ -83,6 +83,7 @@ class LoginMainLayout extends BaseLayout {
 	private Handler mHandler = new Handler();
 	private Context ctx;
 	private String mNewPassword;
+	private boolean isDoQuCount;
 	private FrameLayout.LayoutParams framly = new FrameLayout.LayoutParams(
 			LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 
@@ -134,6 +135,10 @@ class LoginMainLayout extends BaseLayout {
 
 		/** 注册·确认按钮 */
 		BT_REGISTER_CONFIRM,
+		/**卓越用户按钮*/
+		BT_LOGIN_NORMAL,
+		/**豆趣用户按钮*/
+		BT_LOGIN_DOQU,
 
 		_MAX_;
 
@@ -294,13 +299,13 @@ class LoginMainLayout extends BaseLayout {
 		}
 	}
 
-	private boolean account_type_is_douqu() {
-		RadioGroup rg = (RadioGroup) findViewById(IDC.RG_ACCOUNT_TYPE.id());
-		int id = rg.getCheckedRadioButtonId();
-		IDC idc = IDC.fromID(id);
-		return idc == IDC.RB_ACCOUNT_TYPE_DOUQU;
-	}
-
+//	private boolean account_type_is_douqu() {
+//		RadioGroup rg = (RadioGroup) findViewById(IDC.RG_ACCOUNT_TYPE.id());
+//		int id = rg.getCheckedRadioButtonId();
+//		IDC idc = IDC.fromID(id);
+//		return idc == IDC.RB_ACCOUNT_TYPE_DOUQU;
+//	}
+    
 	private void setAccountType(boolean isDouqu) {
 		RadioGroup rg = (RadioGroup) findViewById(IDC.RG_ACCOUNT_TYPE.id());
 		rg.check(isDouqu ? IDC.RB_ACCOUNT_TYPE_DOUQU.id()
@@ -319,9 +324,9 @@ class LoginMainLayout extends BaseLayout {
 
 		// 注册账号
 		case BT_REGISTER: {
-			if (account_type_is_douqu()) {
+			if (isDoQuCount){
 				showToast("请注册卓越通行证！");
-				setAccountType(false);
+				setIsDoQuAccout(false);
 			} else {
 				tryEnterRegister();
 			}
@@ -375,8 +380,32 @@ class LoginMainLayout extends BaseLayout {
 			main.removeAllViews();
 			main.addView(createView_login(ctx, true));
 			break;
+		case BT_LOGIN_DOQU:
+			setIsDoQuAccout(true);
+			break;
+		case BT_LOGIN_NORMAL:
+			setIsDoQuAccout(false);
+			break;
 		default:
 			super.onClick(v);
+		}
+	}
+   
+	/**
+	 * 点击使用豆趣或者卓越用户进行登录
+	 * @param b
+	 */
+	private void setIsDoQuAccout(boolean b) {
+		Button btn_doqu =(Button)findViewById(IDC.BT_LOGIN_DOQU.id());
+		Button btn_normal = (Button)findViewById(IDC.BT_LOGIN_NORMAL.id());
+		if(b){
+		isDoQuCount = true;
+		btn_normal.setBackgroundDrawable(CCImg.LOGIN_LABE_HUI.getDrawble(ctx));	
+		btn_doqu.setBackgroundDrawable(CCImg.LOGIN_LABE_LAN.getDrawble(ctx));		
+		}else{
+		isDoQuCount = false;
+		btn_doqu.setBackgroundDrawable(CCImg.LOGIN_LABE_HUI.getDrawble(ctx));	
+		btn_normal.setBackgroundDrawable(CCImg.LOGIN_LABE_LAN.getDrawble(ctx));
 		}
 	}
 
@@ -393,7 +422,7 @@ class LoginMainLayout extends BaseLayout {
 		String loginName = get_child_text(IDC.ED_LOGIN_NAME);
 		if (mDouquEnabled) {
 			// TODO: 判断复选框状态
-			if (account_type_is_douqu())
+			if (isDoQuCount)
 				loginName = PojoUtils.getDouquName(loginName);
 		}
 		return loginName;
@@ -802,8 +831,8 @@ class LoginMainLayout extends BaseLayout {
 
 		boolean hasAccount = mLoginName != null && mLoginName.length() > 0;
 		main = new FrameLayout(ctx);
-		main.setBackgroundDrawable(BitmapCache.getDrawable(ctx,
-				Constants.ASSETS_RES_PATH + "landed_bg.png"));
+		//main.setBackgroundColor(Color.rgb(245, 245, 245));
+		main.setBackgroundDrawable(CCImg.LOGIN_BACK.getDrawble(ctx));
 		framly.gravity = Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL;
 		framly.topMargin = isVertical ? -heigth1 : 0;
 		framly.rightMargin = isVertical ? 0 : -heigth1;
@@ -854,20 +883,21 @@ class LoginMainLayout extends BaseLayout {
 			// 垂直
 			content.setOrientation(VERTICAL);
 			content.setGravity(Gravity.CENTER_HORIZONTAL);
-			content.setBackgroundDrawable(CCImg.AUTO_BD.getDrawble(context));
+			content.setBackgroundDrawable(CCImg.LOGIN_BACK.getDrawble(context));
 			content.setPadding(ZZDimen.dip2px(50), ZZDimen.dip2px(10),
 					ZZDimen.dip2px(50), ZZDimen.dip2px(10));
 			// 文字
 			TextView tv = new TextView(ctx);
-			tv.setTextColor(0xfffeef00);
+			tv.setTextColor(Color.rgb(255, 113, 1));
+			//tv.setTextColor(0xfffeef00);
 			tv.setText("剩下2秒自动登陆游戏");
 			tv.setTextSize(16);
 			//
 			Loading loading = new Loading(ctx);
 			Button cancel = new Button(ctx);
 			cancel.setBackgroundDrawable(ResConstants.CCImg
-					.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LAN,
-							CCImg.LOGIN_BUTTON_LAN_CLICK));
+					.getStateListDrawable(ctx, CCImg.AUTO_CANCLE,
+							CCImg.AUTO_CANCLE_CLICK));
 			cancel.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View view) {

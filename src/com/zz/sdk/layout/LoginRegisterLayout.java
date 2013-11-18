@@ -1,6 +1,7 @@
 package com.zz.sdk.layout;
 import android.content.Context;
 import android.graphics.Color;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.widget.Button;
 import android.widget.EditText;
@@ -46,7 +47,7 @@ public class LoginRegisterLayout extends LinearLayout{
 		
 		TextView rtvUser = new TextView(ctx);
 		rtvUser.setText("帐号    ");
-		rtvUser.setTextSize(17);
+		rtvUser.setTextSize(TypedValue.COMPLEX_UNIT_DIP,16);
 		//黑色
 		rtvUser.setTextColor(Color.BLACK);
 		LayoutParams lcount = new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
@@ -81,7 +82,7 @@ public class LoginRegisterLayout extends LinearLayout{
 		rtvUserPwd.setText("密码    ");
 		//黑色
 		rtvUserPwd.setTextColor(Color.BLACK);
-		rtvUserPwd.setTextSize(17);
+		rtvUserPwd.setTextSize(TypedValue.COMPLEX_UNIT_DIP,16);
 		wrap2.addView(rtvUserPwd,lcount);
 
 		mRegistUserPwd = new EditText(ctx);
@@ -107,6 +108,7 @@ public class LoginRegisterLayout extends LinearLayout{
 		//确认按钮
 		Button mBtConfirm = new Button(ctx);
 		mBtConfirm.setText("确认");
+		mBtConfirm.setTextSize(TypedValue.COMPLEX_UNIT_DIP,16);
 		mBtConfirm.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
 		mBtConfirm.setPadding(ZZDimen.dip2px(5),ZZDimen.dip2px(12), ZZDimen.dip2px(5), ZZDimen.dip2px(12));
 		mBtConfirm.setSingleLine();
@@ -120,6 +122,7 @@ public class LoginRegisterLayout extends LinearLayout{
 		//返回按钮
 		Button mBtBack = new Button(ctx);
 		mBtBack.setText("返回");
+		mBtBack.setTextSize(TypedValue.COMPLEX_UNIT_DIP,16);
 		mBtBack.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LAN, CCImg.LOGIN_BUTTON_LAN_CLICK));
 		mBtBack.setPadding(ZZDimen.dip2px(5),ZZDimen.dip2px(12), ZZDimen.dip2px(5), ZZDimen.dip2px(12));
 		mBtBack.setId(IDC.BT_BACK.id());

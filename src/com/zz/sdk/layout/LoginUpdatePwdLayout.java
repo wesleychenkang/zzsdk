@@ -1,6 +1,7 @@
 package com.zz.sdk.layout;
 import android.content.Context;
 import android.graphics.Color;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.widget.Button;
 import android.widget.EditText;
@@ -45,7 +46,7 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		rtvUser.setText("旧密码  ");
 		//黑色
 		rtvUser.setTextColor(Color.BLACK);
-		rtvUser.setTextSize(17);
+		rtvUser.setTextSize(TypedValue.COMPLEX_UNIT_DIP,16);
 		wrap1.addView(rtvUser,lpwd);
 
 		//显示旧密码
@@ -75,7 +76,7 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		rtvUserPwd.setText("新密码  ");
 		//黑色
 		rtvUserPwd.setTextColor(Color.BLACK);
-		rtvUserPwd.setTextSize(17);
+		rtvUserPwd.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
 		wrap2.addView(rtvUserPwd,lpwd);
 
 		//用户输入新密码 
@@ -104,6 +105,7 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		
 		Button mBtConfirm = new Button(ctx);
 		mBtConfirm.setText("确认");
+		mBtConfirm.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
 		mBtConfirm.setId(IDC.BT_MODIFY_CONFIRM.id());
 		mBtConfirm.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
 	    mBtConfirm.setPadding(ZZDimen.dip2px(5),ZZDimen.dip2px(12), ZZDimen.dip2px(5), ZZDimen.dip2px(12));
@@ -115,6 +117,7 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		
 		Button mBtClose = new Button(ctx);
 		mBtClose.setText("关闭");
+		mBtClose.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
 		mBtClose.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LAN, CCImg.LOGIN_BUTTON_LAN_CLICK));
 		mBtClose.setPadding(ZZDimen.dip2px(5),ZZDimen.dip2px(12), ZZDimen.dip2px(5), ZZDimen.dip2px(12));
 		mBtClose.setId(IDC.BT_BACK.id());
