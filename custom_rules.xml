@@ -144,7 +144,7 @@
         <!--assets 文件清单 -->
 		<property name="zzsdk.files.asssets" value="zz_res/* zz_res/drawable/*" />
         <property name="zzsdk.files.asssets.unionpay" value="UPPayPluginEx.apk" />
-        <property name="zzsdk.files.asssets.bj" value="zz_res/**bj.jpg" />
+        <property name="zzsdk.files.asssets.bj" value="zz_res/login_bg*.jpg" />
 		<property name="zzsdk.files.asssets.vertical" value="zz_res/v/*" />
 		<property name="zzsdk.files.asssets.360" value="pro.jar res/**" />
 
@@ -318,7 +318,7 @@
 	    <jar destfile="${zzsdk.lib.jar.file.assets}" >
 	        <zipfileset dir="${asset.dir}" prefix="assets"  
 	            includes="${zzsdk.files.asssets} ${zzsdk.files.asssets.vertical} ${out.assets.zzsdk.360.i}" 
-	            excludes="${out.assets.zzsdk.360.e}" />
+	            excludes="${out.assets.zzsdk.360.e} ${zzsdk.files.asssets.bj}" />
 	    </jar>
 	</target>
 
@@ -335,6 +335,11 @@
             <fileset dir=".">
                 <!-- 将主题等资源捆绑 -->
                 <include name="${zzsdk.files.libs.res}" />
+            </fileset>
+        </copy>
+        <copy todir="${zzsdk.lib.extern.file.dir}/assets" >
+            <fileset dir="assets">
+                <include name="${zzsdk.files.asssets.bj}" />
             </fileset>
         </copy>
         <copy todir="${zzsdk.lib.extern.file.dir}/libs" >

@@ -1,13 +1,13 @@
 package com.zz.sdk.layout;
 
-import java.util.regex.Pattern;
-
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Pair;
 import android.view.Gravity;
 import android.view.View;
@@ -41,6 +41,8 @@ import com.zz.sdk.util.ResConstants.Config.ZZDimen;
 import com.zz.sdk.util.ResConstants.ZZStr;
 import com.zz.sdk.util.UserUtil;
 import com.zz.sdk.util.Utils;
+
+import java.util.regex.Pattern;
 
 /**
  * 登录主界面
@@ -80,7 +82,6 @@ class LoginMainLayout extends BaseLayout {
 
 	private AutoLoginDialog mAutoDialog;
 	private FrameLayout main;
-	private Handler mHandler = new Handler();
 	private Context ctx;
 	private String mNewPassword;
 	private boolean isDoQuCount;
@@ -156,7 +157,46 @@ class LoginMainLayout extends BaseLayout {
 			}
 			return _MAX_;
 		}
+	}
 
+	/** 屏幕是否是垂直方向 */
+	private boolean mIsVertical;
+
+	private final static int __MSG_USER__ = 20131118;
+	private final static int MSG_UPDATE_BACKGROUND = __MSG_USER__ + 1;
+	private Handler mHandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+				case MSG_UPDATE_BACKGROUND: {
+					tryChangeBackground();
+				}
+				break;
+				default:
+					super.handleMessage(msg);
+			}
+		}
+	};
+
+	/** 尝试设置背景 */
+	private void tryChangeBackground() {
+		final boolean isVertical = Utils.isOrientationVertical(getContext());
+		if (isVertical == mIsVertical) {
+			return;
+		}
+		_change_background(getSubjectContainer(), isVertical);
+	}
+
+	private void _change_background(View rv, boolean isVertical) {
+		mIsVertical = isVertical;
+		String path = Constants.ASSETS_RES_PATH + "login_bg_" + (isVertical ? "v" : "h") + ".jpg";
+		Drawable d = BitmapCache.getDrawable(ctx, path);
+		rv.setBackgroundDrawable(d);
+	}
+
+	private void checkChangeBackground() {
+		mHandler.removeMessages(MSG_UPDATE_BACKGROUND);
+		mHandler.sendEmptyMessageDelayed(MSG_UPDATE_BACKGROUND, 10);
 	}
 
 	public LoginMainLayout(Context context, ParamChain env) {
@@ -802,6 +842,12 @@ class LoginMainLayout extends BaseLayout {
 		}
 	}
 
+	@Override
+	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+		checkChangeBackground();
+	}
+
 	protected void onInitUI(Context ctx) {
 		set_child_visibility(BaseLayout.IDC.ACT_TITLE, GONE);
 
@@ -813,9 +859,7 @@ class LoginMainLayout extends BaseLayout {
 		int weight2 = widthPixels * (isVertical ? 9 : 6) /10;
 		setOrientation(VERTICAL);
 		// 整体背景图
-		rv.setBackgroundDrawable(BitmapCache.getDrawable(ctx,
-				(isVertical ? Constants.ASSETS_RES_PATH_VERTICAL
-						: Constants.ASSETS_RES_PATH) + "bj.jpg"));
+		_change_background(rv, isVertical);
 		setWeightSum(1.0f);
 		framly.width = weight2;
 

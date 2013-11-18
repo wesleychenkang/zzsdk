@@ -494,18 +494,12 @@ public class ResConstants {
 		TUP_DEZF("cc_tup_dezf.png"), //
 		ZF_WXZ("cc_zf_wxz.9.png"), //
 		ZF_XZ("cc_zf_xz.9.png"), //
-		TITLE_BACK_DEFAULT("title_back_default.png"), //
-		TITLE_BACK_PRESSED("title_back_pressed.png"), //
-		TITLE_BG("title_bg.png"), //
-		TITLE_EXIT_DEFAULT("title_exit_default.png"), //
-		TITLE_EXIT_PRESSED("title_exit_pressed.png"),
-
-		BACK("cc_bt_back.png"),//
-		BACK_CLICK("cc_bt_back_click.png"),//
+		TITLE_BACKGROUND("cc_title_bg.9.png"),//
+		TITLE_BACK_DEFAULT("cc_title_back.png"),//
+		TITLE_BACK_PRESSED("cc_title_back_click.png"),//
 		PANEL_BACKGROUND("cc_panel.9.png"),//
 		PAYLIST_SELECTED("cc_paylist_sel.9.png"),//
 		PAYLIST_NORMAL("cc_paylist_nor.9.png"),//
-		TITLE_BACKGROUND("cc_title_bg.9.png"),//
 
 		/** XListView */
 		XLISTVIEW_ARROW("xlistview_arrow.png"), //

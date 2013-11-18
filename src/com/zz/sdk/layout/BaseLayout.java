@@ -18,7 +18,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.AnimationSet;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -877,30 +876,30 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 					iv.setId(IDC.BT_CANCEL.id());
 					ll.addView(iv, new LayoutParams(LP_WW));
 					iv.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-					iv.setImageDrawable(CCImg.getStateListDrawable(ctx, CCImg.BACK, CCImg.BACK_CLICK));
+					iv.setImageDrawable(CCImg.getStateListDrawable(ctx, CCImg.TITLE_BACK_DEFAULT, CCImg.TITLE_BACK_PRESSED));
 					iv.setClickable(true);
 					iv.setOnClickListener(this);
 					ZZDimenRect.CC_TITLE_BT_PADDING.apply_padding(iv);
 				}
 
 				// 空位，仅用于撑开
-				if (false) {
-					View empty = new View(ctx);
-					ll.addView(empty, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f));
-				}
+//				if (false) {
+//					View empty = new View(ctx);
+//					ll.addView(empty, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f));
+//				}
 
 				// 退出按钮
-				if (false) {
-					Button tv = new Button(ctx);
-					LayoutParams lp = new LayoutParams(LP_WW);
-					lp.topMargin = ZZDimen.dip2px(1);
-					lp.rightMargin = ZZDimen.dip2px(3);
-					ll.addView(tv, lp);
-					tv.setId(IDC.BT_EXIT.id());
-					Drawable d = CCImg.getStateListDrawable(ctx, CCImg.TITLE_EXIT_DEFAULT, CCImg.TITLE_EXIT_PRESSED);
-					tv.setBackgroundDrawable(d);
-					tv.setOnClickListener(this);
-				}
+//				if (false) {
+//					Button tv = new Button(ctx);
+//					LayoutParams lp = new LayoutParams(LP_WW);
+//					lp.topMargin = ZZDimen.dip2px(1);
+//					lp.rightMargin = ZZDimen.dip2px(3);
+//					ll.addView(tv, lp);
+//					tv.setId(IDC.BT_EXIT.id());
+//					Drawable d = CCImg.getStateListDrawable(ctx, CCImg.TITLE_EXIT_DEFAULT, CCImg.TITLE_EXIT_PRESSED);
+//					tv.setBackgroundDrawable(d);
+//					tv.setOnClickListener(this);
+//				}
 			}
 		}
 
