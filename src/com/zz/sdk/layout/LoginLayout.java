@@ -8,20 +8,13 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.LinearLayout.LayoutParams;
-
 import com.zz.lib.pojo.PojoUtils;
 import com.zz.sdk.layout.LoginMainLayout.IDC;
-import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.ResConstants;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
-import com.zz.sdk.util.Utils;
 public class LoginLayout extends LinearLayout {
 	private EditText mInputAccount;
 	private EditText mInputPW;
@@ -46,18 +39,18 @@ public class LoginLayout extends LinearLayout {
 		
 		Button btNormal = new Button(ctx);
 		btNormal.setId(IDC.BT_LOGIN_NORMAL.id());
-		btNormal.setTextSize(TypedValue.COMPLEX_UNIT_DIP,16);
+		btNormal.setTextSize(TypedValue.COMPLEX_UNIT_DIP,13);
 		btNormal.setText("卓越通行证");
 		btNormal.setBackgroundDrawable(CCImg.LOGIN_LABE_LAN.getDrawble(ctx));
-		btNormal.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(5), ZZDimen.dip2px(5), ZZDimen.dip2px(5));
+		btNormal.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(1), ZZDimen.dip2px(5), ZZDimen.dip2px(1));
 		btNormal.setOnClickListener(l);
 		
 		Button btDouQu = new Button(ctx);
 		btDouQu.setText("老用户");
-		btDouQu.setTextSize(TypedValue.COMPLEX_UNIT_DIP,16);
+		btDouQu.setTextSize(TypedValue.COMPLEX_UNIT_DIP,13);
 		btDouQu.setBackgroundDrawable(CCImg.LOGIN_LABE_HUI.getDrawble(ctx));
 		btDouQu.setId(IDC.BT_LOGIN_DOQU.id());
-		btDouQu.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(0), ZZDimen.dip2px(5), ZZDimen.dip2px(0));
+		btDouQu.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(1), ZZDimen.dip2px(5), ZZDimen.dip2px(1));
 		btDouQu.setOnClickListener(l);
 		//小窗口布局			
 		// 注册按钮
@@ -85,7 +78,7 @@ public class LoginLayout extends LinearLayout {
 		Button btnLogin = new Button(ctx);
 		btnLogin.setId(IDC.BT_LOGIN.id());
 		btnLogin.setText("立即登录");
-		btnLogin.setTextSize(TypedValue.COMPLEX_UNIT_DIP,16);
+		btnLogin.setTextSize(TypedValue.COMPLEX_UNIT_DIP,18);
 		btnLogin.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
 	    btnLogin.setPadding(ZZDimen.dip2px(10), ZZDimen.dip2px(12),ZZDimen.dip2px(10),ZZDimen.dip2px(12));
 		btnLogin.setOnClickListener(l);
@@ -93,7 +86,7 @@ public class LoginLayout extends LinearLayout {
 		//第三方登录
 		Button btnFastLogin = new Button(ctx);
 		btnFastLogin.setText("快速登录");
-		btnFastLogin.setTextSize(TypedValue.COMPLEX_UNIT_DIP,16);
+		btnFastLogin.setTextSize(TypedValue.COMPLEX_UNIT_DIP,18);
 		btnFastLogin.setId(IDC.BT_QUICK_LOGIN.id());
 		btnFastLogin.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx,CCImg.LOGIN_BUTTON_HUANG,CCImg.LOGIN_BUTTON_HUANG_CLICK));
 		btnFastLogin.setPadding(ZZDimen.dip2px(10), ZZDimen.dip2px(12),ZZDimen.dip2px(10),ZZDimen.dip2px(12));
@@ -125,13 +118,13 @@ public class LoginLayout extends LinearLayout {
 			LinearLayout wraptop = new LinearLayout(ctx);
 			wraptop.setOrientation(HORIZONTAL);
 			LayoutParams lDouQu = new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
-			lDouQu.height = ZZDimen.dip2px(35);
+			lDouQu.height = ZZDimen.dip2px(26);
 			wraptop.addView(btDouQu,lDouQu);
 			LayoutParams lnormal = new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
 			lnormal.setMargins(ZZDimen.dip2px(1), 0, 0, 0);
-			lnormal.height = ZZDimen.dip2px(35);
+			lnormal.height = ZZDimen.dip2px(26);
 			wraptop.addView(btNormal,lnormal);
-			wraptop.setPadding(0, ZZDimen.dip2px(0), ZZDimen.dip2px(0), ZZDimen.dip2px(-4));
+			wraptop.setPadding(0, ZZDimen.dip2px(0), ZZDimen.dip2px(0), ZZDimen.dip2px(0));
 			content.addView(wraptop,LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
 			
 			
