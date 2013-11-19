@@ -6,5 +6,9 @@ bin/
 gen/
 local.properties
 proguard/
-bak/
-javadoc/
+/bak/
+/javadoc/
+/tmp/
+
+/out/
+/test/res/

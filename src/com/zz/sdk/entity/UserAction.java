@@ -1,7 +1,9 @@
 package com.zz.sdk.entity;
 
-import com.zz.sdk.util.GetDataImpl;
 import android.content.Context;
+
+import com.zz.sdk.entity.result.BaseResult;
+import com.zz.sdk.util.ConnectionUtil;
 
 /**
  * 此类负责用户用户行为
@@ -30,6 +32,8 @@ public class UserAction {
 	public static final String PYEE = "PYEE";
 	/** 银联支付 */
 	public static final String PUNION = "PUNION";
+	/** 卓越币 */
+	public static final String PZYCOIN = "PZYCOIN";
 	/** 取消话费行为 */
 	public static final String CKKFUN = "CKKFUN";
 	/** 取消财付通行为 */
@@ -45,7 +49,7 @@ public class UserAction {
 	public String actionType = "";
 	public String serverId = "";
 
-	public Result requestActivon(Context context) {
-		return GetDataImpl.getInstance(context).request(context, this);
+	public BaseResult requestActivon(Context context) {
+		return ConnectionUtil.getInstance(context).request(this);
 	}
 }

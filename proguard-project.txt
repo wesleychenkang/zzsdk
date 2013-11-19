@@ -50,6 +50,14 @@
 -keep class com.unionpay.**{*;}
 -keep class org.apache.**{*;}
 
+# 保存留构造函数
+-keepclassmembers  class * extends com.zz.sdk.layout.BaseLayout {  
+    <init>(android.content.Context, com.zz.sdk.ParamChain);  
+} 
+
+-keep public class com.zz.sdk.ParamChain {
+   public *;
+}
 
 -keep public class com.zz.sdk.SDKManager {
    public *;

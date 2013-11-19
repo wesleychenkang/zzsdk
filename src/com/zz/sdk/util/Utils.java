@@ -1,6 +1,4 @@
 package com.zz.sdk.util;
-
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -9,16 +7,17 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apaches.commons.codec.binary.Base64;
-import org.apaches.commons.codec.digest.DigestUtils;
-
+import org.apache.commons.codec.binary.Base64;
+import android.Manifest.permission;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -26,17 +25,19 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.telephony.TelephonyManager;
 import android.util.Pair;
 import android.widget.Toast;
-
+import com.zz.lib.pojo.PojoUtils;
 import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.entity.PayChannel;
+import com.zz.sdk.entity.SdkUser;
+import com.zz.sdk.entity.SdkUserTable;
 import com.zz.sdk.entity.UserAction;
-
 /**
  * @Description: 工具类
  * @author roger
@@ -63,8 +64,12 @@ public class Utils {
 	private static String CACHE_PROJECT_ID = null;
 
 	private static String CACHE_GAME_SERVER_ID = null;
-	
+
 	private static String CACHE_PRODUCT_ID = null;
+
+	private static String CACHE_DEVICE_NUM = null;
+
+	private static final NumberFormat PRICE_FORMAT = new DecimalFormat("#.##");
 
 	static {
 		String state = Environment.getExternalStorageState();
@@ -106,9 +111,11 @@ public class Utils {
 		}
 		return s;
 	}
-  
+ 
+	
 	/**
 	 * md5 簽名
+	 * 
 	 * @param s
 	 * @return
 	 */
@@ -117,16 +124,14 @@ public class Utils {
 			return "";
 		}
 		try {
-			
-			return DigestUtils.md5Hex(s);
+			return MD5.md5Hex(s);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Logger.d("md5 encode exception");
 		}
 		return s;
 	}
-	
-	
+
 	/**
 	 * 读取手机唯一标识
 	 * 
@@ -139,6 +144,7 @@ public class Utils {
 		String imsi = tm.getSubscriberId();
 		return imsi;
 	}
+
 	// /////////////////////////////////////////////////////////////////////
 	private final static String KEY = "www.daw.so";
 
@@ -214,6 +220,19 @@ public class Utils {
 		if (user == null || pw == null) {
 			return;
 		}
+
+		if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN) {
+			if (PojoUtils.isDouquUser(user)) {
+				// 不将逗趣的账户储存到sd卡
+				return;
+			}
+
+			if (PojoUtils.isCMGEUser(user)) {
+				// 不存组合式卓越账号
+				return;
+			}
+		}
+
 		// 账号与密码用||分开
 		String data = user + "||" + pw;
 		String encodeData = encode(data);
@@ -243,6 +262,51 @@ public class Utils {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * 从数据库中查找指定的用户信息
+	 * 
+	 * @param ctx
+	 *            环境
+	 * @param account
+	 *            待查找的用户名
+	 * @return <用户名，密码>
+	 */
+	public static Pair<String, String> getAccountFromDB(Context ctx,
+			String account) {
+		SdkUserTable t = SdkUserTable.getInstance(ctx);
+		SdkUser user = t.getSdkUserByName(account);
+		if (user != null) {
+			return new Pair<String, String>(user.loginName, user.password);
+		}
+		return null;
+	}
+
+	/**
+	 * 更新用户信息到数据库
+	 * 
+	 * @param ctx
+	 *            环境
+	 * @param loginName
+	 *            用户名
+	 * @param password
+	 *            密码
+	 * @param userid
+	 *            用户ID
+	 * @param autoLogin
+	 *            是否自动登录，0否 1是
+	 * @return 更新是否成功
+	 */
+	public static boolean writeAccount2DB(Context ctx, String loginName,
+			String password, int userid, int autoLogin) {
+		SdkUser user = new SdkUser();
+		user.sdkUserId = userid;
+		user.loginName = loginName;
+		user.autoLogin = autoLogin;
+		user.password = password;
+		SdkUserTable t = SdkUserTable.getInstance(ctx);
+		return t.update(user);
 	}
 
 	/**
@@ -291,6 +355,10 @@ public class Utils {
 		return ret;
 	}
 
+	public static synchronized void setProjectID(String id) {
+		CACHE_PROJECT_ID = id;
+	}
+
 	/**
 	 * 获取工程ID
 	 * 
@@ -318,8 +386,13 @@ public class Utils {
 			return CACHE_PROJECT_ID;
 		}
 	}
-   public static synchronized String getProductId(Context cxt){
-	   if (null == CACHE_PRODUCT_ID) {
+
+	public static synchronized void setProductId(String id) {
+		CACHE_PRODUCT_ID = id;
+	}
+
+	public static synchronized String getProductId(Context cxt) {
+		if (null == CACHE_PRODUCT_ID) {
 			String productId = null;
 			try {
 				ApplicationInfo appInfo;
@@ -338,12 +411,9 @@ public class Utils {
 		} else {
 			return CACHE_PRODUCT_ID;
 		}
-	  
-	
-	  
-   }
-	
-	
+
+	}
+
 	/**
 	 * 获取 游戏服务器ID
 	 * 
@@ -455,59 +525,6 @@ public class Utils {
 	public static void toastInfo(Context context, String text) {
 		Toast.makeText(context, text, Toast.LENGTH_LONG).show();
 	}
-
-	public static StateListDrawable getStateListDrawable(Context context,
-			String picPressed, String picNormal) {
-		StateListDrawable listDrawable = new StateListDrawable();
-		listDrawable.addState(
-				new int[] { android.R.attr.state_pressed },
-				BitmapCache.getDrawable(context, Constants.ASSETS_RES_PATH
-						+ picPressed));
-		listDrawable.addState(
-				new int[] { android.R.attr.state_selected },
-				BitmapCache.getDrawable(context, Constants.ASSETS_RES_PATH
-						+ picPressed));
-		listDrawable.addState(
-				new int[] { android.R.attr.state_enabled },
-				BitmapCache.getDrawable(context, Constants.ASSETS_RES_PATH
-						+ picNormal));
-		return listDrawable;
-	}
-
-	public static String substringStatusStr(String str, String start, String end) {
-		String ss = str;
-		try {
-			if (null == str || "".equals(start)) {
-				return "";
-			}
-			ss = ss.substring(ss.indexOf(start) + start.length());
-			ss = ss.substring(0, ss.indexOf(end));
-		} catch (Exception e) {
-			ss = "";
-			e.printStackTrace();
-		}
-		return ss;
-	}
-
-	public static List<String> payMoneyList(PayChannel payChannel) {
-		List<String> list = new ArrayList<String>();
-		String moneys = payChannel.priceList;
-		if (moneys != null) {
-			String[] split = moneys.split(",");
-			if (split != null) {
-				for (String s : split) {
-					// 以分为单位， 去掉两面两位
-					list.add(s.trim().substring(0, s.trim().length() - 2));
-				}
-			}
-		}
-		return list;
-	}
-
-	// public static void writeProjectId2cache(Context ctx, String projectId) {
-	// if (projectId != null)
-	// CACHE_PROJECT_ID = projectId;
-	// }
 
 	//
 	// ------------------------------------------------------------------------
@@ -635,5 +652,44 @@ public class Utils {
 			price = price.substring(0, price.length() - 2);
 		}
 		return price;
+	}
+
+	/**
+	 * 转换浮点价格值为字符串，非科学计数法，保持小数位精度，如 "1234.01"
+	 * 
+	 * @param price
+	 * @return
+	 */
+	public static String price2str(double price) {
+		return PRICE_FORMAT.format(price);
+	}
+
+	/** 检查是否有权限， true表示有权限， false表示失败或无权限 */
+	public static boolean checkPermission(Context ctx, String permName) {
+		try {
+			if (PackageManager.PERMISSION_GRANTED == ctx.getPackageManager()
+					.checkPermission(permName, ctx.getPackageName())) {
+				return true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	public static boolean checkPermission_SendSMS(Context ctx) {
+		return checkPermission(ctx, permission.SEND_SMS);
+	}
+
+	public static boolean checkPermission_ReceiveSMS(Context ctx) {
+		return checkPermission(ctx, permission.RECEIVE_SMS);
+	}
+
+	/** 获取设备号 */
+	public static String getDeviceNum(Context context) {
+		if (CACHE_DEVICE_NUM == null) {
+			CACHE_DEVICE_NUM = DeviceUtil.genDeviceID(context);
+		}
+		return CACHE_DEVICE_NUM;
 	}
 }

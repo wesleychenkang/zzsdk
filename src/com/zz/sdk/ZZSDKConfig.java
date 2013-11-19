@@ -11,12 +11,26 @@ import com.zz.sdk.util.Constants;
 public final class ZZSDKConfig {
 	/** 使用360SDK */
 	public final static boolean SUPPORT_360SDK = false;
+	/** 奇虎(360SDK)： 大话360测试 */
+	public final static String QIHOO_PRODUCT_ID = "D1001";
+
+	/** 支持豆趣的用户登录 */
+	public final static boolean SUPPORT_DOUQU_LOGIN = true;
 
 	/** 方向 */
 	public final static int ORIENTATION = Constants.DIR_AUTO;
 
-	/** 奇虎(360SDK)： 大话360测试 */
-	public final static String QIHOO_PRODUCT_ID = "D1001";
+	/** 处在调试模式，<b>版本发布时必须将此值改为 false，避免信息泄露</b> */
+	public final static boolean DEBUG = BuildConfig.DEBUG;
+
+	/** 调试·服务器URL */
+	public final static boolean DEBUG_URL =  false;// DEBUG;// 
+
+	/** 插件模式 */
+	public final static boolean PLUGIN_MODE = false;
+	
+	/** 是否加密密码，新的签名处理，必须要加密 */
+	public final static boolean ENCRYPT_PASSWORD = DEBUG_URL;// true;//
 
 	/* 版本信息 */
 
@@ -26,4 +40,7 @@ public final class ZZSDKConfig {
 	public final static String VERSION_NAME = "1.0";
 	/** 版本发布时间，编译时更新 ，格式：20130725 */
 	public final static String VERSION_DATE = "20130726";
+
+	public final static String CONFIG_DESC = (SUPPORT_360SDK ? ",360sdk" : "")
+			+ (SUPPORT_DOUQU_LOGIN ? ",cmge" : "");
 }

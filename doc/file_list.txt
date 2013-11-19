@@ -1,0 +1,62 @@
+文件功能说明(20131118)
+======================
+
+
+* zzsdk-lib.jar        - SDK 库文件。请复制到游戏工程的 libs/ 目录下。
+
+* javadoc.zip          - javadoc，可在开发时为 zzsdk-lib.jar 提供接口、参数等说明
+
+* zzsdk-lib-assets.jar - assets资源，请复制到游戏工程的 libs/ 目录下。
+
+* zzsdk-lib-extern.zip - 第三方库和资源文件。在工程目录下直接解压。基本组成如下：
+    zzsdk-lib-extern/
+    |-- assets
+    |   `-- zz_res
+    |       |-- login_bg_h.jpg  // 登录背景：横屏
+    |       `-- login_bg_v.jpg  // 登录背景：竖屏
+    |-- libs
+    |   |-- android-support-v4.jar
+    |   |-- armeabi
+    |   |   `-- libentryex.so
+    |   |-- commons-codec-1.6.jar
+    |   |-- UPPayAssistEx.jar
+    |   `-- UPPayPluginEx.jar
+    `-- res
+        `-- values
+            `-- unionpay_style.xml
+
+* zzsdk-demo.apk       - 完整的演示 APK。可直接安装；
+
+* zzsdk-demo.zip       - 演示工程。
+
+    如需测试，先在demo工程目录下解压 zzsdk-lib-extern.zip，
+    再复制 zzsdk-lib.jar 和 zzsdk-lib-assets.jar 到 libs 目录下，
+    就可以导入 eclipse 或直接编译。大致组成如下：
+
+    zzsdk-demo
+    |-- AndroidManifest.xml
+    |-- assets
+    |   `-- zz_res
+    |       |-- login_bg_h.jpg
+    |       `-- login_bg_v.jpg
+    |-- libs
+    |   |-- android-support-v4.jar
+    |   |-- armeabi
+    |   |   `-- libentryex.so
+    |   |-- commons-codec-1.6.jar
+    |   |-- UPPayAssistEx.jar
+    |   |-- UPPayPluginEx.jar
+    |   |-- zzsdk-lib-assets.jar
+    |   `-- zzsdk-lib.jar
+    |-- project.properties
+    |-- res
+    |   `-- values
+    |       |-- strings.xml
+    |       `-- unionpay_style.xml
+    `-- src
+        `-- com
+            `-- zz
+                `-- sdk
+                    `-- demo
+                        `-- MainActivity.java
+

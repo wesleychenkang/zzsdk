@@ -15,9 +15,9 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
-
 
 public class BitmapCache {
 
@@ -108,7 +108,7 @@ public class BitmapCache {
 			}
 		}
 
-		public static NinePatchChunk deserialize(byte[] data) {
+		private static NinePatchChunk deserialize(byte[] data) {
 			ByteBuffer byteBuffer = ByteBuffer.wrap(data).order(
 					ByteOrder.nativeOrder());
 
@@ -144,11 +144,19 @@ public class BitmapCache {
 		}
 	}
 
+	/**
+	 * 读取 9-path 图片
+	 * 
+	 * @param ctx
+	 *            环境
+	 * @param path
+	 *            assets 下的绝对路径
+	 * @return 如果失败则返回 null
+	 */
 	public static NinePatchDrawable getNinePatchDrawable(Context ctx,
 			String path) {
 		try {
-			Bitmap bm = BitmapFactory.decodeStream(ctx.getAssets().open(
-					Constants.ASSETS_RES_PATH + path));
+			Bitmap bm = BitmapFactory.decodeStream(ctx.getAssets().open(path));
 			byte[] chunk = bm.getNinePatchChunk();
 			boolean isChunk = NinePatch.isNinePatchChunk(chunk);
 			if (!isChunk) {
@@ -169,4 +177,43 @@ public class BitmapCache {
 		}
 		return null;
 	}
+
+	/**
+	 * 获取普通 [preesed, selected]组合状态的图
+	 * 
+	 * @param ctx
+	 * @param picPressed
+	 *            按下状态图。assets 下的绝对路径
+	 * @param picNormal
+	 *            普通状态图。assets 下的绝对路径
+	 * @return
+	 */
+	public static StateListDrawable getStateListDrawable(Context ctx,
+			String picPressed, String picNormal) {
+		Drawable dp = (picPressed != null && picPressed.endsWith(".9.png")) ? getNinePatchDrawable(
+				ctx, picPressed) : getDrawable(ctx, picPressed);
+		Drawable dn = (picNormal != null && picNormal.endsWith(".9.png")) ? getNinePatchDrawable(
+				ctx, picNormal) : getDrawable(ctx, picNormal);
+		return getStateListDrawable(ctx, dp, dn);
+	}
+	
+	public static StateListDrawable getStateListDrawable(Context ctx,
+			Drawable picPressed, Drawable picNormal) {
+		StateListDrawable listDrawable = new StateListDrawable();
+		listDrawable.addState(new int[] { android.R.attr.state_pressed }, picPressed); 
+		listDrawable.addState(new int[] { android.R.attr.state_focused}, picPressed); 
+		listDrawable.addState(new int[] { android.R.attr.state_selected }, picPressed);
+		listDrawable.addState(new int[] { android.R.attr.state_enabled }, picNormal);
+		listDrawable.addState(new int[] {  }, picNormal);
+		return listDrawable;
+	}
+   public static  StateListDrawable getStateRadioDrawable(Context ctx,Drawable picChecked, Drawable picNormal){
+	   
+	   StateListDrawable listDrawable = new StateListDrawable();
+		listDrawable.addState(new int[]{android.R.attr.state_checked}, picChecked);
+		// listDrawable.addState(new int[]{android.R.attr.state_focused}, getDrawable(picFocused));
+		listDrawable.addState(new int[]{android.R.attr.state_enabled}, picNormal);
+	   return listDrawable;
+   }
+	
 }
