@@ -865,20 +865,30 @@ class LoginMainLayout extends BaseLayout {
 
 		FrameLayout top = new FrameLayout(ctx);
 		ImageView image = new ImageView(ctx);
-		image.setImageDrawable(BitmapCache.getDrawable(ctx,
-				Constants.ASSETS_RES_PATH + "logo2.png"));
+		image.setImageDrawable(CCImg.LOGIN_LOGO.getDrawble(ctx));
 		top.addView(image);
-
-		FrameLayout.LayoutParams l = new FrameLayout.LayoutParams(
+		FrameLayout.LayoutParams ltop = new FrameLayout.LayoutParams(
 				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		rv.addView(top, l);
-
+		rv.addView(top, ltop);
+        
+		FrameLayout middle = new FrameLayout(ctx);
+		ImageView logo2 = new ImageView(ctx);
+		logo2.setImageDrawable(CCImg.LOGIN_LOGO2.getDrawble(ctx));
+		middle.addView(logo2);
+		FrameLayout.LayoutParams lmiddle = new FrameLayout.LayoutParams(
+				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		lmiddle.gravity= Gravity.CENTER_HORIZONTAL;
+		lmiddle.topMargin=heightPixels/5;
+		rv.addView(middle,lmiddle);
+		
+		
 		boolean hasAccount = mLoginName != null && mLoginName.length() > 0;
 		main = new FrameLayout(ctx);
 		//main.setBackgroundColor(Color.rgb(245, 245, 245));
 		main.setBackgroundDrawable(CCImg.LOGIN_BACK.getDrawble(ctx));
-		framly.gravity = Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL;
-		framly.topMargin = isVertical ? -heigth1 : 0;
+		framly.gravity =Gravity.CENTER_HORIZONTAL;
+		//framly.topMargin = isVertical ? -heigth1 : 0;
+		framly.topMargin = isVertical ? heightPixels/5+ZZDimen.dip2px(40) : 0;
 		framly.rightMargin = isVertical ? 0 : -heigth1;
 		LinearLayout login = createView_login(ctx, hasAccount);
 		main.addView(login);

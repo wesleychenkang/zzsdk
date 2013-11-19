@@ -177,20 +177,25 @@ public class LoginLayout extends LinearLayout {
 			LinearLayout wrapBttom = new LinearLayout(ctx);
 			content.addView(wrapBttom, LayoutParams.MATCH_PARENT,
 					LayoutParams.WRAP_CONTENT);
-			wrapBttom.setOrientation(VERTICAL);
+			wrapBttom.setOrientation(HORIZONTAL);
 			wrapBttom.setGravity(Gravity.CENTER_HORIZONTAL
 					| Gravity.CENTER_VERTICAL);
 			LinearLayout.LayoutParams lLogin = new LinearLayout.LayoutParams(
 					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-			lLogin.setMargins(ZZDimen.dip2px(5), ZZDimen.dip2px(10), ZZDimen.dip2px(10), 0);
-			wrapBttom.addView(btnLogin,lLogin);
+			lLogin.setMargins(ZZDimen.dip2px(5), ZZDimen.dip2px(5), ZZDimen.dip2px(10), 0);
 			
-			// 快速登录
-			LinearLayout.LayoutParams lfastLogin = new LinearLayout.LayoutParams(
-					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-			
-		    lfastLogin.setMargins(ZZDimen.dip2px(5), ZZDimen.dip2px(5), ZZDimen.dip2px(10), 0);
+			if(!hasAccount){
+			 lLogin.weight = 0.5f;
+			 lLogin.setMargins(ZZDimen.dip2px(5), ZZDimen.dip2px(5), ZZDimen.dip2px(5), ZZDimen.dip2px(5));
+			}
+		    wrapBttom.addView(btnLogin,lLogin);
+		   
 		    if(!hasAccount){
+		    	// 快速登录
+			LinearLayout.LayoutParams lfastLogin = new LinearLayout.LayoutParams(
+						LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+			lfastLogin.setMargins(ZZDimen.dip2px(5), ZZDimen.dip2px(5), ZZDimen.dip2px(5),  ZZDimen.dip2px(5));
+			lfastLogin.weight = 0.5f;	
 			wrapBttom.addView(btnFastLogin,lfastLogin);
 		    }
 		}

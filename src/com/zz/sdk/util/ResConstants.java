@@ -523,6 +523,9 @@ public class ResConstants {
 		LOGIN_LABE_LAN("labe_lan.9.png"),
 		LOGIN_LABE_HUI("labe_hui.9.png"),
 		LOGIN_BACK("land.9.png"),
+		LOGIN_LOGO("logo.png"),//顶部logo
+		LOGIN_LOGO2("logo2.png"),//中间logo
+		LOGIN_SDK_BACK("sdk_back.png"),//整体背景
 		/** 自动登录框资源*/
 		AUTO_BD("auto_login_bg.9.png"), //自动登录框背景
 		AUTO_CANCLE("cancel.9.png"),
