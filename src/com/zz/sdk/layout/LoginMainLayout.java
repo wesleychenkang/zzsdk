@@ -440,12 +440,16 @@ class LoginMainLayout extends BaseLayout {
 		Button btn_normal = (Button)findViewById(IDC.BT_LOGIN_NORMAL.id());
 		if(b){
 		isDoQuCount = true;
-		btn_normal.setBackgroundDrawable(CCImg.LOGIN_LABE_HUI.getDrawble(ctx));	
-		btn_doqu.setBackgroundDrawable(CCImg.LOGIN_LABE_LAN.getDrawble(ctx));		
+		btn_normal.setBackgroundDrawable(CCImg.LOGIN_LABE_HUI.getDrawble(ctx));
+		btn_normal.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(1), ZZDimen.dip2px(5), ZZDimen.dip2px(1));
+		btn_doqu.setBackgroundDrawable(CCImg.LOGIN_LABE_LAN.getDrawble(ctx));
+		btn_doqu.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(1), ZZDimen.dip2px(5), ZZDimen.dip2px(1));
 		}else{
 		isDoQuCount = false;
-		btn_doqu.setBackgroundDrawable(CCImg.LOGIN_LABE_HUI.getDrawble(ctx));	
+		btn_doqu.setBackgroundDrawable(CCImg.LOGIN_LABE_HUI.getDrawble(ctx));
+		btn_doqu.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(1), ZZDimen.dip2px(5), ZZDimen.dip2px(1));
 		btn_normal.setBackgroundDrawable(CCImg.LOGIN_LABE_LAN.getDrawble(ctx));
+		btn_normal.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(1), ZZDimen.dip2px(5), ZZDimen.dip2px(1));
 		}
 	}
 

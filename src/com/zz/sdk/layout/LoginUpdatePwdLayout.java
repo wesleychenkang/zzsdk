@@ -55,7 +55,7 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		mOldPwd.setSingleLine();
 		mOldPwd.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
 		mOldPwd.setTextSize(20);
-		mOldPwd.setBackgroundDrawable(CCImg.LOGIN_EDIT.getDrawble(ctx));
+		mOldPwd.setBackgroundDrawable(CCImg.LOGIN_LINEAR.getDrawble(ctx));
 		mOldPwd.setTextColor(Color.WHITE);
 		LinearLayout.LayoutParams lold = new LinearLayout.LayoutParams(-1,-2);
 		lold.leftMargin = ZZDimen.dip2px(8);
@@ -82,7 +82,7 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		//用户输入新密码 
 		mNewPwd = new EditText(ctx);
 		mNewPwd.setSingleLine();
-		mNewPwd.setBackgroundDrawable(CCImg.LOGIN_EDIT.getDrawble(ctx));
+		mNewPwd.setBackgroundDrawable(CCImg.LOGIN_LINEAR.getDrawble(ctx));
 		mNewPwd.setHint("请输入新密码");
 		mNewPwd.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(7), 0, ZZDimen.dip2px(7));
 		mNewPwd.setTextColor(Color.BLACK);

@@ -57,7 +57,7 @@ public class LoginRegisterLayout extends LinearLayout{
 		mRegistUserId = new EditText(ctx);
 		mRegistUserId.setSingleLine();
 		mRegistUserId.setId(IDC.ED_REGISTER_NAME.id());
-		mRegistUserId.setBackgroundDrawable(CCImg.LOGIN_EDIT.getDrawble(ctx));
+		mRegistUserId.setBackgroundDrawable(CCImg.LOGIN_LINEAR.getDrawble(ctx));
 		mRegistUserId.setHint("请输入帐号");
 		mRegistUserId.setTextColor(Color.BLACK);
 		mRegistUserId.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(7), 0, ZZDimen.dip2px(7));
@@ -88,7 +88,7 @@ public class LoginRegisterLayout extends LinearLayout{
 		mRegistUserPwd = new EditText(ctx);
 		//mRegistUserPwd.setId(ID_RUSERPWD);
 		mRegistUserPwd.setSingleLine();
-		mRegistUserPwd.setBackgroundDrawable(CCImg.LOGIN_EDIT.getDrawble(ctx));
+		mRegistUserPwd.setBackgroundDrawable(CCImg.LOGIN_LINEAR.getDrawble(ctx));
 		mRegistUserPwd.setHint("请输入密码");
 		mRegistUserPwd.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(7), 0, ZZDimen.dip2px(7));
 		mRegistUserPwd.setId(IDC.ED_REGISTER_PASSWORD.id());

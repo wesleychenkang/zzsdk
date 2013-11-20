@@ -522,6 +522,9 @@ public class ResConstants {
 		LOGIN_RADIO_PRESSED("btn_radio_pressed.png"),
 		LOGIN_LABE_LAN("labe_lan.9.png"),
 		LOGIN_LABE_HUI("labe_hui.9.png"),
+		LOGIN_COUNT("count.png"),
+		LOGIN_PWD("pwd.png"),
+		LOGIN_LINEAR("login_edit.9.png"),
 		LOGIN_BACK("land.9.png"),
 		LOGIN_LOGO("logo.png"),//顶部logo
 		LOGIN_LOGO2("logo2.png"),//中间logo
