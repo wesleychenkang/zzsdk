@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.os.AsyncTask;
@@ -48,6 +49,7 @@ import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
 import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
 
+import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
@@ -241,7 +243,60 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 			et.setTag(lenLimit);
 		}
 		size.apply(et);
+
+		// 设置光标颜色，如果可以的话
+		if (color != null)
+			change_edit_cursor(et, color.color());
 		return et;
+	}
+
+	protected static void change_edit_cursor(TextView et, int color) {
+		change_edit_cursor(et, new ColorDrawable(color));
+	}
+
+	protected static void change_edit_cursor(TextView et, Drawable d) {
+		try {
+			Field f;
+			Class cls;
+			for (f = null, cls = et.getClass(); !cls.equals(Object.class); cls = cls.getSuperclass()) {
+				try {
+					f = cls.getDeclaredField("mEditor");
+				} catch (NoSuchFieldException e) {
+				}
+			}
+			if (f == null) {
+				if (DEBUG) {
+					Logger.d("找不 mEditor 成员");
+				}
+				return;
+			}
+			f.setAccessible(true);
+			Object editor = f.get(et);
+
+			for (f = null, cls = editor.getClass(); !cls.equals(Object.class); cls = cls.getSuperclass()) {
+				try {
+					f = cls.getDeclaredField("mCursorDrawable");
+				} catch (NoSuchFieldException e) {
+				}
+			}
+			if (f == null) {
+				if (DEBUG) {
+					Logger.d("找不 mCursorDrawable 成员");
+				}
+				return;
+			}
+			f.setAccessible(true);
+			Object cursor = f.get(editor);
+			if (cursor instanceof Drawable[]) {
+				((Drawable[]) cursor)[0] = d;
+			} else {
+				if (DEBUG) {
+					Logger.d("mCursorDrawable 类型不匹配！" + cursor);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	/** 创建一个普通的面板视图 */
