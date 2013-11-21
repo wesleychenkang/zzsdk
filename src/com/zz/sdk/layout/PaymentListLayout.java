@@ -1142,6 +1142,7 @@ public class PaymentListLayout extends CCBaseLayout {
 
 				tv = create_normal_label(ctx, ZZStr.CC_RECHAGRE_COST_DESC);
 				ll2.addView(tv, new LayoutParams(LP_WM));
+				tv.setTextColor(ZZFontColor.CC_RECHARGE_COST.color());
 
 				tv = create_normal_label_shadow(ctx, null);
 				ll2.addView(tv, new LayoutParams(LP_WM));
@@ -1231,7 +1232,6 @@ public class PaymentListLayout extends CCBaseLayout {
 			tv.setGravity(Gravity.CENTER);
 			ll.addView(tv, new LayoutParams(LP_MW));
 			tv.setTextColor(ZZFontColor.CC_RECHARGE_DESC.color());
-			tv.setShadowLayer(0, 0, 0, 0);
 		}
 
 		// 工作区

@@ -286,6 +286,7 @@ abstract class CCBaseLayout extends BaseLayout {
 		tv = create_normal_label(ctx, ZZStr.CC_BALANCE_TITLE);
 		ll.addView(tv, new LayoutParams(LP_WM));
 		tv.setGravity(Gravity.CENTER);
+		tv.setTextColor(ZZFontColor.CC_RECHARGE_COST.color());
 
 		tv = create_normal_label_shadow(ctx, null);
 		ll.addView(tv, new LayoutParams(LP_WW));

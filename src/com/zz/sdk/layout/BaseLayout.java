@@ -204,7 +204,8 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 
 	protected static TextView create_normal_label_shadow(Context ctx, ZZStr title) {
 		TextView tv = create_normal_label(ctx, title);
-		tv.setShadowLayer(1.5f, 1, 1, ZZFontColor.CC_SHADOW_NORMAL.color());
+//		tv.setShadowLayer(0.5f, 0.5f, 0.5f, ZZFontColor.CC_SHADOW_NORMAL.color());
+		tv.getPaint().setFakeBoldText(true);
 		return tv;
 	}
 
@@ -861,6 +862,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 				tv.setId(IDC.TV_TITLE.id());
 				tv.setTextSize(24);
 				tv.setGravity(Gravity.CENTER);
+				tv.setTextColor(0xff434343);
 				ZZDimenRect.CC_LABEL_PADDING.apply_padding(tv);
 			}
 
