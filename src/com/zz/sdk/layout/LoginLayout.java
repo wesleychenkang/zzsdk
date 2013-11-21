@@ -17,6 +17,7 @@ import com.zz.sdk.layout.LoginMainLayout.IDC;
 import com.zz.sdk.util.ResConstants;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
+import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 public class LoginLayout extends LinearLayout {
 	private EditText mInputAccount;
 	private EditText mInputPW;
@@ -51,12 +52,14 @@ public class LoginLayout extends LinearLayout {
 		btNormal.setId(IDC.BT_LOGIN_NORMAL.id());
 		btNormal.setTextSize(TypedValue.COMPLEX_UNIT_DIP,13);
 		btNormal.setText("卓越通行证");
+		btNormal.setTextColor(Color.rgb(255, 255, 255));
 		btNormal.setBackgroundDrawable(CCImg.LOGIN_LABE_LAN.getDrawble(ctx));
 		btNormal.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(1), ZZDimen.dip2px(5), ZZDimen.dip2px(1));
 		btNormal.setOnClickListener(l);
 		
 		Button btDouQu = new Button(ctx);
 		btDouQu.setText("老用户");
+		btDouQu.setTextColor(Color.rgb(255, 255, 255));
 		btDouQu.setTextSize(TypedValue.COMPLEX_UNIT_DIP,13);
 		btDouQu.setBackgroundDrawable(CCImg.LOGIN_LABE_HUI.getDrawble(ctx));
 		btDouQu.setId(IDC.BT_LOGIN_DOQU.id());
@@ -91,25 +94,21 @@ public class LoginLayout extends LinearLayout {
 		btnLogin.setId(IDC.BT_LOGIN.id());
 		btnLogin.setText("立即登录");
 		btnLogin.setTextColor(Color.rgb(255, 255, 255));
-		btnLogin.setTextSize(TypedValue.COMPLEX_UNIT_DIP,18);
+		ZZFontSize.CC_RECHARGE_COMMIT.apply(btnLogin);
 		btnLogin.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
 	    btnLogin.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(12),ZZDimen.dip2px(5),ZZDimen.dip2px(12));
 		btnLogin.setOnClickListener(l);
 		
-		//第三方登录
+		//快速登录
 		Button btnFastLogin = new Button(ctx);
 		btnFastLogin.setText("快速登录");
 		btnFastLogin.setTextColor(Color.rgb(197, 245, 194));
 		btnFastLogin.setTextSize(TypedValue.COMPLEX_UNIT_DIP,18);
+		ZZFontSize.CC_RECHARGE_COMMIT.apply(btnFastLogin);
 		btnFastLogin.setId(IDC.BT_QUICK_LOGIN.id());
 		btnFastLogin.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx,CCImg.LOGIN_BUTTON_HUANG,CCImg.LOGIN_BUTTON_HUANG_CLICK));
 		btnFastLogin.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(12),ZZDimen.dip2px(5),ZZDimen.dip2px(12));
 		btnFastLogin.setOnClickListener(l);
-		// 快速登录
-		Button btnQuickLogin = new Button(ctx);
-		btnQuickLogin.setId(IDC.BT_QUICK_LOGIN.id());
-		btnQuickLogin.setOnClickListener(l);
-		btnQuickLogin.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx,CCImg.LOGIN_BUTTON_KUAI,CCImg.LOGIN_BUTTON_KUAI_ANXIA));
 		
 		// 账号编辑框
 		mInputAccount = new EditText(ctx);

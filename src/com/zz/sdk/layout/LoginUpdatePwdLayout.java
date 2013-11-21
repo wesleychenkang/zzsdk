@@ -45,7 +45,7 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		TextView rtvUser = new TextView(ctx);
 		rtvUser.setText("旧密码  ");
 		//黑色
-		rtvUser.setTextColor(Color.BLACK);
+		rtvUser.setTextColor(Color.rgb(154, 153, 153));
 		rtvUser.setTextSize(TypedValue.COMPLEX_UNIT_DIP,16);
 		wrap1.addView(rtvUser,lpwd);
 
@@ -75,7 +75,7 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		TextView rtvUserPwd = new TextView(ctx);
 		rtvUserPwd.setText("新密码  ");
 		//黑色
-		rtvUserPwd.setTextColor(Color.BLACK);
+		rtvUserPwd.setTextColor(Color.rgb(154, 153, 153));
 		rtvUserPwd.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
 		wrap2.addView(rtvUserPwd,lpwd);
 
@@ -105,6 +105,7 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		
 		Button mBtConfirm = new Button(ctx);
 		mBtConfirm.setText("确认");
+		mBtConfirm.setTextColor(Color.rgb(255, 255, 255));
 		mBtConfirm.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
 		mBtConfirm.setId(IDC.BT_MODIFY_CONFIRM.id());
 		mBtConfirm.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
@@ -117,6 +118,7 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		
 		Button mBtClose = new Button(ctx);
 		mBtClose.setText("关闭");
+		mBtClose.setTextColor(Color.rgb(255, 255, 255));
 		mBtClose.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
 		mBtClose.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LAN, CCImg.LOGIN_BUTTON_LAN_CLICK));
 		mBtClose.setPadding(ZZDimen.dip2px(5),ZZDimen.dip2px(12), ZZDimen.dip2px(5), ZZDimen.dip2px(12));
