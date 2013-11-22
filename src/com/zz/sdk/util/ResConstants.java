@@ -465,6 +465,7 @@ public class ResConstants {
 	}
 
 	public static enum CCImg {
+		CURSOR_BLINK("text_cursor_holo_light.9.png"), //
 		BACKGROUND("cc_background.9.png"), //
 		BUTTON("cc_button.9.png"), //
 		BUTTON_CLICK("cc_button_click.9.png"), //

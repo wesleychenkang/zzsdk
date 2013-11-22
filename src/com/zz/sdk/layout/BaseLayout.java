@@ -39,6 +39,7 @@ import com.zz.sdk.layout.LayoutFactory.ILayoutView;
 import com.zz.sdk.layout.LayoutFactory.KeyLayoutFactory;
 import com.zz.sdk.protocols.ActivityControlInterface;
 import com.zz.sdk.util.BitmapCache;
+import com.zz.sdk.util.ClassUtil;
 import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.Logger;
@@ -245,9 +246,14 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		size.apply(et);
 
 		// 设置光标颜色，如果可以的话
-		if (color != null)
-			change_edit_cursor(et, color.color());
+		// if (color != null) change_edit_cursor(et, color.color());
+		change_edit_cursor(et);
 		return et;
+	}
+
+	protected static void change_edit_cursor(TextView et) {
+		// 用图来做光标，因为纯色 drawable 因宽度问题通用性太低
+		change_edit_cursor(et, CCImg.CURSOR_BLINK.getDrawble(et.getContext()));
 	}
 
 	protected static void change_edit_cursor(TextView et, int color) {
@@ -255,47 +261,21 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	}
 
 	protected static void change_edit_cursor(TextView et, Drawable d) {
-		try {
-			Field f;
-			Class cls;
-			for (f = null, cls = et.getClass(); !cls.equals(Object.class); cls = cls.getSuperclass()) {
-				try {
-					f = cls.getDeclaredField("mEditor");
-				} catch (NoSuchFieldException e) {
-				}
-			}
-			if (f == null) {
-				if (DEBUG) {
-					Logger.d("找不 mEditor 成员");
-				}
+		Object obj = ClassUtil.getFeild(et, "mCursorDrawable");
+		if (obj == null) {
+			obj = ClassUtil.getFeild(et, "mEditor");
+			if (obj == null) {
 				return;
 			}
-			f.setAccessible(true);
-			Object editor = f.get(et);
+			obj = ClassUtil.getFeild(obj, "mCursorDrawable");
+		}
 
-			for (f = null, cls = editor.getClass(); !cls.equals(Object.class); cls = cls.getSuperclass()) {
-				try {
-					f = cls.getDeclaredField("mCursorDrawable");
-				} catch (NoSuchFieldException e) {
-				}
+		if (obj instanceof Drawable[]) {
+			((Drawable[]) obj)[0] = d;
+		} else {
+			if (DEBUG) {
+				Logger.d("mCursorDrawable 类型不匹配！" + obj);
 			}
-			if (f == null) {
-				if (DEBUG) {
-					Logger.d("找不 mCursorDrawable 成员");
-				}
-				return;
-			}
-			f.setAccessible(true);
-			Object cursor = f.get(editor);
-			if (cursor instanceof Drawable[]) {
-				((Drawable[]) cursor)[0] = d;
-			} else {
-				if (DEBUG) {
-					Logger.d("mCursorDrawable 类型不匹配！" + cursor);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 

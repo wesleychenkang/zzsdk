@@ -150,6 +150,8 @@ call :mycp Í¼±ê\Ö§¸¶±¦.png tup_zfb.png
 
 call :mycp bj-20131120.9.png background.9.png
 
+call :mycp ..\text_cursor_holo_light.9.png text_cursor_holo_light.9.png
+
 @pause
 goto :eof
 
