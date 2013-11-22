@@ -115,6 +115,7 @@ public class LoginLayout extends LinearLayout {
 		mInputAccount.setId(IDC.ED_LOGIN_NAME.id());
 		mInputAccount.setHint("请输入帐号");
 		mInputAccount.setTextColor(Color.BLACK);
+		BaseLayout.change_edit_cursor(mInputAccount);
 		mInputAccount.setSingleLine(true);
 		mInputAccount.setBackgroundColor(Color.TRANSPARENT);
 		//mInputAccount.setBackgroundDrawable(CCImg.LOGIN_LINEAR.getDrawble(ctx));
@@ -126,6 +127,7 @@ public class LoginLayout extends LinearLayout {
 		mInputPW.setTextColor(Color.BLACK);
 		mInputPW.setId(IDC.ED_LOGIN_PASSWORD.id());
 		mInputPW.setBackgroundColor(Color.TRANSPARENT);
+		BaseLayout.change_edit_cursor(mInputPW);
 		//mInputPW.setBackgroundDrawable(CCImg.LOGIN_LINEAR.getDrawble(ctx));
 		mInputPW.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(7), 0, ZZDimen.dip2px(7));
 		// 开始布局

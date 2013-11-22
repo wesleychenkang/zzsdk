@@ -87,6 +87,7 @@ public class LoginUpdatePwdLayout extends LinearLayout{
 		mNewPwd.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(7), 0, ZZDimen.dip2px(7));
 		mNewPwd.setTextColor(Color.BLACK);
 		mOldPwd.setTextColor(Color.BLACK);
+		BaseLayout.change_edit_cursor(mNewPwd);
 		mNewPwd.setId(IDC.ED_NEW_PASSOWRD.id());
 		LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT);
 		lp.leftMargin = ZZDimen.dip2px(8);

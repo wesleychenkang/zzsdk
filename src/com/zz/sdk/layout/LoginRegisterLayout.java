@@ -59,6 +59,7 @@ public class LoginRegisterLayout extends LinearLayout{
 		mRegistUserId.setBackgroundDrawable(CCImg.LOGIN_LINEAR.getDrawble(ctx));
 		mRegistUserId.setHint("请输入帐号");
 		mRegistUserId.setTextColor(Color.BLACK);
+		BaseLayout.change_edit_cursor(mRegistUserId);
 		mRegistUserId.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(7), 0, ZZDimen.dip2px(7));
 		LayoutParams lw = new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT);
 		lw.rightMargin =ZZDimen.dip2px(10);
@@ -92,6 +93,7 @@ public class LoginRegisterLayout extends LinearLayout{
 		mRegistUserPwd.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(7), 0, ZZDimen.dip2px(7));
 		mRegistUserPwd.setId(IDC.ED_REGISTER_PASSWORD.id());
 		mRegistUserPwd.setTextColor(Color.BLACK);
+		BaseLayout.change_edit_cursor(mRegistUserPwd);
 		LayoutParams lRegpwd = new LayoutParams(-1,-2);
 		lRegpwd.rightMargin = ZZDimen.dip2px(10);
 		wrap2.addView(mRegistUserPwd, lRegpwd);
