@@ -948,26 +948,26 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		// setLayoutParams(lp);
 
 		// XXX: 根据设备属性设置尺寸
-		if (false) {
-			DisplayMetrics metrics = new DisplayMetrics();
-			WindowManager wm = (WindowManager) ctx
-					.getSystemService(Context.WINDOW_SERVICE);
-			wm.getDefaultDisplay().getMetrics(metrics);
-			int densityDpi = metrics.densityDpi;
-			int mScreenWidth = metrics.widthPixels;
-			int mScreenHeight = metrics.heightPixels;
-
-			Logger.d("metrics.widthPixels---->" + metrics.widthPixels);
-			Logger.d("metrics.heightPixels---->" + metrics.heightPixels);
-			Logger.d("densityDpi---->" + densityDpi);
-			Drawable d = BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH
-					+ "biankuang_bg.png");
-			if (densityDpi > 240 && !(d instanceof NinePatchDrawable)) {
-				// 以“边框”大小限定当前视图尺寸 XXX: 暂时未用上
-				mScreenWidth = d.getIntrinsicWidth();
-				mScreenHeight = d.getIntrinsicHeight();
-			}
-		}
+//		if (false) {
+//			DisplayMetrics metrics = new DisplayMetrics();
+//			WindowManager wm = (WindowManager) ctx
+//					.getSystemService(Context.WINDOW_SERVICE);
+//			wm.getDefaultDisplay().getMetrics(metrics);
+//			int densityDpi = metrics.densityDpi;
+//			int mScreenWidth = metrics.widthPixels;
+//			int mScreenHeight = metrics.heightPixels;
+//
+//			Logger.d("metrics.widthPixels---->" + metrics.widthPixels);
+//			Logger.d("metrics.heightPixels---->" + metrics.heightPixels);
+//			Logger.d("densityDpi---->" + densityDpi);
+//			Drawable d = BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH
+//					+ "biankuang_bg.png");
+//			if (densityDpi > 240 && !(d instanceof NinePatchDrawable)) {
+//				// 以“边框”大小限定当前视图尺寸 XXX: 暂时未用上
+//				mScreenWidth = d.getIntrinsicWidth();
+//				mScreenHeight = d.getIntrinsicHeight();
+//			}
+//		}
 
 		createView(ctx, this);
 

@@ -13,6 +13,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.NinePatch;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.graphics.drawable.StateListDrawable;
@@ -37,7 +38,9 @@ public class BitmapCache {
 			table.put(path, bitmap);
 			return bitmap;
 		} catch (IOException e) {
-			return Bitmap.createBitmap(50, 50, Bitmap.Config.RGB_565);
+			return null;
+//			return Bitmap.createBitmap(50, 50, Bitmap.Config.RGB_565);
+//			return new ColorDrawable(color).get
 		} finally {
 			if (in != null) {
 				try {
@@ -56,7 +59,8 @@ public class BitmapCache {
 	}
 
 	public static Drawable getDrawable(Context ctx, Bitmap bitmap) {
-
+		if (bitmap == null)
+			return null;
 		if (density == 0) {
 			DisplayMetrics metrics = new DisplayMetrics();
 			WindowManager wm = (WindowManager) ctx

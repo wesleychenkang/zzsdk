@@ -86,6 +86,7 @@ public class ConnectionUtil {
 			npv.add(new BasicNameValuePair(e.getKey(), e.getValue()));
 		}
 		npv.add(new BasicNameValuePair(Constants.SING, sign));
+		npv.add(new BasicNameValuePair(Constants.MARKET, "AND"));
 		return npv;
 	}
 
