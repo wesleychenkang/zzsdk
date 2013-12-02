@@ -157,7 +157,7 @@
         <property name="zzsdk.files.class.360" value="com/zz/**/LoginForQiFu*" />
 
         <!-- demo 文件清单 -->
-		<property name="zzsdk.files.demo.project" value="AndroidManifest.xml project.properties res/** .classpath .project" />
+		<property name="zzsdk.files.demo.project" value="AndroidManifest.xml project.properties res/** .classpath .project build.xml" />
 		<property name="zzsdk.files.demo.src" value="src/com/zz/sdk/demo/**" />
 
         <!-- 第三方库、附加资源，文件清单 -->
