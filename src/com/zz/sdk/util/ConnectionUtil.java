@@ -1,27 +1,6 @@
 package com.zz.sdk.util;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.content.Context;
-import android.util.Pair;
 
 import com.zz.sdk.entity.DeviceProperties;
 import com.zz.sdk.entity.JsonParseInterface;
@@ -47,6 +26,26 @@ import com.zz.sdk.entity.result.ResultRequestUionpay;
 import com.zz.sdk.entity.result.ResultRequestYeePay;
 import com.zz.sdk.entity.result.ResultRequestZZCoin;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+
 /**
  * 网络连接工具(与服务器通信获取数据在此写相应的方法) 使用该工具类里的方法时。<b>请在线程中使用。</b>
  */
@@ -67,7 +66,7 @@ public class ConnectionUtil {
 
 	/**
 	 * 将 请求参数二次处理
-	 * 
+	 *
 	 * @param params    参数
 	 */
 	private List<BasicNameValuePair> packHttpParams(
@@ -80,18 +79,25 @@ public class ConnectionUtil {
 			params.put(K_SERVER_ID, Utils.getGameServerId(mContext));
 		if (!params.containsKey(K_DEVICE_NUM))
 			params.put(K_DEVICE_NUM, Utils.getDeviceNum(mContext));
-		String sign = Md5Code.encodeMd5Parameter(params);
+
 		List<BasicNameValuePair> npv = new ArrayList<BasicNameValuePair>();
+
+		String appKey = Utils.getAppKey();
+		if (appKey != null) {
+			String sign = Md5Code.encodeMd5Parameter(params, appKey);
+			npv.add(new BasicNameValuePair(Constants.SING, sign));
+		}
+
 		for (Entry<String, String> e : params.entrySet()) {
 			npv.add(new BasicNameValuePair(e.getKey(), e.getValue()));
 		}
-		npv.add(new BasicNameValuePair(Constants.SING, sign));
+		npv.add(new BasicNameValuePair(Constants.MARKET, "AND"));
 		return npv;
 	}
 
 	/**
 	 * 请求数据
-	 * 
+	 *
 	 * @param clazz
 	 *            数据构造类，基于 {@link JsonParseInterface}。 一般为 &lt;? extends
 	 *            {@link BaseResult}&gt;
@@ -163,13 +169,13 @@ public class ConnectionUtil {
 
 	/**
 	 * 请求c/s数据
-	 * 
+	 *
 	 * @param url
 	 *            请求的url
-	 * 
+	 *
 	 * @param nvps
 	 *            请求的参数
-	 * 
+	 *
 	 * @param attempts
 	 *            请求连接的次数
 	 * @return 返回内容
@@ -249,7 +255,7 @@ public class ConnectionUtil {
 
 	/**
 	 * 用户登录
-	 * 
+	 *
 	 * @return true表示登录成功 false表示登录失败 </br> codes=0成功|1用户不存在|2密码错误
 	 */
 	public ResultLogin login(String loginName, String password) {
@@ -261,7 +267,7 @@ public class ConnectionUtil {
 
 	/**
 	 * 快速登录
-	 * 
+	 *
 	 * @return 登录结果
 	 */
 	public ResultAutoLogin quickLogin() {
@@ -278,7 +284,7 @@ public class ConnectionUtil {
 
 	/**
 	 * 用户注册
-	 * 
+	 *
 	 * @return 注册, codes=0成功|1失败|2用户名已经存在
 	 */
 	public ResultRegister register(String loginName, String password) {
@@ -301,7 +307,7 @@ public class ConnectionUtil {
 
 	/**
 	 * 修改密码
-	 * 
+	 *
 	 * @param user
 	 *            用户名
 	 * @param newPassword
@@ -323,7 +329,7 @@ public class ConnectionUtil {
 
 	/**
 	 * 取消支付中的结果
-	 * 
+	 *
 	 * @param OrderNum
 	 *            订单号
 	 * @param payMsg
@@ -347,7 +353,7 @@ public class ConnectionUtil {
 
 	/**
 	 * 用户行为Log通用接口
-	 * 
+	 *
 	 * @param user
 	 * @return
 	 */
@@ -397,7 +403,7 @@ public class ConnectionUtil {
 
 	/**
 	 * 平台登出，表示用户关闭软件
-	 * 
+	 *
 	 * @return
 	 */
 	public BaseResult offline(Context ctx) {
@@ -409,7 +415,7 @@ public class ConnectionUtil {
 
 	/**
 	 * 详细支付请求
-	 * 
+	 *
 	 * @param type
 	 * @param payParam
 	 * @return
@@ -453,17 +459,19 @@ public class ConnectionUtil {
 			// result1.codes = "-1";
 			return null;
 		}
-		all.add(new BasicNameValuePair(K_PRODUCT_ID, Utils
-				.getProductId(mContext)));
+		all.add(new BasicNameValuePair(K_PRODUCT_ID, Utils.getProductId(mContext)));
 		all.add(new BasicNameValuePair(K_DEVICE_NUM, Utils.getDeviceNum(mContext)));
-		Md5Code.addMd5Parameter(all);
-		return doRequest(clazz, Constants.URL_SERVER_SRV + payParam.part, all,
-				1);
+
+		String appKey = Utils.getAppKey();
+		if (appKey != null)
+			Md5Code.addMd5Parameter(all, appKey);
+
+		return doRequest(clazz, Constants.URL_SERVER_SRV + payParam.part, all, 1);
 	}
 
 	/**
 	 * 获取支付列表
-	 * 
+	 *
 	 * @return
 	 */
 	public ResultPayList getPaymentList(PayParam charge) {
@@ -483,7 +491,7 @@ public class ConnectionUtil {
 
 	/**
 	 * 获取余额
-	 * 
+	 *
 	 * @param loginName
 	 * @return
 	 */
@@ -495,7 +503,7 @@ public class ConnectionUtil {
 
 	/**
 	 * 获取道具 列表
-	 * 
+	 *
 	 * @param rowstart
 	 * @param rowcount
 	 */

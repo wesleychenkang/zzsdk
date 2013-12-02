@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.zz.sdk"
-    android:versionCode="36"
-    android:versionName="1.0.2" >
+    android:versionCode="38"
+    android:versionName="2.0.0" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -47,7 +47,7 @@
         <!-- 产品ID,由SDK方提供 -->
         <meta-data
             android:name="PRODUCT_ID"
-            android:value="D10002"/>
+            android:value="D10001A"/>
         <!-- SDK 的窗体 -->
         <activity
             android:name="com.zz.sdk.activity.BaseActivity"
@@ -145,3 +145,4 @@
     </application>
 
 </manifest>
+

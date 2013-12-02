@@ -42,7 +42,7 @@ public class ResConstants {
 		/** 价格或卓越币数的表达规则, {@link DecimalFormat} */
 		CC_PRICE_FORMAT("##.##"), //
 
-		CC_BALANCE_TITLE("您的卓越币余额是："), //
+		CC_BALANCE_TITLE("您的余额是："), //
 		/** 余额显示，基于 {@link #CC_PRICE_FORMAT} */
 		CC_BALANCE_UNIT("%s"), //
 
@@ -465,6 +465,7 @@ public class ResConstants {
 	}
 
 	public static enum CCImg {
+		CURSOR_BLINK("text_cursor_holo_light.9.png"), //
 		BACKGROUND("cc_background.9.png"), //
 		BUTTON("cc_button.9.png"), //
 		BUTTON_CLICK("cc_button_click.9.png"), //
@@ -522,7 +523,13 @@ public class ResConstants {
 		LOGIN_RADIO_PRESSED("btn_radio_pressed.png"),
 		LOGIN_LABE_LAN("labe_lan.9.png"),
 		LOGIN_LABE_HUI("labe_hui.9.png"),
+		LOGIN_COUNT("count.png"),
+		LOGIN_PWD("pwd.png"),
+		LOGIN_LINEAR("login_edit.9.png"),
 		LOGIN_BACK("land.9.png"),
+		LOGIN_LOGO("logo.png"),//顶部logo
+		LOGIN_LOGO2("logo2.png"),//中间logo
+		LOGIN_SDK_BACK("sdk_back.png"),//整体背景
 		/** 自动登录框资源*/
 		AUTO_BD("auto_login_bg.9.png"), //自动登录框背景
 		AUTO_CANCLE("cancel.9.png"),

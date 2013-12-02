@@ -195,6 +195,14 @@ public class SDKManager {
 	}
 
 	/**
+	 * 设置 APP-Key
+	 * @param appKey    由CMGE根据 PRODUCT_ID　分配的私有KEY
+	 */
+	public static void setAppKey(String appKey) {
+		Utils.setAppKey(appKey);
+	}
+
+	/**
 	 * 设置配置信息，或启动 <i>后台自动登录(仅<strong>单机模式</strong>)</i>
 	 * 
 	 * @param isOnlineGame

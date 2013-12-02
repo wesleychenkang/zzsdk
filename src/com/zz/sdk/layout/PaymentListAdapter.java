@@ -71,7 +71,7 @@ class PaymentListAdapter extends BaseAdapter {
 		TextView holder = (TextView) convertView;
 		if (holder == null) {
 			holder = new TextView(mContext);
-			holder.setGravity(Gravity.CENTER_HORIZONTAL|Gravity.BOTTOM);
+			holder.setGravity(Gravity.CENTER_VERTICAL);
 			holder.setSingleLine();
 			holder.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT, mItemHeight));
 			ZZFontSize.CC_PAYTYPE_ITEM.apply(holder);
@@ -87,7 +87,7 @@ class PaymentListAdapter extends BaseAdapter {
 		holder.setText(mPayChannels[position].channelName);
 		CCImg icon = CCImg.getPayChannelIcon(mPayChannels[position].type);
 		if (icon != null) {
-			holder.setCompoundDrawablesWithIntrinsicBounds(null, icon.getDrawble(mContext), null, null);
+			holder.setCompoundDrawablesWithIntrinsicBounds(icon.getDrawble(mContext), null, null, null);
 			holder.setCompoundDrawablePadding(ZZDimen.dip2px(4));
 		}
 		return holder;

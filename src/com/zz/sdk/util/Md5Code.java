@@ -29,7 +29,7 @@ public class Md5Code {
 	 * @serialData 2013-9-17
 	 * @param nvps
 	 */
-	public static void addMd5Parameter(List<BasicNameValuePair> nvps) {
+	public static void addMd5Parameter(List<BasicNameValuePair> nvps, String appKey) {
 		HashMap<String, String> map = new HashMap<String, String>();
 		map.put(Constants.E, "" + 1);
 		String value = null;
@@ -48,14 +48,14 @@ public class Md5Code {
 			buider.append(list.get(i)).append("=").append(map.get(list.get(i)))
 					.append("&");
 		}
-		buider.append(Constants.MARKE);
+		buider.append(appKey);
 		nvps.add(new BasicNameValuePair(Constants.SING, Md5Code.md5Code(buider
 				.toString())));
 		nvps.add(new BasicNameValuePair(Constants.E, "" + 1));
 
 	}
 
-	public static String encodeMd5Parameter(HashMap<String, String> map) {
+	public static String encodeMd5Parameter(HashMap<String, String> map, String appKey) {
 		map.put(Constants.E, "" + 1);
 		Set<String> set = map.keySet();
 		List<String> list = new ArrayList<String>(set);
@@ -68,7 +68,7 @@ public class Md5Code {
 				buider.append(key).append("=").append(val).append("&");
 			}
 		}
-		buider.append(Constants.MARKE);
+		buider.append(appKey);
 		return Md5Code.md5Code(buider.toString());
 	}
 

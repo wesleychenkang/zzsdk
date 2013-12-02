@@ -28,7 +28,7 @@ call :mycp 兑换列表\ex_Right_click.png ex_right_click.png
 set t=
 @rem call :mycp 兑换详情\Background.png background.png
 @rem call :mycp 兑换详情\Background.9.png background.9.png
-call :mycp 兑换详情\Background_2.9.png background.9.png
+@rem call :mycp 兑换详情\Background_2.9.png background.9.png
 call :myRm 兑换详情\buy_button.png buy_button.png
 call :myRm 兑换详情\buy_button_click.png buy_button_click.png
 call :mycp 兑换详情\buy_button.9.png buy_button.9.png
@@ -147,6 +147,10 @@ call :mycp 图标\短信.png tup_sjdx.png
 call :mycp 图标\中国移动.png tup_yd.png
 call :mycp 图标\银联.png tup_yl.png
 call :mycp 图标\支付宝.png tup_zfb.png
+
+call :mycp bj-20131120.9.png background.9.png
+
+call :mycp ..\text_cursor_holo_light.9.png text_cursor_holo_light.9.png
 
 @pause
 goto :eof

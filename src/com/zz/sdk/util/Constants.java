@@ -36,7 +36,7 @@ public final class Constants {
 	public static final String ASSETS_RES_PATH = "zz_res/";
 	public static final String SING = "sign";
 	public static final String E = "__e__";
-	public static final String MARKE = "12345678";
+	public static final String MARKET = "market";
 	public static final String PRODUCTID = "productId";
 
 	/** 垂直屏幕下的资源(不一定有多套资源) */
@@ -53,29 +53,29 @@ public final class Constants {
 	public static final String URL_SERVER_SRV = URL_SERVER
 			+ (ZZSDKConfig.DEBUG_URL ? "srv/" : "andsrv/");
 
-	public static final String QUICK_LOGIN_REQ = URL_SERVER_SRV + "alg.lg";
+	public static final String QUICK_LOGIN_REQ = URL_SERVER_SRV + "alg.lg"; //auto login
 
-	public static final String REG_REQ = URL_SERVER_SRV + "reg.lg";
+	public static final String REG_REQ = URL_SERVER_SRV + "reg.lg"; //register
 
-	public static final String LOGIN_REQ = URL_SERVER_SRV + "lgn.lg";
+	public static final String LOGIN_REQ = URL_SERVER_SRV + "lgn.lg"; //login
 
-	public static final String MODIFY_PWD = URL_SERVER_SRV + "cpd.do";
+	public static final String MODIFY_PWD = URL_SERVER_SRV + "cpd.do"; //change password
 
-	public static final String LOG_REQ = URL_SERVER_SRV + "log.lg";
+	public static final String LOG_REQ = URL_SERVER_SRV + "log.lg"; //log
 	/** 获取支付URL对应判断消息 */
-	public static final String GPM_REQ = URL_SERVER_SRV + "gpm.do";
+	public static final String GPM_REQ = URL_SERVER_SRV + "gpm.do"; //get pay message
 	/** 获取支付列表 */
-	public static final String GPL_REQ = URL_SERVER_SRV + "gpl.do";
+	public static final String GPL_REQ = URL_SERVER_SRV + "gpl.do"; //get pay list
 	/** 用户取消支付结果 */
-	public static final String NPM_REQ = URL_SERVER_SRV + "npm.do";
+	public static final String NPM_REQ = URL_SERVER_SRV + "npm.do"; //cancel pay message
 	/** 获取360用户信息 */
 	public static final String GET_TOKEN = URL_SERVER_SRV + "q360/gui.do";
 	/** queryOrder(查询订单状态） */
-	public static final String GPM_QO = URL_SERVER_SRV + "qo.do";
+	public static final String GPM_QO = URL_SERVER_SRV + "qo.do"; //query order
 	/**
 	 * 设备信息同步
 	 */
-	public static final String DSYN_REQ = URL_SERVER_SRV + "dsyn.do";
+	public static final String DSYN_REQ = URL_SERVER_SRV + "dsyn.do"; //device syn
 
 	/**
 	 * getBalance(获取卓越币）

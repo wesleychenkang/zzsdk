@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.os.AsyncTask;
@@ -38,6 +39,7 @@ import com.zz.sdk.layout.LayoutFactory.ILayoutView;
 import com.zz.sdk.layout.LayoutFactory.KeyLayoutFactory;
 import com.zz.sdk.protocols.ActivityControlInterface;
 import com.zz.sdk.util.BitmapCache;
+import com.zz.sdk.util.ClassUtil;
 import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.Logger;
@@ -48,6 +50,7 @@ import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
 import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
 
+import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
@@ -204,7 +207,8 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 
 	protected static TextView create_normal_label_shadow(Context ctx, ZZStr title) {
 		TextView tv = create_normal_label(ctx, title);
-		tv.setShadowLayer(1.5f, 1, 1, ZZFontColor.CC_SHADOW_NORMAL.color());
+//		tv.setShadowLayer(0.5f, 0.5f, 0.5f, ZZFontColor.CC_SHADOW_NORMAL.color());
+		tv.getPaint().setFakeBoldText(true);
 		return tv;
 	}
 
@@ -240,7 +244,39 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 			et.setTag(lenLimit);
 		}
 		size.apply(et);
+
+		// 设置光标颜色，如果可以的话
+		// if (color != null) change_edit_cursor(et, color.color());
+		change_edit_cursor(et);
 		return et;
+	}
+
+	protected static void change_edit_cursor(TextView et) {
+		// 用图来做光标，因为纯色 drawable 因宽度问题通用性太低
+		change_edit_cursor(et, CCImg.CURSOR_BLINK.getDrawble(et.getContext()));
+	}
+
+	protected static void change_edit_cursor(TextView et, int color) {
+		change_edit_cursor(et, new ColorDrawable(color));
+	}
+
+	protected static void change_edit_cursor(TextView et, Drawable d) {
+		Object obj = ClassUtil.getFeild(et, "mCursorDrawable");
+		if (obj == null) {
+			obj = ClassUtil.getFeild(et, "mEditor");
+			if (obj == null) {
+				return;
+			}
+			obj = ClassUtil.getFeild(obj, "mCursorDrawable");
+		}
+
+		if (obj instanceof Drawable[]) {
+			((Drawable[]) obj)[0] = d;
+		} else {
+			if (DEBUG) {
+				Logger.d("mCursorDrawable 类型不匹配！" + obj);
+			}
+		}
 	}
 
 	/** 创建一个普通的面板视图 */
@@ -861,6 +897,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 				tv.setId(IDC.TV_TITLE.id());
 				tv.setTextSize(24);
 				tv.setGravity(Gravity.CENTER);
+				tv.setTextColor(0xff434343);
 				ZZDimenRect.CC_LABEL_PADDING.apply_padding(tv);
 			}
 
@@ -948,26 +985,26 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		// setLayoutParams(lp);
 
 		// XXX: 根据设备属性设置尺寸
-		if (false) {
-			DisplayMetrics metrics = new DisplayMetrics();
-			WindowManager wm = (WindowManager) ctx
-					.getSystemService(Context.WINDOW_SERVICE);
-			wm.getDefaultDisplay().getMetrics(metrics);
-			int densityDpi = metrics.densityDpi;
-			int mScreenWidth = metrics.widthPixels;
-			int mScreenHeight = metrics.heightPixels;
-
-			Logger.d("metrics.widthPixels---->" + metrics.widthPixels);
-			Logger.d("metrics.heightPixels---->" + metrics.heightPixels);
-			Logger.d("densityDpi---->" + densityDpi);
-			Drawable d = BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH
-					+ "biankuang_bg.png");
-			if (densityDpi > 240 && !(d instanceof NinePatchDrawable)) {
-				// 以“边框”大小限定当前视图尺寸 XXX: 暂时未用上
-				mScreenWidth = d.getIntrinsicWidth();
-				mScreenHeight = d.getIntrinsicHeight();
-			}
-		}
+//		if (false) {
+//			DisplayMetrics metrics = new DisplayMetrics();
+//			WindowManager wm = (WindowManager) ctx
+//					.getSystemService(Context.WINDOW_SERVICE);
+//			wm.getDefaultDisplay().getMetrics(metrics);
+//			int densityDpi = metrics.densityDpi;
+//			int mScreenWidth = metrics.widthPixels;
+//			int mScreenHeight = metrics.heightPixels;
+//
+//			Logger.d("metrics.widthPixels---->" + metrics.widthPixels);
+//			Logger.d("metrics.heightPixels---->" + metrics.heightPixels);
+//			Logger.d("densityDpi---->" + densityDpi);
+//			Drawable d = BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH
+//					+ "biankuang_bg.png");
+//			if (densityDpi > 240 && !(d instanceof NinePatchDrawable)) {
+//				// 以“边框”大小限定当前视图尺寸 XXX: 暂时未用上
+//				mScreenWidth = d.getIntrinsicWidth();
+//				mScreenHeight = d.getIntrinsicHeight();
+//			}
+//		}
 
 		createView(ctx, this);
 

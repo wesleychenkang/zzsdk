@@ -1,8 +1,10 @@
 package com.zz.sdk.layout;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.text.Html;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -10,16 +12,20 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.zz.sdk.ParamChain;
+import com.zz.sdk.SDKManager;
 import com.zz.sdk.ParamChain.KeyGlobal;
 import com.zz.sdk.ParamChain.KeyUser;
 import com.zz.sdk.entity.result.BaseResult;
 import com.zz.sdk.entity.result.ResultBalance;
+import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.ConnectionUtil;
+import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.ResConstants.CCImg;
@@ -273,6 +279,12 @@ abstract class CCBaseLayout extends BaseLayout {
 	/** 余额视图 */
 	protected void createView_balance(Context ctx, LinearLayout header) {
 		LinearLayout ll = new LinearLayout(ctx);
+		ll.setGravity(Gravity.CENTER_VERTICAL);
+		ll.setBackgroundColor(Color.rgb(162, 206, 60));
+		int hPadding = ZZDimen.dip2px(16);
+		int vPadding = ZZDimen.dip2px(5);
+		ll.setPadding(hPadding, vPadding, hPadding, vPadding);
+		
 		header.addView(ll, new LayoutParams(LP_MW));
 		ll.setOrientation(HORIZONTAL);
 		ll.setId(IDC.BT_BALANCE.id());
@@ -280,31 +292,54 @@ abstract class CCBaseLayout extends BaseLayout {
 		if (DEBUG_UI) {
 			ll.setBackgroundColor(0x80c06000);
 		}
+		
+		ImageView imgIcon = new ImageView(ctx);
+		imgIcon.setImageDrawable(BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/user_info_icon.png"));
+		ll.addView(imgIcon);
+		
+		//信息
+		LinearLayout layoutInfo = new LinearLayout(ctx);
+		layoutInfo.setPadding(vPadding * 2, 0, 0, 0);
+		layoutInfo.setOrientation(LinearLayout.VERTICAL);
+		layoutInfo.setGravity(Gravity.CENTER_VERTICAL);
+		ll.addView(layoutInfo);
+		{
+			TextView txtName = new TextView(ctx);
+			txtName.setText(SDKManager.getInstance(mContext).getGameUserName());
+			txtName.setSingleLine();
+			txtName.setTextColor(Color.WHITE);
+			txtName.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+			layoutInfo.addView(txtName);
+			
+			LinearLayout llmoney = new LinearLayout(ctx);
+			layoutInfo.addView(llmoney);
+			TextView tv;
+			tv = create_normal_label(ctx, ZZStr.CC_BALANCE_TITLE);
+			tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+			llmoney.addView(tv, new LayoutParams(LP_WM));
+			tv.setTextColor(Color.WHITE);
+			tv.setGravity(Gravity.CENTER);
 
-		TextView tv;
+			tv = create_normal_label_shadow(ctx, null);
+			llmoney.addView(tv, new LayoutParams(LP_WW));
+			tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+			tv.setId(IDC.TV_BALANCE.id());
+			tv.setGravity(Gravity.CENTER);
+			tv.setCompoundDrawablesWithIntrinsicBounds(null, null, CCImg.MONEY.getDrawble(ctx), null);
+			tv.setCompoundDrawablePadding(ZZDimen.dip2px(4));
+			tv.setTextColor(ZZFontColor.CC_RECHARGE_COST.color());
+			ZZFontSize.CC_RECHARGE_BALANCE.apply(tv);
+			if (DEBUG_UI) {
+				tv.setBackgroundColor(0xc0c00000);
+			}
 
-		tv = create_normal_label(ctx, ZZStr.CC_BALANCE_TITLE);
-		ll.addView(tv, new LayoutParams(LP_WM));
-		tv.setGravity(Gravity.CENTER);
-
-		tv = create_normal_label_shadow(ctx, null);
-		ll.addView(tv, new LayoutParams(LP_WW));
-		tv.setId(IDC.TV_BALANCE.id());
-		tv.setGravity(Gravity.CENTER);
-		tv.setCompoundDrawablesWithIntrinsicBounds(null, null, CCImg.MONEY.getDrawble(ctx), null);
-		tv.setCompoundDrawablePadding(ZZDimen.dip2px(4));
-		tv.setTextColor(ZZFontColor.CC_RECHARGE_COST.color());
-		ZZFontSize.CC_RECHARGE_BALANCE.apply(tv);
-		if (DEBUG_UI) {
-			tv.setBackgroundColor(0xc0c00000);
+			ProgressBar pb = new ProgressBar(ctx, null, android.R.attr.progressBarStyleSmallTitle);
+			LayoutParams lp = new LayoutParams(LP_WW);
+			lp.gravity = Gravity.CENTER_VERTICAL;
+			llmoney.addView(pb, lp);
+			pb.setId(IDC.PB_BALANCE.id());
+			pb.setVisibility(GONE);
 		}
-
-		ProgressBar pb = new ProgressBar(ctx, null, android.R.attr.progressBarStyleSmallTitle);
-		LayoutParams lp = new LayoutParams(LP_WW);
-		lp.gravity = Gravity.CENTER_VERTICAL;
-		ll.addView(pb, lp);
-		pb.setId(IDC.PB_BALANCE.id());
-		pb.setVisibility(GONE);
 	}
 
 	/** 创建页脚区：帮助按钮等 */
@@ -371,7 +406,7 @@ abstract class CCBaseLayout extends BaseLayout {
 			fl.setId(BaseLayout.IDC.ACT_SUBJECT.id());
 			rv.addView(fl, new LayoutParams(LayoutParams.MATCH_PARENT,
 					LayoutParams.MATCH_PARENT, 1.0f));
-			ZZDimenRect.CC_ROOTVIEW_PADDING.apply_padding(fl);
+//			ZZDimenRect.CC_ROOTVIEW_PADDING.apply_padding(fl);
 			if (DEBUG_UI) {
 				fl.setBackgroundColor(0x803060c0);
 			}
