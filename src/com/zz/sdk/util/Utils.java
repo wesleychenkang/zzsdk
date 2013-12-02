@@ -13,7 +13,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.codec.binary.Base64;
@@ -25,8 +24,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.telephony.TelephonyManager;
@@ -34,7 +31,6 @@ import android.util.Pair;
 import android.widget.Toast;
 import com.zz.lib.pojo.PojoUtils;
 import com.zz.sdk.ZZSDKConfig;
-import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.SdkUser;
 import com.zz.sdk.entity.SdkUserTable;
 import com.zz.sdk.entity.UserAction;
@@ -69,6 +65,8 @@ public class Utils {
 
 	private static String CACHE_DEVICE_NUM = null;
 
+	private static String CACHE_APP_KEY = null;
+
 	private static final NumberFormat PRICE_FORMAT = new DecimalFormat("#.##");
 
 	static {
@@ -83,7 +81,7 @@ public class Utils {
 
 	/**
 	 * get the out_trade_no for an order. 获取外部订单号
-	 * 
+	 *
 	 * @return
 	 */
 	public static String getTradeNo() {
@@ -111,11 +109,11 @@ public class Utils {
 		}
 		return s;
 	}
- 
-	
+
+
 	/**
 	 * md5 簽名
-	 * 
+	 *
 	 * @param s
 	 * @return
 	 */
@@ -134,7 +132,7 @@ public class Utils {
 
 	/**
 	 * 读取手机唯一标识
-	 * 
+	 *
 	 * @param ctx
 	 * @return
 	 */
@@ -209,7 +207,7 @@ public class Utils {
 
 	/**
 	 * 写用户名和密码到SD卡中
-	 * 
+	 *
 	 * @param ctx
 	 * @param user
 	 * @param pw
@@ -266,7 +264,7 @@ public class Utils {
 
 	/**
 	 * 从数据库中查找指定的用户信息
-	 * 
+	 *
 	 * @param ctx
 	 *            环境
 	 * @param account
@@ -285,7 +283,7 @@ public class Utils {
 
 	/**
 	 * 更新用户信息到数据库
-	 * 
+	 *
 	 * @param ctx
 	 *            环境
 	 * @param loginName
@@ -311,7 +309,7 @@ public class Utils {
 
 	/**
 	 * 从SD卡加载用户名和密码
-	 * 
+	 *
 	 * @param ctx
 	 * @return
 	 */
@@ -355,101 +353,74 @@ public class Utils {
 		return ret;
 	}
 
+	private static String get_metaData(Context ctx, String key) {
+		try {
+			PackageManager pm = ctx.getPackageManager();
+			ApplicationInfo appInfo = pm.getApplicationInfo(ctx.getPackageName(), PackageManager.GET_META_DATA);
+			if (appInfo != null && appInfo.metaData != null) {
+				return appInfo.metaData.getString(key);
+			}
+		} catch (Exception e) {
+			Logger.d("read " + key + " error!");
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	public static synchronized void setProjectID(String id) {
 		CACHE_PROJECT_ID = id;
 	}
 
 	/**
 	 * 获取工程ID
-	 * 
+	 *
 	 * @param ctx
 	 * @return
 	 */
 	public static synchronized String getProjectId(Context ctx) {
-		if (null == CACHE_PROJECT_ID) {
-			String projectId = null;
-			try {
-				ApplicationInfo appInfo;
-				appInfo = ctx.getPackageManager().getApplicationInfo(
-						ctx.getPackageName(), PackageManager.GET_META_DATA);
-				if (appInfo != null && appInfo.metaData != null) {
-					projectId = appInfo.metaData
-							.getString(Constants.K_PROJECT_ID);
-				}
-				CACHE_PROJECT_ID = projectId;
-			} catch (Exception e) {
-				Logger.d("read PROJECT_ID error!");
-				e.printStackTrace();
-			}
-			return projectId;
-		} else {
-			return CACHE_PROJECT_ID;
-		}
+		if (null == CACHE_PROJECT_ID)
+			CACHE_PROJECT_ID = get_metaData(ctx, Constants.K_PROJECT_ID);
+		return CACHE_PROJECT_ID;
 	}
 
 	public static synchronized void setProductId(String id) {
 		CACHE_PRODUCT_ID = id;
 	}
 
-	public static synchronized String getProductId(Context cxt) {
-		if (null == CACHE_PRODUCT_ID) {
-			String productId = null;
-			try {
-				ApplicationInfo appInfo;
-				appInfo = cxt.getPackageManager().getApplicationInfo(
-						cxt.getPackageName(), PackageManager.GET_META_DATA);
-				if (appInfo != null && appInfo.metaData != null) {
-					productId = appInfo.metaData
-							.getString(Constants.K_PRODUCT_ID);
-				}
-				CACHE_PRODUCT_ID = productId;
-			} catch (Exception e) {
-				Logger.d("read PROJECT_ID error!");
-				e.printStackTrace();
-			}
-			return productId;
-		} else {
-			return CACHE_PRODUCT_ID;
-		}
-
+	public static synchronized String getProductId(Context ctx) {
+		if (null == CACHE_PRODUCT_ID)
+			CACHE_PRODUCT_ID = get_metaData(ctx, Constants.K_PRODUCT_ID);
+		return CACHE_PRODUCT_ID;
 	}
 
 	/**
 	 * 获取 游戏服务器ID
-	 * 
+	 *
 	 * @param ctx
 	 * @return
 	 */
 
 	public static synchronized String getGameServerId(Context ctx) {
-		if (null == CACHE_GAME_SERVER_ID) {
-			String serverId = null;
-			try {
-				ApplicationInfo appInfo;
-				appInfo = ctx.getPackageManager().getApplicationInfo(
-						ctx.getPackageName(), PackageManager.GET_META_DATA);
-				if (appInfo != null && appInfo.metaData != null) {
-					serverId = appInfo.metaData
-							.getString(Constants.K_SERVER_ID);
-				}
-				CACHE_GAME_SERVER_ID = serverId;
-			} catch (Exception e) {
-				Logger.d("read SERVER_ID error!");
-				e.printStackTrace();
-			}
-			return serverId;
-		} else {
-			return CACHE_GAME_SERVER_ID;
-		}
+		if (null == CACHE_GAME_SERVER_ID)
+			CACHE_GAME_SERVER_ID = get_metaData(ctx, Constants.K_SERVER_ID);
+		return CACHE_GAME_SERVER_ID;
 	}
 
 	public static synchronized void setGameServerID(String gameServerId) {
 		CACHE_GAME_SERVER_ID = gameServerId;
 	}
 
+	public static synchronized String getAppKey() {
+		return CACHE_APP_KEY;
+	}
+
+	public static synchronized void setAppKey(String appKey) {
+		CACHE_APP_KEY = appKey;
+	}
+
 	/**
 	 * 将渠道信息写到sdcard，路径 -> 应用包名/channel/dw.txt
-	 * 
+	 *
 	 * @param channel
 	 */
 	public static void writeChannelMessage2SDCard(Context ctx, String channel) {
@@ -482,7 +453,7 @@ public class Utils {
 
 	/**
 	 * 检查清单是否添加完整
-	 * 
+	 *
 	 * @param ctx
 	 * @param type
 	 * @param clzName
@@ -533,7 +504,7 @@ public class Utils {
 
 	/**
 	 * 检查操作频率
-	 * 
+	 *
 	 * @param ticks
 	 *            上次操作时间点
 	 * @param threshold
@@ -561,7 +532,7 @@ public class Utils {
 
 	/**
 	 * 记录操作时间点
-	 * 
+	 *
 	 * @param ticks
 	 *            操作时间点记录
 	 * @param flag
@@ -599,7 +570,7 @@ public class Utils {
 
 	/**
 	 * 根据点击的 充值类型的按钮 确定进入点击类型
-	 * 
+	 *
 	 * @param type
 	 * @return
 	 */
@@ -620,7 +591,7 @@ public class Utils {
 
 	/**
 	 * 判断设定当前屏幕方向
-	 * 
+	 *
 	 * @param ctx
 	 * @return
 	 */
@@ -638,7 +609,7 @@ public class Utils {
 	/**
 	 * 锁定窗体的横竖屏方向，禁止自动旋转。建议在窗体的
 	 * {@link Activity#onCreate(Bundle savedInstanceState)} 调用。
-	 * 
+	 *
 	 * @param activity
 	 */
 	public static void loack_screen_orientation(Activity activity) {
@@ -656,7 +627,7 @@ public class Utils {
 
 	/**
 	 * 转换浮点价格值为字符串，非科学计数法，保持小数位精度，如 "1234.01"
-	 * 
+	 *
 	 * @param price
 	 * @return
 	 */

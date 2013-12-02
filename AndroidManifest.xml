@@ -47,7 +47,7 @@
         <!-- 产品ID,由SDK方提供 -->
         <meta-data
             android:name="PRODUCT_ID"
-            android:value="D10002"/>
+            android:value="D10001A"/>
         <!-- SDK 的窗体 -->
         <activity
             android:name="com.zz.sdk.activity.BaseActivity"

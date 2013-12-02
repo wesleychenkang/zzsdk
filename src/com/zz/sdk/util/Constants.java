@@ -37,7 +37,6 @@ public final class Constants {
 	public static final String SING = "sign";
 	public static final String E = "__e__";
 	public static final String MARKET = "market";
-	public static final String MARKE = "12345678";
 	public static final String PRODUCTID = "productId";
 
 	/** 垂直屏幕下的资源(不一定有多套资源) */
