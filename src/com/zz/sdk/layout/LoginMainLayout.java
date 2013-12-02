@@ -1,10 +1,14 @@
 package com.zz.sdk.layout;
 
+import java.util.regex.Pattern;
+
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
@@ -14,7 +18,6 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -42,8 +45,6 @@ import com.zz.sdk.util.ResConstants.ZZStr;
 import com.zz.sdk.util.UserUtil;
 import com.zz.sdk.util.Utils;
 
-import java.util.regex.Pattern;
-
 /**
  * 登录主界面
  * <ul>
@@ -55,7 +56,8 @@ import java.util.regex.Pattern;
  * @author nxliao
  * 
  */
-class LoginMainLayout extends BaseLayout {
+class LoginMainLayout extends BaseLayout
+{
 
 	/** 用户数据处理 */
 	private UserUtil mUserUtil;
@@ -85,10 +87,10 @@ class LoginMainLayout extends BaseLayout {
 	private Context ctx;
 	private String mNewPassword;
 	private boolean isDoQuCount;
-	private FrameLayout.LayoutParams framly = new FrameLayout.LayoutParams(
-			LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+	private FrameLayout.LayoutParams framly = new FrameLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
 
-	protected static enum IDC implements IIDC {
+	protected static enum IDC implements IIDC
+	{
 		ACT_ERR,
 
 		ACT_NORMAL,
@@ -97,9 +99,28 @@ class LoginMainLayout extends BaseLayout {
 
 		ACT_RIGHSTER,
 
+		/**
+		 * 忘记密码
+		 */
+		ACT_FORGETPWD,
+
+		/**
+		 * 注册协议
+		 */
+		ACT_AGREEMENT,
+
 		ACT_MODIFY_PASSWORD,
 
+		/**
+		 * 忘记密码
+		 */
+		BT_FORGET_PASSWORD,
+
 		BT_REGISTER,
+
+		BT_CALLPHONE,
+
+		BT_EMAIL,
 
 		BT_LOGIN, BT_QUICK_LOGIN, BT_UPDATE_PASSWORD,
 
@@ -116,8 +137,14 @@ class LoginMainLayout extends BaseLayout {
 		/** 修改密码·确认按钮 */
 		BT_MODIFY_CONFIRM,
 
+		/** 修改密码·旧密码输入框 */
+		ED_OLD_PASSOWRD,
+
 		/** 修改密码·新密码输入框 */
 		ED_NEW_PASSOWRD,
+
+		/** 修改密码·确认新密码输入框 */
+		ED_NEW_REPEAT_PASSOWRD,
 
 		/** 登录·账号输入框 */
 		ED_LOGIN_NAME,
@@ -134,25 +161,42 @@ class LoginMainLayout extends BaseLayout {
 		/** 注册·密码 */
 		ED_REGISTER_PASSWORD,
 
+		/** 注册·重复密码 */
+		ED_REGISTER_REPEAT_PASSWORD,
+
 		/** 注册·确认按钮 */
 		BT_REGISTER_CONFIRM,
-		/**卓越用户按钮*/
+
+		/**
+		 * 注册协议
+		 */
+		CK_REGISTER_AGREEMENT,
+
+		/**
+		 * 协议
+		 */
+		BT_REGISTER_AGREEMENT,
+
+		/** 卓越用户按钮 */
 		BT_LOGIN_NORMAL,
-		/**豆趣用户按钮*/
+		/** 豆趣用户按钮 */
 		BT_LOGIN_DOQU,
 
 		_MAX_;
 
 		protected final static int __start__ = BaseLayout.IDC._MAX_.id();
 
-		public final int id() {
+		public final int id()
+		{
 			return ordinal() + __start__;
 		}
 
 		/** 从 id 反查，如果失败则返回 {@link #_MAX_} */
-		public final static IDC fromID(int id) {
+		public final static IDC fromID(int id)
+		{
 			id -= __start__;
-			if (id >= 0 && id < _MAX_.ordinal()) {
+			if (id >= 0 && id < _MAX_.ordinal())
+			{
 				return values()[id];
 			}
 			return _MAX_;
@@ -164,49 +208,59 @@ class LoginMainLayout extends BaseLayout {
 
 	private final static int __MSG_USER__ = 20131118;
 	private final static int MSG_UPDATE_BACKGROUND = __MSG_USER__ + 1;
-	private Handler mHandler = new Handler() {
+	private Handler mHandler = new Handler()
+	{
 		@Override
-		public void handleMessage(Message msg) {
-			switch (msg.what) {
-				case MSG_UPDATE_BACKGROUND: {
-					tryChangeBackground();
-				}
+		public void handleMessage(Message msg)
+		{
+			switch (msg.what)
+			{
+			case MSG_UPDATE_BACKGROUND:
+			{
+				tryChangeBackground();
+			}
 				break;
-				default:
-					super.handleMessage(msg);
+			default:
+				super.handleMessage(msg);
 			}
 		}
 	};
 
 	/** 尝试设置背景 */
-	private void tryChangeBackground() {
+	private void tryChangeBackground()
+	{
 		final boolean isVertical = Utils.isOrientationVertical(getContext());
-		if (isVertical == mIsVertical) {
+		if (isVertical == mIsVertical)
+		{
 			return;
 		}
 		_change_background(getSubjectContainer(), isVertical);
 	}
 
-	private void _change_background(View rv, boolean isVertical) {
+	private void _change_background(View rv, boolean isVertical)
+	{
 		mIsVertical = isVertical;
 		String path = Constants.ASSETS_RES_PATH + "login_bg_" + (isVertical ? "v" : "h") + ".jpg";
 		Drawable d = BitmapCache.getDrawable(ctx, path);
 		rv.setBackgroundDrawable(d);
 	}
 
-	private void checkChangeBackground() {
+	private void checkChangeBackground()
+	{
 		mHandler.removeMessages(MSG_UPDATE_BACKGROUND);
 		mHandler.sendEmptyMessageDelayed(MSG_UPDATE_BACKGROUND, 10);
 	}
 
-	public LoginMainLayout(Context context, ParamChain env) {
+	public LoginMainLayout(Context context, ParamChain env)
+	{
 		super(context, env);
 		this.ctx = context;
 		initUI(context);
 	}
 
 	@Override
-	protected void onInitEnv(Context ctx, ParamChain env) {
+	protected void onInitEnv(Context ctx, ParamChain env)
+	{
 		mLoginState = MSG_STATUS.EXIT_SDK;
 
 		Boolean b = env.get(KeyCaller.K_LOGIN_DOUQU_ENABLED, Boolean.class);
@@ -229,16 +283,32 @@ class LoginMainLayout extends BaseLayout {
 	 * 
 	 * @param act
 	 */
-	private void switchPanle(IDC act) {
-		switch (act) {
-		case ACT_MODIFY_PASSWORD: {
+	private void switchPanle(IDC act)
+	{
+		switch (act)
+		{
+		case ACT_MODIFY_PASSWORD:
+		{
 			main.removeAllViews();
 			main.addView(createView_modifyPasswd(ctx));
 		}
 			break;
-		case ACT_RIGHSTER: {
+		case ACT_RIGHSTER:
+		{
 			main.removeAllViews();
 			main.addView(createView_regist(ctx));
+		}
+			break;
+		case ACT_FORGETPWD:
+		{
+			main.removeAllViews();
+			main.addView(createView_ForgetPwd(ctx));
+		}
+			break;
+		case ACT_AGREEMENT:
+		{
+			main.removeAllViews();
+			main.addView(createView_Agreement(ctx));
 		}
 			break;
 		default:
@@ -250,13 +320,16 @@ class LoginMainLayout extends BaseLayout {
 	/**
 	 * 登录成功。刷新缓存到数据库。关闭登录界面。
 	 */
-	private void onLoginSuccess() {
+	private void onLoginSuccess()
+	{
 		mLoginState = MSG_STATUS.SUCCESS;
 		removeExitTrigger();
 		showPopup_Tip(false, "登录成功！");
-		postDelayed(new Runnable() {
+		postDelayed(new Runnable()
+		{
 			@Override
-			public void run() {
+			public void run()
+			{
 				hidePopup();
 				callHost_back();
 			}
@@ -266,12 +339,15 @@ class LoginMainLayout extends BaseLayout {
 		String loginName = mUserUtil.getCachedLoginName();
 		String password = mUserUtil.getCachedPassword();
 		ParamChain env = getEnv().getParent(KeyUser.class.getName());
-		if (PojoUtils.isDouquUser(mLoginName)) {
+		if (PojoUtils.isDouquUser(mLoginName))
+		{
 			mUserUtil.syncSdkUser_douqu(mLoginName, mPassword, mDouquId);
 			env.add(KeyUser.K_LOGIN_NAME_GAME_USER, String.valueOf(mDouquId));
 			mLoginName = loginName;
 			mPassword = password;
-		} else {
+		}
+		else
+		{
 			mUserUtil.syncSdkUser(true);
 		}
 		env.add(KeyUser.K_LOGIN_NAME, loginName);
@@ -281,8 +357,10 @@ class LoginMainLayout extends BaseLayout {
 	}
 
 	@Override
-	protected void clean() {
-		if (mLoginState != MSG_STATUS.EXIT_SDK) {
+	protected void clean()
+	{
+		if (mLoginState != MSG_STATUS.EXIT_SDK)
+		{
 			nofityLoginResult(getEnv(), mLoginState);
 		}
 		// 发出退出消息
@@ -295,9 +373,11 @@ class LoginMainLayout extends BaseLayout {
 	 * @param env
 	 * @param state
 	 */
-	private void nofityLoginResult(ParamChain env, int state) {
+	private void nofityLoginResult(ParamChain env, int state)
+	{
 		int code;
-		switch (state) {
+		switch (state)
+		{
 		case MSG_STATUS.SUCCESS:
 			code = LoginCallbackInfo.STATUS_SUCCESS;
 			break;
@@ -322,9 +402,11 @@ class LoginMainLayout extends BaseLayout {
 	}
 
 	@Override
-	public boolean onEnter() {
+	public boolean onEnter()
+	{
 		boolean ret = super.onEnter();
-		if (ret) {
+		if (ret)
+		{
 			// 将默认状态置为 “cancel”
 			mLoginState = MSG_STATUS.CANCEL;
 
@@ -333,41 +415,50 @@ class LoginMainLayout extends BaseLayout {
 		return ret;
 	}
 
-	private void checkAutoLogin() {
-		if (mLoginName != null && mPassword != null) {
+	private void checkAutoLogin()
+	{
+		if (mLoginName != null && mPassword != null)
+		{
 			// show_auto_login_wait();
 		}
 	}
 
-//	private boolean account_type_is_douqu() {
-//		RadioGroup rg = (RadioGroup) findViewById(IDC.RG_ACCOUNT_TYPE.id());
-//		int id = rg.getCheckedRadioButtonId();
-//		IDC idc = IDC.fromID(id);
-//		return idc == IDC.RB_ACCOUNT_TYPE_DOUQU;
-//	}
-    
-	private void setAccountType(boolean isDouqu) {
+	// private boolean account_type_is_douqu() {
+	// RadioGroup rg = (RadioGroup) findViewById(IDC.RG_ACCOUNT_TYPE.id());
+	// int id = rg.getCheckedRadioButtonId();
+	// IDC idc = IDC.fromID(id);
+	// return idc == IDC.RB_ACCOUNT_TYPE_DOUQU;
+	// }
+
+	private void setAccountType(boolean isDouqu)
+	{
 		RadioGroup rg = (RadioGroup) findViewById(IDC.RG_ACCOUNT_TYPE.id());
-		rg.check(isDouqu ? IDC.RB_ACCOUNT_TYPE_DOUQU.id()
-				: IDC.RB_ACCOUNT_TYPE_NORMAL.id());
+		rg.check(isDouqu ? IDC.RB_ACCOUNT_TYPE_DOUQU.id() : IDC.RB_ACCOUNT_TYPE_NORMAL.id());
 	}
 
 	@Override
-	public void onClick(View v) {
+	public void onClick(View v)
+	{
 		IDC idc = IDC.fromID(v.getId());
-		switch (idc) {
+		switch (idc)
+		{
 		case BT_AUTO_LOGIN_CANCEL:
-			if (mAutoDialog != null && mAutoDialog.isShowing()) {
+			if (mAutoDialog != null && mAutoDialog.isShowing())
+			{
 				mAutoDialog.dismiss();
 			}
 			break;
 
 		// 注册账号
-		case BT_REGISTER: {
-			if (isDoQuCount){
+		case BT_REGISTER:
+		{
+			if (isDoQuCount)
+			{
 				showToast("请注册卓越通行证！");
 				setIsDoQuAccout(false);
-			} else {
+			}
+			else
+			{
 				tryEnterRegister();
 			}
 		}
@@ -376,41 +467,53 @@ class LoginMainLayout extends BaseLayout {
 		// 修改密码
 		case BT_UPDATE_PASSWORD:
 			// 登录
-		case BT_LOGIN: {
+		case BT_LOGIN:
+		{
 			Pair<View, String> err = checkLoginInput();
-			if (err == null) {
+			if (err == null)
+			{
 				mLoginForModify = idc == IDC.BT_UPDATE_PASSWORD;
 				tryLoginWait(mLoginName, mPassword);
-			} else {
+			}
+			else
+			{
 				showInputError(err);
 			}
 		}
 			break;
 
 		/** 提交密码修改 */
-		case BT_MODIFY_CONFIRM: {
+		case BT_MODIFY_CONFIRM:
+		{
 			Pair<View, String> err = checkModifyInput();
 			if (err == null)
-				tryModifyWait(mLoginName, mPassword, mNewPassword);
-			else {
+			{
+				String oldPassword = get_child_text(IDC.ED_OLD_PASSOWRD);
+				tryModifyWait(mLoginName, oldPassword, mNewPassword);
+			}
+			else
+			{
 				showInputError(err);
 			}
 		}
 			break;
 
 		/** 提交注册 */
-		case BT_REGISTER_CONFIRM: {
+		case BT_REGISTER_CONFIRM:
+		{
 			Pair<View, String> err = checkRegisterInput();
 			if (err == null)
 				tryRegisterWait(mLoginName, mPassword);
-			else {
+			else
+			{
 				showInputError(err);
 			}
 		}
 			break;
 
 		// 快速登录
-		case BT_QUICK_LOGIN: {
+		case BT_QUICK_LOGIN:
+		{
 			tryQuickRegisterWait();
 		}
 			break;
@@ -426,30 +529,58 @@ class LoginMainLayout extends BaseLayout {
 		case BT_LOGIN_NORMAL:
 			setIsDoQuAccout(false);
 			break;
+		case BT_REGISTER_AGREEMENT:
+			// 注册协议按钮
+			switchPanle(IDC.ACT_AGREEMENT);
+			break;
+		case BT_FORGET_PASSWORD:
+			// 忘记密码
+			switchPanle(IDC.ACT_FORGETPWD);
+			break;
+		case BT_CALLPHONE:
+			// 电话
+			Intent phoneIntent = new Intent("android.intent.action.CALL", Uri.parse("tel:" + get_child_text(IDC.BT_CALLPHONE)));
+			phoneIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			ctx.startActivity(phoneIntent);
+			break;
+		case BT_EMAIL:
+			// 邮箱// 创建Intent  
+			Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
+			emailIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			//设置内容类型  
+			emailIntent.setType("plain/text");
+			emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[] { get_child_text(IDC.BT_EMAIL) });
+			ctx.startActivity(emailIntent);
+			break;
 		default:
 			super.onClick(v);
 		}
 	}
-   
+
 	/**
 	 * 点击使用豆趣或者卓越用户进行登录
+	 * 
 	 * @param b
 	 */
-	private void setIsDoQuAccout(boolean b) {
-		Button btn_doqu =(Button)findViewById(IDC.BT_LOGIN_DOQU.id());
-		Button btn_normal = (Button)findViewById(IDC.BT_LOGIN_NORMAL.id());
-		if(b){
-		isDoQuCount = true;
-		btn_normal.setBackgroundDrawable(CCImg.LOGIN_LABE_HUI.getDrawble(ctx));
-		btn_normal.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(1), ZZDimen.dip2px(5), ZZDimen.dip2px(1));
-		btn_doqu.setBackgroundDrawable(CCImg.LOGIN_LABE_LAN.getDrawble(ctx));
-		btn_doqu.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(1), ZZDimen.dip2px(5), ZZDimen.dip2px(1));
-		}else{
-		isDoQuCount = false;
-		btn_doqu.setBackgroundDrawable(CCImg.LOGIN_LABE_HUI.getDrawble(ctx));
-		btn_doqu.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(1), ZZDimen.dip2px(5), ZZDimen.dip2px(1));
-		btn_normal.setBackgroundDrawable(CCImg.LOGIN_LABE_LAN.getDrawble(ctx));
-		btn_normal.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(1), ZZDimen.dip2px(5), ZZDimen.dip2px(1));
+	private void setIsDoQuAccout(boolean b)
+	{
+		Button btn_doqu = (Button) findViewById(IDC.BT_LOGIN_DOQU.id());
+		Button btn_normal = (Button) findViewById(IDC.BT_LOGIN_NORMAL.id());
+		if (b)
+		{
+			isDoQuCount = true;
+			btn_doqu.setSelected(true);
+			btn_normal.setSelected(false);
+			// btn_normal.setBackgroundDrawable(CCImg.LOGIN_LABE_HUI.getDrawble(ctx));
+			// btn_doqu.setBackgroundDrawable(CCImg.LOGIN_LABE_LAN.getDrawble(ctx));
+		}
+		else
+		{
+			isDoQuCount = false;
+			btn_doqu.setSelected(false);
+			btn_normal.setSelected(true);
+			// btn_doqu.setBackgroundDrawable(CCImg.LOGIN_LABE_HUI.getDrawble(ctx));
+			// btn_normal.setBackgroundDrawable(CCImg.LOGIN_LABE_LAN.getDrawble(ctx));
 		}
 	}
 
@@ -458,13 +589,16 @@ class LoginMainLayout extends BaseLayout {
 	 * 
 	 * @param err
 	 */
-	private void showInputError(Pair<View, String> err) {
+	private void showInputError(Pair<View, String> err)
+	{
 		showToast(err.second);
 	}
 
-	private String read_login_name() {
+	private String read_login_name()
+	{
 		String loginName = get_child_text(IDC.ED_LOGIN_NAME);
-		if (mDouquEnabled) {
+		if (mDouquEnabled)
+		{
 			// TODO: 判断复选框状态
 			if (isDoQuCount)
 				loginName = PojoUtils.getDouquName(loginName);
@@ -472,7 +606,8 @@ class LoginMainLayout extends BaseLayout {
 		return loginName;
 	}
 
-	private String read_login_password() {
+	private String read_login_password()
+	{
 		String loginPassword = get_child_text(IDC.ED_LOGIN_PASSWORD);
 		return loginPassword;
 	}
@@ -481,44 +616,50 @@ class LoginMainLayout extends BaseLayout {
 	 * 检查登录的输入内容是否合法。
 	 * 
 	 * @return <ul>
-	 *         <li>如果通过检查，则更新变量 {@link #mLoginName} 和 {@link #mPassword}，并返回
-	 *         null 。
+	 *         <li>如果通过检查，则更新变量 {@link #mLoginName} 和 {@link #mPassword}，并返回 null 。
 	 *         <li>否则返回<出错View, 提示文本>
 	 *         </ul>
 	 */
-	private Pair<View, String> checkLoginInput() {
+	private Pair<View, String> checkLoginInput()
+	{
 		Pair<View, String> ret;
 
 		View vLoginName = null;
 		View vPassword = null;
 		String loginName = read_login_name();
 		String password = read_login_password();
-		do {
+		do
+		{
 			Pair<Boolean, String> resultName = null;
-			if (mDouquEnabled) {
-				if (PojoUtils.isDouquUser(loginName)
-						|| PojoUtils.isCMGEUser(loginName)) {
+			if (mDouquEnabled)
+			{
+				if (PojoUtils.isDouquUser(loginName) || PojoUtils.isCMGEUser(loginName))
+				{
 					resultName = new Pair<Boolean, String>(true, loginName);
 				}
 			}
 			if (resultName == null)
 				resultName = validUserName(loginName);
-			if (!resultName.first) {
+			if (!resultName.first)
+			{
 				// 输入不合法
 				ret = new Pair<View, String>(vLoginName, resultName.second);
 				break;
 			}
 
 			Pair<Boolean, String> resultPW = null;
-			if (mDouquEnabled) {
-				if (PojoUtils.isDouquUser(loginName)) {
+			if (mDouquEnabled)
+			{
+				if (PojoUtils.isDouquUser(loginName))
+				{
 					String desc = PojoUtils.isDouquPasswd(password);
 					resultPW = new Pair<Boolean, String>(desc == null, desc);
 				}
 			}
 			if (resultPW == null)
 				resultPW = validPassWord(password);
-			if (!resultPW.first) {
+			if (!resultPW.first)
+			{
 				ret = new Pair<View, String>(vPassword, resultPW.second);
 				break;
 			}
@@ -533,34 +674,40 @@ class LoginMainLayout extends BaseLayout {
 	}
 
 	/** 尝试登录 */
-	private void tryLoginWait(String loginName, String password) {
-		showPopup_Wait("正在登录……", new SimpleWaitTimeout() {
-			public void onTimeOut() {
+	private void tryLoginWait(String loginName, String password)
+	{
+		showPopup_Wait("正在登录……", new SimpleWaitTimeout()
+		{
+			public void onTimeOut()
+			{
 				onLoginTimeout();
 			}
 		});
 		setExitTrigger(-1, "正在登录……");
 
-		ITaskCallBack cb = new ITaskCallBack() {
+		ITaskCallBack cb = new ITaskCallBack()
+		{
 			@Override
-			public void onResult(AsyncTask<?, ?, ?> task, Object token,
-					BaseResult result) {
-				if (isCurrentTaskFinished(task)) {
+			public void onResult(AsyncTask<?, ?, ?> task, Object token, BaseResult result)
+			{
+				if (isCurrentTaskFinished(task))
+				{
 					onLoginReuslt(result);
 				}
 			}
 		};
-		AsyncTask<?, ?, ?> task = LoginTask.createAndStart(mUserUtil, cb, this,
-				loginName, password);
+		AsyncTask<?, ?, ?> task = LoginTask.createAndStart(mUserUtil, cb, this, loginName, password);
 		setCurrentTask(task);
 	}
 
-	private void resetExitTrigger() {
+	private void resetExitTrigger()
+	{
 		setExitTrigger(-1, null);
 	}
 
 	/** 登录超时 */
-	private void onLoginTimeout() {
+	private void onLoginTimeout()
+	{
 		resetExitTrigger();
 		showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_TIMEOUT);
 	}
@@ -568,27 +715,36 @@ class LoginMainLayout extends BaseLayout {
 	/**
 	 * 处理登录结果
 	 * 
-	 * @param result
-	 *            登录结果，成功或失败
+	 * @param result 登录结果，成功或失败
 	 */
-	private void onLoginReuslt(BaseResult result) {
-		if (result.isSuccess()) {
-			if (PojoUtils.isDouquUser(mLoginName)) {
+	private void onLoginReuslt(BaseResult result)
+	{
+		if (result.isSuccess())
+		{
+			if (PojoUtils.isDouquUser(mLoginName))
+			{
 				mDouquId = mUserUtil.getCachedDouquUserID();
 			}
 
-			if (mLoginForModify) {
+			if (mLoginForModify)
+			{
 				// 如果是为修改密码而登录
 				hidePopup();
 				resetExitTrigger();
 				switchPanle(IDC.ACT_MODIFY_PASSWORD);
-			} else {
+			}
+			else
+			{
 				onLoginSuccess();
 			}
-		} else {
-			if (result.isUsed()) {
+		}
+		else
+		{
+			if (result.isUsed())
+			{
 				showPopup_Tip(result.getErrDesc());
-			} else
+			}
+			else
 				showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
 		}
 	}
@@ -598,22 +754,40 @@ class LoginMainLayout extends BaseLayout {
 	// - modify password -
 	//
 
-	private Pair<View, String> checkModifyInput() {
+	private Pair<View, String> checkModifyInput()
+	{
 		Pair<View, String> ret = null;
 		View vPassword = null;
+		String oldPassword = get_child_text(IDC.ED_OLD_PASSOWRD);
 		String password = get_child_text(IDC.ED_NEW_PASSOWRD);
-		do {
+		String repeatPassword = get_child_text(IDC.ED_NEW_REPEAT_PASSOWRD);
+		do
+		{
 			Pair<Boolean, String> resultPW = null;
-			if (mDouquEnabled) {
-				if (PojoUtils.isDouquUser(mLoginName)) {
+			if (mDouquEnabled)
+			{
+				if (PojoUtils.isDouquUser(mLoginName))
+				{
 					String desc = PojoUtils.isDouquPasswd(password);
 					resultPW = new Pair<Boolean, String>(desc == null, desc);
 				}
 			}
 			if (resultPW == null)
 				resultPW = validPassWord(password);
-			if (!resultPW.first) {
+			if (!resultPW.first)
+			{
 				ret = new Pair<View, String>(vPassword, resultPW.second);
+				break;
+			}
+			resultPW = validPassWord(oldPassword);
+			if (!resultPW.first)
+			{
+				ret = new Pair<View, String>(vPassword, resultPW.second);
+				break;
+			}
+			if (!password.equals(repeatPassword))
+			{
+				ret = new Pair<View, String>(vPassword, "两次密码输入不一致!");
 				break;
 			}
 			// success
@@ -624,41 +798,51 @@ class LoginMainLayout extends BaseLayout {
 		return ret;
 	}
 
-	private void tryModifyWait(String loginName, String password,
-			String newPasswd) {
-		showPopup_Wait("正在修改密码……", new SimpleWaitTimeout() {
-			public void onTimeOut() {
+	private void tryModifyWait(String loginName, String password, String newPasswd)
+	{
+		showPopup_Wait("正在修改密码……", new SimpleWaitTimeout()
+		{
+			public void onTimeOut()
+			{
 				onModifyTimeout();
 			}
 		});
 		setExitTrigger(-1, "正在修改密码……");
-		ITaskCallBack cb = new ITaskCallBack() {
+		ITaskCallBack cb = new ITaskCallBack()
+		{
 			@Override
-			public void onResult(AsyncTask<?, ?, ?> task, Object token,
-					BaseResult result) {
-				if (isCurrentTaskFinished(task)) {
+			public void onResult(AsyncTask<?, ?, ?> task, Object token, BaseResult result)
+			{
+				if (isCurrentTaskFinished(task))
+				{
 					onModifyReuslt(result);
 				}
 			}
 		};
-		AsyncTask<?, ?, ?> task = ModifyPasswordTask.createAndStart(mUserUtil,
-				cb, this, loginName, password, newPasswd);
+		AsyncTask<?, ?, ?> task = ModifyPasswordTask.createAndStart(mUserUtil, cb, this, loginName, password, newPasswd);
 		setCurrentTask(task);
 	}
 
-	protected void onModifyReuslt(BaseResult result) {
-		if (result.isSuccess()) {
+	protected void onModifyReuslt(BaseResult result)
+	{
+		if (result.isSuccess())
+		{
 			mPassword = mNewPassword;
 			onLoginSuccess();
-		} else {
-			if (result.isUsed()) {
+		}
+		else
+		{
+			if (result.isUsed())
+			{
 				showPopup_Tip(result.getErrDesc());
-			} else
+			}
+			else
 				showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
 		}
 	}
 
-	protected void onModifyTimeout() {
+	protected void onModifyTimeout()
+	{
 		resetExitTrigger();
 		showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_TIMEOUT);
 	}
@@ -668,7 +852,8 @@ class LoginMainLayout extends BaseLayout {
 	// - register -
 	//
 
-	private void tryEnterRegister() {
+	private void tryEnterRegister()
+	{
 		switchPanle(IDC.ACT_RIGHSTER);
 	}
 
@@ -676,28 +861,38 @@ class LoginMainLayout extends BaseLayout {
 	 * 检查登录的输入内容是否合法。
 	 * 
 	 * @return <ul>
-	 *         <li>如果通过检查，则更新变量 {@link #mLoginName} 和 {@link #mPassword}，并返回
-	 *         null 。
+	 *         <li>如果通过检查，则更新变量 {@link #mLoginName} 和 {@link #mPassword}，并返回 null 。
 	 *         <li>否则返回<出错View, 提示文本>
 	 *         </ul>
 	 */
-	private Pair<View, String> checkRegisterInput() {
+	private Pair<View, String> checkRegisterInput()
+	{
 		Pair<View, String> ret;
 
 		View vLoginName = null;
 		View vPassword = null;
 		String loginName = get_child_text(IDC.ED_REGISTER_NAME);
 		String password = get_child_text(IDC.ED_REGISTER_PASSWORD);
-		do {
+		// 确认密码
+		String repeatPassword = get_child_text(IDC.ED_REGISTER_REPEAT_PASSWORD);
+		do
+		{
 			Pair<Boolean, String> resultName = validUserName(loginName);
-			if (!resultName.first) {
+			if (!resultName.first)
+			{
 				ret = new Pair<View, String>(vLoginName, resultName.second);
 				break;
 			}
 
 			Pair<Boolean, String> resultPW = validPassWord(password);
-			if (!resultPW.first) {
+			if (!resultPW.first)
+			{
 				ret = new Pair<View, String>(vPassword, resultPW.second);
+				break;
+			}
+			if (!password.equals(repeatPassword))
+			{
+				ret = new Pair<View, String>(vPassword, "两次密码输入不一致!");
 				break;
 			}
 
@@ -710,39 +905,50 @@ class LoginMainLayout extends BaseLayout {
 		return ret;
 	}
 
-	private void tryRegisterWait(String loginName, String password) {
-		showPopup_Wait("正在注册……", new SimpleWaitTimeout() {
-			public void onTimeOut() {
+	private void tryRegisterWait(String loginName, String password)
+	{
+		showPopup_Wait("正在注册……", new SimpleWaitTimeout()
+		{
+			public void onTimeOut()
+			{
 				onRegisterTimeout();
 			}
 		});
 		setExitTrigger(-1, "正在注册……");
-		ITaskCallBack cb = new ITaskCallBack() {
+		ITaskCallBack cb = new ITaskCallBack()
+		{
 			@Override
-			public void onResult(AsyncTask<?, ?, ?> task, Object token,
-					BaseResult result) {
-				if (isCurrentTaskFinished(task)) {
+			public void onResult(AsyncTask<?, ?, ?> task, Object token, BaseResult result)
+			{
+				if (isCurrentTaskFinished(task))
+				{
 					onRegisterResult(result);
 				}
 			}
 		};
-		AsyncTask<?, ?, ?> task = RegisterTask.createAndStart(mUserUtil, cb,
-				this, loginName, password);
+		AsyncTask<?, ?, ?> task = RegisterTask.createAndStart(mUserUtil, cb, this, loginName, password);
 		setCurrentTask(task);
 	}
 
-	protected void onRegisterTimeout() {
+	protected void onRegisterTimeout()
+	{
 		resetExitTrigger();
 		showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_TIMEOUT);
 	}
 
-	protected void onRegisterResult(BaseResult result) {
-		if (result.isSuccess()) {
+	protected void onRegisterResult(BaseResult result)
+	{
+		if (result.isSuccess())
+		{
 			onLoginSuccess();
-		} else {
-			if (result.isUsed()) {
+		}
+		else
+		{
+			if (result.isUsed())
+			{
 				showPopup_Tip(result.getErrDesc());
-			} else
+			}
+			else
 				showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
 		}
 	}
@@ -752,45 +958,57 @@ class LoginMainLayout extends BaseLayout {
 	// - quick register -
 	//
 
-	private void tryQuickRegisterWait() {
-		showPopup_Wait("正在注册……", new SimpleWaitTimeout() {
-			public void onTimeOut() {
+	private void tryQuickRegisterWait()
+	{
+		showPopup_Wait("正在注册……", new SimpleWaitTimeout()
+		{
+			public void onTimeOut()
+			{
 				onQuickRegisterTimeout();
 			}
 		});
 		setExitTrigger(-1, "正在注册……");
-		ITaskCallBack cb = new ITaskCallBack() {
+		ITaskCallBack cb = new ITaskCallBack()
+		{
 			@Override
-			public void onResult(AsyncTask<?, ?, ?> task, Object token,
-					BaseResult result) {
-				if (isCurrentTaskFinished(task)) {
+			public void onResult(AsyncTask<?, ?, ?> task, Object token, BaseResult result)
+			{
+				if (isCurrentTaskFinished(task))
+				{
 					onQuickRegisterResult(result);
 				}
 			}
 		};
-		AsyncTask<?, ?, ?> task = QuickRegisterTask.createAndStart(mUserUtil,
-				cb, this);
+		AsyncTask<?, ?, ?> task = QuickRegisterTask.createAndStart(mUserUtil, cb, this);
 		setCurrentTask(task);
 	}
 
-	protected void onQuickRegisterTimeout() {
+	protected void onQuickRegisterTimeout()
+	{
 		resetExitTrigger();
 		showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_TIMEOUT);
 	}
 
-	protected void onQuickRegisterResult(BaseResult result) {
-		if (result.isSuccess() && result instanceof ResultAutoLogin) {
+	protected void onQuickRegisterResult(BaseResult result)
+	{
+		if (result.isSuccess() && result instanceof ResultAutoLogin)
+		{
 			ResultAutoLogin r = (ResultAutoLogin) result;
-			if (DEBUG) {
+			if (DEBUG)
+			{
 				Logger.d("D: quickRegisterResult" + r);
 			}
 			mLoginName = r.mUserName;
 			mPassword = r.mPassword;
 			onLoginSuccess();
-		} else {
-			if (result.isUsed()) {
+		}
+		else
+		{
+			if (result.isUsed())
+			{
 				showPopup_Tip(result.getErrDesc());
-			} else
+			}
+			else
 				showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
 		}
 	}
@@ -799,11 +1017,11 @@ class LoginMainLayout extends BaseLayout {
 	 * 创建登录 LinearLayout
 	 * 
 	 * @param ctx
-	 * @param hasAccount
-	 *            是否为第一次登录
+	 * @param hasAccount 是否为第一次登录
 	 * @return
 	 */
-	private LinearLayout createView_login(Context ctx, boolean hasAccount) {
+	private View createView_login(Context ctx, boolean hasAccount)
+	{
 		LoginLayout login = new LoginLayout(ctx, this, hasAccount);
 		login.setAccount(mLoginName, mDouquEnabled);
 		login.setPassWord(mPassword);
@@ -816,9 +1034,11 @@ class LoginMainLayout extends BaseLayout {
 	 * @param ctx
 	 * @return
 	 */
-	private View createView_modifyPasswd(Context ctx) {
+	private View createView_modifyPasswd(Context ctx)
+	{
 		LoginUpdatePwdLayout update = new LoginUpdatePwdLayout(ctx, this);
-		update.setOldPassWord(mPassword);
+		// update.setOldPassWord(mPassword);
+		update.setUserLoginName(mLoginName);
 		return update;
 	}
 
@@ -828,16 +1048,43 @@ class LoginMainLayout extends BaseLayout {
 	 * @param ctx
 	 * @return
 	 */
-	private LinearLayout createView_regist(Context ctx) {
+	private LinearLayout createView_regist(Context ctx)
+	{
 		LoginRegisterLayout reg = new LoginRegisterLayout(ctx, this);
 		return reg;
 	}
 
 	/**
+	 * 创建忘记密码LinearLayout
+	 * 
+	 * @param ctx
+	 * @return
+	 */
+	private LinearLayout createView_ForgetPwd(Context ctx)
+	{
+		ForgetPwdLayout layout = new ForgetPwdLayout(ctx, this);
+		return layout;
+	}
+
+	/**
+	 * 创建注册协议LinearLayout
+	 * 
+	 * @param ctx
+	 * @return
+	 */
+	private LinearLayout createView_Agreement(Context ctx)
+	{
+		AgreementLayout layout = new AgreementLayout(ctx, this);
+		return layout;
+	}
+
+	/**
 	 * 显示自动游戏登录Dialog
 	 */
-	private void show_auto_login_wait() {
-		if (mAutoLoginEnabled) {
+	private void show_auto_login_wait()
+	{
+		if (mAutoLoginEnabled)
+		{
 			mAutoDialog = new AutoLoginDialog(getActivity());
 			// 显示
 			mAutoDialog.show();
@@ -847,77 +1094,77 @@ class LoginMainLayout extends BaseLayout {
 	}
 
 	@Override
-	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
+	{
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 		checkChangeBackground();
 	}
 
-	protected void onInitUI(Context ctx) {
+	protected void onInitUI(Context ctx)
+	{
 		set_child_visibility(BaseLayout.IDC.ACT_TITLE, GONE);
 
 		FrameLayout rv = getSubjectContainer();
-		final boolean isVertical = Utils.isOrientationVertical(getContext());
-		int widthPixels = getResources().getDisplayMetrics().widthPixels;
-		int heightPixels = getResources().getDisplayMetrics().heightPixels;
-		int heigth1 = heightPixels * 1 / 20;
-		int weight2 = widthPixels * (isVertical ? 9 : 6) /10;
+		// final boolean isVertical = Utils.isOrientationVertical(getContext());
+		// int widthPixels = getResources().getDisplayMetrics().widthPixels;
+		// int heightPixels = getResources().getDisplayMetrics().heightPixels;
+		// int heigth1 = heightPixels * 1 / 20;
+		// int weight2 = widthPixels * (isVertical ? 9 : 6) /10;
 		setOrientation(VERTICAL);
 		// 整体背景图
-		_change_background(rv, isVertical);
-		setWeightSum(1.0f);
-		framly.width = weight2;
+		// _change_background(rv, isVertical);
+		// rv.setBackgroundColor(Color.RED);
+		// setWeightSum(1.0f);
+		// framly.width = weight2;
 
-		FrameLayout top = new FrameLayout(ctx);
-		ImageView image = new ImageView(ctx);
-		image.setImageDrawable(CCImg.LOGIN_LOGO.getDrawble(ctx));
-		top.addView(image);
-		FrameLayout.LayoutParams ltop = new FrameLayout.LayoutParams(
-				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		rv.addView(top, ltop);
-        
-		FrameLayout middle = new FrameLayout(ctx);
-		ImageView logo2 = new ImageView(ctx);
-		logo2.setImageDrawable(CCImg.LOGIN_LOGO2.getDrawble(ctx));
-		middle.addView(logo2);
-		FrameLayout.LayoutParams lmiddle = new FrameLayout.LayoutParams(
-				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		lmiddle.gravity= Gravity.CENTER_HORIZONTAL;
-		lmiddle.topMargin=heightPixels/5;
-		rv.addView(middle,lmiddle);
-		
-		
+		// FrameLayout top = new FrameLayout(ctx);
+		// ImageView image = new ImageView(ctx);
+		// image.setImageDrawable(BitmapCache.getDrawable(ctx,
+		// Constants.ASSETS_RES_PATH + "logo2.png"));
+		// top.addView(image);
+		//
+		// FrameLayout.LayoutParams l = new FrameLayout.LayoutParams(
+		// LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		// rv.addView(top, l);
+
 		boolean hasAccount = mLoginName != null && mLoginName.length() > 0;
 		main = new FrameLayout(ctx);
-		//main.setBackgroundColor(Color.rgb(245, 245, 245));
-		main.setBackgroundDrawable(CCImg.LOGIN_BACK.getDrawble(ctx));
-		framly.gravity =Gravity.CENTER_HORIZONTAL;
-		//framly.topMargin = isVertical ? -heigth1 : 0;
-		framly.topMargin = isVertical ? heightPixels/5+ZZDimen.dip2px(40) : 0;
-		framly.rightMargin = isVertical ? 0 : -heigth1;
-		LinearLayout login = createView_login(ctx, hasAccount);
-		main.addView(login);
+		// main.setBackgroundDrawable(CCImg.LOGIN_BACK.getDrawble(ctx));
+		// framly.gravity = Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL;
+		// framly.topMargin = isVertical ? -heigth1 : 0;
+		// framly.rightMargin = isVertical ? 0 : -heigth1;
+		View login = createView_login(ctx, hasAccount);
+		main.addView(login, FrameLayout.LayoutParams.FILL_PARENT, FrameLayout.LayoutParams.FILL_PARENT);
 		rv.addView(main, framly);
 		// 显示“自动登录”框
-		if (hasAccount) {
+		if (hasAccount)
+		{
 			show_auto_login_wait();
 		}
 	}
 
-	private Runnable doAutoLogin = new Runnable() {
+	private Runnable doAutoLogin = new Runnable()
+	{
 		@Override
-		public void run() {
+		public void run()
+		{
 			// 先判断是否已经被cancel
-			if (mAutoDialog != null && mAutoDialog.isShowing()) {
-				try {
+			if (mAutoDialog != null && mAutoDialog.isShowing())
+			{
+				try
+				{
 					// 取消显示
 					mAutoDialog.cancel();
-				} catch (Exception e) {
+				}
+				catch (Exception e)
+				{
 					Logger.d(e.getClass().getName());
 				}
 
 				// 自动登录，也要对参数进行检查
 				Pair<View, String> err = checkLoginInput();
-				if (err == null) {
+				if (err == null)
+				{
 					mLoginForModify = false;
 					tryLoginWait(mLoginName, mPassword);
 				}
@@ -928,52 +1175,48 @@ class LoginMainLayout extends BaseLayout {
 	/**
 	 * 自动登陆显示进度框
 	 */
-	static class AutoLoginDialog extends Dialog {
+	static class AutoLoginDialog extends Dialog
+	{
 
-		public AutoLoginDialog(Context context) {
+		public AutoLoginDialog(Context context)
+		{
 			super(context);
 			Context ctx = context;
 
 			getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-			getWindow().setBackgroundDrawable(
-					new ColorDrawable(Color.TRANSPARENT));
+			getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 			LinearLayout content = new LinearLayout(ctx);
 			// 垂直
 			content.setOrientation(VERTICAL);
 			content.setGravity(Gravity.CENTER_HORIZONTAL);
 			content.setBackgroundDrawable(CCImg.LOGIN_BACK.getDrawble(context));
-			content.setPadding(ZZDimen.dip2px(50), ZZDimen.dip2px(10),
-					ZZDimen.dip2px(50), ZZDimen.dip2px(10));
+			content.setPadding(ZZDimen.dip2px(50), ZZDimen.dip2px(10), ZZDimen.dip2px(50), ZZDimen.dip2px(10));
 			// 文字
 			TextView tv = new TextView(ctx);
 			tv.setTextColor(Color.rgb(255, 113, 1));
-			//tv.setTextColor(0xfffeef00);
+			// tv.setTextColor(0xfffeef00);
 			tv.setText("剩下2秒自动登陆游戏");
 			tv.setTextSize(16);
 			//
 			Loading loading = new Loading(ctx);
 			Button cancel = new Button(ctx);
-			cancel.setBackgroundDrawable(ResConstants.CCImg
-					.getStateListDrawable(ctx, CCImg.AUTO_CANCLE,
-							CCImg.AUTO_CANCLE_CLICK));
-			cancel.setOnClickListener(new View.OnClickListener() {
+			cancel.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.AUTO_CANCLE, CCImg.AUTO_CANCLE_CLICK));
+			cancel.setOnClickListener(new View.OnClickListener()
+			{
 				@Override
-				public void onClick(View view) {
+				public void onClick(View view)
+				{
 					dismiss();
 				}
 			});
-			cancel.setPadding(ZZDimen.dip2px(35), ZZDimen.dip2px(12),
-					ZZDimen.dip2px(35), ZZDimen.dip2px(12));
+			cancel.setPadding(ZZDimen.dip2px(35), ZZDimen.dip2px(12), ZZDimen.dip2px(35), ZZDimen.dip2px(12));
 			cancel.setText("取消");
 
-			content.addView(tv, LayoutParams.WRAP_CONTENT,
-					LayoutParams.WRAP_CONTENT);
-			LinearLayout.LayoutParams lploading = new LinearLayout.LayoutParams(
-					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			content.addView(tv, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			LinearLayout.LayoutParams lploading = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			lploading.topMargin = ZZDimen.dip2px(10);
 			content.addView(loading, lploading);
-			LinearLayout.LayoutParams lpcancel = new LinearLayout.LayoutParams(
-					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			LinearLayout.LayoutParams lpcancel = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			lpcancel.topMargin = ZZDimen.dip2px(10);
 			content.addView(cancel, lpcancel);
 
@@ -985,10 +1228,10 @@ class LoginMainLayout extends BaseLayout {
 
 	}
 
-	private static class LoginTask extends AsyncTask<Object, Void, ResultLogin> {
-		protected static AsyncTask<?, ?, ?> createAndStart(UserUtil uu,
-				ITaskCallBack callback, Object token, String loginName,
-				String password) {
+	private static class LoginTask extends AsyncTask<Object, Void, ResultLogin>
+	{
+		protected static AsyncTask<?, ?, ?> createAndStart(UserUtil uu, ITaskCallBack callback, Object token, String loginName, String password)
+		{
 			LoginTask task = new LoginTask();
 			task.execute(uu, callback, token, loginName, password);
 			return task;
@@ -998,7 +1241,8 @@ class LoginMainLayout extends BaseLayout {
 		private Object mToken;
 
 		@Override
-		protected ResultLogin doInBackground(Object... params) {
+		protected ResultLogin doInBackground(Object... params)
+		{
 			UserUtil uu = (UserUtil) params[0];
 			ITaskCallBack callback = (ITaskCallBack) params[1];
 			Object token = params[2];
@@ -1007,7 +1251,8 @@ class LoginMainLayout extends BaseLayout {
 			String password = (String) params[4];
 
 			ResultLogin ret = uu.login(loginName, password);
-			if (!this.isCancelled()) {
+			if (!this.isCancelled())
+			{
 				mCallback = callback;
 				mToken = token;
 			}
@@ -1015,8 +1260,10 @@ class LoginMainLayout extends BaseLayout {
 		}
 
 		@Override
-		protected void onPostExecute(ResultLogin result) {
-			if (mCallback != null) {
+		protected void onPostExecute(ResultLogin result)
+		{
+			if (mCallback != null)
+			{
 				mCallback.onResult(this, mToken, result);
 			}
 			mCallback = null;
@@ -1024,11 +1271,10 @@ class LoginMainLayout extends BaseLayout {
 		}
 	}
 
-	private static class ModifyPasswordTask extends
-			AsyncTask<Object, Void, ResultChangePwd> {
-		protected static AsyncTask<?, ?, ?> createAndStart(UserUtil uu,
-				ITaskCallBack callback, Object token, String loginName,
-				String password, String newPasswd) {
+	private static class ModifyPasswordTask extends AsyncTask<Object, Void, ResultChangePwd>
+	{
+		protected static AsyncTask<?, ?, ?> createAndStart(UserUtil uu, ITaskCallBack callback, Object token, String loginName, String password, String newPasswd)
+		{
 			ModifyPasswordTask task = new ModifyPasswordTask();
 			task.execute(uu, callback, token, loginName, password, newPasswd);
 			return task;
@@ -1038,7 +1284,8 @@ class LoginMainLayout extends BaseLayout {
 		private Object mToken;
 
 		@Override
-		protected ResultChangePwd doInBackground(Object... params) {
+		protected ResultChangePwd doInBackground(Object... params)
+		{
 			UserUtil uu = (UserUtil) params[0];
 			ITaskCallBack callback = (ITaskCallBack) params[1];
 			Object token = params[2];
@@ -1047,9 +1294,9 @@ class LoginMainLayout extends BaseLayout {
 			String password = (String) params[4];
 			String newPasswd = (String) params[5];
 
-			ResultChangePwd ret = uu.modifyPassword(loginName, password,
-					newPasswd);
-			if (!this.isCancelled()) {
+			ResultChangePwd ret = uu.modifyPassword(loginName, password, newPasswd);
+			if (!this.isCancelled())
+			{
 				mCallback = callback;
 				mToken = token;
 			}
@@ -1057,8 +1304,10 @@ class LoginMainLayout extends BaseLayout {
 		}
 
 		@Override
-		protected void onPostExecute(ResultChangePwd result) {
-			if (mCallback != null) {
+		protected void onPostExecute(ResultChangePwd result)
+		{
+			if (mCallback != null)
+			{
 				mCallback.onResult(this, mToken, result);
 			}
 			mCallback = null;
@@ -1066,11 +1315,10 @@ class LoginMainLayout extends BaseLayout {
 		}
 	}
 
-	private static class RegisterTask extends
-			AsyncTask<Object, Void, ResultRegister> {
-		protected static AsyncTask<?, ?, ?> createAndStart(UserUtil uu,
-				ITaskCallBack callback, Object token, String loginName,
-				String password) {
+	private static class RegisterTask extends AsyncTask<Object, Void, ResultRegister>
+	{
+		protected static AsyncTask<?, ?, ?> createAndStart(UserUtil uu, ITaskCallBack callback, Object token, String loginName, String password)
+		{
 			RegisterTask task = new RegisterTask();
 			task.execute(uu, callback, token, loginName, password);
 			return task;
@@ -1080,7 +1328,8 @@ class LoginMainLayout extends BaseLayout {
 		private Object mToken;
 
 		@Override
-		protected ResultRegister doInBackground(Object... params) {
+		protected ResultRegister doInBackground(Object... params)
+		{
 			UserUtil uu = (UserUtil) params[0];
 			ITaskCallBack callback = (ITaskCallBack) params[1];
 			Object token = params[2];
@@ -1089,7 +1338,8 @@ class LoginMainLayout extends BaseLayout {
 			String password = (String) params[4];
 
 			ResultRegister ret = uu.register(loginName, password);
-			if (!this.isCancelled()) {
+			if (!this.isCancelled())
+			{
 				mCallback = callback;
 				mToken = token;
 			}
@@ -1097,8 +1347,10 @@ class LoginMainLayout extends BaseLayout {
 		}
 
 		@Override
-		protected void onPostExecute(ResultRegister result) {
-			if (mCallback != null) {
+		protected void onPostExecute(ResultRegister result)
+		{
+			if (mCallback != null)
+			{
 				mCallback.onResult(this, mToken, result);
 			}
 			mCallback = null;
@@ -1106,10 +1358,10 @@ class LoginMainLayout extends BaseLayout {
 		}
 	}
 
-	private static class QuickRegisterTask extends
-			AsyncTask<Object, Void, ResultAutoLogin> {
-		protected static AsyncTask<?, ?, ?> createAndStart(UserUtil uu,
-				ITaskCallBack callback, Object token) {
+	private static class QuickRegisterTask extends AsyncTask<Object, Void, ResultAutoLogin>
+	{
+		protected static AsyncTask<?, ?, ?> createAndStart(UserUtil uu, ITaskCallBack callback, Object token)
+		{
 			QuickRegisterTask task = new QuickRegisterTask();
 			task.execute(uu, callback, token);
 			return task;
@@ -1119,12 +1371,14 @@ class LoginMainLayout extends BaseLayout {
 		private Object mToken;
 
 		@Override
-		protected ResultAutoLogin doInBackground(Object... params) {
+		protected ResultAutoLogin doInBackground(Object... params)
+		{
 			UserUtil uu = (UserUtil) params[0];
 			ITaskCallBack callback = (ITaskCallBack) params[1];
 			Object token = params[2];
 			ResultAutoLogin ret = uu.quickLogin();
-			if (!this.isCancelled()) {
+			if (!this.isCancelled())
+			{
 				mCallback = callback;
 				mToken = token;
 			}
@@ -1132,8 +1386,10 @@ class LoginMainLayout extends BaseLayout {
 		}
 
 		@Override
-		protected void onPostExecute(ResultAutoLogin result) {
-			if (mCallback != null) {
+		protected void onPostExecute(ResultAutoLogin result)
+		{
+			if (mCallback != null)
+			{
 				mCallback.onResult(this, mToken, result);
 			}
 			mCallback = null;
@@ -1147,22 +1403,32 @@ class LoginMainLayout extends BaseLayout {
 	 * @param user
 	 * @return
 	 */
-	private Pair<Boolean, String> validUserName(String user) {
+	private Pair<Boolean, String> validUserName(String user)
+	{
 		String des = null;
 		boolean result = false;
-		if (user != null) {
+		if (user != null)
+		{
 			user = user.trim();
 		}
-		if (user == null || user.length() < 6) {
+		if (user == null || user.length() < 6)
+		{
 			des = "帐号长度至少6位";
-		} else if (!user.matches("^(?!_)(?!.*?_$)[a-zA-Z0-9_]+$")) {
+		}
+		else if (!user.matches("^(?!_)(?!.*?_$)[a-zA-Z0-9_]+$"))
+		{
 			des = "帐号必须由字母、数字或下划线组成,并以数字或字母开头";
-			if (mDouquEnabled) {
+			if (mDouquEnabled)
+			{
 				des += "；\r或使用 CMGE 通行证登录";
 			}
-		} else if (user.length() > 45) {
+		}
+		else if (user.length() > 45)
+		{
 			des = "账号长度不能超过45位";
-		} else {
+		}
+		else
+		{
 			result = true;
 		}
 		Pair<Boolean, String> p = new Pair<Boolean, String>(result, des);
@@ -1175,21 +1441,32 @@ class LoginMainLayout extends BaseLayout {
 	 * @param pw
 	 * @return
 	 */
-	private static Pair<Boolean, String> validPassWord(String pw) {
+	private static Pair<Boolean, String> validPassWord(String pw)
+	{
 		String des = null;
 		boolean result = false;
-		if (pw != null) {
+		if (pw != null)
+		{
 			pw = pw.trim();
 		}
-		if (pw == null || pw.length() < 6) {
+		if (pw == null || pw.length() < 6)
+		{
 			des = "密码长度至少6位";
-		} else if (getChinese(pw)) {
+		}
+		else if (getChinese(pw))
+		{
 			des = "密码不能包含中文";
-		} else if (!pw.matches("^(?!_)(?!.*?_$)[a-zA-Z0-9]+$")) {
+		}
+		else if (!pw.matches("^(?!_)(?!.*?_$)[a-zA-Z0-9]+$"))
+		{
 			des = "密码中只能包含数字和字母";
-		} else if (pw.length() > 45) {
+		}
+		else if (pw.length() > 45)
+		{
 			des = "密码长度不能超过45位";
-		} else {
+		}
+		else
+		{
 			result = true;
 		}
 		Pair<Boolean, String> p = new Pair<Boolean, String>(result, des);
@@ -1200,15 +1477,19 @@ class LoginMainLayout extends BaseLayout {
 	 * @param str
 	 * @return true表示包含有中文
 	 */
-	private static boolean getChinese(String str) {
+	private static boolean getChinese(String str)
+	{
 		boolean HasChinese = false;
-		if (str == null || "".equals(str.trim())) {
+		if (str == null || "".equals(str.trim()))
+		{
 			return false;
 		}
 		char[] pwd = str.toCharArray();
-		for (int i = 0; i < pwd.length; i++) {
+		for (int i = 0; i < pwd.length; i++)
+		{
 			char c = pwd[i];
-			if (Pattern.matches("[\u4e00-\u9fa5]", String.valueOf(c))) {
+			if (Pattern.matches("[\u4e00-\u9fa5]", String.valueOf(c)))
+			{
 				HasChinese = true;
 				break;
 			}
