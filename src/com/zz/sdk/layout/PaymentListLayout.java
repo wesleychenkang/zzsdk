@@ -450,7 +450,7 @@ public class PaymentListLayout extends CCBaseLayout {
 						}
 					}
 
-					nofityPayResult(env, state);
+					notifyPayResult(env, state);
 					showPayResult(env, state);
 				}
 			}
@@ -458,7 +458,7 @@ public class PaymentListLayout extends CCBaseLayout {
 		return ret;
 	}
 
-	private void nofityPayResult(ParamChain env, int state) {
+	private void notifyPayResult(ParamChain env, int state) {
 		int code;
 		switch (state) {
 		case MSG_STATUS.SUCCESS:
@@ -500,7 +500,7 @@ public class PaymentListLayout extends CCBaseLayout {
 		final boolean autoclose; // 是否自动关闭
 		switch (state) {
 		case MSG_STATUS.SUCCESS: {
-			str = ZZStr.CC_RECHARGE_RESULT_SUCCESS;
+			str = (mChargeStyle != null && mChargeStyle == ChargeStyle.RECHARGE) ? ZZStr.CC_RECHARGE_RESULT_SUCCESS_ZYCOIN : ZZStr.CC_RECHARGE_RESULT_SUCCESS;
 			Boolean autoClose = (env == null) ? null : env.get(
 					KeyCaller.K_IS_CLOSE_WINDOW, Boolean.class);
 			if (autoClose != null && autoClose) {
@@ -1571,13 +1571,13 @@ public class PaymentListLayout extends CCBaseLayout {
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
 		case PayChannel.PAY_TYPE_YEEPAY_DX:
 			// 充值卡类，没有下一界面，已经是充值成功了
-			nofityPayResult(env, MSG_STATUS.SUCCESS);
+			notifyPayResult(env, MSG_STATUS.SUCCESS);
 			showPayResult(env, MSG_STATUS.SUCCESS);
 			return true;
 
 		case PayChannel.PAY_TYPE_ZZCOIN:
 			// 卓越币，没有下一界面，已经是充值成功了
-			nofityPayResult(env, MSG_STATUS.SUCCESS);
+			notifyPayResult(env, MSG_STATUS.SUCCESS);
 			showPayResult(env, MSG_STATUS.SUCCESS);
 			return true;
 

@@ -53,7 +53,7 @@ public class ResConstants {
 		DEFAULT_HELP_TITLE(""),
 		/** 默认·帮助·内容 */
 		DEFAULT_HELP_TOPIC(
-				"如有疑问请联系客服，<br /><b>客服热线</b>： <a>020-85525051</a><br><b>客服QQ</b>：9159。"),
+				"如有疑问请联系客服，<br /><b>客服热线</b>： <a>4007555999</a><br><b>客服邮箱</b>：87686529@qq.com。"),
 
 		/** 充值中心 */
 		CC_RECHARGE_TITLE("充值中心"),
@@ -106,6 +106,9 @@ public class ResConstants {
 		/** 充值结果：充值正在进行中，请稍后在游戏中查看 */
 		CC_RECHARGE_RESULT_SUCCESS(
 				"充值正在进行中，请稍后在游戏中查看，一般1-10分钟到账，如未到账，请联系客服。祝您游戏愉快！"),
+
+		/** 充值结果：充值成功，请稍候刷新余额 */
+		CC_RECHARGE_RESULT_SUCCESS_ZYCOIN("充值正在进行中，请稍候刷新余额，一般1-10分钟到账，如未到账，请联系客服。祝您游戏愉快！"),
 
 		/** 充值结果：充值操作被取消 */
 		CC_RECHARGE_RESULT_CANCEL("充值操作被取消！"),
@@ -179,7 +182,7 @@ public class ResConstants {
 		CC_PAYCHANNEL_NOCHOOSE("必须选择一个可用的支付通道！"), //
 
 		CC_HELP_TITLE("帮助说明"), //
-		CC_HELP_TEL("客服电话: 0123-45678901"), //
+		CC_HELP_TEL("客服电话: 4007555999"), //
 		CC_RECHARGE_LIST_NONE("不能显示候选列表"), //
 
 		/** 道具兑换 */
@@ -358,7 +361,7 @@ public class ResConstants {
 			CC_GRIDVIEW_ITEM_HEIGHT(62), //
 
 			/** 充值界面·GridView 单元格大小 */
-			CC_GRIDVIEW_COLUMN_WIDTH(96),
+			CC_GRIDVIEW_COLUMN_WIDTH(108),
 
 			/** 充值界面·充值卡输入框的高度 */
 			CC_CARD_HEIGHT(32),
@@ -411,7 +414,7 @@ public class ResConstants {
 			CC_RECHARGE_COMMIT(16, 4, 16, 4),
 
 			/** 充值界面·GridView 的单元格子项的边距 */
-			CC_GRIDVIEW_ITEM_PADDDING(16, 8, 16, 8),
+			CC_GRIDVIEW_ITEM_PADDDING(12, 8, 12, 8),
 
 			/** 充值界面·候选金额的单元格子项的边距 */
 			CC_GRIDVIEW_CANDIDATE_PADDING(12, 6, 12, 6),

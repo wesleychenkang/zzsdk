@@ -77,9 +77,9 @@ public class LoginUpdatePwdLayout extends LinearLayout
 		viewUser.setEnabled(false);
 		content.addView(viewUser);
 		// 旧密码
-		content.addView(createItemView(true, ctx, IDC.ED_OLD_PASSOWRD.id(), "密码", Constants.ASSETS_RES_PATH + "drawable/pwd_icon.png", "6-20个字符"));
+		content.addView(createItemView(true, ctx, IDC.ED_OLD_PASSOWRD.id(), "密码", Constants.ASSETS_RES_PATH + "drawable/pwd_icon.png", "请输入原始密码"));
 		// 新密码
-		content.addView(createItemView(true, ctx, IDC.ED_NEW_PASSOWRD.id(), "新密码", Constants.ASSETS_RES_PATH + "drawable/pwd_icon.png", "6-20个字符"));
+		content.addView(createItemView(true, ctx, IDC.ED_NEW_PASSOWRD.id(), "新密码", Constants.ASSETS_RES_PATH + "drawable/pwd_icon.png", "请设置6-12个字母或数字!"));
 		// 确认密码
 		content.addView(createItemView(true, ctx, IDC.ED_NEW_REPEAT_PASSOWRD.id(), "确认密码", Constants.ASSETS_RES_PATH + "drawable/pwd_icon.png", "请再次输入密码"));
 		// mOldPwd
@@ -247,6 +247,8 @@ public class LoginUpdatePwdLayout extends LinearLayout
 			editText.setId(id);
 			editText.setBackgroundDrawable(null);
 			editText.setPadding(0, 0, 0, 0);
+			editText.setTextColor(ZZFontColor.CC_RECHARGE_INPUT.color());
+			CCBaseLayout.change_edit_cursor(editText);
 			layoutEdit.addView(editText, LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
 		}
 

@@ -50,7 +50,7 @@ public class ForgetPwdLayout extends LinearLayout
 			ZZDimenRect.CC_TITLE_BT_PADDING.apply_padding(imgLeft);
 			// 中间标题
 			TextView txtTitle = new TextView(ctx);
-			txtTitle.setText("修改密码");
+			txtTitle.setText("忘记密码");
 			txtTitle.setSingleLine();
 			txtTitle.setTextColor(ZZFontColor.CC_RECHARGE_NORMAL.color());
 			txtTitle.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
@@ -75,12 +75,12 @@ public class ForgetPwdLayout extends LinearLayout
 		TextView txtTipTwo = new TextView(ctx);
 		txtTipTwo.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
 		txtTipTwo.setTextColor(Color.GRAY);
-		txtTipTwo.setText("如果您忘记密码，请联系客户找回。");
+		txtTipTwo.setText("如果您忘记密码，请联系客服找回。");
 		txtTipTwo.setPadding(0, ZZDimen.dip2px(15), 0, 0);
 		content.addView(txtTipTwo);
 
-		content.addView(createItemView(ctx, l, IDC.BT_CALLPHONE.id(), "客户热线:", "15928709708"));
-		content.addView(createItemView(ctx, l, IDC.BT_EMAIL.id(), "客户邮箱:", "yang.pollyyeung@gmail.com"));
+		content.addView(createItemView(ctx, l, IDC.BT_CALLPHONE.id(), "客服热线:", "4007555999"));
+		content.addView(createItemView(ctx, l, IDC.BT_EMAIL.id(), "客服邮箱:", "87686529@qq.com"));
 	}
 
 	private View createItemView(Context context, OnClickListener l, int id, String leftStr, String rightStr)

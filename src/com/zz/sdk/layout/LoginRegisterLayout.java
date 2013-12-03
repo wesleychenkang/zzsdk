@@ -81,7 +81,7 @@ public class LoginRegisterLayout extends LinearLayout
 		//帐号
 		content.addView(createItemView(ctx, IDC.ED_REGISTER_NAME.id(), "帐号", Constants.ASSETS_RES_PATH + "drawable/user_icon.png", "6-20个字符，数字字母组合，不含特殊符号!"));
 		//密码
-		content.addView(createItemView(ctx, IDC.ED_REGISTER_PASSWORD.id(), "密码", Constants.ASSETS_RES_PATH + "drawable/pwd_icon.png", "请设置6-12个字母，数字!"));
+		content.addView(createItemView(ctx, IDC.ED_REGISTER_PASSWORD.id(), "密码", Constants.ASSETS_RES_PATH + "drawable/pwd_icon.png", "请设置6-12个字母或数字!"));
 		//确认密码
 		content.addView(createItemView(ctx, IDC.ED_REGISTER_REPEAT_PASSWORD.id(), "确认密码", Constants.ASSETS_RES_PATH + "drawable/pwd_icon.png", "请再次输入密码"));
 
@@ -275,6 +275,8 @@ public class LoginRegisterLayout extends LinearLayout
 			editText.setId(id);
 			editText.setBackgroundDrawable(null);
 			editText.setPadding(0, 0, 0, 0);
+			editText.setTextColor(ZZFontColor.CC_RECHARGE_INPUT.color());
+			CCBaseLayout.change_edit_cursor(editText);
 			layoutEdit.addView(editText, LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
 		}
 
