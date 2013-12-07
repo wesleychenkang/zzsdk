@@ -60,6 +60,7 @@ import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.DebugFlags.KeyDebug;
 import com.zz.sdk.util.Logger;
+import com.zz.sdk.util.PaymentYDMMUtil;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
 import com.zz.sdk.util.ResConstants.Config.ZZDimenRect;
@@ -1582,7 +1583,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			return true;
 
 		case PayChannel.PAY_TYPE_KKFUNPAY: {
-			clazz = PaymentSMSLayout.class;
+			clazz = PaymentYDMMUtil.isValid(mIMSI) ? PaymentSMSLayout_YDMM.class : PaymentSMSLayout.class;
 
 			ResultRequestKKFunPay r = (ResultRequestKKFunPay) result;
 

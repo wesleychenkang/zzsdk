@@ -184,6 +184,34 @@ public class MainActivity extends Activity implements OnClickListener {
 	private void init(Context ctx) {
 		// 配置 APP_KEY，必须在API调用之前设置
 		SDKManager.setAppKey(CONFIG_APP_KEY);
+		SDKManager.setPayConfYDMM(new SDKManager.IPayConfYDMM() {
+			@Override
+			public boolean isValid() {
+				return true;
+			}
+
+			@Override
+			public String getPayCode(double price) {
+				switch ((int) (price * 100)) {
+					case 3000: // 30
+						return "30000770465901";
+					case 600:
+						return "30000770465902";
+					default:
+						return null; // "30000770465902";
+				}
+			}
+
+			@Override
+			public String getAppID() {
+				return "300007704659";
+			}
+
+			@Override
+			public String getAppKey() {
+				return "942F63FC1453B9DA";
+			}
+		});
 		mSDKManager = SDKManager.getInstance(ctx);
 		mDebugEnv = DebugFlags.get_env();
 	}

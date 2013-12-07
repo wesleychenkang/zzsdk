@@ -156,6 +156,12 @@ public class ResConstants {
 		/** 连接服务器失败，请联系客服或重试！ */
 		CC_SMS_TIP_SEEDBACK_FAILED("连接服务器失败，请联系客服或重试！"),
 
+		CC_SMS_TIP_WAIT_INIT("正在初始化……"),
+		CC_SMS_ERR_INIT("初始化失败！错误号[%d]"),
+		CC_SMS_TIP_WAIT_BILLING("正在交易，请耐心等待并保持网络通畅……"),
+		CC_SMS_ERR_BILLING("支付失败！错误号[%d]"),
+		CC_SMS_CANCEL_BILLING("支付被取消！"),
+
 		/** 拼命加载中... */
 		CC_HINT_LOADING("拼命加载中..."),
 
