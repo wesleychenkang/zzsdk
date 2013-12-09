@@ -26,20 +26,15 @@ import com.zz.sdk.util.PaymentYDMMUtil;
 import com.zz.sdk.util.ResConstants;
 
 import java.io.File;
-import java.util.HashMap;
-
-import mm.purchasesdk.OnPurchaseListener;
-import mm.purchasesdk.Purchase;
-import mm.purchasesdk.PurchaseCode;
 
 /**
  * 移动M-Market支付
  *
  * <ol>目前的问题：
- *  <li>与旧的模式（普通话费＋FMM）的预选择</li>
- *  <li>尚未转用移动MM的专用订单号获取接口</li>
- *  <li>移动方面交易成功，是否不用考虑回调服务器的结果？</li>
- *  <li>回调服务器尚未调通</li>
+ *  <li>与旧的模式（普通话费＋FMM）的预选择: ok, 20131209</li>
+ *  <li>尚未转用移动MM的专用订单号获取接口: ok, 20131209</li>
+ *  <li>移动方面交易成功，是否不用考虑回调服务器的结果？: 不必通知, 20131209</li>
+ *  <li>回调服务器尚未调通: 不必通知, 20131209</li>
  * </ol>
  * @author nxliao
  * @version 0.1.0.20131206
@@ -52,18 +47,14 @@ public class PaymentSMSLayout_YDMM extends CCBaseLayout {
 	private int mType;
 	private String mTypeName;
 
-	private Purchase mPurchase;
 	private String mOrderID;
 	private String mTradeID;
+	private Object mPurchase;
+	private Object mListener;
 
 	private String mPayCode;
 	private STATE mPayWaitState;
-
-	static final int __MSG_USER__ = 2013;
-	static final int MSG_INIT_START = __MSG_USER__ + 1;
-	static final int MSG_INIT_FINISH = __MSG_USER__ + 2;
-	static final int MSG_BILLING_START = __MSG_USER__ + 3;
-	static final int MSG_BILLING_FINISH = __MSG_USER__ + 4;
+	private Handler mHandler;
 
 	private static enum STATE {
 		/** 混沌状态 */
@@ -120,27 +111,6 @@ public class PaymentSMSLayout_YDMM extends CCBaseLayout {
 		}
 	}
 
-	private Handler mHandler = new Handler() {
-		@Override
-		public void handleMessage(Message msg) {
-			switch (msg.what) {
-				case MSG_INIT_START:
-					tryInit();
-					break;
-				case MSG_INIT_FINISH:
-					onInitResult(msg.arg1);
-					break;
-				case MSG_BILLING_START:
-					tryOrder();
-					break;
-				case MSG_BILLING_FINISH:
-					onOrderResult(msg.arg1, msg.obj);
-					break;
-			}
-		}
-	};
-
-
 	public PaymentSMSLayout_YDMM(Context context, ParamChain env) {
 		super(context, env);
 		initUI(context);
@@ -159,6 +129,27 @@ public class PaymentSMSLayout_YDMM extends CCBaseLayout {
 		mAmount = amount == null ? 0 : (int) (amount * 100);
 
 		mPayCode = PaymentYDMMUtil.getPayCode(mAmount / 100d);
+
+		mHandler = new Handler() {
+			@Override
+			public void handleMessage(Message msg) {
+				switch (msg.what) {
+					case PaymentYDMMUtil.MSG_INIT_START:
+						tryInit();
+						break;
+					case PaymentYDMMUtil.MSG_INIT_FINISH:
+						onInitResult(msg.arg1);
+						break;
+					case PaymentYDMMUtil.MSG_BILLING_START:
+						tryOrder();
+						break;
+					case PaymentYDMMUtil.MSG_BILLING_FINISH:
+						onOrderResult(msg.arg1, msg.obj);
+						break;
+				}
+			}
+		};
+		mListener = PaymentYDMMUtil.genPurchaseListener(mHandler);
 	}
 
 	// 等待加载列表
@@ -242,7 +233,7 @@ public class PaymentSMSLayout_YDMM extends CCBaseLayout {
 			if (str != null) {
 				String title;
 				if (mTypeName != null) {
-					title = String.format("%s - %s", str.str(), mTypeName);
+					title = String.format(ResConstants.ZZStr.CC_RECHARGE_TITLE_DETAIL.str(), str.str(), mTypeName);
 				} else title = str.str();
 				setTileTypeText(title);
 			}
@@ -270,7 +261,7 @@ public class PaymentSMSLayout_YDMM extends CCBaseLayout {
 
 	private void tryInitStart() {
 		if (mPayWaitState == STATE.NORMAL) {
-			mHandler.obtainMessage(MSG_INIT_START).sendToTarget();
+			mHandler.obtainMessage(PaymentYDMMUtil.MSG_INIT_START).sendToTarget();
 		}
 	}
 
@@ -282,26 +273,22 @@ public class PaymentSMSLayout_YDMM extends CCBaseLayout {
 				onErr(ResConstants.ZZStr.CC_TRY_SMS_NO_MATCH);
 				return;
 			}
-			try {
-				mPurchase = Purchase.getInstance();
-				mPurchase.setAppInfo(PaymentYDMMUtil.getAppID(), PaymentYDMMUtil.getAppKey()); // 设置计费应用 ID 和 Key (必须)
-				mPurchase.setTimeout(10000, 10000);  // 设置超时时间(可选)，可不设置，缺省都是 10s
-				mPurchase.init(getActivity(), mListener); //初始化，传入监听器
-			} catch (Exception e) {
-				e.printStackTrace();
+
+			mPurchase = PaymentYDMMUtil.initPurchase(getActivity(), mListener);
+			if (mPurchase == null) {
 				// 发送初始化失败的状态
-				mHandler.obtainMessage(MSG_INIT_FINISH, -1, 0).sendToTarget();
+				mHandler.obtainMessage(PaymentYDMMUtil.MSG_INIT_FINISH, -1, 0).sendToTarget();
 			}
 		}
 	}
 
 	private void onInitResult(int code) {
-		if (code == PurchaseCode.INIT_OK) {
+		if (PaymentYDMMUtil.isInitOK(code)) {
 			changeActivePanel(IDC.ACT_NORMAL);
 			mPayWaitState = STATE.INITED;
 
 			// 开启支付
-			mHandler.obtainMessage(MSG_BILLING_START).sendToTarget();
+			mHandler.obtainMessage(PaymentYDMMUtil.MSG_BILLING_START).sendToTarget();
 		} else {
 			onErr(String.format(ResConstants.ZZStr.CC_SMS_ERR_INIT.str(), code));
 		}
@@ -309,36 +296,27 @@ public class PaymentSMSLayout_YDMM extends CCBaseLayout {
 
 	private void tryOrder() {
 		if (mPayCode != null && mPurchase != null) {
-			try {
-				mPurchase.order(getActivity(), mPayCode, 1, mOrderNumber, true, mListener);
-				showPopup_Wait("正在交易，请耐心等待并保持网络通畅……", null);
-			} catch (Exception e) {
-				e.printStackTrace();
-				mHandler.obtainMessage(MSG_BILLING_FINISH, -1, 0, null);
+			boolean ret = PaymentYDMMUtil.tryOrder(getActivity(), mPurchase, mPayCode, mOrderNumber, mListener);
+			if (ret) {
+				showPopup_Wait(ResConstants.ZZStr.CC_SMS_TIP_WAIT_BILLING.str(), null);
+			} else {
+				mHandler.obtainMessage(PaymentYDMMUtil.MSG_BILLING_FINISH, -1, 0, null);
 			}
 		}
 	}
 
 	private void onOrderResult(int code, Object obj) {
-		HashMap<String, String> data = (obj instanceof HashMap) ? (HashMap<String, String>) obj : null;
-		// 此次订购的orderID
-		String orderID = data == null ? null : data.get(OnPurchaseListener.ORDERID);
-		// 商品的paycode
-		String paycode = data == null ? null : data.get(OnPurchaseListener.PAYCODE);
-		// 商品的有效期(仅租赁类型商品有效)
-		String leftday = data == null ? null : data.get(OnPurchaseListener.LEFTDAY);
-		// 商品的交易 ID，用户可以根据这个交易ID，查询商品是否已经交易
-		String tradeID = data == null ? null : data.get(OnPurchaseListener.TRADEID);
-		String ordertype = data == null ? null : data.get(OnPurchaseListener.ORDERTYPE);
+		PaymentYDMMUtil.ResultData data = (obj instanceof PaymentYDMMUtil.ResultData) ? (PaymentYDMMUtil.ResultData) obj : null;
 
-		mOrderID = orderID;
-		mTradeID = tradeID;
+		mOrderID = data == null ? null : data.orderID;
+		mTradeID = data == null ? null : data.tradeID;
 
-		if (((code == PurchaseCode.ORDER_OK) || (code == PurchaseCode.AUTH_OK)) && orderID != null) {
+		if (PaymentYDMMUtil.isOrderOK(code) && mOrderID != null) {
 			/* 商品购买成功或者已经购买。 此时会返回商品的paycode，orderID,以及剩余时间(租赁类型商品) */
 			// TODO: 交易已经成功，应该可以设置 mPayResultState = MSG_STATUS.SUCCESS;
-			trySeedback();
-		} else if (code == PurchaseCode.BILL_CANCEL_FAIL) {
+//			trySeedback();
+			onPaySuccess();
+		} else if (PaymentYDMMUtil.isOrderCancel(code)) {
 			onErr(ResConstants.ZZStr.CC_SMS_CANCEL_BILLING);
 		} else {
 			// 订购失败
@@ -402,33 +380,42 @@ public class PaymentSMSLayout_YDMM extends CCBaseLayout {
 	}
 
 	private void show_seedback_detail() {
-		AlertDialog dialog = new AlertDialog.Builder(getActivity()).setIcon(ResConstants.CCImg.getPayChannelIcon(mType).getDrawble(getContext())).setTitle("订单详情").setMessage(gen_param_detail()).setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-			}
-		}).setNegativeButton("复制", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				ClipboardManager clipboard = (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
-				if (clipboard != null) {
-					clipboard.setText(gen_param_detail());
-					showToast("复制成功，请与客服联系！\n祝您游戏愉快！");
+		AlertDialog dialog = new AlertDialog.Builder(getActivity())
+				.setIcon(ResConstants.CCImg.getPayChannelIcon(mType).getDrawble(getContext()))
+				.setTitle(ResConstants.ZZStr.CC_SMS_TIP_ORDER_DETAIL.str())
+				.setMessage(gen_param_detail())
+				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+					}
 				}
-			}
-		}).create();
+				).setNegativeButton(ResConstants.ZZStr.CC_SMS_TIP_ORDER_COPY.str(), new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						ClipboardManager clipboard = (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
+						if (clipboard != null) {
+							clipboard.setText(gen_param_detail());
+							showToast(ResConstants.ZZStr.CC_SMS_TIP_ORDER_COPY_OK);
+						}
+					}
+				}
+				).create();
 		dialog.setCancelable(true);
 		dialog.setCanceledOnTouchOutside(true);
 		dialog.show();
 	}
 
+	private void onPaySuccess() {
+		mPayWaitState = STATE.SUCCESS;
+		mPayResultState = MSG_STATUS.SUCCESS;
+		removeExitTrigger();
+		callHost_back();
+	}
+
 	private void onSMSSeedbackResult(BaseResult result) {
 		if (result != null && result.isUsed()) {
-			// success
-			mPayWaitState = STATE.SUCCESS;
-			mPayResultState = MSG_STATUS.SUCCESS;
-			removeExitTrigger();
-			callHost_back();
+			onPaySuccess();
 		} else {
 			// connect failed 重试　详情（告知用户订单）
 			mPayWaitState = STATE.FAILED;
@@ -475,6 +462,13 @@ public class PaymentSMSLayout_YDMM extends CCBaseLayout {
 		mTypeName = null;
 		mPayResultState = MSG_STATUS.EXIT_SDK;
 		mOrderNumber = null;
+
+		mOrderID = null;
+		mTradeID = null;
+		mPurchase = null;
+		mListener = null;
+		mPayCode = null;
+		mPayWaitState = STATE.UNKNOWN;
 	}
 
 	@Override
@@ -495,51 +489,6 @@ public class PaymentSMSLayout_YDMM extends CCBaseLayout {
 		tryInitStart();
 		return ret;
 	}
-
-	private OnPurchaseListener mListener = new OnPurchaseListener() {
-		@Override
-		public void onAfterApply() {
-
-		}
-
-		@Override
-		public void onAfterDownload() {
-
-		}
-
-		@Override
-		public void onBeforeApply() {
-
-		}
-
-		@Override
-		public void onBeforeDownload() {
-
-		}
-
-		@Override
-		public void onInitFinish(int code) {
-			mHandler.obtainMessage(MSG_INIT_FINISH, code, 0).sendToTarget();
-		}
-
-		@Override
-		public void onBillingFinish(int code, HashMap arg1) {
-			mHandler.obtainMessage(MSG_BILLING_FINISH, code, 0, arg1).sendToTarget();
-		}
-
-		@Override
-		public void onQueryFinish(int code, HashMap arg1) {
-			if (code == PurchaseCode.QUERY_OK) {
-			}
-		}
-
-		/** 退订结果 */
-		@Override
-		public void onUnsubscribeFinish(int code) {
-			//			String result = "退订结果：" + Purchase.getReason(code);
-			//			System.out.println(result);
-		}
-	};
 
 
 	private static class SMSSeedBackTask extends AsyncTask<Object, Void, BaseResult> {

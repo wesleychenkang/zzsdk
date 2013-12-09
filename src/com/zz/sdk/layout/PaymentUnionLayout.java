@@ -140,7 +140,7 @@ class PaymentUnionLayout extends BaseLayout {
 			if (str != null) {
 				String title;
 				if (mTypeName != null) {
-					title = String.format("%s - %s", str.str(), mTypeName);
+					title = String.format(ZZStr.CC_RECHARGE_TITLE_DETAIL.str(), str.str(), mTypeName);
 				} else
 					title = str.str();
 				setTileTypeText(title);

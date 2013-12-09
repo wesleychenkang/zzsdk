@@ -2,6 +2,7 @@ package com.zz.sdk.util;
 
 import android.content.Context;
 
+import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.entity.DeviceProperties;
 import com.zz.sdk.entity.JsonParseInterface;
 import com.zz.sdk.entity.PayChannel;
@@ -437,6 +438,12 @@ public class ConnectionUtil {
 			clazz = ResultRequestYeePay.class;
 			break;
 		case PayChannel.PAY_TYPE_KKFUNPAY:
+			if (ZZSDKConfig.SUPPORT_YDMM) {
+				if(PaymentYDMMUtil.isValid()) {
+					clazz = ResultRequest.class;
+					break;
+				}
+			}
 			clazz = ResultRequestKKFunPay.class;
 			break;
 		case PayChannel.PAY_TYPE_KKFUNPAY_NEW_FMM:

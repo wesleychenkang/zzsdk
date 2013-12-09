@@ -443,7 +443,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 			if (str != null) {
 				String title;
 				if (mTypeName != null) {
-					title = String.format("%s - %s", str.str(), mTypeName);
+					title = String.format(ZZStr.CC_RECHARGE_TITLE_DETAIL.str(), str.str(), mTypeName);
 				} else
 					title = str.str();
 				setTileTypeText(title);
@@ -789,7 +789,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 		AlertDialog dialog = new AlertDialog.Builder(getActivity())
 				.setIcon(
 						CCImg.getPayChannelIcon(mType).getDrawble(getContext()))
-				.setTitle("订单详情")
+				.setTitle(ZZStr.CC_SMS_TIP_ORDER_DETAIL.str())
 				.setMessage(gen_param_detail(mSMSPayParam))
 				.setPositiveButton(android.R.string.ok,
 						new DialogInterface.OnClickListener() {
@@ -799,14 +799,14 @@ class PaymentSMSLayout extends CCBaseLayout {
 								dialog.dismiss();
 							}
 						})
-				.setNegativeButton("复制", new DialogInterface.OnClickListener() {
+				.setNegativeButton(ZZStr.CC_SMS_TIP_ORDER_COPY.str(), new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						ClipboardManager clipboard = (ClipboardManager) mContext
 								.getSystemService(Context.CLIPBOARD_SERVICE);
 						if (clipboard != null) {
 							clipboard.setText(gen_param_detail(mSMSPayParam));
-							showToast("复制成功，请与客服联系！\n祝您游戏愉快！");
+							showToast(ZZStr.CC_SMS_TIP_ORDER_COPY_OK.str());
 						}
 					}
 				}).create();

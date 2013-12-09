@@ -59,6 +59,8 @@ public class ResConstants {
 		CC_RECHARGE_TITLE("充值中心"),
 		/** 充值中心(购买) */
 		CC_RECHARGE_TITLE_SOCIAL("充值中心(购买)"),
+		/** 充值中心·子界面标题：%s - %s */
+		CC_RECHARGE_TITLE_DETAIL("%s - %s"),
 
 		CC_RECHARGE_COUNT_TITLE("充值数量"), //
 		/** 充值中心（游戏购买入口） */
@@ -161,6 +163,9 @@ public class ResConstants {
 		CC_SMS_TIP_WAIT_BILLING("正在交易，请耐心等待并保持网络通畅……"),
 		CC_SMS_ERR_BILLING("支付失败！错误号[%d]"),
 		CC_SMS_CANCEL_BILLING("支付被取消！"),
+		CC_SMS_TIP_ORDER_DETAIL("订单详情"),
+		CC_SMS_TIP_ORDER_COPY("复制"),
+		CC_SMS_TIP_ORDER_COPY_OK("复制成功，请与客服联系！\n祝您游戏愉快！"),
 
 		/** 拼命加载中... */
 		CC_HINT_LOADING("拼命加载中..."),
