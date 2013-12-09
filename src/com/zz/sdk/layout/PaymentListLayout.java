@@ -528,6 +528,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			break;
 		}
 		if (str != null) {
+			set_child_focuse(IDC.ACT_PAY_GRID);
 			showPopup_Tip(!autoclose, str);
 			if (autoclose) {
 				removeExitTrigger();
