@@ -60,6 +60,7 @@ import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.DebugFlags.KeyDebug;
 import com.zz.sdk.util.Logger;
+import com.zz.sdk.util.PaymentYDMMUtil;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
 import com.zz.sdk.util.ResConstants.Config.ZZDimenRect;
@@ -298,6 +299,9 @@ public class PaymentListLayout extends CCBaseLayout {
 				mIMSI = null;
 			}
 		}
+		if (ZZSDKConfig.SUPPORT_YDMM) {
+			PaymentYDMMUtil.setIMSI(mIMSI);
+		}
 
 		Double o = env.get(KeyUser.K_COIN_RATE, Double.class);
 		if (o != null) {
@@ -524,6 +528,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			break;
 		}
 		if (str != null) {
+			set_child_focuse(IDC.ACT_PAY_GRID);
 			showPopup_Tip(!autoclose, str);
 			if (autoclose) {
 				removeExitTrigger();
@@ -1582,10 +1587,14 @@ public class PaymentListLayout extends CCBaseLayout {
 			return true;
 
 		case PayChannel.PAY_TYPE_KKFUNPAY: {
+			if (ZZSDKConfig.SUPPORT_YDMM) {
+				if (PaymentYDMMUtil.isValid()) {
+					clazz = PaymentSMSLayout_YDMM.class;
+					break;
+				}
+			}
 			clazz = PaymentSMSLayout.class;
-
 			ResultRequestKKFunPay r = (ResultRequestKKFunPay) result;
-
 			env.add(KeyPaymentList.K_PAY_SMS_CONFIRM_ENABLED,
 					r.mEnablePayConfirm, ValType.TEMPORARY);
 			env.add(KeyPaymentList.K_PAY_SMS_CHANNELMESSAGE, r.mChannels,

@@ -443,7 +443,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 			if (str != null) {
 				String title;
 				if (mTypeName != null) {
-					title = String.format("%s - %s", str.str(), mTypeName);
+					title = String.format(ZZStr.CC_RECHARGE_TITLE_DETAIL.str(), str.str(), mTypeName);
 				} else
 					title = str.str();
 				setTileTypeText(title);
@@ -789,7 +789,7 @@ class PaymentSMSLayout extends CCBaseLayout {
 		AlertDialog dialog = new AlertDialog.Builder(getActivity())
 				.setIcon(
 						CCImg.getPayChannelIcon(mType).getDrawble(getContext()))
-				.setTitle("订单详情")
+				.setTitle(ZZStr.CC_SMS_TIP_ORDER_DETAIL.str())
 				.setMessage(gen_param_detail(mSMSPayParam))
 				.setPositiveButton(android.R.string.ok,
 						new DialogInterface.OnClickListener() {
@@ -799,14 +799,14 @@ class PaymentSMSLayout extends CCBaseLayout {
 								dialog.dismiss();
 							}
 						})
-				.setNegativeButton("复制", new DialogInterface.OnClickListener() {
+				.setNegativeButton(ZZStr.CC_SMS_TIP_ORDER_COPY.str(), new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						ClipboardManager clipboard = (ClipboardManager) mContext
 								.getSystemService(Context.CLIPBOARD_SERVICE);
 						if (clipboard != null) {
 							clipboard.setText(gen_param_detail(mSMSPayParam));
-							showToast("复制成功，请与客服联系！\n祝您游戏愉快！");
+							showToast(ZZStr.CC_SMS_TIP_ORDER_COPY_OK.str());
 						}
 					}
 				}).create();
@@ -841,22 +841,20 @@ class PaymentSMSLayout extends CCBaseLayout {
 			mPayWaitState = STATE.FAILED;
 			mPayResultState = MSG_STATUS.FAILED;
 			resetExitTrigger();
-			show_seedback_failed();
+
+			showPopup(false, show_seedback_failed(mContext, mType, this, IDC.BT_SHOW_DETAIL, IDC.BT_RETRY_SEEDBACK));
 		}
 	}
 
-	private void show_seedback_failed() {
-		Rect r = ZZDimenRect.CC_ROOTVIEW_PADDING.rect();
-		Context ctx = mContext;
+	protected static View show_seedback_failed(Context ctx, int type, OnClickListener listener, IIDC detail, IIDC retry) {
+		Rect r = ResConstants.Config.ZZDimenRect.CC_ROOTVIEW_PADDING.rect();
 		LinearLayout ll = new LinearLayout(ctx);
 		{
 			ll.setOrientation(VERTICAL);
-			FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT,
-					Gravity.CENTER);
+			FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, Gravity.CENTER);
 			lp.setMargins(r.left, r.top, r.right, r.bottom);
 			ll.setLayoutParams(lp);
-			ll.setBackgroundDrawable(CCImg.BACKGROUND.getDrawble(ctx));
+			ll.setBackgroundDrawable(ResConstants.CCImg.BACKGROUND.getDrawble(ctx));
 			ll.setPadding(r.left, r.top, r.right, r.bottom);
 		}
 
@@ -865,10 +863,8 @@ class PaymentSMSLayout extends CCBaseLayout {
 			ll.addView(tv, new LayoutParams(LP_WW));
 			tv.setSingleLine(false);
 			tv.setGravity(Gravity.CENTER);
-			tv.setText(ZZStr.CC_PROMPT_TITLE.str());
-			tv.setCompoundDrawablesWithIntrinsicBounds(
-					CCImg.getPayChannelIcon(mType).getDrawble(ctx), null, null,
-					null);
+			tv.setText(ResConstants.ZZStr.CC_PROMPT_TITLE.str());
+			tv.setCompoundDrawablesWithIntrinsicBounds(ResConstants.CCImg.getPayChannelIcon(type).getDrawble(ctx), null, null, null);
 			tv.setTextSize(24);
 			tv.setPadding(0, r.top, 0, r.bottom);
 		}
@@ -876,8 +872,8 @@ class PaymentSMSLayout extends CCBaseLayout {
 			TextView tv = create_normal_label(ctx, null);
 			ll.addView(tv, new LayoutParams(LP_MW));
 			tv.setSingleLine(false);
-			tv.setBackgroundDrawable(CCImg.ZF_XZ.getDrawble(ctx));
-			tv.setText(ZZStr.CC_SMS_TIP_SEEDBACK_FAILED.str());
+			tv.setBackgroundDrawable(ResConstants.CCImg.ZF_XZ.getDrawble(ctx));
+			tv.setText(ResConstants.ZZStr.CC_SMS_TIP_SEEDBACK_FAILED.str());
 			tv.setPadding(r.left, r.top, r.right, r.bottom);
 		}
 
@@ -886,42 +882,39 @@ class PaymentSMSLayout extends CCBaseLayout {
 			ll.addView(fl, new LayoutParams(LP_MW));
 
 			LinearLayout l2 = new LinearLayout(ctx);
-			fl.addView(l2, new FrameLayout.LayoutParams(
-					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
-					Gravity.CENTER));
+			fl.addView(l2, new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.CENTER));
 			l2.setOrientation(HORIZONTAL);
 			l2.setPadding(r.left, r.top, r.right, r.bottom);
 
 			Button bt;
 			{
 				bt = new Button(ctx);
-				bt.setId(IDC.BT_SHOW_DETAIL.id());
+				bt.setId(detail.id());
 				LayoutParams lp = new LayoutParams(LP_WW);
-				lp.setMargins(0, 0, ZZDimen.CC_COMMIT_SPACE.px(), 0);
+				lp.setMargins(0, 0, ResConstants.Config.ZZDimen.CC_COMMIT_SPACE.px(), 0);
 				l2.addView(bt, lp);
-				bt.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
-						CCImg.BUY_BUTTON, CCImg.BUY_BUTTON_CLICK));
-				bt.setTextColor(ZZFontColor.CC_RECHARGE_COMMIT.color());
-				ZZDimenRect.CC_RECHARGE_COMMIT.apply_padding(bt);
-				ZZFontSize.CC_RECHARGE_COMMIT.apply(bt);
-				bt.setOnClickListener(this);
+				bt.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, ResConstants.CCImg.BUY_BUTTON, ResConstants.CCImg.BUY_BUTTON_CLICK));
+				bt.setTextColor(ResConstants.Config.ZZFontColor.CC_RECHARGE_COMMIT.color());
+				ResConstants.Config.ZZDimenRect.CC_RECHARGE_COMMIT.apply_padding(bt);
+				ResConstants.Config.ZZFontSize.CC_RECHARGE_COMMIT.apply(bt);
+				bt.setOnClickListener(listener);
 				bt.setText("详情");
 			}
 			{
 				bt = new Button(ctx);
-				bt.setId(IDC.BT_RETRY_SEEDBACK.id());
+				bt.setId(retry.id());
 				l2.addView(bt, new LayoutParams(LP_WW));
-				bt.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,
-						CCImg.BUTTON, CCImg.BUTTON_CLICK));
-				bt.setTextColor(ZZFontColor.CC_RECHARGE_COMMIT.color());
-				ZZDimenRect.CC_RECHARGE_COMMIT.apply_padding(bt);
-				ZZFontSize.CC_RECHARGE_COMMIT.apply(bt);
-				bt.setOnClickListener(this);
+				bt.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, ResConstants.CCImg.BUTTON, ResConstants.CCImg.BUTTON_CLICK));
+				bt.setTextColor(ResConstants.Config.ZZFontColor.CC_RECHARGE_COMMIT.color());
+				ResConstants.Config.ZZDimenRect.CC_RECHARGE_COMMIT.apply_padding(bt);
+				ResConstants.Config.ZZFontSize.CC_RECHARGE_COMMIT.apply(bt);
+				bt.setOnClickListener(listener);
 				bt.setText("重试");
 			}
 		}
 
-		showPopup(false, ll);
+		// showPopup(false, ll);
+		return ll;
 	}
 
 	private void showPopup_Wait_SMS_SeedBack() {

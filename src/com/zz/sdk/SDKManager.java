@@ -1,8 +1,5 @@
 package com.zz.sdk;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -22,19 +19,23 @@ import com.zz.sdk.entity.SMSChannelMessage;
 import com.zz.sdk.entity.result.ResultOrder;
 import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.DebugFlags;
-import com.zz.sdk.util.UserUtil;
 import com.zz.sdk.util.DebugFlags.KeyDebug;
 import com.zz.sdk.util.Logger;
+import com.zz.sdk.util.PaymentYDMMUtil;
 import com.zz.sdk.util.ResConstants;
 import com.zz.sdk.util.ResConstants.ZZStr;
+import com.zz.sdk.util.UserUtil;
 import com.zz.sdk.util.Utils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 /**
  * SDK 接口管理类. <strong>使用流程（示例）：</strong>
  * <ol>
  * <li>&lt;<b>可选</b>&gt;调用 {@link #setProductId(String)}、{@link #setProjectId(String)}、{@link #setGameServerId(String)}等配置SDK；</li>
  * <li>调用 {@link #getInstance(Context)} 获取 SDK 实例</li>
- * 
+ *
  * <li>启动<strong>登录</strong>界面: {@link #showLoginView(android.os.Handler, int, boolean)} </li>
  * <li>启动<strong>支付</strong>界面:
  * {@link #showPaymentView(android.os.Handler, int, String, String, int, boolean)}
@@ -43,7 +44,7 @@ import com.zz.sdk.util.Utils;
  * {@link MSG_STATUS#EXIT_SDK} 时表示此次SDK操作结束。</li>
  * <li>退出游戏时，调用 {@link #recycle()} 释放资源</li>
  * </ol>
- * 
+ *
  * @author roger jason.liao
  */
 
@@ -58,7 +59,7 @@ public class SDKManager {
 
 	/**
 	 * 获取 SDK 实例
-	 * 
+	 *
 	 * @param ctx 上下文
 	 * @return 如果成功则返回SDK实现，否则返回 null
 	 */
@@ -175,7 +176,7 @@ public class SDKManager {
 
 	/**
 	 * 配置自定义的 ServerID，用于区分游戏服务器
-	 * 
+	 *
 	 * @param gameServerId
 	 *            默认的游戏服务器ID，由SDK分配给游戏方，类似
 	 *            {@link #showPaymentView(android.os.Handler, int, String, String, int, boolean) showPaymentView}
@@ -202,9 +203,15 @@ public class SDKManager {
 		Utils.setAppKey(appKey);
 	}
 
+	/** 配置支付参数·移动M-Market */
+	public static void setPayConfYDMM(IPayConfYDMM conf) {
+		PaymentYDMMUtil.setsConf(conf);
+	}
+
+
 	/**
 	 * 设置配置信息，或启动 <i>后台自动登录(仅<strong>单机模式</strong>)</i>
-	 * 
+	 *
 	 * @param isOnlineGame
 	 *            是为网络游，如果是 false(单机游戏) 则自动启动后台登录
 	 * @param isDisplayLoginTip
@@ -391,7 +398,7 @@ public class SDKManager {
 
 	/**
 	 * 获取游戏登录的用户名
-	 * 
+	 *
 	 * @return 已经登录的用户名，如果未登录则返回 null
 	 */
 	public String getAccountName() {
@@ -427,7 +434,7 @@ public class SDKManager {
 
 	/**
 	 * 是否已经登录
-	 * 
+	 *
 	 * @return true-已经成功登录
 	 */
 	public boolean isLogined() {
@@ -445,7 +452,7 @@ public class SDKManager {
 
 	/**
 	 * 查询订单的状态。<b>需要网络访问，请在非UI线程中调用！</b>
-	 * 
+	 *
 	 * @param orderNumber 订单号
 	 * @return 见 {@link com.zz.sdk.MSG_STATUS}
 	 * @see com.zz.sdk.MSG_STATUS#CANCEL
@@ -500,7 +507,7 @@ public class SDKManager {
 
 	/**
 	 * 获取版本号
-	 * 
+	 *
 	 * @return
 	 */
 	public static int getVersionCode() {
@@ -509,7 +516,7 @@ public class SDKManager {
 
 	/**
 	 * 获取当前版本信息，
-	 * 
+	 *
 	 * @return 格式 <strong>Ver:{版本号}-{版本名}-{发布日期}</strong>
 	 */
 	public static String getVersionDesc() {
@@ -605,3 +612,4 @@ public class SDKManager {
 		}
 	}
 }
+

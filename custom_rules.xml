@@ -101,6 +101,7 @@
 		<do-update-zzsdk-config-java key="PLUGIN_MODE" value="${zzsdk.plugin.enabled}" />
 		<do-update-zzsdk-config-java key="DEBUG_URL" value="${zzsdk.debug.url.enabled}" />
 		<do-update-zzsdk-config-java key="ENCRYPT_PASSWORD" value="${zzsdk.config.encrypt_password}" />
+		<do-update-zzsdk-config-java key="SUPPORT_YDMM" value="${zzsdk.ydmm.enabled}" />
 
         <mkdir dir="${zzsdk.release.dir}" />
 	</target>
@@ -155,6 +156,7 @@
             <property name="zzsdk.files.class.douqu" value="com/zz/lib/pojo/**" />
         -->
         <property name="zzsdk.files.class.360" value="com/zz/**/LoginForQiFu*" />
+        <property name="zzsdk.files.class.ydmm" value="com/zz/sdk/**/*YDMM*" />
 
         <!-- demo 文件清单 -->
 		<property name="zzsdk.files.demo.project" value="AndroidManifest.xml project.properties res/** .classpath .project build.xml" />
@@ -166,6 +168,7 @@
 		<property name="zzsdk.files.libs.all.jar" value="**/*.jar" />
         <property name="zzsdk.files.libs.unionpay" value="UPPayAssistEx.jar UPPayPluginEx.jar" />
 		<property name="zzsdk.files.libs.360" value="360SDK.jar" />
+		<property name="zzsdk.files.libs.ydmm" value="mmbilling.2.3.0.jar armeabi/libcasdkjni.so armeabi/libidentifyapp.so" />
 
 		<property name="zzsdk.config.java.file"  location="src/com/zz/sdk/ZZSDKConfig.java" />
 
@@ -185,6 +188,9 @@
 		
 		<!-- 调试·服务器URL，必须要关闭 -->
 		<property name="zzsdk.debug.url.enabled" value="false" />
+
+        <!-- 移动M-Market开关 -->
+		<property name="zzsdk.ydmm.enabled" value="false" />
 	</target>
 	
 	<target name="-set-zzsdk-mode-check">
@@ -236,18 +242,14 @@
 		    value="${zzsdk.files.class.360}" else-value="" />
 
 		<jar destfile="${preobfuscate.jar.file}">
-			<fileset  dir="${out.classes.absolute.dir}" >
-			    <include name="${zzsdk.files.class.all}" />
-                <!--
-				    <include name="${out.classes.zzsdk.douqu.i}" />
-				-->
-				<include name="${out.classes.zzsdk.360.i}" />
-			    <exclude name="R.java.d" />
-			    <exclude name="${zzsdk.files.class.demo}" />
+			<fileset
+                dir="${out.classes.absolute.dir}"
+                includes="${zzsdk.files.class.all} ${out.classes.zzsdk.360.i}"
+                excludes="R.java.d ${zzsdk.files.class.demo} ${out.classes.zzsdk.360.e}">
                 <!-- 不需要屏蔽逗趣代码
+				    <include name="${out.classes.zzsdk.douqu.i}" />
 			        <exclude name="${out.classes.zzsdk.douqu.e}" />
 			    -->
-                <exclude name="${out.classes.zzsdk.360.e}" />
 			</fileset>
 		</jar>
 
@@ -328,6 +330,8 @@
         <echo level="info">复制库和附加资源: ${zzsdk.lib.extern.file.dir} ... </echo>
         <do-set-include-or-exclude key-value="${zzsdk.360.enabled}" name="out.libs.zzsdk.360"
                                    value="${zzsdk.files.libs.360}" else-value="" />
+        <do-set-include-or-exclude key-value="${zzsdk.ydmm.enabled}" name="out.libs.zzsdk.ydmm"
+                                   value="${zzsdk.files.libs.ydmm}" else-value="" />
 
         <delete dir="${zzsdk.lib.extern.file.dir}"/>
         <mkdir dir="${zzsdk.lib.extern.file.dir}" />
@@ -343,12 +347,9 @@
             </fileset>
         </copy>
         <copy todir="${zzsdk.lib.extern.file.dir}/libs" >
-            <fileset dir="libs">
-                <include name="${zzsdk.files.libs.all.so}"/>
-                <include name="${zzsdk.files.libs.all.jar}" />
-                <include name="${out.libs.zzsdk.360.i}" />
-                <exclude name="${out.libs.zzsdk.360.e}" />
-            </fileset>
+            <fileset dir="libs"
+                     includes="${zzsdk.files.libs.all.so} ${zzsdk.files.libs.all.jar} ${out.libs.zzsdk.360.i} ${out.libs.zzsdk.ydmm.i}"
+                     excludes="${out.libs.zzsdk.360.e} ${out.libs.zzsdk.ydmm.e}" />
         </copy>
     </target>
 
@@ -416,7 +417,9 @@
 	            </not>
 	        </condition>
 	    </fail>
-	    
+
+	    <!-- TODO: 需要根据组件开关预处理 AndroidManifest.xml 和 MainActivity.java -->
+
 		<property name="zzsdk.demo.zip.file" location="${out.absolute.dir}/${zzsdk.demo}.zip" />
 	    
 		<echo level="info">打包成 demo 工程: ${zzsdk.demo.zip.file} ... </echo>
@@ -473,13 +476,14 @@
 	    
 	    <do-set-include-or-exclude key-value="${zzsdk.douqu.enabled}" name="zzsdk.release.dir.douqu" value="-{Douqu}" else-value="" />
 	    <do-set-include-or-exclude key-value="${zzsdk.360.enabled}" name="zzsdk.release.dir.360" value="-{360}" else-value="" />
-	    
+	    <do-set-include-or-exclude key-value="${zzsdk.ydmm.enabled}" name="zzsdk.release.dir.ydmm" value="-{YDMM}" else-value="" />
+
 	    <!-- 版本名：zzsdk-lib+demo+doc-{日期}[{版本号}](v{版本号})-[类别开关] -->
 	    
 	    <do-isset-property name="zzsdk.release.dir" default="${out.absolute.dir}" />
 	    
 	    <property name="zzsdk.release.name" 
-	        value="${zzsdk.config.build.date}[${zzsdk.config.version.code}](v${zzsdk.config.version.name})${zzsdk.release.dir.douqu.i}${zzsdk.release.dir.360.i}"/>
+	        value="${zzsdk.config.build.date}[${zzsdk.config.version.code}](v${zzsdk.config.version.name})${zzsdk.release.dir.douqu.i}${zzsdk.release.dir.360.i}${zzsdk.release.dir.ydmm.i}"/>
 	    
 	    <property name="zzsdk.config.release.dir" 
 	        location="${zzsdk.release.dir}/zzsdk-${zzsdk.release.name}" />
@@ -571,6 +575,16 @@
 		<echo>设置 360 模式...</echo>
 		<property name="zzsdk.360.enabled" value="true"/>
 	</target>
+
+	<target name="ydmm" description="设置 移动M-Market 模式">
+		<fail message="不能重复设置 移动M-Market 模式！">
+		    <condition>
+		        <isset property="zzsdk.ydmm.enabled" />
+		    </condition>
+		</fail>
+		<echo>设置 移动M-Market 模式...</echo>
+		<property name="zzsdk.ydmm.enabled" value="true"/>
+	</target>
 	
 	<target name="tolib" depends="-obfuscate_code, -zzsdk-demo-package-release" description="打包成 sdk 库" >
 		<echo>versionCode: ${zzsdk.config.version.code}</echo>
@@ -585,11 +599,9 @@
 		<delete file="${out.dex.input.absolute.dir}" />
 		<jar destfile="${out.dex.input.absolute.dir}">
 			<zipfileset src="${zzsdk.lib.jar.file}" />
-			<fileset  dir="${out.classes.absolute.dir}" >
-				<include name="R.java.d" />
-				<include name="${zzsdk.files.class.demo}" />
-				<include name="${out.classes.zzsdk.douqu.e}" />
-				<include name="${out.classes.zzsdk.360.e}" />
+			<fileset
+                dir="${out.classes.absolute.dir}"
+                includes="R.java.d ${zzsdk.files.class.demo} ${out.classes.zzsdk.douqu.e} ${out.classes.zzsdk.360.e}">
 			</fileset>
 		</jar>
 		<path id="out.dex.jar.input.ref">

@@ -26,6 +26,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.zz.sdk.IPayConfYDMM;
 import com.zz.sdk.LoginCallbackInfo;
 import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.MSG_TYPE;
@@ -51,7 +52,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final String CONFIG_GAME_ROLE = "战士001";
 
 	/** APP_KEY: 对应产品ID为 D10001A */
-	private static final String CONFIG_APP_KEY = "5f8cec9cd21bc5520d5e8a32d97fa017";
+	private static final String CONFIG_APP_KEY = "12345678";
 
 	private static final String CONFIG_GAME_SERVER_NAME = "乐活测试服务器";
 	private static final String CONFIG_GAME_CALLBACK_INFO = "厂商自定义参数（长度限制250个字符）";
@@ -184,6 +185,39 @@ public class MainActivity extends Activity implements OnClickListener {
 	private void init(Context ctx) {
 		// 配置 APP_KEY，必须在API调用之前设置
 		SDKManager.setAppKey(CONFIG_APP_KEY);
+
+		// 配置移动M-Market的支付参数，若不需要移动MM，则这段不必配置
+		SDKManager.setPayConfYDMM(new IPayConfYDMM() {
+			@Override
+			public boolean isValid() {
+				return true;
+			}
+
+			@Override
+			public String getPayCode(double price) {
+				switch ((int) (price * 100)) {
+					case 3000: // 30
+						return "30000770422802";
+					case 1000:
+						return "30000770422801";
+					case 100: // 1元
+						return "30000770422801";
+					default:
+						return null; // "30000770465902";
+				}
+			}
+
+			@Override
+			public String getAppID() {
+				return "300007704228";
+			}
+
+			@Override
+			public String getAppKey() {
+				return "8A659AD788259DD9";
+			}
+		});
+
 		mSDKManager = SDKManager.getInstance(ctx);
 		mDebugEnv = DebugFlags.get_env();
 	}

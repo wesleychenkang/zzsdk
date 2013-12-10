@@ -10,7 +10,9 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.util.DebugFlags;
+import com.zz.sdk.util.PaymentYDMMUtil;
 
 /**
  * @Description: 支付参数
@@ -174,6 +176,7 @@ public class PayParam implements Serializable, JsonParseInterface {
 			if (DebugFlags.DEBUG) {
 				listParames.add(new BasicNameValuePair("ip", DebugFlags.DEF_DEBUG_IP));
 			}
+			listParames.add(new BasicNameValuePair(K_AMOUNT, amount));
 			break;
 		case PayChannel.PAY_TYPE_KKFUNPAY_NEW_FMM:
 			listParames.add(new BasicNameValuePair(K_LOGINNAME, loginName));
@@ -219,6 +222,12 @@ public class PayParam implements Serializable, JsonParseInterface {
 			part = "pyee.lg";
 			break;
 		case PayChannel.PAY_TYPE_KKFUNPAY:
+			if (ZZSDKConfig.SUPPORT_YDMM) {
+				if (PaymentYDMMUtil.isValid()) {
+					part = "pmm.lg";
+					break;
+				}
+			}
 			part = "pkkfun0.lg"; // "pkkfun.lg";
 			break;
 		case PayChannel.PAY_TYPE_KKFUNPAY_NEW_FMM:

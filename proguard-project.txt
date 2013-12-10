@@ -22,7 +22,10 @@
 -libraryjars 'libs/UPPayAssistEx.jar'
 -libraryjars 'libs/android-support-v4.jar'
 -libraryjars 'libs/commons-codec-1.6.jar'
--libraryjars 'libs/360SDK.jar'
+# -libraryjars 'libs/360SDK.jar'
+-libraryjars 'libs/UPPayPluginEx.jar'
+-libraryjars 'libs/mmbilling.2.3.0.jar'
+
 
 -optimizationpasses 5
 -dontusemixedcaseclassnames
@@ -55,19 +58,9 @@
     <init>(android.content.Context, com.zz.sdk.ParamChain);  
 } 
 
--keep public class com.zz.sdk.ParamChain {
-   public *;
-}
-
--keep public class com.zz.sdk.SDKManager {
-   public *;
-}
-
+-keep public class com.zz.sdk.ParamChain { public *; }
+-keep public class com.zz.sdk.SDKManager { public *; }
 -keep public class com.zz.sdk.MSG_* { public *;}
-
--keep public class com.zz.sdk.PaymentCallbackInfo {
-   public *;
-}
--keep public class com.zz.sdk.LoginCallbackInfo {
-   public *;
-}
+-keep public class com.zz.sdk.PaymentCallbackInfo { public *; }
+-keep public class com.zz.sdk.LoginCallbackInfo { public *; }
+-keep public class com.zz.sdk.IPayConfYDMM { public *; }

@@ -17,6 +17,9 @@ public final class ZZSDKConfig {
 	/** 支持豆趣的用户登录 */
 	public final static boolean SUPPORT_DOUQU_LOGIN = true;
 
+	/** 使用移动MM支持，@ADD 20131206 nxliao */
+	public final static boolean SUPPORT_YDMM = true;
+
 	/** 方向 */
 	public final static int ORIENTATION = Constants.DIR_AUTO;
 
@@ -41,6 +44,9 @@ public final class ZZSDKConfig {
 	/** 版本发布时间，编译时更新 ，格式：20130725 */
 	public final static String VERSION_DATE = "20130726";
 
-	public final static String CONFIG_DESC = (SUPPORT_360SDK ? ",360sdk" : "")
-			+ (SUPPORT_DOUQU_LOGIN ? ",cmge" : "");
+	public final static String CONFIG_DESC = "" //
+			+ (SUPPORT_360SDK ? ",360sdk" : "") // 360登录
+			+ (SUPPORT_DOUQU_LOGIN ? ",cmge" : "") // 逗趣账号
+			+ (SUPPORT_YDMM ? ",ydmm" : "") // 移动M-Market
+			;
 }
