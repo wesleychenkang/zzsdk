@@ -1,0 +1,50 @@
+关于移动M-Market的配置
+---------------------
+
+2013/12/10
+
+
+* AndroidManifest.xml
+
+　详细配置(权限、Activity、Server等）请参考demo。
+
+　要注意 mm.purchasesdk.iapservice.BillingLayoutActivity 的 action:
+
+　　demo的包名是 "com.zz.sdk"，所以这个action是 com.zz.sdk.com.mmiap.activity；
+　　如果游戏的包名是 "com.game.sample"，那么这个action就是 com.game.sample.com.mmiap.activity，即将前缀改为你自己的包名。
+
+
+* 在初始化 SDKManager 之前，必须配置商品回调接口，如：
+
+		// 配置移动M-Market的支付参数，若不需要移动MM，则这段不必配置
+		SDKManager.setPayConfYDMM(new IPayConfYDMM() {
+			@Override
+			public boolean isValid() {
+				return true; // 这里必须返回true才能使移动MM生效
+			}
+
+			@Override
+			public String getPayCode(double price) { // 获取与价格对应的商品号，参数price是价格，单位是元。这个表由ＳＤＫ提供
+				switch ((int) (price * 100)) {
+					case 3000: // 30
+						return "30000770422802";
+					case 1000:
+						return "30000770422801";
+					case 100: // 1元
+						return "30000770422801";
+					default:
+						return null; // "30000770465902";
+				}
+			}
+
+			@Override
+			public String getAppID() {
+				return "300007704228"; // 获取ID，这个是ＳＤＫ提供
+			}
+
+			@Override
+			public String getAppKey() { // 获取KEY，这个是ＳＤＫ提供
+				return "8A659AD788259DD9";
+			}
+		});　
+
