@@ -34,11 +34,13 @@ public class ForgetPwdLayout extends LinearLayout
 		setOrientation(LinearLayout.VERTICAL);
 		int bgColor = Color.rgb(245, 245, 245);
 		setBackgroundColor(bgColor);
-
+        FrameLayout all = new FrameLayout(ctx);
+        addView(all,LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT);
 		// 标题栏
 		FrameLayout layoutTitle = new FrameLayout(ctx);
 		layoutTitle.setBackgroundDrawable(CCImg.TITLE_BACKGROUND.getDrawble(ctx));
-		addView(layoutTitle, LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+		all.addView(layoutTitle, LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+	
 		{
 			// 左侧按钮
 			ImageView imgLeft = new ImageView(ctx);
@@ -58,20 +60,33 @@ public class ForgetPwdLayout extends LinearLayout
 			fLp = new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.CENTER);
 			layoutTitle.addView(txtTitle, fLp);
 		}
-
+        
+		FrameLayout lay = new FrameLayout(ctx);
 		LinearLayout content = new LinearLayout(ctx);
-		LayoutParams ly = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
-		content.setPadding(ZZDimen.dip2px(20), ZZDimen.dip2px(10), ZZDimen.dip2px(20), 0);
-		addView(content, ly);
+		LayoutParams ly = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+		content.setPadding(ZZDimen.dip2px(20), ZZDimen.dip2px(75), ZZDimen.dip2px(20), 0);
+		lay.addView(content, ly);
+		all.addView(lay,FrameLayout.LayoutParams.MATCH_PARENT,FrameLayout.LayoutParams.WRAP_CONTENT);
 		content.setOrientation(LinearLayout.VERTICAL);
-
+        // 温馨提示栏
+		LinearLayout content1 = new LinearLayout(ctx);
+		content1.setOrientation(LinearLayout.HORIZONTAL);
+		content1.setGravity(Gravity.CENTER_VERTICAL);
+		LayoutParams lc = new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+		lc.topMargin = ZZDimen.dip2px(15);
+		content.addView(content1,lc);
+		
+		ImageView image = new ImageView(ctx);
+		image.setBackgroundDrawable(CCImg.PWD_PROMPT.getDrawble(ctx));
+		content1.addView(image);
+		
 		TextView txtTip = new TextView(ctx);
 		txtTip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
 		txtTip.setTextColor(Color.GREEN);
 		txtTip.setText("温馨提示");
-		txtTip.setPadding(0, ZZDimen.dip2px(15), 0, 0);
-		content.addView(txtTip);
-
+		txtTip.setPadding(ZZDimen.dip2px(5), 0, 0, 0);
+		content1.addView(txtTip);
+ 
 		TextView txtTipTwo = new TextView(ctx);
 		txtTipTwo.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
 		txtTipTwo.setTextColor(Color.GRAY);
@@ -81,19 +96,36 @@ public class ForgetPwdLayout extends LinearLayout
 
 		content.addView(createItemView(ctx, l, IDC.BT_CALLPHONE.id(), "客服热线:", "4007555999"));
 		content.addView(createItemView(ctx, l, IDC.BT_EMAIL.id(), "客服邮箱:", "87686529@qq.com"));
+		
+		FrameLayout layoutlogo = new FrameLayout(ctx);
+		layoutlogo.setBackgroundDrawable(CCImg.PWD_BACKPWD.getDrawble(ctx));
+		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,FrameLayout.LayoutParams.WRAP_CONTENT);
+	    lp.gravity =Gravity.RIGHT|Gravity.CENTER_VERTICAL;
+	    lp.rightMargin = ZZDimen.dip2px(-45);
+		all.addView(layoutlogo,lp);
 	}
 
 	private View createItemView(Context context, OnClickListener l, int id, String leftStr, String rightStr)
 	{
 		LinearLayout layout = new LinearLayout(context);
+		layout.setGravity(Gravity.CENTER_VERTICAL);
 		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
 		lp.topMargin = ZZDimen.dip2px(15);
 		layout.setLayoutParams(lp);
+		ImageView image = new ImageView(context);
+		if(id==IDC.BT_CALLPHONE.id()){
+		image.setBackgroundDrawable(CCImg.PWD_PHONE.getDrawble(context));
+		}else{
+		image.setBackgroundDrawable(CCImg.PWD_EMAIL.getDrawble(context));	
+		}
+		layout.addView(image);
+		
 		TextView txtLeft = new TextView(context);
 		txtLeft.setAutoLinkMask(Linkify.ALL);
 		txtLeft.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
 		txtLeft.setTextColor(Color.GRAY);
 		txtLeft.setText(leftStr);
+		txtLeft.setPadding(ZZDimen.dip2px(5), 0, 0, 0);
 		layout.addView(txtLeft);
 
 		int[] colors = new int[] { Color.GRAY, Color.GRAY, Color.GRAY, Color.rgb(255, 97, 22) };
@@ -108,10 +140,10 @@ public class ForgetPwdLayout extends LinearLayout
 		txtRight.setTextColor(colorList);
 		txtRight.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
 		txtRight.setText(rightStr);
+		txtRight.setPadding(ZZDimen.dip2px(5), 0, 0, 0);
 		txtRight.setOnClickListener(l);
 		txtRight.setMovementMethod(LinkMovementMethod.getInstance());
 		layout.addView(txtRight);
-
 		return layout;
 	}
 }

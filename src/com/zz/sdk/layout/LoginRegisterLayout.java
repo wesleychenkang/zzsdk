@@ -90,7 +90,7 @@ public class LoginRegisterLayout extends LinearLayout
 		mBtConfirm.setText("注册");
 		mBtConfirm.setEnabled(false);
 		mBtConfirm.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
-		mBtConfirm.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/btn_reg_pressed.9.png", Constants.ASSETS_RES_PATH + "drawable/btn_reg_default.9.png"));
+		mBtConfirm.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/reg_hover_btn.9.png", Constants.ASSETS_RES_PATH + "drawable/reg_link_btn.9.png"));
 //		mBtConfirm.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(12), ZZDimen.dip2px(5), ZZDimen.dip2px(12));
 		mBtConfirm.setSingleLine();
 		mBtConfirm.setId(IDC.BT_REGISTER_CONFIRM.id());
@@ -256,7 +256,7 @@ public class LoginRegisterLayout extends LinearLayout
 		layout.addView(txtTitle);
 
 		//输入框栏
-		LinearLayout layoutEdit = new LinearLayout(context);
+		final LinearLayout layoutEdit = new LinearLayout(context);
 		layout.addView(layoutEdit);
 		layoutEdit.setBackgroundDrawable(BitmapCache.getStateListDrawable(context, Constants.ASSETS_RES_PATH + "drawable/login_text_bg_pressed.9.png", Constants.ASSETS_RES_PATH + "drawable/login_text_bg_default.9.png"));
 		{
@@ -276,13 +276,36 @@ public class LoginRegisterLayout extends LinearLayout
 			editText.setBackgroundDrawable(null);
 			editText.setPadding(0, 0, 0, 0);
 			editText.setTextColor(ZZFontColor.CC_RECHARGE_INPUT.color());
+			editText.setOnFocusChangeListener(new OnFocusChangeListener() {
+				
+				@Override
+				public void onFocusChange(View v, boolean hasFocus) {
+				
+					updateLayout(layoutEdit,v.getContext(),hasFocus);
+				}
+			});
 			CCBaseLayout.change_edit_cursor(editText);
 			layoutEdit.addView(editText, LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
 		}
 
 		return layout;
 	}
-
+  
+	/**
+	 * 动态更改 线性布局的背景
+	 * @param layout
+	 * @param ctx
+	 * @param focus
+	 */
+	public void updateLayout(LinearLayout layout,Context ctx,boolean focus){
+		if(focus){
+		layout.setBackgroundDrawable(CCImg.LOGIN_TEXT_BACK_PRESS.getDrawble(ctx));
+		}else{
+		layout.setBackgroundDrawable(CCImg.LOGIN_TEXT_BACK_DEFAULT.getDrawble(ctx));
+		} 
+	}
+	
+	
 //	public String getInputUserName()
 //	{
 //		return mRegistUserId.getText().toString();

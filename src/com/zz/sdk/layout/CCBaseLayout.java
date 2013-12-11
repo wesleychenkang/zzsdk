@@ -280,7 +280,7 @@ abstract class CCBaseLayout extends BaseLayout {
 	protected void createView_balance(Context ctx, LinearLayout header) {
 		LinearLayout ll = new LinearLayout(ctx);
 		ll.setGravity(Gravity.CENTER_VERTICAL);
-		ll.setBackgroundColor(Color.rgb(162, 206, 60));
+		ll.setBackgroundColor(Color.rgb(151, 200, 47));
 		int hPadding = ZZDimen.dip2px(16);
 		int vPadding = ZZDimen.dip2px(5);
 		ll.setPadding(hPadding, vPadding, hPadding, vPadding);

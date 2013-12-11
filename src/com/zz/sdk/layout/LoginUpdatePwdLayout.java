@@ -227,7 +227,7 @@ public class LoginUpdatePwdLayout extends LinearLayout
 		layout.addView(txtTitle);
 
 		// 输入框栏
-		LinearLayout layoutEdit = new LinearLayout(context);
+		final LinearLayout layoutEdit = new LinearLayout(context);
 		layout.addView(layoutEdit);
 		layoutEdit.setBackgroundDrawable(BitmapCache.getStateListDrawable(context, Constants.ASSETS_RES_PATH + "drawable/login_text_bg_pressed.9.png", Constants.ASSETS_RES_PATH + "drawable/login_text_bg_default.9.png"));
 		{
@@ -249,9 +249,28 @@ public class LoginUpdatePwdLayout extends LinearLayout
 			editText.setPadding(0, 0, 0, 0);
 			editText.setTextColor(ZZFontColor.CC_RECHARGE_INPUT.color());
 			CCBaseLayout.change_edit_cursor(editText);
+			editText.setOnFocusChangeListener(new OnFocusChangeListener() {
+				@Override
+				public void onFocusChange(View v, boolean hasFocus) {
+				updateLayout(layoutEdit,v.getContext(),hasFocus);
+				}
+			});
 			layoutEdit.addView(editText, LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
 		}
-
 		return layout;
+	}
+	
+	/**
+	 * 动态更改 线性布局的背景
+	 * @param layout
+	 * @param ctx
+	 * @param focus
+	 */
+	public void updateLayout(LinearLayout layout,Context ctx,boolean focus){
+		if(focus){
+		layout.setBackgroundDrawable(CCImg.LOGIN_TEXT_BACK_PRESS.getDrawble(ctx));
+		}else{
+		layout.setBackgroundDrawable(CCImg.LOGIN_TEXT_BACK_DEFAULT.getDrawble(ctx));
+		} 
 	}
 }

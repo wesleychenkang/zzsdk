@@ -287,7 +287,7 @@ public class ResConstants {
 			CC_EXCHANGE_DETAIL_NAME(Color.BLACK),
 			/** 兑换详情·描述文本 */
 			CC_EXCHANGE_DETAIL_DESC(0xff777777),
-
+			CC_TITLE(0x8fc325),
 			;
 
 			private int c;
@@ -544,10 +544,17 @@ public class ResConstants {
 		LOGIN_LOGO("logo.png"),//顶部logo
 		LOGIN_LOGO2("logo2.png"),//中间logo
 		LOGIN_SDK_BACK("sdk_back.png"),//整体背景
+		LOGIN_TEXT_BACK_PRESS("login_text_bg_pressed.9.png"),
+		LOGIN_TEXT_BACK_DEFAULT("login_text_bg_default.9.png"),
 		/** 自动登录框资源*/
 		AUTO_BD("auto_login_bg.9.png"), //自动登录框背景
 		AUTO_CANCLE("cancel.9.png"),
 		AUTO_CANCLE_CLICK("cancel_click.9.png"),
+		/**忘记密码页面资源*/
+		PWD_PROMPT("f_info_icon.png"), //温馨提示
+		PWD_PHONE("f_tel_icon.png"),// 电话标示
+		PWD_EMAIL("f_email_icon.png"), // emial 标示
+		PWD_BACKPWD("f_lock_bg.png"),
 		;
 	
 
