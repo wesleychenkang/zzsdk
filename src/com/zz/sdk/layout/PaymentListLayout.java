@@ -905,10 +905,10 @@ public class PaymentListLayout extends CCBaseLayout {
 			break;
 
 		case PayChannel.PAY_TYPE_YEEPAY_LT:
-			prepparePayType_Card(ctx, rv, 15, 19);
+			//prepparePayType_Card(ctx, rv, 15, 19);
 			break;
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
-			prepparePayType_Card(ctx, rv, 17, 18);
+			//prepparePayType_Card(ctx, rv, 17, 18);
 			break;
 		case PayChannel.PAY_TYPE_YEEPAY_DX: {
 			// TODO: 暂时得知电信充值卡的长度为卡号（19）密码（18）
@@ -918,7 +918,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			// tv.setText("暂不可使用电信充值卡，请使用其他方式");
 			// tv.setTextColor(Color.BLUE);
 			// ZZFontSize.CC_RECHAGR_NORMAL.apply(tv);
-			prepparePayType_Card(ctx, rv, 19, 18);
+			//prepparePayType_Card(ctx, rv, 19, 18);
 		}
 			break;
 
@@ -1489,21 +1489,22 @@ public class PaymentListLayout extends CCBaseLayout {
 		case PayChannel.PAY_TYPE_YEEPAY_LT:
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
 		case PayChannel.PAY_TYPE_YEEPAY_DX: {
-			String card = get_child_text(IDC.PANEL_CARDINPUT, IDC.ED_CARD, 1);
-			String passwd = get_child_text(IDC.PANEL_CARDINPUT, IDC.ED_PASSWD,
-					1);
-			if (card == null || card.length() == 0) {
-				set_child_focuse(IDC.PANEL_CARDINPUT, IDC.ED_CARD);
-				ret = ZZStr.CC_CARDNUM_CHECK_FAILED.str();
-			} else if (passwd == null || passwd.length() == 0) {
-				set_child_focuse(IDC.PANEL_CARDINPUT, IDC.ED_PASSWD);
-				ret = ZZStr.CC_PASSWD_CHECK_FAILED.str();
-			} else {
-				env.add(KeyPaymentList.K_PAY_CARD, card, ValType.TEMPORARY);
-				env.add(KeyPaymentList.K_PAY_CARD_PASSWD, passwd,
-						ValType.TEMPORARY);
-				ret = null;
-			}
+//			String card = get_child_text(IDC.PANEL_CARDINPUT, IDC.ED_CARD, 1);
+//			String passwd = get_child_text(IDC.PANEL_CARDINPUT, IDC.ED_PASSWD,
+//					1);
+//			if (card == null || card.length() == 0) {
+//				set_child_focuse(IDC.PANEL_CARDINPUT, IDC.ED_CARD);
+//				ret = ZZStr.CC_CARDNUM_CHECK_FAILED.str();
+//			} else if (passwd == null || passwd.length() == 0) {
+//				set_child_focuse(IDC.PANEL_CARDINPUT, IDC.ED_PASSWD);
+//				ret = ZZStr.CC_PASSWD_CHECK_FAILED.str();
+//			} else {
+//				env.add(KeyPaymentList.K_PAY_CARD, card, ValType.TEMPORARY);
+//				env.add(KeyPaymentList.K_PAY_CARD_PASSWD, passwd,
+//						ValType.TEMPORARY);
+//				ret = null;
+//			}
+			ret = null;
 		}
 			break;
 
@@ -1524,7 +1525,17 @@ public class PaymentListLayout extends CCBaseLayout {
 		}
 		return ret;
 	}
-
+    
+	/**进入易宝支付的次级页面*/
+	private boolean enterPayYBDetail(ILayoutHost host, PayChannel channel){
+		ParamChain env = getEnv();
+		env.add(KeyPaymentList.K_PAY_CHANNELTYPE, channel.type,
+				ValType.TEMPORARY);
+		env.add(KeyPaymentList.K_PAY_CHANNELNAME, channel.channelName,
+				ValType.TEMPORARY);
+		host.enter((((Object)this).getClass()).getClassLoader(), PaymentYBLayout.class.getName(), env);
+		return true;
+	}
 	private boolean enterPayDetail(ILayoutHost host, PayChannel channel,
 			ResultRequest result) {
 		ParamChain env = getEnv();
@@ -1576,9 +1587,11 @@ public class PaymentListLayout extends CCBaseLayout {
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
 		case PayChannel.PAY_TYPE_YEEPAY_DX:
 			// 充值卡类，没有下一界面，已经是充值成功了
-			notifyPayResult(env, MSG_STATUS.SUCCESS);
-			showPayResult(env, MSG_STATUS.SUCCESS);
-			return true;
+//			notifyPayResult(env, MSG_STATUS.SUCCESS);
+ //		  showPayResult(env, MSG_STATUS.SUCCESS);
+//			return true;
+			clazz = PaymentYBLayout.class;
+			break;
 
 		case PayChannel.PAY_TYPE_ZZCOIN:
 			// 卓越币，没有下一界面，已经是充值成功了
@@ -1627,9 +1640,8 @@ public class PaymentListLayout extends CCBaseLayout {
 	private boolean tryEnterPayDetail(ILayoutHost host, PayChannel channel) {
 		// 向服务器发送用户操作记录
 		final String dRequest;
-
+		// 模拟充值卡 充值成功
 		final int type = channel.type;
-
 		switch (type) {
 		case PayChannel.PAY_TYPE_ALIPAY:
 			dRequest = UserAction.PALI;
@@ -1639,13 +1651,16 @@ public class PaymentListLayout extends CCBaseLayout {
 			break;
 		case PayChannel.PAY_TYPE_YEEPAY_LT:
 			dRequest = UserAction.PYEE;
-			break;
+			enterPayYBDetail(getHost(),channel);
+			return true;
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
 			dRequest = UserAction.PYEE;
-			break;
+			enterPayYBDetail(getHost(),channel);
+			return true;
 		case PayChannel.PAY_TYPE_YEEPAY_DX:
 			dRequest = UserAction.PYEE;
-			break;
+			enterPayYBDetail(getHost(),channel);
+			return true;
 		case PayChannel.PAY_TYPE_UNMPAY:
 		case PayChannel.PAY_TYPE_EX_DEZF:
 			dRequest = UserAction.PUNION;

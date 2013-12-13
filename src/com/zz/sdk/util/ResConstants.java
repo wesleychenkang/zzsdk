@@ -222,7 +222,10 @@ public class ResConstants {
 
 		/** 无网络连接 */
 		BITMAP_FUN_BADNETWORK("请检查网络连接！"),
-
+        /**充值卡金额*/
+		YB_TEXT_VALUE("充值卡面额"),
+		YB_DECE_NUMBER("充值卡号"),
+		YB_DECE_PWD("充值密码"),
 		;
 
 		private String context;
@@ -440,6 +443,9 @@ public class ResConstants {
 			CC_EX_DETAIL_PADDING(12, 8, 12, 8),
 			/** 兑换详情的展示面板边距 */
 			CC_EX_DETAIL_PANEL(6, 4, 6, 4),
+			
+			CC_YB_TEXT(16,8,6,6),
+			CC_YB_EDIT(16,8,0,8),
 
 			;
 
@@ -555,6 +561,11 @@ public class ResConstants {
 		PWD_PHONE("f_tel_icon.png"),// 电话标示
 		PWD_EMAIL("f_email_icon.png"), // emial 标示
 		PWD_BACKPWD("f_lock_bg.png"),
+		
+		/**花费充值页面资源*/
+		YB_BACKDEFAULT("yb_back_default.9.png"),
+		YB_BACKPRESS("yb_back_pressed.9.png"),
+		YB_BACK_UNPRESS("uncheck.9.png")
 		;
 	
 

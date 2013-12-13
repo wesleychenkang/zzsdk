@@ -275,7 +275,6 @@ abstract class CCBaseLayout extends BaseLayout {
 		header.setVisibility(VISIBLE);
 		ZZDimenRect.CC_ROOTVIEW_PADDING.apply_padding(header);
 	}
-
 	/** 余额视图 */
 	protected void createView_balance(Context ctx, LinearLayout header) {
 		LinearLayout ll = new LinearLayout(ctx);
@@ -374,7 +373,11 @@ abstract class CCBaseLayout extends BaseLayout {
 			tvDesc.setBackgroundColor(0x800000ff);
 		}
 	}
-
+   
+	protected void hideView_footer(){
+		LinearLayout l = (LinearLayout)findViewById(IDC.BT_HELP.id());
+		l.setVisibility(View.GONE);
+	}
 	protected LinearLayout getHeaderContainer() {
 		return (LinearLayout) findViewById(IDC.ACT_HEADER.id());
 	}
