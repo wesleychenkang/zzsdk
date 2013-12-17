@@ -1408,11 +1408,11 @@ public class PaymentListLayout extends CCBaseLayout {
 					tmp.add(p);
 				}
 			}
-			if (tmp.size() == channelMessages.length) {
-			} else {
+//			if (tmp.size() == channelMessages.length) {
+//			} else {
 				channelMessages = new PayChannel[tmp.size()];
 				channelMessages = tmp.toArray(channelMessages);
-			}
+//			}
 		}
 
 		if (mPaymentListAdapter == null) {
