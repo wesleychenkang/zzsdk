@@ -33,6 +33,7 @@ import com.zz.sdk.MSG_TYPE;
 import com.zz.sdk.ParamChain;
 import com.zz.sdk.ParamChain.KeyUser;
 import com.zz.sdk.PaymentCallbackInfo;
+import com.zz.sdk.SDKDIY;
 import com.zz.sdk.SDKManager;
 import com.zz.sdk.ZZDebugKit;
 import com.zz.sdk.util.DebugFlags;
@@ -185,6 +186,9 @@ public class MainActivity extends Activity implements OnClickListener {
 	private void init(Context ctx) {
 		// 配置 APP_KEY，必须在API调用之前设置
 		SDKManager.setAppKey(CONFIG_APP_KEY);
+
+		// 将话费支付设置为首先支付方式
+		SDKDIY.setPaySequence_CallCharge(true);
 
 		// 配置移动M-Market的支付参数，若不需要移动MM，则这段不必配置
 		SDKManager.setPayConfYDMM(new IPayConfYDMM() {

@@ -64,3 +64,4 @@
 -keep public class com.zz.sdk.PaymentCallbackInfo { public *; }
 -keep public class com.zz.sdk.LoginCallbackInfo { public *; }
 -keep public class com.zz.sdk.IPayConfYDMM { public *; }
+-keep public class com.zz.sdk.SDKDIY { public *; }
