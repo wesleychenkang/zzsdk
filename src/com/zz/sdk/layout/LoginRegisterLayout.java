@@ -116,6 +116,7 @@ public class LoginRegisterLayout extends LinearLayout
 			checkBox.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
 			checkBox.setTextColor(Color.BLACK);
 			checkBox.setText("已阅读并同意");
+			checkBox.setChecked(true);
 			Drawable picPressed = BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/checkbox_pressed.png");
 			Drawable picNormal = BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/checkbox_default.png");
 			StateListDrawable listDrawable = new StateListDrawable();

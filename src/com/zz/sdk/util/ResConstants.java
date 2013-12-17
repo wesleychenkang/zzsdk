@@ -67,6 +67,7 @@ public class ResConstants {
 		CC_RECHARGE_COUNT_TITLE_PRICE("道具价格"), //
 		CC_RECHAGRE_COUNT_HINT("请输入数量"), //
 		CC_RECHARGE_COUNT_CHECK_FAILED("请输入正确的充值数量"), //
+		CC_RECHARGE_COUNT_CHECK_LARGE("充值数量大于充值卡最大面额，请选择其它支付方式！"),
 		CC_RECHAGRE_COUNT_DESC("卓越币"), //
 		/** RMB与卓越币的兑换比例，如 (1元=%s卓越币)，基于 {@link #CC_PRICE_FORMAT} */
 		CC_RECHAGRE_RATE_DESC("(1元=%s卓越币)"), //
@@ -186,6 +187,7 @@ public class ResConstants {
 		/** 卓越币余额不足 */
 		CC_PAYTYPE_COIN_DESC_POOR("卓越币余额不足，请更换其他方式进行支付"), //
 		CC_COMMIT_RECHARGE("确认充值"), //
+		CC_NEXT_RECHARGE("下一步"),
 		CC_COMMIT_RECHARGE_SMS("确认提交"), //
 		CC_COMMIT_BUY("确认购买"), //
 		CC_COMMIT_EXCHANGE("确认兑换"), //
@@ -525,7 +527,9 @@ public class ResConstants {
 		/** XListView */
 		XLISTVIEW_ARROW("xlistview_arrow.png"), //
 		EMPTY_PHOTO("empty_photo.png"),
-
+        SPINNER_BACK("spinner.png"),
+        SPINNER_TXT_DEFAULT("spinnertxt_default.png"),
+        SPINNER_TXT_CLICK("spinnertxt_press.png"),
 		// :%s/\([a-z_]*\)\.\(.*\)$/\U\1\l("\1\.\2"), \/\//g
 		/** 登录界面资源 */
 		LOGIN_BUTTON_LV_CLICK("login_button_lv_click.9.png"), //

@@ -17,6 +17,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
@@ -873,6 +874,7 @@ class LoginMainLayout extends BaseLayout
 		View vPassword = null;
 		String loginName = get_child_text(IDC.ED_REGISTER_NAME);
 		String password = get_child_text(IDC.ED_REGISTER_PASSWORD);
+		CheckBox check = (CheckBox)findViewById(IDC.CK_REGISTER_AGREEMENT.id());
 		// 确认密码
 		String repeatPassword = get_child_text(IDC.ED_REGISTER_REPEAT_PASSWORD);
 		do
@@ -895,7 +897,9 @@ class LoginMainLayout extends BaseLayout
 				ret = new Pair<View, String>(vPassword, "两次密码输入不一致!");
 				break;
 			}
-
+            if(!check.isChecked()){
+            	ret = new Pair<View,String>(check,"请");
+            }
 			// success
 			mLoginName = loginName;
 			mPassword = password;

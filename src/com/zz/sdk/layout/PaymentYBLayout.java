@@ -87,6 +87,7 @@ public class PaymentYBLayout extends CCBaseLayout {
 	private Double nowCount;
 	private Context context;
 	private int type = 0;
+	private final static String cardAmount = "cardAmount";
 	public PaymentYBLayout(Context context, ParamChain env) {
 		super(context, env);
 		this.context = context;
@@ -306,24 +307,38 @@ public class PaymentYBLayout extends CCBaseLayout {
 		String password = ((EditText)findViewById(IDC.ED_PASSWD.id())).getText().toString();
 		if(cardNumber==null ||cardNumber.length()==0){
 			ret = ZZStr.CC_CARDNUM_CHECK_FAILED.str();
+			
 			return ret;
 		}
 		if(null ==password || password.length()==0){
 			ret = ZZStr.CC_PASSWD_CHECK_FAILED.str();
 			return ret;
 		}
+		if(now == -1){
+			ret = "请选择充值卡面额";
+			return ret;
+		}
+		getEnv().add(KeyPaymentList.K_PAY_CARD, cardNumber, ValType.TEMPORARY);
+		getEnv().add(KeyPaymentList.K_PAY_CARD_PASSWD, password,
+				ValType.TEMPORARY);
+		ret = null;
 		return ret;
 		
 	}
 	private static PayParam genPayParam(Context ctx, ParamChain env) {
 		PayParam payParam = new PayParam();
 		payParam.loginName = env.get(KeyUser.K_LOGIN_NAME, String.class);
+		String loginName = payParam.loginName;
 		payParam.gameRole = env.get(KeyCaller.K_GAME_ROLE, String.class);
 		payParam.serverId = env.get(KeyCaller.K_GAME_SERVER_ID, String.class);
 		payParam.projectId = Utils.getProjectId(ctx);
 		Double amount = env.get(KeyPaymentList.K_PAY_AMOUNT, Double.class);
 		payParam.amount = Utils.price2str(amount == null ? 0 : amount);
 		payParam.requestId = "";
+		payParam.cardAmount = String.valueOf(env.get(cardAmount,Integer.class));
+		payParam.cardNo = env.get(KeyPaymentList.K_PAY_CARD,String.class);
+		payParam.cardPassword = env.get(KeyPaymentList.K_PAY_CARD_PASSWD,String.class);
+		payParam.type = String.valueOf(env.get(KeyPaymentList.K_PAY_CHANNELTYPE,Integer.class));
 		return payParam;
 	}
 	
@@ -364,6 +379,7 @@ public class PaymentYBLayout extends CCBaseLayout {
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
 			  if(arg1.getId()!=IDC.UNCLICK.id()){
+				 
 				  l.updateUI(arg2);
 			  }
 			}
@@ -434,21 +450,23 @@ public class PaymentYBLayout extends CCBaseLayout {
 	private void preparePayDec(Context ctx,LinearLayout rv){
 		TextView txtp = new TextView(ctx);
 		txtp.setText("温馨提示:");
+		txtp.setTextColor(Color.rgb(72, 145, 44));
 		rv.addView(txtp);
 		ZZDimenRect.CC_YB_TEXT.apply_padding(txtp);
 		
 		TextView txt_one = new TextView(ctx);
-		txt_one.setText("1. 所选择的界面和充值面值不符时，卡内余额将充入卓越币");
+		txt_one.setText("1. 所选面额喝充值卡面额不符合时,卡内余额将充入卓越币");
 		ZZDimenRect.CC_YB_TEXT.apply_padding(txt_one);
+		txt_one.setTextColor(ZZFontColor.CC_RECHARGE_COST.color());
 		rv.addView(txt_one);
 		
 		TextView txt_two = new TextView(ctx);
-		txt_two.setText("2. 充值卡到账过程可能需要1-10分钟，请放心充值");
+		txt_two.setText("2. 1元=1卓越币,一般1-10分钟即可到账,请放心充值");
 		ZZDimenRect.CC_YB_TEXT.apply_padding(txt_two);
 		rv.addView(txt_two);
 		
 		TextView txt_three = new TextView(ctx);
-		txt_three.setText("3:客服热线 ："+"10000000"+ "客服QQ:"+"122333333333");
+		txt_three.setText("3. 客服热线 :"+"4007555999"+ "  客服QQ:"+"4008848808");
 		ZZDimenRect.CC_YB_TEXT.apply_padding(txt_three);
 		rv.addView(txt_three);
 		
@@ -489,7 +507,7 @@ public class PaymentYBLayout extends CCBaseLayout {
 			 }
 			 if(arg0 == now){
 			 txtholder.setBackgroundDrawable(CCImg.YB_BACKPRESS.getDrawble(ctx));
-		     }else if(counts[arg0]<nowCount){
+			 }else if(counts[arg0]<nowCount){
 		     txtholder.setBackgroundDrawable(CCImg.YB_BACK_UNPRESS.getDrawble(ctx));
 			 txtholder.setId(IDC.UNCLICK.id());
 		     }else{
@@ -501,8 +519,10 @@ public class PaymentYBLayout extends CCBaseLayout {
 		
 		public void updateUI(int count){
 			now = count;
+			System.out.println();
+			getEnv().add(cardAmount, counts[now].intValue());
 		    notifyDataSetChanged();
-		}
+	    }
     	
     }
     /**
@@ -539,7 +559,7 @@ public class PaymentYBLayout extends CCBaseLayout {
 		protected ResultRequest doInBackground(Object... params) {
 			ConnectionUtil cu = (ConnectionUtil) params[0];
 			ITaskCallBack callback = (ITaskCallBack) params[1];
-			int type = (Integer) params[2];
+			int type = PayChannel.PAY_TYPE_YEEPAY_DX;
 			PayParam charge = (PayParam) params[3];
 
 			if (DEBUG) {
