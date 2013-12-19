@@ -48,3 +48,14 @@
 			}
 		});　
 
+
+* 混淆处理：
+
+　如果需要混淆，请加上如下配置：
+
+	-libraryjars libs/mmbilling.jar
+
+	-keep class com.ccit.** {*; }
+	-keep class ccit.** { *; }
+	-keep class mm.purchasesdk.**
+	-keep class mm.purchasesdk.** {*;}
