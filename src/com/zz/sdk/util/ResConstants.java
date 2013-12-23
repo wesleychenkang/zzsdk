@@ -42,7 +42,7 @@ public class ResConstants {
 		/** 价格或卓越币数的表达规则, {@link DecimalFormat} */
 		CC_PRICE_FORMAT("##.##"), //
 
-		CC_BALANCE_TITLE("您的余额是："), //
+		CC_BALANCE_TITLE("您的卓越币余额是："), //
 		/** 余额显示，基于 {@link #CC_PRICE_FORMAT} */
 		CC_BALANCE_UNIT("%s"), //
 

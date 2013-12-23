@@ -149,6 +149,9 @@ public class PaymentYBLayout extends CCBaseLayout {
 	    if(mChargeStyle!=ChargeStyle.BUY ||(mChargeStyle==ChargeStyle.BUY && amount!=null && amount>0)){
 	    	preparText(ctx,lybuttom);
 	    	preparGridView(ctx,lybuttom);
+	    	
+	    }else{
+	    	now = 0; // 暂时定义默认为0 用户已经在前面选择过了卡的面额
 	    }
 	    prepparePayType_Card(ctx,lybuttom,type);
 	    preparButton(ctx,lybuttom);
@@ -459,7 +462,7 @@ public class PaymentYBLayout extends CCBaseLayout {
 		ZZDimenRect.CC_YB_TEXT.apply_padding(txtp);
 		
 		TextView txt_one = new TextView(ctx);
-		txt_one.setText("1. 所选面额喝充值卡面额不符合时,卡内余额将充入卓越币");
+		txt_one.setText("1. 所选面额喝充值卡面额不符合时,卡内余额将充入卓越币,卓越币可以购买游戏中的道具");
 		ZZDimenRect.CC_YB_TEXT.apply_padding(txt_one);
 		txt_one.setTextColor(ZZFontColor.CC_RECHARGE_COST.color());
 		rv.addView(txt_one);
@@ -470,7 +473,7 @@ public class PaymentYBLayout extends CCBaseLayout {
 		rv.addView(txt_two);
 		
 		TextView txt_three = new TextView(ctx);
-		txt_three.setText("3. 客服热线 :"+"4007555999"+ "  客服QQ:"+"4008848808");
+		txt_three.setText("3. 客服热线 :"+"4007555999"+ "  客服QQ:"+"974384918");
 		ZZDimenRect.CC_YB_TEXT.apply_padding(txt_three);
 		rv.addView(txt_three);
 		
