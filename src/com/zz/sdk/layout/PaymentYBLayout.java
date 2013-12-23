@@ -87,6 +87,7 @@ public class PaymentYBLayout extends CCBaseLayout {
 	private Double nowCount;
 	private Context context;
 	private int type = 0;
+	private Integer amount;
 	private final static String cardAmount = "cardAmount";
 	public PaymentYBLayout(Context context, ParamChain env) {
 		super(context, env);
@@ -115,6 +116,7 @@ public class PaymentYBLayout extends CCBaseLayout {
 		} else {
 			title = ZZStr.CC_RECHARGE_TITLE;
 		}
+		amount = env.get(KeyCaller.K_AMOUNT, Integer.class);
 		env.add(KeyPaymentList.K_PAY_TITLE, title, ValType.TEMPORARY);
 		
 	}
@@ -144,10 +146,10 @@ public class PaymentYBLayout extends CCBaseLayout {
 	    sroll.setFillViewport(true);
 	    sroll.addView(lybuttom,new LayoutParams(LP_MM));
 	    all.addView(sroll,new LayoutParams(LP_MW));
-	    
-	
-	    preparText(ctx,lybuttom);
-	    preparGridView(ctx,lybuttom);
+	    if(mChargeStyle!=ChargeStyle.BUY ||(mChargeStyle==ChargeStyle.BUY && amount!=null && amount>0)){
+	    	preparText(ctx,lybuttom);
+	    	preparGridView(ctx,lybuttom);
+	    }
 	    prepparePayType_Card(ctx,lybuttom,type);
 	    preparButton(ctx,lybuttom);
 	    preparePayDec(ctx,lybuttom);
@@ -155,7 +157,9 @@ public class PaymentYBLayout extends CCBaseLayout {
 
 	@Override
 	public boolean onEnter() {
+		resetExitTrigger();
 		return super.onEnter();
+		
 	}
      
 	@Override
@@ -286,7 +290,7 @@ public class PaymentYBLayout extends CCBaseLayout {
 						hidePopup();
 						callHost_back();
 					}
-				}, 2500);
+				}, 1500);
 			} else {
 				resetExitTrigger();
 			}
@@ -400,7 +404,7 @@ public class PaymentYBLayout extends CCBaseLayout {
 			limitPasswd = 18;
 		  break;
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
-			limitCard =15;
+			limitCard =17;
 			limitPasswd = 18;
 		  break;
 		}

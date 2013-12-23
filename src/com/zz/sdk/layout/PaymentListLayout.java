@@ -878,6 +878,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			mPaymentTypeChoose = pos;
 			updateRechargeCostUintByChannelType(type);
 			updateCharge(type);
+		  
 		}
 
 		if (mPaymentListAdapter != null) {
@@ -892,13 +893,12 @@ public class PaymentListLayout extends CCBaseLayout {
 		case PayChannel.PAY_TYPE_YEEPAY_LT:
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
 			set_child_text(IDC.BT_RECHARGE_COMMIT, ZZStr.CC_NEXT_RECHARGE);
-			if(mChargeStyle==ChargeStyle.BUY){
+			if(mChargeStyle==ChargeStyle.BUY && isCanModifyAmount() ){
 				updateChargeCount(true);
 			}
-
 			break;
 		default:
-			if(mChargeStyle==ChargeStyle.BUY){
+			if(mChargeStyle==ChargeStyle.BUY && isCanModifyAmount()){
 			updateChargeCount(false);
 			}
 			set_child_text(IDC.BT_RECHARGE_COMMIT, ZZStr.CC_COMMIT_RECHARGE);
@@ -1128,23 +1128,6 @@ public class PaymentListLayout extends CCBaseLayout {
 				perNonmalText(ctx,ll2);
 				
 			}
-
-			// 应付金额
-			if (false) {
-				ll2 = new LinearLayout(ctx);
-				ll2.setOrientation(HORIZONTAL);
-				ll.addView(ll2);
-
-				tv = create_normal_label(ctx, ZZStr.CC_RECHAGRE_COST_DESC);
-				ll2.addView(tv, new LayoutParams(LP_WM));
-
-				tv = create_normal_label(ctx, null);
-				ll2.addView(tv, new LayoutParams(LP_WM));
-				tv.setId(IDC.TV_RECHARGE_COST.id());
-				tv.setTextColor(ZZFontColor.CC_RECHARGE_COST.color());
-				ZZFontSize.CC_RECHARGE_COST.apply(tv);
-			}
-
 			// 附加显示
 			{
 				tv = create_normal_label_shadow(ctx, ZZStr.CC_RECHARGE_COST_SUMMARY);
@@ -1533,7 +1516,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			amount = (Double) getValue(VAL.PRICE);
 		}else if(type == PayChannel.PAY_TYPE_YEEPAY_DX||type == PayChannel.PAY_TYPE_YEEPAY_LT||type == PayChannel.PAY_TYPE_YEEPAY_YD){
 			
-			if(mChargeStyle==ChargeStyle.BUY){
+			if(mChargeStyle==ChargeStyle.BUY && isCanModifyAmount()){
 				amount = nowCost;
 			}else{
 				amount = (Double) getValue(VAL.COST);

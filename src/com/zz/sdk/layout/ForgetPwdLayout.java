@@ -13,6 +13,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.LinearLayout.LayoutParams;
 
 import com.zz.sdk.layout.LoginMainLayout.IDC;
 import com.zz.sdk.util.ResConstants.CCImg;
@@ -39,7 +40,9 @@ public class ForgetPwdLayout extends LinearLayout
 		// 标题栏
 		FrameLayout layoutTitle = new FrameLayout(ctx);
 		layoutTitle.setBackgroundDrawable(CCImg.TITLE_BACKGROUND.getDrawble(ctx));
-		all.addView(layoutTitle, LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+		LayoutParams lptitle = new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT);
+		lptitle.height = ZZDimen.dip2px(45);
+		all.addView(layoutTitle, lptitle);
 	
 		{
 			// 左侧按钮

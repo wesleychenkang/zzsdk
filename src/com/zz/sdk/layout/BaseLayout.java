@@ -207,7 +207,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 
 	protected static TextView create_normal_label_shadow(Context ctx, ZZStr title) {
 		TextView tv = create_normal_label(ctx, title);
-//		tv.setShadowLayer(0.5f, 0.5f, 0.5f, ZZFontColor.CC_SHADOW_NORMAL.color());
+		tv.setShadowLayer(0.5f, 0.5f, 0.5f, ZZFontColor.CC_SHADOW_NORMAL.color());
 		tv.getPaint().setFakeBoldText(true);
 		return tv;
 	}
@@ -887,7 +887,9 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		{
 			FrameLayout title = new FrameLayout(ctx);
 			title.setBackgroundDrawable(CCImg.TITLE_BACKGROUND.getDrawble(ctx));
-			rv.addView(title, new LayoutParams(LP_MW));
+			LayoutParams lp = new LayoutParams(LP_MW);
+			lp.height = ZZDimen.dip2px(45);
+			rv.addView(title,lp);
 			title.setId(IDC.ACT_TITLE.id());
 
 			// 标题条
@@ -895,7 +897,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 				TextView tv = create_normal_label(ctx, null);
 				title.addView(tv, new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.CENTER));
 				tv.setId(IDC.TV_TITLE.id());
-				tv.setTextSize(24);
+				tv.setTextSize(ZZDimen.dip2px(13));
 				tv.setGravity(Gravity.CENTER);
 				tv.setTextColor(0xff434343);
 				ZZDimenRect.CC_LABEL_PADDING.apply_padding(tv);

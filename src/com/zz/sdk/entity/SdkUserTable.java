@@ -85,6 +85,21 @@ public class SdkUserTable {
 		return user;
 	}
 	
+	public List<SdkUser> getAllSDKUsers(){
+		Cursor query = mDb.query(TABLE_NAME, null, null, null, null, null, LASTLOGINTIME + " desc ");
+		List<SdkUser> list = new ArrayList<SdkUser>();
+		if (query.moveToFirst()) {
+			while (!query.isAfterLast()) {
+				list.add(getSdkUser(query));
+				query.moveToNext();
+			}
+		}
+		query.close();
+		if (list.size() > 0) {
+			return list;
+		}
+		return null;
+	}
 	/**
 	 * 加载全部用户
 	 * @return 

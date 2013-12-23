@@ -556,6 +556,7 @@ public class ResConstants {
 		LOGIN_SDK_BACK("sdk_back.png"),//整体背景
 		LOGIN_TEXT_BACK_PRESS("login_text_bg_pressed.9.png"),
 		LOGIN_TEXT_BACK_DEFAULT("login_text_bg_default.9.png"),
+		LOGIN_UNDER_LINE("underline.png"),
 		/** 自动登录框资源*/
 		AUTO_BD("auto_login_bg.9.png"), //自动登录框背景
 		AUTO_CANCLE("cancel.9.png"),

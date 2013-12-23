@@ -898,7 +898,8 @@ class LoginMainLayout extends BaseLayout
 				break;
 			}
             if(!check.isChecked()){
-            	ret = new Pair<View,String>(check,"请");
+            	ret = new Pair<View,String>(check,"请先勾选并同意卓越游戏用户服务协议");
+            	break;
             }
 			// success
 			mLoginName = loginName;

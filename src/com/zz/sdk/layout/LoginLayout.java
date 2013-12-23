@@ -1,18 +1,27 @@
 package com.zz.sdk.layout;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
@@ -107,6 +116,7 @@ public class LoginLayout extends ScrollView
 				btDouQu.setOnClickListener(l);
 				btDouQu.setTextColor(colorList);
 				lp = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+				lp.height = ZZDimen.dip2px(35);
 				lp.leftMargin = ZZDimen.dip2px(5);
 				layoutSelectUser.addView(btDouQu, lp);
 
@@ -120,7 +130,8 @@ public class LoginLayout extends ScrollView
 				btNormal.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/joy_user.png", ""));
 				btNormal.setOnClickListener(l);
 				btNormal.setTextColor(colorList);
-				layoutSelectUser.addView(btNormal);
+				lp.leftMargin = ZZDimen.dip2px(0);
+				layoutSelectUser.addView(btNormal,lp);
 			}
 		}
 
@@ -146,7 +157,7 @@ public class LoginLayout extends ScrollView
 			mInputAccount = new MultiAutoCompleteTextView(ctx);
 			mInputAccount.setDropDownBackgroundDrawable(new ColorDrawable(bgColor));
 			mInputAccount.setId(IDC.ED_LOGIN_NAME.id());
-			mInputAccount.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
+			//mInputAccount.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
 			mInputAccount.setHint("请输入帐号");
 			mInputAccount.setTextColor(Color.BLACK);
 			mInputAccount.setSingleLine(true);
@@ -171,7 +182,7 @@ public class LoginLayout extends ScrollView
 				{
 					sdkUserloginName[i] = sdkUsers[i].loginName;
 				}
-				ArrayAdapter<String> adapter = new ArrayAdapter<String>(ctx, android.R.layout.simple_dropdown_item_1line, sdkUserloginName);
+				LoginNameAdpter<String> adapter = new LoginNameAdpter<String>(ctx,sdkUserloginName);
 				mInputAccount.setAdapter(adapter);
 				mInputAccount.setOnItemClickListener(new OnItemClickListener()
 				{
@@ -184,7 +195,8 @@ public class LoginLayout extends ScrollView
 			}
 
 			//下拉的图标
-			ImageView imgSelect = new ImageView(ctx);
+			ImageButton imgSelect = new ImageButton(ctx);
+			imgSelect.setBackgroundColor(Color.TRANSPARENT);
 			imgSelect.setImageDrawable(BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/select_icon.png"));
 			imgSelect.setOnClickListener(new OnClickListener()
 			{

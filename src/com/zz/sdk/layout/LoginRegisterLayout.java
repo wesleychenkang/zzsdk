@@ -52,7 +52,9 @@ public class LoginRegisterLayout extends LinearLayout
 		//标题栏
 		FrameLayout layoutTitle = new FrameLayout(ctx);
 		layoutTitle.setBackgroundDrawable(CCImg.TITLE_BACKGROUND.getDrawble(ctx));
-		addView(layoutTitle, LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+		LayoutParams lptitle = new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT);
+		lptitle.height = ZZDimen.dip2px(45);
+		addView(layoutTitle,lptitle);
 		{
 			//左侧按钮
 			ImageView imgLeft = new ImageView(ctx);
@@ -86,9 +88,9 @@ public class LoginRegisterLayout extends LinearLayout
 		content.addView(createItemView(ctx, IDC.ED_REGISTER_REPEAT_PASSWORD.id(), "确认密码", Constants.ASSETS_RES_PATH + "drawable/pwd_icon.png", "请再次输入密码"));
 
 		//注册确认按钮
-		final Button mBtConfirm = new Button(ctx);
+	    Button mBtConfirm = new Button(ctx);
 		mBtConfirm.setText("注册");
-		mBtConfirm.setEnabled(false);
+		mBtConfirm.setEnabled(true);
 		mBtConfirm.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
 		mBtConfirm.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/reg_hover_btn.9.png", Constants.ASSETS_RES_PATH + "drawable/reg_link_btn.9.png"));
 //		mBtConfirm.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(12), ZZDimen.dip2px(5), ZZDimen.dip2px(12));
@@ -107,11 +109,11 @@ public class LoginRegisterLayout extends LinearLayout
 		content.addView(layoutCheck, lp);
 		{
 			CheckBox checkBox = new CheckBox(ctx);
-			checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-					mBtConfirm.setEnabled(isChecked);
-				}
-			});
+//			checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+//				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//					mBtConfirm.setEnabled(isChecked);
+//				}
+//			});
 			checkBox.setId(IDC.CK_REGISTER_AGREEMENT.id());
 			checkBox.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
 			checkBox.setTextColor(Color.BLACK);
