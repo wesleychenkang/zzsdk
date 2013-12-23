@@ -531,6 +531,19 @@
 	            <copy file="doc/file_list.txt"  tofile="${zzsdk.config.release.dir}/文件说明.txt" />
 	        </sequential>
 	    </do-only-if-file-exist>
+		<!-- 移动M-Market的文件说明 -->
+		<if >
+		    <condition>
+				<and>
+					<istrue value="${zzsdk.ydmm.enabled}" />
+					<available file="doc/ydmm_sdk.txt" type="file" /> 
+				</and>
+		    </condition>
+		    <then>
+				<echo level="info">复制移动M-Market说明</echo>
+	            <copy file="doc/ydmm_sdk.txt"  tofile="${zzsdk.config.release.dir}/移动MM接入说明.txt" />
+		    </then>
+		</if>
 	    
 	    <do-only-if-file-exist path="${zzsdk.demo.zip.file}" type="file">
 	        <sequential>
