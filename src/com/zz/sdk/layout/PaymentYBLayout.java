@@ -152,6 +152,9 @@ public class PaymentYBLayout extends CCBaseLayout {
 	    	
 	    }else{
 	    	now = 0; // 暂时定义默认为0 用户已经在前面选择过了卡的面额
+	    	double s = nowCount; // 指定卡面额要进行转换 前面会传 10.0,20.0 
+	    	int a = (int)s; // 此处强制转换不会有丢失的情况  ，指真针对 前面选择好了的面额情况
+	    	getEnv().add(cardAmount,a);
 	    }
 	    prepparePayType_Card(ctx,lybuttom,type);
 	    preparButton(ctx,lybuttom);
@@ -335,7 +338,6 @@ public class PaymentYBLayout extends CCBaseLayout {
 	private static PayParam genPayParam(Context ctx, ParamChain env) {
 		PayParam payParam = new PayParam();
 		payParam.loginName = env.get(KeyUser.K_LOGIN_NAME, String.class);
-		String loginName = payParam.loginName;
 		payParam.gameRole = env.get(KeyCaller.K_GAME_ROLE, String.class);
 		payParam.serverId = env.get(KeyCaller.K_GAME_SERVER_ID, String.class);
 		payParam.projectId = Utils.getProjectId(ctx);
