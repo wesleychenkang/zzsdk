@@ -4,11 +4,9 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.AsyncTask;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.View.MeasureSpec;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
@@ -33,9 +31,7 @@ import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.result.BaseResult;
 import com.zz.sdk.entity.result.ResultRequest;
-import com.zz.sdk.layout.BaseLayout.ITaskCallBack;
 import com.zz.sdk.layout.PaymentListLayout.ChargeStyle;
-import com.zz.sdk.layout.PaymentListLayout.IDC;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
 import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.ConnectionUtil;
@@ -510,10 +506,10 @@ public class PaymentYBLayout extends CCBaseLayout {
 			TextView txtholder = (TextView) convertView;
 			if(txtholder==null){
 			 txtholder = new TextView(ctx);
-			 txtholder.setText(counts[arg0].intValue()+"元");
 			 txtholder.setGravity(Gravity.CENTER);
 			 txtholder.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT,mItemHeight));
 			 }
+			 txtholder.setText(counts[arg0].intValue()+"元");
 			 if(arg0 == now){
 			 txtholder.setBackgroundDrawable(CCImg.YB_BACKPRESS.getDrawble(ctx));
 			 }else if(counts[arg0]<nowCount){
