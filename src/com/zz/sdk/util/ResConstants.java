@@ -412,7 +412,7 @@ public class ResConstants {
 
 		/** 尺寸配置, DIP */
 		public static enum ZZDimenRect {
-			CC_TITLE_BT_PADDING(16, 8, 16, 8),
+			CC_TITLE_BT_PADDING(16, 4, 16, 4),
 
 			/** 充值界面·主活动区的边距 */
 			CC_ROOTVIEW_PADDING(16, 16, 16, 16),
