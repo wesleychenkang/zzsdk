@@ -441,6 +441,7 @@ public class PaymentListLayout extends CCBaseLayout {
 	public boolean onResume() {
 		boolean ret = super.onResume();
 		if (ret) {
+			set_child_focuse(IDC.ACT_PAY_GRID);
 			// TODO: 如果是从子界面返回来的，视情况显示支付结果
 			ParamChain env = getEnv();
 			Object result = env.remove(KeyPaymentList.K_PAY_RESULT);
