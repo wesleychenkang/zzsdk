@@ -464,7 +464,7 @@ public class PaymentYBLayout extends CCBaseLayout {
 		ZZDimenRect.CC_YB_TEXT.apply_padding(txtp);
 		
 		TextView txt_one = new TextView(ctx);
-		txt_one.setText("1. 所选面额喝充值卡面额不符合时,卡内余额将充入卓越币,卓越币可以购买游戏中的道具");
+		txt_one.setText("1. 所选面额和充值卡面额不符合时,卡内余额将充入卓越币,卓越币可以购买游戏中的道具");
 		ZZDimenRect.CC_YB_TEXT.apply_padding(txt_one);
 		txt_one.setTextColor(ZZFontColor.CC_RECHARGE_COST.color());
 		rv.addView(txt_one);
