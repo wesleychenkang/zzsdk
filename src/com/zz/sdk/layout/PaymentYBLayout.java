@@ -142,7 +142,7 @@ public class PaymentYBLayout extends CCBaseLayout {
 	    sroll.setFillViewport(true);
 	    sroll.addView(lybuttom,new LayoutParams(LP_MM));
 	    all.addView(sroll,new LayoutParams(LP_MW));
-	    if(mChargeStyle!=ChargeStyle.BUY ||(mChargeStyle==ChargeStyle.BUY && amount!=null && amount>0)){
+	    if(mChargeStyle!=ChargeStyle.RECHARGE ||(mChargeStyle==ChargeStyle.RECHARGE && amount!=null && amount>0)){
 	    	preparText(ctx,lybuttom);
 	    	preparGridView(ctx,lybuttom);
 	    	
@@ -331,7 +331,8 @@ public class PaymentYBLayout extends CCBaseLayout {
 		return ret;
 		
 	}
-	private static PayParam genPayParam(Context ctx, ParamChain env) {
+	private  PayParam genPayParam(Context ctx, ParamChain env) {
+		
 		PayParam payParam = new PayParam();
 		payParam.loginName = env.get(KeyUser.K_LOGIN_NAME, String.class);
 		payParam.gameRole = env.get(KeyCaller.K_GAME_ROLE, String.class);
@@ -344,6 +345,9 @@ public class PaymentYBLayout extends CCBaseLayout {
 		payParam.cardNo = env.get(KeyPaymentList.K_PAY_CARD,String.class);
 		payParam.cardPassword = env.get(KeyPaymentList.K_PAY_CARD_PASSWD,String.class);
 		payParam.type = String.valueOf(env.get(KeyPaymentList.K_PAY_CHANNELTYPE,Integer.class));
+		if (mChargeStyle == ChargeStyle.RECHARGE) {
+			payParam.way = "1";
+		}
 		return payParam;
 	}
 	

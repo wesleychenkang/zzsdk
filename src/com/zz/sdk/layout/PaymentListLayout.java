@@ -894,12 +894,12 @@ public class PaymentListLayout extends CCBaseLayout {
 		case PayChannel.PAY_TYPE_YEEPAY_LT:
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
 			set_child_text(IDC.BT_RECHARGE_COMMIT, ZZStr.CC_NEXT_RECHARGE);
-			if(mChargeStyle==ChargeStyle.BUY && isCanModifyAmount() ){
+			if(mChargeStyle==ChargeStyle.RECHARGE && isCanModifyAmount() ){
 				updateChargeCount(true);
 			}
 			break;
 		default:
-			if(mChargeStyle==ChargeStyle.BUY && isCanModifyAmount()){
+			if(mChargeStyle==ChargeStyle.RECHARGE && isCanModifyAmount()){
 			updateChargeCount(false);
 			}
 			set_child_text(IDC.BT_RECHARGE_COMMIT, ZZStr.CC_COMMIT_RECHARGE);
@@ -1517,7 +1517,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			amount = (Double) getValue(VAL.PRICE);
 		}else if(type == PayChannel.PAY_TYPE_YEEPAY_DX||type == PayChannel.PAY_TYPE_YEEPAY_LT||type == PayChannel.PAY_TYPE_YEEPAY_YD){
 			
-			if(mChargeStyle==ChargeStyle.BUY && isCanModifyAmount()){
+			if(mChargeStyle==ChargeStyle.RECHARGE && isCanModifyAmount()){
 				amount = nowCost;
 			}else{
 				amount = (Double) getValue(VAL.COST);
