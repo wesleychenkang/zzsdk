@@ -5,12 +5,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.nfc.NfcAdapter.CreateNdefMessageCallback;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -921,9 +924,14 @@ public class PaymentListLayout extends CCBaseLayout {
 		
 		
 	}
-
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	private void createSpinnerView(Context ctx, LinearLayout ly) {
-		Spinner spinner = new Spinner(ctx);
+		Spinner spinner = null;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
+			spinner = new Spinner(ctx,1); 
+		}else{
+		    spinner = new Spinner(ctx);
+		}
 		spinner.setBackgroundDrawable(CCImg.SPINNER_BACK.getDrawble(ctx));
 		final Double[] money = new Double[] { 0.0, 10.0, 20.0, 30.0, 50.0,
 				100.0, 200.0 };

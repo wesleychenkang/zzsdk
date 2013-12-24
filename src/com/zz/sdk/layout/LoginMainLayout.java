@@ -467,6 +467,8 @@ class LoginMainLayout extends BaseLayout
 
 		// 修改密码
 		case BT_UPDATE_PASSWORD:
+			switchPanle(IDC.ACT_MODIFY_PASSWORD);
+			break;
 			// 登录
 		case BT_LOGIN:
 		{
