@@ -1,24 +1,14 @@
 package com.zz.sdk.layout;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -29,7 +19,6 @@ import android.widget.MultiAutoCompleteTextView;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
-
 import com.zz.lib.pojo.PojoUtils;
 import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.entity.SdkUser;
@@ -193,7 +182,20 @@ public class LoginLayout extends ScrollView
 					}
 				});
 			}
-
+            // 删除按钮
+			ImageView imgDelete = new ImageView(ctx);
+//			imgDelete.setId(id)
+			//imgDelete.setBackgroundColor(Color.TRANSPARENT);
+			imgDelete.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,CCImg.LOGIN_DELETE,CCImg.LOGIN_DELETE_CLICK));
+			imgDelete.setVisibility(View.VISIBLE);
+			imgDelete.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					mInputAccount.setText("");
+				}
+			});
+			layoutUserName.addView(imgDelete);
+			
 			//下拉的图标
 			ImageButton imgSelect = new ImageButton(ctx);
 			imgSelect.setBackgroundColor(Color.TRANSPARENT);
