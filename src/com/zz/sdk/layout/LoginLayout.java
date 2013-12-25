@@ -26,8 +26,10 @@ import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.entity.SdkUser;
 import com.zz.sdk.entity.SdkUserTable;
 import com.zz.sdk.layout.LoginMainLayout.IDC;
+import com.zz.sdk.util.AntiAddictionUtil;
 import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.Constants;
+import com.zz.sdk.util.ResConstants;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
 
 public class LoginLayout extends ScrollView
@@ -60,6 +62,14 @@ public class LoginLayout extends ScrollView
 //		ly.weight = 0.8f;
 		addView(content, ly);
 
+		LinearLayout.LayoutParams lp;
+
+		/*LOGO*/
+		if (AntiAddictionUtil.isEnabled()) {
+			ImageView logo = new ImageView(ctx);
+			logo.setImageDrawable(ResConstants.CCImg.ANTIADDICTION_LOGO.getDrawble(ctx));
+			content.addView(logo);
+		} else {
 		//cmge logo
 		ImageView imgCmgetLogo = new ImageView(ctx);
 		imgCmgetLogo.setImageDrawable(BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/cmge_logo.png"));
@@ -68,9 +78,10 @@ public class LoginLayout extends ScrollView
 		//joygame logo
 		ImageView imgJoyGameLogo = new ImageView(ctx);
 		imgJoyGameLogo.setImageDrawable(BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/joygame_logo.png"));
-		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+		lp = new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
 		lp.setMargins(0, ZZDimen.dip2px(15), 0, ZZDimen.dip2px(15));
 		content.addView(imgJoyGameLogo, lp);
+		}
 
 		//用户渠道-老用户-卓越通行证
 		FrameLayout layoutUserTab = new FrameLayout(ctx);
@@ -268,6 +279,18 @@ public class LoginLayout extends ScrollView
 			txtModifyPW.setOnClickListener(l);
 			txtModifyPW.setPadding(ZZDimen.dip2px(15), 0, 0, 0);
 			layoutUpdateAndforget.addView(txtModifyPW);
+
+			//修改密码
+			if (AntiAddictionUtil.isEnabled()) {
+				TextView tv = new TextView(ctx);
+				tv.setId(IDC.BT_ANTI_ADDICTION.id());
+				tv.setText("防沉迷验证");
+				tv.setTextColor(new ColorStateList(new int[][]{new int[]{android.R.attr.state_pressed}, new int[]{}}, new int[]{Color.BLACK, Color.RED}));
+				tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
+				tv.setOnClickListener(l);
+				tv.setPadding(ZZDimen.dip2px(15), 0, 0, 0);
+				layoutUpdateAndforget.addView(tv);
+			}
 		}
 
 		//其它分割条

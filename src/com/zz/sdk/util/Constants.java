@@ -92,6 +92,9 @@ public final class Constants {
 	 */
 	public static final String GPRO_DREG = URL_SERVER_SRV + "dreg.lg";
 
+	/** 防沉迷验证：cmStatus 状态：0未验证|1未成年|2成年*/
+	public static final String VCM_REQ = URL_SERVER_SRV + "vcm.lg";
+
 	/** web 版本「支付宝」交易成功后的url */
 	public static final String GUARD_Alipay_callback = CALL_BACK_URL_SERVER + "palicb.lg";
 	/** web 版本「财富通」交易成功后的url */

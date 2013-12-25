@@ -124,6 +124,9 @@ class LoginMainLayout extends BaseLayout
 
 		BT_LOGIN, BT_QUICK_LOGIN, BT_UPDATE_PASSWORD,
 
+		/**防沉迷*/
+		BT_ANTI_ADDICTION,
+
 		/** 单选按钮组·账号类别 */
 		RG_ACCOUNT_TYPE,
 
@@ -481,6 +484,15 @@ class LoginMainLayout extends BaseLayout
 			}
 		}
 			break;
+
+		// 防沉迷验证
+			case BT_ANTI_ADDICTION: {
+				LayoutFactory.ILayoutHost host = getHost();
+				ParamChain env = getEnv();
+				host.enter((((Object)this).getClass()).getClassLoader(), LoginAntiAddictionLayout.class.getName(), env);
+			}
+			break;
+
 
 		/** 提交密码修改 */
 		case BT_MODIFY_CONFIRM:

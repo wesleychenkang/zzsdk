@@ -154,6 +154,9 @@ public interface ParamChain {
 		/** 用户密码, {@link String} */
 		public static final String K_PASSWORD = _TAG_ + "password";
 
+		/** 防沉迷验证状态, {@link java.lang.Integer}，0未知 1未成年 2已经成年 */
+		public static final String K_ANTIADDICTION = _TAG_ + "anti-addiction";
+
 		/** 余额，{@link Double}，格式 0.00 */
 		public static final String K_COIN_BALANCE = _TAG_ + "coin_balance";
 

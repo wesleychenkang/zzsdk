@@ -526,6 +526,22 @@ public class ConnectionUtil {
 		return doRequest(ResultDeviceRegister.class, Constants.GPRO_DREG, 2, "deviceNum", Utils.getDeviceNum(mContext));
 	}
 
+	/**
+	 * 防沉迷验证
+	 *
+	 * @param loginName 登录名
+	 * @param password  密码
+	 * @param state     状态：0未验证|1未成年|2成年
+	 * @return
+	 */
+	public ResultLogin anti_addiction(String loginName, String password, int state) {
+		return doRequest(ResultLogin.class, Constants.VCM_REQ, 1 //
+				, "cmStatus", String.valueOf(state) //
+				, K_LOGIN_NAME, loginName //
+				, K_PASSWORD, password
+		);
+	}
+
 	//
 	// ////////////////////////////////////////////////////////////////////////
 	//
