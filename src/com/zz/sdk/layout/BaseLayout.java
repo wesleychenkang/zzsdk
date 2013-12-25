@@ -888,9 +888,9 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 			FrameLayout title = new FrameLayout(ctx);
 			title.setBackgroundDrawable(CCImg.TITLE_BACKGROUND.getDrawble(ctx));
 			LayoutParams lp = new LayoutParams(LP_MW);
-			lp.height = ZZDimen.dip2px(45);
 			rv.addView(title,lp);
 			title.setId(IDC.ACT_TITLE.id());
+			title.setPadding(0, 0, 0, 0);
 
 			// 标题条
 			{

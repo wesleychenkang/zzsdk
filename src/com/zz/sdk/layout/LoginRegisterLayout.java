@@ -52,8 +52,8 @@ public class LoginRegisterLayout extends LinearLayout
 		//标题栏
 		FrameLayout layoutTitle = new FrameLayout(ctx);
 		layoutTitle.setBackgroundDrawable(CCImg.TITLE_BACKGROUND.getDrawble(ctx));
+		layoutTitle.setPadding(0, 0, 0, 0);
 		LayoutParams lptitle = new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT);
-		lptitle.height = ZZDimen.dip2px(45);
 		addView(layoutTitle,lptitle);
 		{
 			//左侧按钮

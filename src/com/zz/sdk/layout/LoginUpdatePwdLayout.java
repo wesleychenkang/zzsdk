@@ -45,6 +45,7 @@ public class LoginUpdatePwdLayout extends LinearLayout
 		// 标题栏
 		FrameLayout layoutTitle = new FrameLayout(ctx);
 		layoutTitle.setBackgroundDrawable(CCImg.TITLE_BACKGROUND.getDrawble(ctx));
+		layoutTitle.setPadding(0, 0, 0, 0);
 		addView(layoutTitle, LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
 		{
 			// 左侧按钮

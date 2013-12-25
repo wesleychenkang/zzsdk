@@ -412,7 +412,7 @@ public class ResConstants {
 
 		/** 尺寸配置, DIP */
 		public static enum ZZDimenRect {
-			CC_TITLE_BT_PADDING(16, 4, 16, 4),
+			CC_TITLE_BT_PADDING(16, 2, 16, 2),
 
 			/** 充值界面·主活动区的边距 */
 			CC_ROOTVIEW_PADDING(16, 16, 16, 16),
@@ -557,6 +557,8 @@ public class ResConstants {
 		LOGIN_TEXT_BACK_PRESS("login_text_bg_pressed.9.png"),
 		LOGIN_TEXT_BACK_DEFAULT("login_text_bg_default.9.png"),
 		LOGIN_UNDER_LINE("underline.png"),
+		LOGIN_DELETE("remove_hover.png"),
+		LOGIN_DELETE_CLICK("remove_link.png"),
 		/** 自动登录框资源*/
 		AUTO_BD("auto_login_bg.9.png"), //自动登录框背景
 		AUTO_CANCLE("cancel.9.png"),
