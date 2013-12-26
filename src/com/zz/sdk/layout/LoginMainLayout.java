@@ -30,10 +30,12 @@ import com.zz.sdk.ParamChain;
 import com.zz.sdk.ParamChain.KeyCaller;
 import com.zz.sdk.ParamChain.KeyUser;
 import com.zz.sdk.entity.result.BaseResult;
+import com.zz.sdk.entity.result.ResultAntiaddiction;
 import com.zz.sdk.entity.result.ResultAutoLogin;
 import com.zz.sdk.entity.result.ResultChangePwd;
 import com.zz.sdk.entity.result.ResultLogin;
 import com.zz.sdk.entity.result.ResultRegister;
+import com.zz.sdk.util.AntiAddictionUtil;
 import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.Loading;
@@ -52,9 +54,9 @@ import com.zz.sdk.util.Utils;
  * <li>360用户
  * <li>逗趣用户
  * </ul>
- * 
+ *
  * @author nxliao
- * 
+ *
  */
 class LoginMainLayout extends BaseLayout
 {
@@ -81,6 +83,7 @@ class LoginMainLayout extends BaseLayout
 	private boolean mAutoLoginEnabled;
 
 	private boolean mLoginForModify;
+	private boolean mLoginForAntiAddiction;
 
 	private AutoLoginDialog mAutoDialog;
 	private FrameLayout main;
@@ -88,6 +91,14 @@ class LoginMainLayout extends BaseLayout
 	private String mNewPassword;
 	private boolean isDoQuCount;
 	private FrameLayout.LayoutParams framly = new FrameLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+
+	protected static interface KeyLogin extends KeyUser {
+		static final String _TAG_ = KeyUser._TAG_ + "login" + _SEPARATOR_;
+
+		/** 防沉迷的返回值，{@link com.zz.sdk.entity.result.ResultAntiaddiction}*/
+		public static final String K_ANTI_RESULT= _TAG_+"ant-addiction_result";
+	}
+
 
 	protected static enum IDC implements IIDC
 	{
@@ -283,7 +294,7 @@ class LoginMainLayout extends BaseLayout
 
 	/**
 	 * 切换活动面板，目前仅直接替换视图
-	 * 
+	 *
 	 * @param act
 	 */
 	private void switchPanle(IDC act)
@@ -323,20 +334,25 @@ class LoginMainLayout extends BaseLayout
 	/**
 	 * 登录成功。刷新缓存到数据库。关闭登录界面。
 	 */
-	private void onLoginSuccess()
+	private void onLoginSuccess() {
+		onLoginSuccess(true, null);
+	}
+
+	private void onLoginSuccess(boolean needWait, String tip)
 	{
 		mLoginState = MSG_STATUS.SUCCESS;
-		removeExitTrigger();
-		showPopup_Tip(false, "登录成功！");
-		postDelayed(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				hidePopup();
-				callHost_back();
-			}
-		}, 1500);
+		if (needWait) {
+			removeExitTrigger();
+			showPopup_Tip(false, tip == null ? "登录成功！" : tip);
+			postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					hidePopup();
+					callHost_back();
+				}
+			}, 2000
+			);
+		}
 
 		String sdkUserId = mUserUtil.getCachedSdkUserId();
 		String loginName = mUserUtil.getCachedLoginName();
@@ -357,6 +373,7 @@ class LoginMainLayout extends BaseLayout
 		env.add(KeyUser.K_PASSWORD, password);
 		env.add(KeyUser.K_SDKUSER_ID, sdkUserId);
 		env.add(KeyUser.K_LOGIN_STATE_SUCCESS, Boolean.TRUE);
+		env.add(KeyUser.K_ANTIADDICTION, mUserUtil.getCachedCMState());
 	}
 
 	@Override
@@ -364,7 +381,7 @@ class LoginMainLayout extends BaseLayout
 	{
 		if (mLoginState != MSG_STATUS.EXIT_SDK)
 		{
-			nofityLoginResult(getEnv(), mLoginState);
+			notifyLoginResult(getEnv(), mLoginState);
 		}
 		// 发出退出消息
 		notifyCaller(MSG_TYPE.LOGIN, MSG_STATUS.EXIT_SDK, null);
@@ -372,11 +389,11 @@ class LoginMainLayout extends BaseLayout
 
 	/**
 	 * 通知登录结果到回调函数
-	 * 
+	 *
 	 * @param env
 	 * @param state
 	 */
-	private void nofityLoginResult(ParamChain env, int state)
+	private void notifyLoginResult(ParamChain env, int state)
 	{
 		int code;
 		switch (state)
@@ -400,9 +417,40 @@ class LoginMainLayout extends BaseLayout
 		else
 			info.loginName = mLoginName;
 		info.sdkuserid = mUserUtil.getCachedSdkUserId();
+		info.mAntiAddiciton = mUserUtil.getCachedCMState();
 
 		notifyCaller(MSG_TYPE.LOGIN, state, info);
 	}
+
+	private void checkAntiAddictionResult() {
+		if (!mLoginForAntiAddiction) return;
+		postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				hidePopup();
+				removeExitTrigger();
+				callHost_back();
+			}
+		}, 100
+		);
+		ResultAntiaddiction ra = getEnv().get(KeyLogin.K_ANTIADDICTION, ResultAntiaddiction.class);
+		int state = ra == null ? 0 : ra.mCmStatus;
+		ParamChain env = getEnv().getParent(KeyUser.class.getName());
+		if (state == 0)
+			env.remove(KeyUser.K_ANTIADDICTION);
+		else
+			env.add(KeyUser.K_ANTIADDICTION, state);
+	}
+
+	@Override
+	public boolean onResume() {
+		boolean ret = super.onResume();
+		if (ret) {
+			checkAntiAddictionResult();
+		}
+		return ret;
+	}
+
 
 	@Override
 	public boolean onEnter()
@@ -467,6 +515,8 @@ class LoginMainLayout extends BaseLayout
 		}
 			break;
 
+		// 防沉迷验证
+		case BT_ANTI_ADDICTION:
 		// 修改密码
 		case BT_UPDATE_PASSWORD:
 			// 登录
@@ -476,6 +526,7 @@ class LoginMainLayout extends BaseLayout
 			if (err == null)
 			{
 				mLoginForModify = idc == IDC.BT_UPDATE_PASSWORD;
+				mLoginForAntiAddiction = idc == IDC.BT_ANTI_ADDICTION;
 				tryLoginWait(mLoginName, mPassword);
 			}
 			else
@@ -484,15 +535,6 @@ class LoginMainLayout extends BaseLayout
 			}
 		}
 			break;
-
-		// 防沉迷验证
-			case BT_ANTI_ADDICTION: {
-				LayoutFactory.ILayoutHost host = getHost();
-				ParamChain env = getEnv();
-				host.enter((((Object)this).getClass()).getClassLoader(), LoginAntiAddictionLayout.class.getName(), env);
-			}
-			break;
-
 
 		/** 提交密码修改 */
 		case BT_MODIFY_CONFIRM:
@@ -556,10 +598,10 @@ class LoginMainLayout extends BaseLayout
 			ctx.startActivity(phoneIntent);
 			break;
 		case BT_EMAIL:
-			// 邮箱// 创建Intent  
+			// 邮箱// 创建Intent
 			Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
 			emailIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			//设置内容类型  
+			//设置内容类型
 			emailIntent.setType("plain/text");
 			emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[] { get_child_text(IDC.BT_EMAIL) });
 			ctx.startActivity(emailIntent);
@@ -571,7 +613,7 @@ class LoginMainLayout extends BaseLayout
 
 	/**
 	 * 点击使用豆趣或者卓越用户进行登录
-	 * 
+	 *
 	 * @param b
 	 */
 	private void setIsDoQuAccout(boolean b)
@@ -598,7 +640,7 @@ class LoginMainLayout extends BaseLayout
 
 	/**
 	 * 提示用户，输入有误
-	 * 
+	 *
 	 * @param err
 	 */
 	private void showInputError(Pair<View, String> err)
@@ -626,7 +668,7 @@ class LoginMainLayout extends BaseLayout
 
 	/**
 	 * 检查登录的输入内容是否合法。
-	 * 
+	 *
 	 * @return <ul>
 	 *         <li>如果通过检查，则更新变量 {@link #mLoginName} 和 {@link #mPassword}，并返回 null 。
 	 *         <li>否则返回<出错View, 提示文本>
@@ -726,7 +768,7 @@ class LoginMainLayout extends BaseLayout
 
 	/**
 	 * 处理登录结果
-	 * 
+	 *
 	 * @param result 登录结果，成功或失败
 	 */
 	private void onLoginReuslt(BaseResult result)
@@ -745,6 +787,13 @@ class LoginMainLayout extends BaseLayout
 				resetExitTrigger();
 				switchPanle(IDC.ACT_MODIFY_PASSWORD);
 			}
+			else if (mLoginForAntiAddiction)
+			{
+				if (tryStartAntiAddiction(true)) {
+				} else {
+					onLoginSuccess();
+				}
+			}
 			else
 			{
 				onLoginSuccess();
@@ -759,6 +808,24 @@ class LoginMainLayout extends BaseLayout
 			else
 				showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
 		}
+	}
+
+	/**尝试启动防沉迷界面*/
+	private boolean tryStartAntiAddiction(boolean login) {
+		if (AntiAddictionUtil.isEnabled()) {
+			int state = mUserUtil.getCachedCMState();
+			if (state == 0) {
+				hidePopup();
+				mLoginForAntiAddiction = true;
+				onLoginSuccess(false, null);
+				getHost().enter((((Object) this).getClass()).getClassLoader(), LoginAntiAddictionLayout.class.getName(), getEnvForChild());
+				return true;
+			} else if (login) {
+				onLoginSuccess(true, "已通过验证，无须再验证！\n如果需要更改状态，请与客服联系！");
+				return true;
+			}
+		}
+		return false;
 	}
 
 	// ////////////////////////////////////////////////////////////////////////
@@ -871,7 +938,7 @@ class LoginMainLayout extends BaseLayout
 
 	/**
 	 * 检查登录的输入内容是否合法。
-	 * 
+	 *
 	 * @return <ul>
 	 *         <li>如果通过检查，则更新变量 {@link #mLoginName} 和 {@link #mPassword}，并返回 null 。
 	 *         <li>否则返回<出错View, 提示文本>
@@ -952,7 +1019,10 @@ class LoginMainLayout extends BaseLayout
 	{
 		if (result.isSuccess())
 		{
-			onLoginSuccess();
+			if (tryStartAntiAddiction(false)) {
+			} else {
+				onLoginSuccess();
+			}
 		}
 		else
 		{
@@ -1012,7 +1082,10 @@ class LoginMainLayout extends BaseLayout
 			}
 			mLoginName = r.mUserName;
 			mPassword = r.mPassword;
-			onLoginSuccess();
+			if (tryStartAntiAddiction(false)) {
+			} else {
+				onLoginSuccess();
+			}
 		}
 		else
 		{
@@ -1027,7 +1100,7 @@ class LoginMainLayout extends BaseLayout
 
 	/**
 	 * 创建登录 LinearLayout
-	 * 
+	 *
 	 * @param ctx
 	 * @param hasAccount 是否为第一次登录
 	 * @return
@@ -1042,7 +1115,7 @@ class LoginMainLayout extends BaseLayout
 
 	/**
 	 * 创建修改密码LinearLayout
-	 * 
+	 *
 	 * @param ctx
 	 * @return
 	 */
@@ -1056,7 +1129,7 @@ class LoginMainLayout extends BaseLayout
 
 	/**
 	 * 创建注册LinearLayout
-	 * 
+	 *
 	 * @param ctx
 	 * @return
 	 */
@@ -1068,7 +1141,7 @@ class LoginMainLayout extends BaseLayout
 
 	/**
 	 * 创建忘记密码LinearLayout
-	 * 
+	 *
 	 * @param ctx
 	 * @return
 	 */
@@ -1080,7 +1153,7 @@ class LoginMainLayout extends BaseLayout
 
 	/**
 	 * 创建注册协议LinearLayout
-	 * 
+	 *
 	 * @param ctx
 	 * @return
 	 */
@@ -1411,7 +1484,7 @@ class LoginMainLayout extends BaseLayout
 
 	/**
 	 * 验证用户名输入
-	 * 
+	 *
 	 * @param user
 	 * @return
 	 */
@@ -1449,7 +1522,7 @@ class LoginMainLayout extends BaseLayout
 
 	/**
 	 * 验证密码输入
-	 * 
+	 *
 	 * @param pw
 	 * @return
 	 */

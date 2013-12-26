@@ -32,6 +32,6 @@ public class LoginCallbackInfo {
 	@Override
 	public String toString() {
 		return "LoginCallbackInfo [statusCode=" + statusCode + ", loginName="
-				+ loginName + ", sdkuserid=" + sdkuserid + "]";
+				+ loginName + ", sdkuserid=" + sdkuserid + ", anti-addiction=" + mAntiAddiciton + "]";
 	}
 }

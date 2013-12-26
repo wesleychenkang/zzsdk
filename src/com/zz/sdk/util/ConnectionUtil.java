@@ -9,6 +9,7 @@ import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.UserAction;
 import com.zz.sdk.entity.result.BaseResult;
+import com.zz.sdk.entity.result.ResultAntiaddiction;
 import com.zz.sdk.entity.result.ResultAutoLogin;
 import com.zz.sdk.entity.result.ResultBalance;
 import com.zz.sdk.entity.result.ResultChangePwd;
@@ -534,11 +535,11 @@ public class ConnectionUtil {
 	 * @param state     状态：0未验证|1未成年|2成年
 	 * @return
 	 */
-	public ResultLogin anti_addiction(String loginName, String password, int state) {
-		return doRequest(ResultLogin.class, Constants.VCM_REQ, 1 //
+	public ResultAntiaddiction anti_addiction(String loginName, String password, int state) {
+		return doRequest(ResultAntiaddiction.class, Constants.VCM_REQ, 1 //
 				, "cmStatus", String.valueOf(state) //
 				, K_LOGIN_NAME, loginName //
-				, K_PASSWORD, password
+				, K_PASSWORD, Md5Code.encodePassword(password) //
 		);
 	}
 

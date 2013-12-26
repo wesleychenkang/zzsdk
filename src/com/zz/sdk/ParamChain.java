@@ -65,6 +65,9 @@ public interface ParamChain {
 
 		/** 键：网络请求处理，{@link ConnectionUtil} */
 		public static final String K_UTIL_CONNECT = _TAG_ + "util_connection";
+
+		/** 键：调用者的变量环境，{@link com.zz.sdk.ParamChain}，如 getEnv().get({@link #K_CALLER_ENV}, {@link com.zz.sdk.ParamChain}.class)*/
+		public static final String K_CALLER_ENV = _TAG_ + "caller_env";
 	}
 
 	public static interface KeyDevice extends KeyGlobal {

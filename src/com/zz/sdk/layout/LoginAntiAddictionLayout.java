@@ -1,15 +1,14 @@
 package com.zz.sdk.layout;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.text.Html;
 import android.text.InputFilter;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -18,17 +17,23 @@ import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.zz.sdk.LoginCallbackInfo;
 import com.zz.sdk.ParamChain;
+import com.zz.sdk.entity.result.BaseResult;
+import com.zz.sdk.entity.result.ResultAntiaddiction;
 import com.zz.sdk.util.ResConstants;
+import com.zz.sdk.util.UserUtil;
 
 /**
  * 防沉迷
- * <p/>
  * <ul>输入：
  * <li>loginName</li>
  * <li>Password</li>
  * <li>LoginState</li>
  * <li>cmState</li>
+ * </ul>
+ * <ul>输出：
+ * <li>与登录结果相同</li>
  * </ul>
  *
  * @version 0.1.0.20131224
@@ -72,14 +77,20 @@ class LoginAntiAddictionLayout extends BaseLayout {
 		}
 	}
 
+	/** 是否已经登录成功过 */
 	private boolean mLogined;
+	/** 默认用户名 */
 	private String mLoginName;
+	/** 默认密码 */
 	private String mPassword;
 	/* 0未设置 1未成年 2已成年 */
 	private int mState;
+	private boolean mHashVerify;
 
 	private TextView tvAccount, tvPasswd;
 	private RadioGroup rgState;
+
+	private final int DEF_ANTI_STATE = LoginCallbackInfo.STATUS_AA_ADULT;
 
 	public LoginAntiAddictionLayout(Context context, ParamChain env) {
 		super(context, env);
@@ -93,7 +104,8 @@ class LoginAntiAddictionLayout extends BaseLayout {
 		mLoginName = env.get(ParamChain.KeyUser.K_LOGIN_NAME, String.class);
 		mPassword = env.get(ParamChain.KeyUser.K_PASSWORD, String.class);
 		Integer i = env.get(ParamChain.KeyUser.K_ANTIADDICTION, Integer.class);
-		mState = i == null ? 0 : i;
+		mState = i == null ? DEF_ANTI_STATE : i;
+		mHashVerify = false;
 	}
 
 	@Override
@@ -128,13 +140,9 @@ class LoginAntiAddictionLayout extends BaseLayout {
 		Rect r = ResConstants.Config.ZZDimenRect.CC_INPUT_ICON_ACCOUNT_PADDING.rect();
 
 		// 编辑框
-		tv = new EditText(ctx);
+		tv = create_normal_input(ctx, hint, ResConstants.Config.ZZFontColor.CC_RECHARGE_INPUT, ResConstants.Config.ZZFontSize.CC_RECHARGE_INPUT, 0);
 		fl.addView(tv, FrameLayout.LayoutParams.FILL_PARENT, FrameLayout.LayoutParams.FILL_PARENT);
 
-		tv.setHint(hint.str());
-		tv.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
-		tv.setSingleLine(true);
-		tv.setTextColor(Color.BLACK);
 		tv.setId(input_id.id());
 		Drawable d = ResConstants.CCImg.getStateListDrawable(ctx, ResConstants.CCImg.LOGIN_TEXT_BG_DEFAULT, ResConstants.CCImg.LOGIN_TEXT_BG_PRESSED);
 		tv.setBackgroundDrawable(d);
@@ -318,16 +326,97 @@ class LoginAntiAddictionLayout extends BaseLayout {
 		}
 	}
 
+	@Override
+	protected void clean() {
+		super.clean();
+
+		mLoginName = null;
+		mPassword = null;
+	}
+
+	@Override
+	public boolean isExitEnabled(boolean isBack) {
+		return mHashVerify || super.isExitEnabled(isBack);
+	}
+
 	private void onCancel() {
-		getHost().back();
+		if (mHashVerify) return;
+		if (isAlive()) callHost_back();
+	}
+
+	/** 验证成功，需要将结果返回到 {@link com.zz.sdk.layout.LoginMainLayout} */
+	private void onSuccess(ResultAntiaddiction ra) {
+		ParamChain env = getEnv().get(ParamChain.KeyGlobal.K_CALLER_ENV, ParamChain.class);
+		env.add(LoginMainLayout.KeyLogin.K_ANTIADDICTION, ra);
+		mHashVerify = true;
+		hidePopup();
+		showPopup_Tip("验证成功！");
+		removeExitTrigger();
+		postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				if (isAlive()) {
+					removeExitTrigger();
+					callHost_back();
+				}
+			}
+		}, 3500
+		);
 	}
 
 	private void tryCommit() {
+		if (mHashVerify) return;
+		if (!isAlive()) return;
+
 		if (!checkCommit()) {
 			return;
 		}
 
-		// TODO: 启动任务+显示等待窗
+		// 启动任务+显示等待窗
+
+		showPopup_Wait("正在进行验证……", new SimpleWaitTimeout() {
+			public void onTimeOut() {
+				onAntiTimeout();
+			}
+		}
+		);
+		setExitTrigger(-1, "正在进行验证……");
+
+		ITaskCallBack cb = new ITaskCallBack() {
+			@Override
+			public void onResult(
+					AsyncTask<?, ?, ?> task, Object token,
+					BaseResult result) {
+				if (isCurrentTaskFinished(task)) {
+					onAnitResult(result);
+				}
+
+			}
+		};
+		AsyncTask<?, ?, ?> task = AntiAddictionTask.createAndStart(
+				UserUtil.getInstance(getContext()), cb, this, mLoginName, mPassword, mState
+		);
+		setCurrentTask(task);
+	}
+
+	/** 登录超时 */
+	private void onAntiTimeout() {
+		removeExitTrigger();
+		showPopup_Tip(ResConstants.ZZStr.CC_TRY_CONNECT_SERVER_TIMEOUT);
+	}
+
+	private void onAnitResult(BaseResult result) {
+		hidePopup();
+		if (result.isSuccess()) {
+			ResultAntiaddiction ra = (ResultAntiaddiction) result;
+			onSuccess(ra);
+		} else {
+			if (result.isUsed()) {
+				showPopup_Tip(result.getErrDesc());
+			} else {
+				showPopup_Tip(ResConstants.ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
+			}
+		}
 	}
 
 	private boolean checkCommit() {
@@ -359,6 +448,45 @@ class LoginAntiAddictionLayout extends BaseLayout {
 			return true;
 		} while (false);
 		return false;
+	}
+
+	private static class AntiAddictionTask extends AsyncTask<Object, Void, ResultAntiaddiction> {
+		protected static AsyncTask<?, ?, ?> createAndStart(
+				UserUtil uu, ITaskCallBack callback, Object token, String loginName, String password, int state) {
+			AntiAddictionTask task = new AntiAddictionTask();
+			task.execute(uu, callback, token, loginName, password, state);
+			return task;
+		}
+
+		private ITaskCallBack mCallback;
+		private Object mToken;
+
+		@Override
+		protected ResultAntiaddiction doInBackground(Object... params) {
+			UserUtil uu = (UserUtil) params[0];
+			ITaskCallBack callback = (ITaskCallBack) params[1];
+			Object token = params[2];
+
+			String loginName = (String) params[3];
+			String password = (String) params[4];
+			int state = (Integer) params[5];
+
+			ResultAntiaddiction ret = uu.anti_addiction(loginName, password, state);
+			if (!this.isCancelled()) {
+				mCallback = callback;
+				mToken = token;
+			}
+			return ret;
+		}
+
+		@Override
+		protected void onPostExecute(ResultAntiaddiction result) {
+			if (mCallback != null) {
+				mCallback.onResult(this, mToken, result);
+			}
+			mCallback = null;
+			mToken = null;
+		}
 	}
 
 }
