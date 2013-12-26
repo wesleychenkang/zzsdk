@@ -98,7 +98,7 @@ public class ForgetPwdLayout extends LinearLayout
 		content.addView(txtTipTwo);
 
 		content.addView(createItemView(ctx, l, IDC.BT_CALLPHONE.id(), "客服热线:", "4007555999"));
-		content.addView(createItemView(ctx, l, IDC.BT_EMAIL.id(), "客服邮箱:", "87686529@qq.com"));
+		content.addView(createItemView(ctx, l, IDC.BT_EMAIL.id(), "客服邮箱:", "kefu028@cmge.com"));
 		
 		FrameLayout layoutlogo = new FrameLayout(ctx);
 		layoutlogo.setBackgroundDrawable(CCImg.PWD_BACKPWD.getDrawble(ctx));

@@ -3,6 +3,8 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -141,7 +143,8 @@ public class LoginLayout extends ScrollView
 			//imgUserLogo.setBackgroundColor(Color.rgb(231, 231, 231));
 			imgUserLogo.setImageDrawable(BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/user_icon.png"));
 			layoutUserName.addView(imgUserLogo);
-
+			 // 删除按钮
+			final ImageView imgDelete = new ImageView(ctx);
 			// 账号编辑框
 			mInputAccount = new MultiAutoCompleteTextView(ctx);
 			mInputAccount.setDropDownBackgroundDrawable(new ColorDrawable(bgColor));
@@ -154,13 +157,39 @@ public class LoginLayout extends ScrollView
 			mInputAccount.setPadding(ZZDimen.dip2px(2), 0, 0, ZZDimen.dip2px(2));
 			mInputAccount.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
 			BaseLayout.change_edit_cursor(mInputAccount);
+			mInputAccount.addTextChangedListener(new TextWatcher(){
+
+				@Override
+				public void beforeTextChanged(CharSequence s, int start,
+						int count, int after) {
+					if(s.length()==0){
+						imgDelete.setVisibility(View.GONE);
+					}
+					
+				}
+
+				@Override
+				public void onTextChanged(CharSequence s, int start,
+						int before, int count) {
+					if(s.length()==0){
+						imgDelete.setVisibility(View.GONE);
+					}else{
+						imgDelete.setVisibility(View.VISIBLE);
+					}
+				}
+
+				@Override
+				public void afterTextChanged(Editable s) {
+					
+				}
+				
+			});
 			mInputAccount.setOnFocusChangeListener(new OnFocusChangeListener() {
 				@Override
 				public void onFocusChange(View v, boolean hasFocus) {
 				 updateLayout(layoutUserName,v.getContext(),hasFocus);
 				}
 			});
-		    
 			LinearLayout.LayoutParams inputlp = new LinearLayout.LayoutParams(0, LayoutParams.FILL_PARENT, 1);
 			layoutUserName.addView(mInputAccount, inputlp);
 			final SdkUser[] sdkUsers = SdkUserTable.getInstance(ctx).getAllSdkUsers();
@@ -182,12 +211,10 @@ public class LoginLayout extends ScrollView
 					}
 				});
 			}
-            // 删除按钮
-			ImageView imgDelete = new ImageView(ctx);
+           
 //			imgDelete.setId(id)
 			//imgDelete.setBackgroundColor(Color.TRANSPARENT);
 			imgDelete.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,CCImg.LOGIN_DELETE,CCImg.LOGIN_DELETE_CLICK));
-			imgDelete.setVisibility(View.VISIBLE);
 			imgDelete.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {

@@ -314,6 +314,8 @@ public class ResConstants {
 		 * 字体大小配置
 		 */
 		public static enum ZZFontSize {
+			/** 充值等標題字號 */
+			CC_TITLE(22),
 			/** 充值界面普通文本 */
 			CC_RECHARGE_NORMAL(16),
 			/** 充值界面·描述文本 */

@@ -80,9 +80,9 @@ public class LoginUpdatePwdLayout extends LinearLayout
 		// 旧密码
 		content.addView(createItemView(true, ctx, IDC.ED_OLD_PASSOWRD.id(), "密码", Constants.ASSETS_RES_PATH + "drawable/pwd_icon.png", "请输入密码"));
 		// 新密码
-		content.addView(createItemView(true, ctx, IDC.ED_NEW_PASSOWRD.id(), "新密码", Constants.ASSETS_RES_PATH + "drawable/pwd_icon.png", "新密码：6-12数字、字母组合"));
+		content.addView(createItemView(true, ctx, IDC.ED_NEW_PASSOWRD.id(), "新密码", Constants.ASSETS_RES_PATH + "drawable/pwd_icon.png", "6-12個数字、字母组合"));
 		// 确认密码
-		content.addView(createItemView(true, ctx, IDC.ED_NEW_REPEAT_PASSOWRD.id(), "确认密码", Constants.ASSETS_RES_PATH + "drawable/pwd_icon.png", "请再次输入密码"));
+		content.addView(createItemView(true, ctx, IDC.ED_NEW_REPEAT_PASSOWRD.id(), "确认密码", Constants.ASSETS_RES_PATH + "drawable/pwd_icon.png", "请再次输入新密码"));
 	}
 
 	public void setUserLoginName(String s)

@@ -369,7 +369,12 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	 * @return
 	 */
 	protected ILayoutHost getHost() {
-		return mEnv.get(KeyLayoutFactory.K_HOST, ILayoutHost.class);
+		if(null!=mEnv){
+			return mEnv.get(KeyLayoutFactory.K_HOST, ILayoutHost.class);
+		}else{
+			return null;
+		}
+		
 	}
 
 	protected boolean callHost_back() {
@@ -897,10 +902,10 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 				TextView tv = create_normal_label(ctx, null);
 				title.addView(tv, new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.CENTER));
 				tv.setId(IDC.TV_TITLE.id());
-				tv.setTextSize(ZZDimen.dip2px(13));
 				tv.setGravity(Gravity.CENTER);
 				tv.setTextColor(0xff434343);
 				ZZDimenRect.CC_LABEL_PADDING.apply_padding(tv);
+				ZZFontSize.CC_TITLE.apply(tv);
 			}
 
 			// 按钮组
