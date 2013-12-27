@@ -429,15 +429,14 @@ class LoginMainLayout extends BaseLayout
 
 	private void checkAntiAddictionResult() {
 		if (!mLoginForAntiAddiction) return;
-		postDelayed(new Runnable() {
+		post(new Runnable() {
 			@Override
 			public void run() {
 				hidePopup();
 				removeExitTrigger();
 				callHost_back();
 			}
-		}, 100
-		);
+		});
 		ResultAntiaddiction ra = getEnv().get(KeyLogin.K_ANTIADDICTION, ResultAntiaddiction.class);
 		int state = ra == null ? 0 : ra.mCmStatus;
 		ParamChain env = getEnv().getParent(KeyUser.class.getName());
@@ -520,12 +519,12 @@ class LoginMainLayout extends BaseLayout
 		}
 			break;
 
-		// 防沉迷验证
-		case BT_ANTI_ADDICTION:
 		// 修改密码
 		case BT_UPDATE_PASSWORD:
 			switchPanle(IDC.ACT_MODIFY_PASSWORD);
 			break;
+			// 防沉迷验证
+		case BT_ANTI_ADDICTION:
 			// 登录
 		case BT_LOGIN:
 		{
