@@ -17,11 +17,12 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.TextView;
-
 import com.zz.lib.pojo.PojoUtils;
 import com.zz.sdk.LoginCallbackInfo;
 import com.zz.sdk.MSG_STATUS;
@@ -59,8 +60,8 @@ import com.zz.sdk.util.Utils;
  *
  */
 class LoginMainLayout extends BaseLayout
-{
-
+{ 
+	private String name;
 	/** 用户数据处理 */
 	private UserUtil mUserUtil;
 	/** 当前正在操作的用户名 */
@@ -84,6 +85,7 @@ class LoginMainLayout extends BaseLayout
 
 	private boolean mLoginForModify;
 	private boolean mLoginForAntiAddiction;
+	private LoginLayout login;
 
 	private AutoLoginDialog mAutoDialog;
 	private FrameLayout main;
@@ -303,8 +305,10 @@ class LoginMainLayout extends BaseLayout
 		{
 		case ACT_MODIFY_PASSWORD:
 		{
+			String name = login.getAccount();
+			String pwd = login.getPassWord();
 			main.removeAllViews();
-			main.addView(createView_modifyPasswd(ctx));
+			main.addView(createView_modifyPasswd(ctx,name,pwd));
 		}
 			break;
 		case ACT_RIGHSTER:
@@ -330,7 +334,8 @@ class LoginMainLayout extends BaseLayout
 		}
 
 	}
-
+   
+	
 	/**
 	 * 登录成功。刷新缓存到数据库。关闭登录界面。
 	 */
@@ -519,6 +524,8 @@ class LoginMainLayout extends BaseLayout
 		case BT_ANTI_ADDICTION:
 		// 修改密码
 		case BT_UPDATE_PASSWORD:
+			switchPanle(IDC.ACT_MODIFY_PASSWORD);
+			break;
 			// 登录
 		case BT_LOGIN:
 		{
@@ -665,7 +672,6 @@ class LoginMainLayout extends BaseLayout
 		String loginPassword = get_child_text(IDC.ED_LOGIN_PASSWORD);
 		return loginPassword;
 	}
-
 	/**
 	 * 检查登录的输入内容是否合法。
 	 *
@@ -955,6 +961,7 @@ class LoginMainLayout extends BaseLayout
 		View vPassword = null;
 		String loginName = get_child_text(IDC.ED_REGISTER_NAME);
 		String password = get_child_text(IDC.ED_REGISTER_PASSWORD);
+		CheckBox check = (CheckBox)findViewById(IDC.CK_REGISTER_AGREEMENT.id());
 		// 确认密码
 		String repeatPassword = get_child_text(IDC.ED_REGISTER_REPEAT_PASSWORD);
 		do
@@ -977,7 +984,10 @@ class LoginMainLayout extends BaseLayout
 				ret = new Pair<View, String>(vPassword, "两次密码输入不一致!");
 				break;
 			}
-
+            if(!check.isChecked()){
+            	ret = new Pair<View,String>(check,"请先勾选并同意卓越游戏用户服务协议");
+            	break;
+            }
 			// success
 			mLoginName = loginName;
 			mPassword = password;
@@ -1110,7 +1120,7 @@ class LoginMainLayout extends BaseLayout
 	 */
 	private View createView_login(Context ctx, boolean hasAccount)
 	{
-		LoginLayout login = new LoginLayout(ctx, this, hasAccount);
+		login = new LoginLayout(ctx, this, hasAccount);
 		login.setAccount(mLoginName, mDouquEnabled);
 		login.setPassWord(mPassword);
 		return login;
@@ -1122,21 +1132,21 @@ class LoginMainLayout extends BaseLayout
 	 * @param ctx
 	 * @return
 	 */
-	private View createView_modifyPasswd(Context ctx)
+	private View createView_modifyPasswd(Context ctx,String name,String pwd)
 	{
 		LoginUpdatePwdLayout update = new LoginUpdatePwdLayout(ctx, this);
-		// update.setOldPassWord(mPassword);
-		update.setUserLoginName(mLoginName);
+	    update.setUserOldPWD(pwd);
+		update.setUserLoginName(name);
 		return update;
 	}
-
+ 
 	/**
 	 * 创建注册LinearLayout
 	 *
 	 * @param ctx
 	 * @return
 	 */
-	private LinearLayout createView_regist(Context ctx)
+	private ScrollView createView_regist(Context ctx)
 	{
 		LoginRegisterLayout reg = new LoginRegisterLayout(ctx, this);
 		return reg;

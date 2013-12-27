@@ -144,7 +144,7 @@ class LoginAntiAddictionLayout extends BaseLayout {
 		fl.addView(tv, FrameLayout.LayoutParams.FILL_PARENT, FrameLayout.LayoutParams.FILL_PARENT);
 
 		tv.setId(input_id.id());
-		Drawable d = ResConstants.CCImg.getStateListDrawable(ctx, ResConstants.CCImg.LOGIN_TEXT_BG_DEFAULT, ResConstants.CCImg.LOGIN_TEXT_BG_PRESSED);
+		Drawable d = ResConstants.CCImg.getStateListDrawable(ctx, ResConstants.CCImg.LOGIN_TEXT_BACK_DEFAULT, ResConstants.CCImg.LOGIN_TEXT_BACK_PRESS);
 		tv.setBackgroundDrawable(d);
 		tv.setPadding(r.left, r.top, r.right, r.bottom);
 

@@ -1,10 +1,19 @@
 package com.zz.sdk.layout;
 
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.nfc.NfcAdapter.CreateNdefMessageCallback;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -20,6 +29,7 @@ import android.view.animation.AnimationSet;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.GridView;
@@ -28,6 +38,7 @@ import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
@@ -42,6 +53,7 @@ import com.zz.sdk.ParamChain.KeyUser;
 import com.zz.sdk.ParamChain.ValType;
 import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.ZZSDKConfig;
+import com.zz.sdk.activity.BaseActivity;
 import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.Result;
@@ -69,11 +81,6 @@ import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 import com.zz.sdk.util.ResConstants.ZZStr;
 import com.zz.sdk.util.UserUtil;
 import com.zz.sdk.util.Utils;
-
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 //import com.zz.sdk.util.GetDataImpl;
 
@@ -217,6 +224,7 @@ public class PaymentListLayout extends CCBaseLayout {
 		ED_PASSWD,
 
 		PB_WAIT,
+		CHARGE_COUNT,
 
 		_MAX_;
 
@@ -260,9 +268,12 @@ public class PaymentListLayout extends CCBaseLayout {
 	private double ZZ_COIN_RATE;
 
 	private ChargeStyle mChargeStyle;
-
+ 
 	private String mIMSI;
-
+	/**选择充值卡的金额*/
+    private Double nowCost;
+    /**当前选择的充值方式*/
+    private int type;
 	private Handler mHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
@@ -433,6 +444,7 @@ public class PaymentListLayout extends CCBaseLayout {
 	public boolean onResume() {
 		boolean ret = super.onResume();
 		if (ret) {
+			set_child_focuse(IDC.ACT_PAY_GRID);
 			// TODO: 如果是从子界面返回来的，视情况显示支付结果
 			ParamChain env = getEnv();
 			Object result = env.remove(KeyPaymentList.K_PAY_RESULT);
@@ -595,7 +607,6 @@ public class PaymentListLayout extends CCBaseLayout {
 			set_child_text(IDC.BT_RECHARGE_COMMIT, ZZStr.CC_COMMIT_RECHARGE);
 		}
 	}
-
 	private class MyTextWatcher implements TextWatcher {
 		private int mId;
 
@@ -834,7 +845,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			return;
 		}
 
-		int type = channel.type;
+		type = channel.type;
 		if (mPaymentTypeChoose != pos) {
 			do {
 				View v;
@@ -870,13 +881,81 @@ public class PaymentListLayout extends CCBaseLayout {
 			} while (false);
 			mPaymentTypeChoose = pos;
 			updateRechargeCostUintByChannelType(type);
+			updateCharge(type);
+		  
 		}
 
 		if (mPaymentListAdapter != null) {
 			mPaymentListAdapter.choose(mPaymentTypeChoose);
 		}
 	}
+     
+	/**更改充值按钮的文字*/
+	private void updateCharge(int type){
+		switch(type){
+		case PayChannel.PAY_TYPE_YEEPAY_DX:
+		case PayChannel.PAY_TYPE_YEEPAY_LT:
+		case PayChannel.PAY_TYPE_YEEPAY_YD:
+			set_child_text(IDC.BT_RECHARGE_COMMIT, ZZStr.CC_NEXT_RECHARGE);
+			if(mChargeStyle==ChargeStyle.RECHARGE && isCanModifyAmount() ){
+				updateChargeCount(true);
+			}
+			break;
+		default:
+			if(mChargeStyle==ChargeStyle.RECHARGE && isCanModifyAmount()){
+			updateChargeCount(false);
+			}
+			set_child_text(IDC.BT_RECHARGE_COMMIT, ZZStr.CC_COMMIT_RECHARGE);
+			break;
+		}
+	}
+	/**改变充值数量选这方式*/
+	private void updateChargeCount(boolean t){
+		LinearLayout ll = (LinearLayout)findViewById(IDC.CHARGE_COUNT.id());
+		if(t){
+		  ll.removeAllViews();
+		  createSpinnerView(getActivity(),ll);
+		}else{
+		 ll.removeAllViews();
+		 perNonmalText(mContext, ll);	
+		}
+		
+		
+		
+		
+	}
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	private void createSpinnerView(Context ctx, LinearLayout ly) {
+		Spinner spinner = null;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
+			spinner = new Spinner(ctx,1); 
+		}else{
+		    spinner = new Spinner(ctx);
+		}
+		spinner.setBackgroundDrawable(CCImg.SPINNER_BACK.getDrawble(ctx));
+		final Double[] money = new Double[] {0.0,10.0, 20.0, 30.0, 50.0,
+				100.0, 200.0};
+		final PaymentSpinnerAdpter adpter = new PaymentSpinnerAdpter(
+				getActivity(), money);
+		spinner.setAdapter(adpter);
+		adpter.updateAdpter(0);
+		ly.addView(spinner, new LayoutParams(LP_MW));
+		spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int position, long id) {
+				nowCost = money[position];
+				updateRechargeCost(nowCost);
+				adpter.updateAdpter(position);
+			}
 
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+			}
+
+		});
+
+	}
 	private PayChannel getFocusPaychannel(int itemPos) {
 		if (mPaymentListAdapter != null) {
 			Object o = mPaymentListAdapter.getItem(itemPos);
@@ -905,10 +984,10 @@ public class PaymentListLayout extends CCBaseLayout {
 			break;
 
 		case PayChannel.PAY_TYPE_YEEPAY_LT:
-			prepparePayType_Card(ctx, rv, 15, 19);
+			//prepparePayType_Card(ctx, rv, 15, 19);
 			break;
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
-			prepparePayType_Card(ctx, rv, 17, 18);
+			//prepparePayType_Card(ctx, rv, 17, 18);
 			break;
 		case PayChannel.PAY_TYPE_YEEPAY_DX: {
 			// TODO: 暂时得知电信充值卡的长度为卡号（19）密码（18）
@@ -918,7 +997,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			// tv.setText("暂不可使用电信充值卡，请使用其他方式");
 			// tv.setTextColor(Color.BLUE);
 			// ZZFontSize.CC_RECHAGR_NORMAL.apply(tv);
-			prepparePayType_Card(ctx, rv, 19, 18);
+			//prepparePayType_Card(ctx, rv, 19, 18);
 		}
 			break;
 
@@ -1050,71 +1129,14 @@ public class PaymentListLayout extends CCBaseLayout {
 
 			// 输入框
 			{
-				ll2 = new LinearLayout(ctx);ll2.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/login_text_bg_pressed.9.png", Constants.ASSETS_RES_PATH + "drawable/login_text_bg_default.9.png"));
-				
+				ll2 = new LinearLayout(ctx);
+				ll2.setId(IDC.CHARGE_COUNT.id());
+				ll2.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/login_text_bg_pressed.9.png", Constants.ASSETS_RES_PATH + "drawable/login_text_bg_default.9.png"));
 				header.addView(ll2, new LayoutParams(LP_MW));
 				ll2.setOrientation(HORIZONTAL);
-
-				// TODO: 如果是定额不可编辑，则这里使用 TextView 即可
-				if (isCanModifyAmount()) {
-					tv = create_normal_input(ctx, ZZStr.CC_RECHAGRE_COUNT_HINT,
-					                         ZZFontColor.CC_RECHARGE_INPUT,
-					                         ZZFontSize.CC_RECHARGE_INPUT, 8);
-				} else {
-					tv = create_normal_label(ctx, null);
-					tv.setTextColor(ZZFontColor.CC_RECHARGE_INPUT.color());
-				}
-				ll2.addView(tv, new LayoutParams(LayoutParams.MATCH_PARENT,
-				                                 LayoutParams.WRAP_CONTENT, 1.0f));
-				tv.setId(IDC.ED_RECHARGE_COUNT.id());
-				tv.setBackgroundDrawable(null);
-//				tv.setBackgroundDrawable(CCImg.RECHARGE_INPUT_BG.getDrawble(ctx));
-				tv.addTextChangedListener(new MyTextWatcher(
-						IDC.ED_RECHARGE_COUNT.id()));
-				tv.setInputType(EditorInfo.TYPE_CLASS_NUMBER
-				/* | EditorInfo.TYPE_NUMBER_FLAG_DECIMAL */);
-				ZZDimenRect.CC_RECHARGE_INPUT.apply_padding(tv);
-
-				tv = create_normal_label(ctx, ZZStr.CC_RECHAGRE_COUNT_DESC);
-				ll2.addView(tv, new LayoutParams(LP_WM));
-				tv.setId(IDC.TV_RECHARGE_COUNT_DESC.id());
-				tv.setVisibility(GONE);
-
-				ImageButton ib = new ImageButton(ctx);
-				lp = new LayoutParams(LP_WW);
-				lp.gravity = Gravity.CENTER_VERTICAL;
-				ll2.addView(ib, lp);
-				ib.setId(IDC.BT_RECHARGE_PULL.id());
-				ib.setBackgroundDrawable(null);
-				ib.setImageDrawable(BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/select_icon.png"));
-//				ib.setImageDrawable(CCImg.getStateListDrawable(ctx, CCImg.CHARGE_PULL, CCImg.CHARGE_PULL_CLICK));
-				ib.setScaleType(ScaleType.CENTER_INSIDE);
-				ib.setOnClickListener(this);
-
-//				tv = create_normal_label(ctx, null);
-//				String rate = mRechargeFormat.format(ZZ_COIN_RATE);
-//				String rate_desc = String.format(
-//						ZZStr.CC_RECHAGRE_RATE_DESC.str(), rate);
-//				tv.setText(rate_desc);
-//				ll2.addView(tv, new LayoutParams(LP_WM));
+				perNonmalText(ctx,ll2);
+				
 			}
-
-			// 应付金额
-			if (false) {
-				ll2 = new LinearLayout(ctx);
-				ll2.setOrientation(HORIZONTAL);
-				ll.addView(ll2);
-
-				tv = create_normal_label(ctx, ZZStr.CC_RECHAGRE_COST_DESC);
-				ll2.addView(tv, new LayoutParams(LP_WM));
-
-				tv = create_normal_label(ctx, null);
-				ll2.addView(tv, new LayoutParams(LP_WM));
-				tv.setId(IDC.TV_RECHARGE_COST.id());
-				tv.setTextColor(ZZFontColor.CC_RECHARGE_COST.color());
-				ZZFontSize.CC_RECHARGE_COST.apply(tv);
-			}
-
 			// 附加显示
 			{
 				tv = create_normal_label_shadow(ctx, ZZStr.CC_RECHARGE_COST_SUMMARY);
@@ -1153,7 +1175,9 @@ public class PaymentListLayout extends CCBaseLayout {
 				@Override
 				public void onItemClick(AdapterView<?> parent, View view,
 						int position, long id) {
-					updatePayType(position);
+					   type = position;
+				       updatePayType(position);
+					
 				}
 			};
 			gv.setOnItemClickListener(listener);
@@ -1239,7 +1263,47 @@ public class PaymentListLayout extends CCBaseLayout {
 
 		return rv;
 	}
+   
+	/**充值数量布局*/
+	private void perNonmalText(Context ctx, LinearLayout ll2){
+		TextView tv;
+		// TODO: 如果是定额不可编辑，则这里使用 TextView 即可
+		if (isCanModifyAmount()) {
+			tv = create_normal_input(ctx, ZZStr.CC_RECHAGRE_COUNT_HINT,
+			                         ZZFontColor.CC_RECHARGE_INPUT,
+			                         ZZFontSize.CC_RECHARGE_INPUT, 8);
+		} else {
+			tv = create_normal_label(ctx, null);
+			tv.setTextColor(ZZFontColor.CC_RECHARGE_INPUT.color());
+		}
+		ll2.addView(tv, new LayoutParams(LayoutParams.MATCH_PARENT,
+		                                 LayoutParams.WRAP_CONTENT, 1.0f));
+		tv.setId(IDC.ED_RECHARGE_COUNT.id());
+		tv.setBackgroundDrawable(null);
+//		tv.setBackgroundDrawable(CCImg.RECHARGE_INPUT_BG.getDrawble(ctx));
+		tv.addTextChangedListener(new MyTextWatcher(
+				IDC.ED_RECHARGE_COUNT.id()));
+		tv.setInputType(EditorInfo.TYPE_CLASS_NUMBER
+		/* | EditorInfo.TYPE_NUMBER_FLAG_DECIMAL */);
+		ZZDimenRect.CC_RECHARGE_INPUT.apply_padding(tv);
 
+		tv = create_normal_label(ctx, ZZStr.CC_RECHAGRE_COUNT_DESC);
+		ll2.addView(tv, new LayoutParams(LP_WM));
+		tv.setId(IDC.TV_RECHARGE_COUNT_DESC.id());
+		tv.setVisibility(GONE);
+
+		ImageButton ib = new ImageButton(ctx);
+		LayoutParams lp = new LayoutParams(LP_WW);
+		lp.gravity = Gravity.CENTER_VERTICAL;
+		ll2.addView(ib, lp);
+		ib.setId(IDC.BT_RECHARGE_PULL.id());
+		ib.setBackgroundDrawable(null);
+		ib.setImageDrawable(BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/select_icon.png"));
+//		ib.setImageDrawable(CCImg.getStateListDrawable(ctx, CCImg.CHARGE_PULL, CCImg.CHARGE_PULL_CLICK));
+		ib.setScaleType(ScaleType.CENTER_INSIDE);
+		ib.setOnClickListener(this);
+		
+	}
 	@Override
 	protected void onInitUI(Context ctx) {
 		// 主活动区
@@ -1338,7 +1402,6 @@ public class PaymentListLayout extends CCBaseLayout {
 
 			if (rpl.mPaies != null && rpl.mPaies.length > 0) {
 				Logger.d("获取列表成功!");
-
 				setChannelMessages(rpl.mPaies);
 				showPayList(true);
 
@@ -1457,11 +1520,22 @@ public class PaymentListLayout extends CCBaseLayout {
 	private String checkInput(ILayoutHost host, PayChannel channel) {
 		ParamChain env = getEnv();
 
-		final double amount;
-		if (channel.type == PayChannel.PAY_TYPE_ZZCOIN)
+		double amount = 0;
+		if (channel.type == PayChannel.PAY_TYPE_ZZCOIN){
 			amount = (Double) getValue(VAL.PRICE);
-		else
+		}else if(type == PayChannel.PAY_TYPE_YEEPAY_DX||type == PayChannel.PAY_TYPE_YEEPAY_LT||type == PayChannel.PAY_TYPE_YEEPAY_YD){
+			
+			if(mChargeStyle==ChargeStyle.RECHARGE && isCanModifyAmount()){
+				amount = nowCost;
+			}else{
+				amount = (Double) getValue(VAL.COST);
+			}
+			if(amount>200.0){
+			 return ZZStr.CC_RECHARGE_COUNT_CHECK_LARGE.str();
+			}
+		}else{
 			amount = (Double) getValue(VAL.COST);
+		}
 		if (amount < 0.01f) {
 			if (DebugFlags.DEBUG_DEMO
 					&& channel.type == PayChannel.PAY_TYPE_KKFUNPAY) {
@@ -1489,21 +1563,22 @@ public class PaymentListLayout extends CCBaseLayout {
 		case PayChannel.PAY_TYPE_YEEPAY_LT:
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
 		case PayChannel.PAY_TYPE_YEEPAY_DX: {
-			String card = get_child_text(IDC.PANEL_CARDINPUT, IDC.ED_CARD, 1);
-			String passwd = get_child_text(IDC.PANEL_CARDINPUT, IDC.ED_PASSWD,
-					1);
-			if (card == null || card.length() == 0) {
-				set_child_focuse(IDC.PANEL_CARDINPUT, IDC.ED_CARD);
-				ret = ZZStr.CC_CARDNUM_CHECK_FAILED.str();
-			} else if (passwd == null || passwd.length() == 0) {
-				set_child_focuse(IDC.PANEL_CARDINPUT, IDC.ED_PASSWD);
-				ret = ZZStr.CC_PASSWD_CHECK_FAILED.str();
-			} else {
-				env.add(KeyPaymentList.K_PAY_CARD, card, ValType.TEMPORARY);
-				env.add(KeyPaymentList.K_PAY_CARD_PASSWD, passwd,
-						ValType.TEMPORARY);
-				ret = null;
-			}
+//			String card = get_child_text(IDC.PANEL_CARDINPUT, IDC.ED_CARD, 1);
+//			String passwd = get_child_text(IDC.PANEL_CARDINPUT, IDC.ED_PASSWD,
+//					1);
+//			if (card == null || card.length() == 0) {
+//				set_child_focuse(IDC.PANEL_CARDINPUT, IDC.ED_CARD);
+//				ret = ZZStr.CC_CARDNUM_CHECK_FAILED.str();
+//			} else if (passwd == null || passwd.length() == 0) {
+//				set_child_focuse(IDC.PANEL_CARDINPUT, IDC.ED_PASSWD);
+//				ret = ZZStr.CC_PASSWD_CHECK_FAILED.str();
+//			} else {
+//				env.add(KeyPaymentList.K_PAY_CARD, card, ValType.TEMPORARY);
+//				env.add(KeyPaymentList.K_PAY_CARD_PASSWD, passwd,
+//						ValType.TEMPORARY);
+//				ret = null;
+//			}
+			ret = null;
 		}
 			break;
 
@@ -1524,7 +1599,17 @@ public class PaymentListLayout extends CCBaseLayout {
 		}
 		return ret;
 	}
-
+    
+	/**进入易宝支付的次级页面*/
+	private boolean enterPayYBDetail(ILayoutHost host, PayChannel channel){
+		ParamChain env = getEnv();
+		env.add(KeyPaymentList.K_PAY_CHANNELTYPE, channel.type,
+				ValType.TEMPORARY);
+		env.add(KeyPaymentList.K_PAY_CHANNELNAME, channel.channelName,
+				ValType.TEMPORARY);
+		host.enter((((Object)this).getClass()).getClassLoader(), PaymentYBLayout.class.getName(), env);
+		return true;
+	}
 	private boolean enterPayDetail(ILayoutHost host, PayChannel channel,
 			ResultRequest result) {
 		ParamChain env = getEnv();
@@ -1576,9 +1661,11 @@ public class PaymentListLayout extends CCBaseLayout {
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
 		case PayChannel.PAY_TYPE_YEEPAY_DX:
 			// 充值卡类，没有下一界面，已经是充值成功了
-			notifyPayResult(env, MSG_STATUS.SUCCESS);
-			showPayResult(env, MSG_STATUS.SUCCESS);
-			return true;
+//			notifyPayResult(env, MSG_STATUS.SUCCESS);
+ //		  showPayResult(env, MSG_STATUS.SUCCESS);
+//			return true;
+			clazz = PaymentYBLayout.class;
+			break;
 
 		case PayChannel.PAY_TYPE_ZZCOIN:
 			// 卓越币，没有下一界面，已经是充值成功了
@@ -1627,9 +1714,8 @@ public class PaymentListLayout extends CCBaseLayout {
 	private boolean tryEnterPayDetail(ILayoutHost host, PayChannel channel) {
 		// 向服务器发送用户操作记录
 		final String dRequest;
-
+		// 模拟充值卡 充值成功
 		final int type = channel.type;
-
 		switch (type) {
 		case PayChannel.PAY_TYPE_ALIPAY:
 			dRequest = UserAction.PALI;
@@ -1639,13 +1725,16 @@ public class PaymentListLayout extends CCBaseLayout {
 			break;
 		case PayChannel.PAY_TYPE_YEEPAY_LT:
 			dRequest = UserAction.PYEE;
-			break;
+			enterPayYBDetail(getHost(),channel);
+			return true;
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
 			dRequest = UserAction.PYEE;
-			break;
+			enterPayYBDetail(getHost(),channel);
+			return true;
 		case PayChannel.PAY_TYPE_YEEPAY_DX:
 			dRequest = UserAction.PYEE;
-			break;
+			enterPayYBDetail(getHost(),channel);
+			return true;
 		case PayChannel.PAY_TYPE_UNMPAY:
 		case PayChannel.PAY_TYPE_EX_DEZF:
 			dRequest = UserAction.PUNION;

@@ -207,7 +207,7 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 
 	protected static TextView create_normal_label_shadow(Context ctx, ZZStr title) {
 		TextView tv = create_normal_label(ctx, title);
-//		tv.setShadowLayer(0.5f, 0.5f, 0.5f, ZZFontColor.CC_SHADOW_NORMAL.color());
+		tv.setShadowLayer(0.5f, 0.5f, 0.5f, ZZFontColor.CC_SHADOW_NORMAL.color());
 		tv.getPaint().setFakeBoldText(true);
 		return tv;
 	}
@@ -369,7 +369,12 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 	 * @return
 	 */
 	protected ILayoutHost getHost() {
-		return mEnv.get(KeyLayoutFactory.K_HOST, ILayoutHost.class);
+		if(null!=mEnv){
+			return mEnv.get(KeyLayoutFactory.K_HOST, ILayoutHost.class);
+		}else{
+			return null;
+		}
+		
 	}
 
 	protected boolean callHost_back() {
@@ -887,18 +892,20 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		{
 			FrameLayout title = new FrameLayout(ctx);
 			title.setBackgroundDrawable(CCImg.TITLE_BACKGROUND.getDrawble(ctx));
-			rv.addView(title, new LayoutParams(LP_MW));
+			LayoutParams lp = new LayoutParams(LP_MW);
+			rv.addView(title,lp);
 			title.setId(IDC.ACT_TITLE.id());
+			title.setPadding(0, 0, 0, 0);
 
 			// 标题条
 			{
 				TextView tv = create_normal_label(ctx, null);
 				title.addView(tv, new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.CENTER));
 				tv.setId(IDC.TV_TITLE.id());
-				tv.setTextSize(24);
 				tv.setGravity(Gravity.CENTER);
 				tv.setTextColor(0xff434343);
 				ZZDimenRect.CC_LABEL_PADDING.apply_padding(tv);
+				ZZFontSize.CC_TITLE.apply(tv);
 			}
 
 			// 按钮组
