@@ -7,7 +7,9 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
@@ -21,6 +23,8 @@ import android.widget.MultiAutoCompleteTextView;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
+
 import com.zz.lib.pojo.PojoUtils;
 import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.entity.SdkUser;
@@ -33,10 +37,9 @@ import com.zz.sdk.util.ResConstants.Config.ZZDimen;
 import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 
 public class LoginLayout extends ScrollView
-{
+{  
 	private MultiAutoCompleteTextView mInputAccount;
 	private EditText mInputPW;
-
 	public LoginLayout(Context context, OnClickListener l, boolean hasAccount)
 	{
 		super(context);
@@ -153,6 +156,16 @@ public class LoginLayout extends ScrollView
 			mInputAccount.setPadding(ZZDimen.dip2px(2), 0, 0, ZZDimen.dip2px(2));
 			mInputAccount.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
 			BaseLayout.change_edit_cursor(mInputAccount);
+			mInputAccount.setOnEditorActionListener(new OnEditorActionListener(){
+				@Override
+				public boolean onEditorAction(TextView v, int actionId,
+						KeyEvent event) {
+					if(actionId ==EditorInfo.IME_ACTION_GO ){
+						return true;
+					}
+					return false;
+				}
+			});
 			mInputAccount.addTextChangedListener(new TextWatcher(){
 
 				@Override
@@ -364,58 +377,7 @@ public class LoginLayout extends ScrollView
 		txtAbout.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
 		content.addView(txtAbout, lp);
 
-		// 开始布局
-//		if (true)
-//		{
-//			LinearLayout wrapall = new LinearLayout(ctx);
-//			content.addView(wrapall, LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-//			wrapall.setOrientation(LinearLayout.HORIZONTAL);
-//			//wrapall.setBackgroundColor(Color.BLUE);
-//			//wrapall.setGravity(Gravity.CENTER_VERTICAL);
-//			wrapall.setPadding(0, 0, 0, ZZDimen.dip2px(5));
-//
-//			// 右边布局
-//			// 根据“是否有本地账号”来判断，有：「快速注册」，无：「注册账号、修改密码」
-//			{
-//				LinearLayout wrapRight = new LinearLayout(ctx);
-//				LinearLayout.LayoutParams lright = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 0.7f);
-//				wrapall.addView(wrapRight, lright);
-//				wrapRight.setOrientation(LinearLayout.VERTICAL);
-//				wrapRight.setPadding(ZZDimen.dip2px(5), 0, 0, 0);
-//				LinearLayout.LayoutParams lpmodify = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-//				lpmodify.setMargins(ZZDimen.dip2px(0), ZZDimen.dip2px(0), ZZDimen.dip2px(0), ZZDimen.dip2px(0)); // 上边距5dp
-//				lpmodify.height = ZZDimen.dip2px(45);
-//				// 添加注册帐号按钮
-//				wrapRight.addView(btnRegister, lpmodify);
-//				lpmodify.setMargins(ZZDimen.dip2px(0), ZZDimen.dip2px(-5), ZZDimen.dip2px(0), ZZDimen.dip2px(0));
-//				// 添加修改密码按钮
-//				wrapRight.addView(btnModifyPW, lpmodify);
-//			}
-//
-//		}
-
-		//  下层线性布局「立即登录」　[「快速登录」]
-//		{
-//			LinearLayout wrapBttom = new LinearLayout(ctx);
-//			content.addView(wrapBttom, LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-//			wrapBttom.setOrientation(LinearLayout.VERTICAL);
-//			wrapBttom.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
-//			LinearLayout.LayoutParams lLogin = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-//			lLogin.setMargins(ZZDimen.dip2px(5), ZZDimen.dip2px(10), ZZDimen.dip2px(10), 0);
-//			wrapBttom.addView(btnLogin, lLogin);
-//
-//			// 快速登录
-//			LinearLayout.LayoutParams lfastLogin = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-//
-//			lfastLogin.setMargins(ZZDimen.dip2px(5), ZZDimen.dip2px(5), ZZDimen.dip2px(10), 0);
-//			if (!hasAccount)
-//			{
-//				wrapBttom.addView(btnFastLogin, lfastLogin);
-//			}
-//		}
-
 	}
-
 	/**
 	 * 设置帐号
 	 * 
@@ -467,15 +429,16 @@ public class LoginLayout extends ScrollView
 	public String getAccount()
 	{
 		String account = mInputAccount.getText().toString().trim();
-		return account;
+		return null == account ? "" : account;
 	}
 
 	/**
 	 * 获取密码
 	 */
 	public String getPassWord()
-	{
-		return mInputPW.getText().toString().trim();
+	{ 
+		String pwd = mInputPW.getText().toString().trim();
+		return null == pwd ? "" : pwd;
 	}
 	/**
 	 * 动态更改 线性布局的背景

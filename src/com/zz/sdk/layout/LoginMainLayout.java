@@ -21,8 +21,8 @@ import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.TextView;
-
 import com.zz.lib.pojo.PojoUtils;
 import com.zz.sdk.LoginCallbackInfo;
 import com.zz.sdk.MSG_STATUS;
@@ -58,8 +58,8 @@ import com.zz.sdk.util.Utils;
  * 
  */
 class LoginMainLayout extends BaseLayout
-{
-
+{ 
+	private String name;
 	/** 用户数据处理 */
 	private UserUtil mUserUtil;
 	/** 当前正在操作的用户名 */
@@ -82,6 +82,7 @@ class LoginMainLayout extends BaseLayout
 	private boolean mAutoLoginEnabled;
 
 	private boolean mLoginForModify;
+	private LoginLayout login;
 
 	private AutoLoginDialog mAutoDialog;
 	private FrameLayout main;
@@ -290,8 +291,10 @@ class LoginMainLayout extends BaseLayout
 		{
 		case ACT_MODIFY_PASSWORD:
 		{
+			String name = login.getAccount();
+			String pwd = login.getPassWord();
 			main.removeAllViews();
-			main.addView(createView_modifyPasswd(ctx));
+			main.addView(createView_modifyPasswd(ctx,name,pwd));
 		}
 			break;
 		case ACT_RIGHSTER:
@@ -317,7 +320,8 @@ class LoginMainLayout extends BaseLayout
 		}
 
 	}
-
+   
+	
 	/**
 	 * 登录成功。刷新缓存到数据库。关闭登录界面。
 	 */
@@ -614,7 +618,6 @@ class LoginMainLayout extends BaseLayout
 		String loginPassword = get_child_text(IDC.ED_LOGIN_PASSWORD);
 		return loginPassword;
 	}
-
 	/**
 	 * 检查登录的输入内容是否合法。
 	 * 
@@ -1029,7 +1032,7 @@ class LoginMainLayout extends BaseLayout
 	 */
 	private View createView_login(Context ctx, boolean hasAccount)
 	{
-		LoginLayout login = new LoginLayout(ctx, this, hasAccount);
+		login = new LoginLayout(ctx, this, hasAccount);
 		login.setAccount(mLoginName, mDouquEnabled);
 		login.setPassWord(mPassword);
 		return login;
@@ -1041,21 +1044,21 @@ class LoginMainLayout extends BaseLayout
 	 * @param ctx
 	 * @return
 	 */
-	private View createView_modifyPasswd(Context ctx)
+	private View createView_modifyPasswd(Context ctx,String name,String pwd)
 	{
 		LoginUpdatePwdLayout update = new LoginUpdatePwdLayout(ctx, this);
-		// update.setOldPassWord(mPassword);
-		update.setUserLoginName(mLoginName);
+	    update.setUserOldPWD(pwd);
+		update.setUserLoginName(name);
 		return update;
 	}
-
+ 
 	/**
 	 * 创建注册LinearLayout
 	 * 
 	 * @param ctx
 	 * @return
 	 */
-	private LinearLayout createView_regist(Context ctx)
+	private ScrollView createView_regist(Context ctx)
 	{
 		LoginRegisterLayout reg = new LoginRegisterLayout(ctx, this);
 		return reg;

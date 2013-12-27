@@ -23,6 +23,7 @@ import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
 import com.zz.sdk.util.ResConstants.Config.ZZDimenRect;
 import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
+import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 
 public class LoginUpdatePwdLayout extends ScrollView
 {
@@ -94,9 +95,8 @@ public class LoginUpdatePwdLayout extends ScrollView
 		Button mBtConfirm = new Button(ctx);
 		mBtConfirm.setText("确认修改");
 		mBtConfirm.setTextColor(Color.WHITE);
-		mBtConfirm.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
+		ZZFontSize.CC_RECHARGE_COMMIT.apply(mBtConfirm);
 		mBtConfirm.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/btn_login_pressed.9.png", Constants.ASSETS_RES_PATH + "drawable/btn_login_default.9.png"));
-		// mBtConfirm.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(12), ZZDimen.dip2px(5), ZZDimen.dip2px(12));
 		mBtConfirm.setSingleLine();
 		mBtConfirm.setId(IDC.BT_MODIFY_CONFIRM.id());
 		mBtConfirm.setOnClickListener(l);
@@ -109,8 +109,11 @@ public class LoginUpdatePwdLayout extends ScrollView
 	public void setUserLoginName(String s)
 	{
 		((TextView) findViewById(IDC.ED_REGISTER_NAME.id())).setText(s);
+		
 	}
-
+	public void setUserOldPWD(String pwd){
+		((TextView)findViewById(IDC.ED_OLD_PASSOWRD.id())).setText(pwd);
+	}
 	private View createItemView(boolean enabled, Context context, int id, String title, String icon, String tip)
 	{
 		LinearLayout layout = new LinearLayout(context);
