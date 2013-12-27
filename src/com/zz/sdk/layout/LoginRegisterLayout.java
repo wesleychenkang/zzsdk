@@ -12,11 +12,13 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.FrameLayout.LayoutParams;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.zz.sdk.layout.LoginMainLayout.IDC;
@@ -28,7 +30,7 @@ import com.zz.sdk.util.ResConstants.Config.ZZDimenRect;
 import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
 import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 
-public class LoginRegisterLayout extends LinearLayout
+public class LoginRegisterLayout extends ScrollView
 {
 	public LinearLayout mRegisterLayout;
 	public RelativeLayout mContainer;
@@ -44,18 +46,20 @@ public class LoginRegisterLayout extends LinearLayout
 
 	public void initUI(Context ctx, OnClickListener l)
 	{
+		setFillViewport(true);
 		int bgColor = Color.rgb(245, 245, 245);
-		setBackgroundColor(bgColor);
-		setOrientation(LinearLayout.VERTICAL);
-		setGravity(Gravity.CENTER);
-		LayoutParams ly = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
-
+		LinearLayout all = new LinearLayout(ctx);
+		all.setGravity(Gravity.CENTER_HORIZONTAL);
+		all.setOrientation(LinearLayout.VERTICAL);
+		all.setBackgroundColor(bgColor);
+		LinearLayout.LayoutParams ly = new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+		addView(all,ly);
 		//标题栏
 		FrameLayout layoutTitle = new FrameLayout(ctx);
 		layoutTitle.setBackgroundDrawable(CCImg.TITLE_BACKGROUND.getDrawble(ctx));
 		layoutTitle.setPadding(0, 0, 0, 0);
 		LayoutParams lptitle = new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT);
-		addView(layoutTitle,lptitle);
+		all.addView(layoutTitle,lptitle);
 		{
 			//左侧按钮
 			ImageView imgLeft = new ImageView(ctx);
@@ -78,7 +82,7 @@ public class LoginRegisterLayout extends LinearLayout
 
 		LinearLayout content = new LinearLayout(ctx);
 		content.setPadding(ZZDimen.dip2px(20), ZZDimen.dip2px(10), ZZDimen.dip2px(20), 0);
-		addView(content, ly);
+		all.addView(content, ly);
 		content.setOrientation(LinearLayout.VERTICAL);
 
 		//帐号
@@ -148,99 +152,7 @@ public class LoginRegisterLayout extends LinearLayout
 			txtAgreement.setText("卓越游戏用户服务协议");
 			layoutCheck.addView(txtAgreement);
 		}
-		//content.setBackgroundDrawable(BitmapCache.getDrawable(ctx,Constants.ASSETS_RES_PATH+"landed_bg.png"));
-
-		// 用来放置注册帐号信息的布局
-//		LinearLayout wrap1 = new LinearLayout(ctx);
-////		wrap1.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-//		wrap1.setOrientation(LinearLayout.HORIZONTAL);
-//		wrap1.setFocusableInTouchMode(true);
-//
-//		TextView rtvUser = new TextView(ctx);
-//		rtvUser.setText("帐号    ");
-//		rtvUser.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
-//		//黑色
-//		rtvUser.setTextColor(Color.BLACK);
-//		LayoutParams lcount = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-//		lcount.leftMargin = ZZDimen.dip2px(10);
-//		wrap1.addView(rtvUser, lcount);
-//
-//		mRegistUserId = new EditText(ctx);
-//		mRegistUserId.setSingleLine();
-//		mRegistUserId.setId(IDC.ED_REGISTER_NAME.id());
-//		mRegistUserId.setBackgroundDrawable(CCImg.LOGIN_EDIT.getDrawble(ctx));
-//		mRegistUserId.setHint("请输入帐号");
-//		mRegistUserId.setTextColor(Color.BLACK);
-//		mRegistUserId.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(7), 0, ZZDimen.dip2px(7));
-//		LayoutParams lw = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-//		lw.rightMargin = ZZDimen.dip2px(10);
-//		wrap1.addView(mRegistUserId, lw);
-//
-//		LinearLayout.LayoutParams lpid = new LinearLayout.LayoutParams(-1, -2);
-//		content.addView(wrap1, lpid);
-//
-//		// 用来放置密码帐号信息的布局
-//		LinearLayout wrap2 = new LinearLayout(ctx);
-//		wrap2.setPadding(0, ZZDimen.dip2px(10), 0, ZZDimen.dip2px(10));
-//		//wrap2.setId(ID_PWDLAYOUT);
-//		wrap2.setLayoutParams(new LinearLayout.LayoutParams(-1, -2));
-//		wrap2.setOrientation(LinearLayout.HORIZONTAL);
-//
-//		LinearLayout.LayoutParams lppwd = new LinearLayout.LayoutParams(-1, -2);
-//
-//		TextView rtvUserPwd = new TextView(ctx);
-//		rtvUserPwd.setText("密码    ");
-//		//黑色
-//		rtvUserPwd.setTextColor(Color.BLACK);
-//		rtvUserPwd.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
-//		wrap2.addView(rtvUserPwd, lcount);
-//
-//		mRegistUserPwd = new EditText(ctx);
-//		//mRegistUserPwd.setId(ID_RUSERPWD);
-//		mRegistUserPwd.setSingleLine();
-//		mRegistUserPwd.setBackgroundDrawable(CCImg.LOGIN_EDIT.getDrawble(ctx));
-//		mRegistUserPwd.setHint("请输入密码");
-//		mRegistUserPwd.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(7), 0, ZZDimen.dip2px(7));
-//		mRegistUserPwd.setId(IDC.ED_REGISTER_PASSWORD.id());
-//		mRegistUserPwd.setTextColor(Color.BLACK);
-//		LayoutParams lRegpwd = new LayoutParams(-1, -2);
-//		lRegpwd.rightMargin = ZZDimen.dip2px(10);
-//		wrap2.addView(mRegistUserPwd, lRegpwd);
-//		content.addView(wrap2, lppwd);
-//
-//		// 用来放确认和返回按钮的子布局
-//		LinearLayout wrap3 = new LinearLayout(ctx);
-//		wrap3.setPadding(0, ZZDimen.dip2px(5), 0, 0);
-//		wrap3.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
-//		wrap3.setOrientation(LinearLayout.HORIZONTAL);
-//
-//		//确认按钮
-//		Button mBtConfirm = new Button(ctx);
-//		mBtConfirm.setText("确认");
-//		mBtConfirm.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
-//		mBtConfirm.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LV, CCImg.LOGIN_BUTTON_LV_CLICK));
-//		mBtConfirm.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(12), ZZDimen.dip2px(5), ZZDimen.dip2px(12));
-//		mBtConfirm.setSingleLine();
-//		mBtConfirm.setId(IDC.BT_REGISTER_CONFIRM.id());
-//		mBtConfirm.setOnClickListener(l);
-//		LayoutParams lbtn = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-//		lbtn.weight = 0.5f;
-//		lbtn.leftMargin = ZZDimen.dip2px(10);
-//		wrap3.addView(mBtConfirm, lbtn);
-//
-//		//返回按钮
-//		Button mBtBack = new Button(ctx);
-//		mBtBack.setText("返回");
-//		mBtBack.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
-//		mBtBack.setBackgroundDrawable(ResConstants.CCImg.getStateListDrawable(ctx, CCImg.LOGIN_BUTTON_LAN, CCImg.LOGIN_BUTTON_LAN_CLICK));
-//		mBtBack.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(12), ZZDimen.dip2px(5), ZZDimen.dip2px(12));
-//		mBtBack.setId(IDC.BT_BACK.id());
-//		LinearLayout.LayoutParams lpbt = new LinearLayout.LayoutParams(-1, -2);
-//		lpbt.setMargins(ZZDimen.dip2px(5), 0, ZZDimen.dip2px(10), 0);
-//		lpbt.weight = 0.5f;
-//		mBtBack.setOnClickListener(l);
-//		wrap3.addView(mBtBack, lpbt);
-//		content.addView(wrap3, -1, -2);
+	
 
 	}
 

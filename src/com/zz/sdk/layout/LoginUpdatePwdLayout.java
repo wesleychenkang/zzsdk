@@ -11,6 +11,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.LinearLayout.LayoutParams;
 
@@ -23,7 +24,7 @@ import com.zz.sdk.util.ResConstants.Config.ZZDimen;
 import com.zz.sdk.util.ResConstants.Config.ZZDimenRect;
 import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
 
-public class LoginUpdatePwdLayout extends LinearLayout
+public class LoginUpdatePwdLayout extends ScrollView
 {
 	public LinearLayout mUpdatePwdLayout;
 	public RelativeLayout mContainer;
@@ -38,15 +39,20 @@ public class LoginUpdatePwdLayout extends LinearLayout
 
 	public void init(Context ctx, OnClickListener l)
 	{
+		setFillViewport(true);
 		int bgColor = Color.rgb(245, 245, 245);
-		setBackgroundColor(bgColor);
-		setOrientation(LinearLayout.VERTICAL);
+		LinearLayout all = new LinearLayout(ctx);
+		all.setGravity(Gravity.CENTER_HORIZONTAL);
+		all.setOrientation(LinearLayout.VERTICAL);
+		all.setBackgroundColor(bgColor);
+		addView(all,new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT));
+		
 
 		// 标题栏
 		FrameLayout layoutTitle = new FrameLayout(ctx);
 		layoutTitle.setBackgroundDrawable(CCImg.TITLE_BACKGROUND.getDrawble(ctx));
 		layoutTitle.setPadding(0, 0, 0, 0);
-		addView(layoutTitle, LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+		all.addView(layoutTitle, LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
 		{
 			// 左侧按钮
 			ImageView imgLeft = new ImageView(ctx);
@@ -70,7 +76,7 @@ public class LoginUpdatePwdLayout extends LinearLayout
 		LinearLayout content = new LinearLayout(ctx);
 		LayoutParams ly = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 		content.setPadding(ZZDimen.dip2px(20), ZZDimen.dip2px(10), ZZDimen.dip2px(20), 0);
-		addView(content, ly);
+		all.addView(content, ly);
 		content.setOrientation(LinearLayout.VERTICAL);
 
 		// 帐号
@@ -83,6 +89,21 @@ public class LoginUpdatePwdLayout extends LinearLayout
 		content.addView(createItemView(true, ctx, IDC.ED_NEW_PASSOWRD.id(), "新密码", Constants.ASSETS_RES_PATH + "drawable/pwd_icon.png", "6-12個数字、字母组合"));
 		// 确认密码
 		content.addView(createItemView(true, ctx, IDC.ED_NEW_REPEAT_PASSOWRD.id(), "确认密码", Constants.ASSETS_RES_PATH + "drawable/pwd_icon.png", "请再次输入新密码"));
+	    
+		// 修改确认按钮
+		Button mBtConfirm = new Button(ctx);
+		mBtConfirm.setText("确认修改");
+		mBtConfirm.setTextColor(Color.WHITE);
+		mBtConfirm.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
+		mBtConfirm.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/btn_login_pressed.9.png", Constants.ASSETS_RES_PATH + "drawable/btn_login_default.9.png"));
+		// mBtConfirm.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(12), ZZDimen.dip2px(5), ZZDimen.dip2px(12));
+		mBtConfirm.setSingleLine();
+		mBtConfirm.setId(IDC.BT_MODIFY_CONFIRM.id());
+		mBtConfirm.setOnClickListener(l);
+		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+		lp.topMargin = ZZDimen.dip2px(20);
+		content.addView(mBtConfirm, lp);
+	
 	}
 
 	public void setUserLoginName(String s)
