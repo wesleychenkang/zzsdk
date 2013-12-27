@@ -52,6 +52,7 @@ import com.zz.sdk.ParamChain.KeyGlobal;
 import com.zz.sdk.ParamChain.KeyUser;
 import com.zz.sdk.ParamChain.ValType;
 import com.zz.sdk.PaymentCallbackInfo;
+import com.zz.sdk.SDKDIY;
 import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.activity.BaseActivity;
 import com.zz.sdk.entity.PayChannel;
@@ -1450,6 +1451,8 @@ public class PaymentListLayout extends CCBaseLayout {
 
 		// 滤过无效支付方式
 		{
+			final int seqTop = SDKDIY.getPaySequenceTop();
+
 			List<PayChannel> tmp = new ArrayList<PayChannel>();
 			for (int i = 0, c = channelMessages.length; i < c; i++) {
 				PayChannel p = channelMessages[i];
@@ -1460,13 +1463,19 @@ public class PaymentListLayout extends CCBaseLayout {
 						(mPaymentTypeSkipZYCoin || mChargeStyle == ChargeStyle.RECHARGE)) {
 					continue;
 				}
-				tmp.add(p);
+
+				// 如果有指定首选支付方式，则将其置顶
+				if (seqTop >= 0 && p.type == seqTop) {
+					tmp.add(0, p);
+				} else {
+					tmp.add(p);
+				}
 			}
-			if (tmp.size() == channelMessages.length) {
-			} else {
+//			if (tmp.size() == channelMessages.length) {
+//			} else {
 				channelMessages = new PayChannel[tmp.size()];
 				channelMessages = tmp.toArray(channelMessages);
-			}
+//			}
 		}
 
 		if (mPaymentListAdapter == null) {

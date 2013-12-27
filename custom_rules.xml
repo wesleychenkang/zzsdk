@@ -191,6 +191,9 @@
 
         <!-- 移动M-Market开关 -->
 		<property name="zzsdk.ydmm.enabled" value="false" />
+
+        <!-- DIY开关，目前仅仅是在发行包上带个标记 -->
+        <property name="zzsdk.diy.enabled" value="false" />
 	</target>
 	
 	<target name="-set-zzsdk-mode-check">
@@ -477,13 +480,14 @@
 	    <do-set-include-or-exclude key-value="${zzsdk.douqu.enabled}" name="zzsdk.release.dir.douqu" value="-{Douqu}" else-value="" />
 	    <do-set-include-or-exclude key-value="${zzsdk.360.enabled}" name="zzsdk.release.dir.360" value="-{360}" else-value="" />
 	    <do-set-include-or-exclude key-value="${zzsdk.ydmm.enabled}" name="zzsdk.release.dir.ydmm" value="-{YDMM}" else-value="" />
+	    <do-set-include-or-exclude key-value="${zzsdk.diy.enabled}" name="zzsdk.release.dir.diy" value="-{DIY}" else-value="" />
 
 	    <!-- 版本名：zzsdk-lib+demo+doc-{日期}[{版本号}](v{版本号})-[类别开关] -->
 	    
 	    <do-isset-property name="zzsdk.release.dir" default="${out.absolute.dir}" />
 	    
 	    <property name="zzsdk.release.name" 
-	        value="${zzsdk.config.build.date}[${zzsdk.config.version.code}](v${zzsdk.config.version.name})${zzsdk.release.dir.douqu.i}${zzsdk.release.dir.360.i}${zzsdk.release.dir.ydmm.i}"/>
+	        value="${zzsdk.config.build.date}[${zzsdk.config.version.code}](v${zzsdk.config.version.name})${zzsdk.release.dir.douqu.i}${zzsdk.release.dir.360.i}${zzsdk.release.dir.ydmm.i}${zzsdk.release.dir.diy.i}"/>
 	    
 	    <property name="zzsdk.config.release.dir" 
 	        location="${zzsdk.release.dir}/zzsdk-${zzsdk.release.name}" />
@@ -598,6 +602,11 @@
 		<echo>设置 移动M-Market 模式...</echo>
 		<property name="zzsdk.ydmm.enabled" value="true"/>
 	</target>
+
+    <target name="diy" description="设置发行包为 DIY 模式">
+        <echo>设置 DIY 模式……</echo>
+        <property name="zzsdk.diy.enabled" value="true"/>
+    </target>
 	
 	<target name="tolib" depends="-obfuscate_code, -zzsdk-demo-package-release" description="打包成 sdk 库" >
 		<echo>versionCode: ${zzsdk.config.version.code}</echo>
