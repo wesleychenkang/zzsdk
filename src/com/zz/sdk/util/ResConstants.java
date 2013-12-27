@@ -49,6 +49,23 @@ public class ResConstants {
 		/** 提示 */
 		CC_PROMPT_TITLE("提示"), //
 
+		CC_ANTIADDICTION_TITLE("防沉迷认证"), //
+		CC_ANTIADDICTION_ACCOUNT_LABEL("验证账号"), //
+		CC_ANTIADDICTION_ACCOUNT_HINT("请输入账号"), //
+		CC_ANTIADDICTION_PASSWD_LABEL("账号密码"), //
+		CC_ANTIADDICTION_PASSWD_HINT("请输入密码"), //
+		CC_ANTIADDICTION_CHOOSE_LABEL("防沉迷验证"), //
+		CC_ANTIADDICTION_CHOOSE_ADULT("已成年"), //
+		CC_ANTIADDICTION_CHOOSE_NONAGE("未成年"), //
+		CC_ANTIADDICTION_BT_COMMIT("进行验证"), //
+		CC_ANTIADDICTION_BT_CANCEL("以后再说"), //
+		CC_ANTIADDICTION_DESC_HTML("<b>保护未成年人身心健康，<font color='#F17040'>未满18周岁的用户</font>将受到防沉迷系统的限制：<br> " +
+				                           "１．游戏过程,会提示您的累计在线时间;<br>" +
+				                           "２．累计游戏时间超过3小时,游戏收益(经验,金钱)减半;<br>" +
+				                           "３．累计游戏时间超过5小时,游戏收益为0;<br>" +
+				                           "４．如遇问题,请在游戏中与游戏客服联系;"), //
+		CC_ANTIADDICTION_ERR("验证失败!"), //
+
 		/** 默认·帮助·标题 */
 		DEFAULT_HELP_TITLE(""),
 		/** 默认·帮助·内容 */
@@ -415,6 +432,12 @@ public class ResConstants {
 			/** 充值界面·普通面板的边距 */
 			CC_PANEL_PADDING(8, 8, 8, 8),
 
+			/**账号输入框（带ICON）*/
+			CC_INPUT_ICON_ACCOUNT_PADDING(12, 8, 32, 8),
+
+			/**输入框ICON*/
+			CC_INPUT_ICON_PADDING(8, 4, 8, 4),
+
 			/** 普通标签的上下行距 */
 			CC_LABEL_PADDING(0, 4, 0, 4), //
 
@@ -544,12 +567,28 @@ public class ResConstants {
 		LOGIN_LOGO("logo.png"),//顶部logo
 		LOGIN_LOGO2("logo2.png"),//中间logo
 		LOGIN_SDK_BACK("sdk_back.png"),//整体背景
+		LOGIN_TEXT_BG_DEFAULT("login_text_bg_default.9.png"), //
+		LOGIN_TEXT_BG_PRESSED("login_text_bg_pressed.9.png"), //
 		/** 自动登录框资源*/
 		AUTO_BD("auto_login_bg.9.png"), //自动登录框背景
 		AUTO_CANCLE("cancel.9.png"),
 		AUTO_CANCLE_CLICK("cancel_click.9.png"),
+		USER_ICON("user_icon.png"),
+		PWD_ICON("pwd_icon.png"),
+
+		/**防沉迷资源*/
+		ANTIADDICTION_TIP("antiaddiction_tip.png"), //
+		ANTIADDICTION_DOTLINE("antiaddiction_dotline.png"), //
+		ANTIADDICTION_RADIO_SEL("antiaddiction_radio_sel.png"), //
+		ANTIADDICTION_RADIO_NOR("antiaddiction_radio_nor.png"), //
+		ANTIADDICTION_COMMIT_LINK("antiaddiction_commit_link.9.png"),//
+		ANTIADDICTION_COMMIT_HOVER("antiaddiction_commit_hover.9.png"), //
+		ANTIADDICTION_CANCEL_LINK("antiaddiction_cancel_link.9.png"),//
+		ANTIADDICTION_CANCEL_HOVER("antiaddiction_cancel_hover.9.png"), //
+		ANTIADDICTION_LOGO("antiaddiction_logo.png"), //
+
 		;
-	
+
 
 		private String context;
 
@@ -585,7 +624,7 @@ public class ResConstants {
 
 		/**
 		 * 构造按钮状态图
-		 * 
+		 *
 		 * @param ctx
 		 *            环境
 		 * @param picNormal
@@ -607,9 +646,16 @@ public class ResConstants {
 			return BitmapCache.getStateListDrawable(ctx, dp, dn);
 		}
 
+		public static StateListDrawable getStateRadioDrawable(Context ctx,
+				CCImg picNormal, CCImg picPressed) {
+			Drawable dn = picNormal == null ? null : picNormal.getDrawble(ctx);
+			Drawable dp = picPressed == null ? null : picPressed.getDrawble(ctx);
+			return BitmapCache.getStateRadioDrawable(ctx, dp, dn);
+		}
+
 		/**
 		 * 获取 支付方式 的图标
-		 * 
+		 *
 		 * @param payType
 		 * @return
 		 */

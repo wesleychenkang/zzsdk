@@ -17,6 +17,7 @@ import com.zz.sdk.activity.BaseActivity;
 import com.zz.sdk.activity.LAYOUT_TYPE;
 import com.zz.sdk.entity.SMSChannelMessage;
 import com.zz.sdk.entity.result.ResultOrder;
+import com.zz.sdk.util.AntiAddictionUtil;
 import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.DebugFlags.KeyDebug;
@@ -208,6 +209,10 @@ public class SDKManager {
 		PaymentYDMMUtil.setsConf(conf);
 	}
 
+	/** 配置是否启用防沉迷检查 */
+	public static void setAntiAddiction(boolean enabled) {
+		AntiAddictionUtil.enabled(enabled);
+	}
 
 	/**
 	 * 设置配置信息，或启动 <i>后台自动登录(仅<strong>单机模式</strong>)</i>

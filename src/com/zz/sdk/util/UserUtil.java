@@ -13,6 +13,7 @@ import com.zz.sdk.ParamChain.KeyUser;
 import com.zz.sdk.entity.SdkUser;
 import com.zz.sdk.entity.SdkUserTable;
 import com.zz.sdk.entity.result.BaseResult;
+import com.zz.sdk.entity.result.ResultAntiaddiction;
 import com.zz.sdk.entity.result.ResultAutoLogin;
 import com.zz.sdk.entity.result.ResultChangePwd;
 import com.zz.sdk.entity.result.ResultLogin;
@@ -50,6 +51,8 @@ public class UserUtil {
 	private String mSdkUserId;
 	/** 逗趣用户 ID */
 	private int mDouquUserid;
+	/**防沉迷状态： 0未知 1未成年 2成年 */
+	private int mCMState;
 
 	protected UserUtil(Context ctx) {
 		mContext = ctx;
@@ -73,6 +76,12 @@ public class UserUtil {
 	/** 返回缓存中的用户id */
 	public String getCachedSdkUserId() {
 		return mSdkUserId;
+	}
+
+	public int getCachedCMState() {
+		if (mCMState == 1) return 1;
+		if (mCMState == 2) return 2;
+		return 0;
 	}
 
 	/** 返回缓存中的逗趣用户 id */
@@ -308,6 +317,20 @@ public class UserUtil {
 		return ret;
 	}
 
+
+	public ResultAntiaddiction anti_addiction(String loginName, String password, int state) {
+		ResultAntiaddiction ret;
+		ret = mConnectionUtil.anti_addiction(loginName, password, state);
+		if (ret != null && ret.isSuccess()) {
+			// 若登录成功，更新缓存
+			SdkUser user = result2user(ret, loginName);
+			user.password = password;
+			user.autoLogin = 1;
+			mSdkUser = user;
+		}
+		return ret;
+	}
+
 	/**
 	 * 快速登录，即自动注册。如果成功，将自动更新到缓存，但不会保存到文件。需要主动调用 {@link #syncSdkUser()}
 	 * 
@@ -406,6 +429,7 @@ public class UserUtil {
 		} catch (NumberFormatException e) {
 		}
 		mSdkUserId = ret.mSdkUserId;
+		mCMState = ret.mCmStatus;
 		return user;
 	}
 

@@ -9,6 +9,7 @@ import com.zz.sdk.entity.PayChannel;
 import com.zz.sdk.entity.PayParam;
 import com.zz.sdk.entity.UserAction;
 import com.zz.sdk.entity.result.BaseResult;
+import com.zz.sdk.entity.result.ResultAntiaddiction;
 import com.zz.sdk.entity.result.ResultAutoLogin;
 import com.zz.sdk.entity.result.ResultBalance;
 import com.zz.sdk.entity.result.ResultChangePwd;
@@ -524,6 +525,22 @@ public class ConnectionUtil {
 	/** 向服务器注册设备 */
 	public ResultDeviceRegister registerDevice() {
 		return doRequest(ResultDeviceRegister.class, Constants.GPRO_DREG, 2, "deviceNum", Utils.getDeviceNum(mContext));
+	}
+
+	/**
+	 * 防沉迷验证
+	 *
+	 * @param loginName 登录名
+	 * @param password  密码
+	 * @param state     状态：0未验证|1未成年|2成年
+	 * @return
+	 */
+	public ResultAntiaddiction anti_addiction(String loginName, String password, int state) {
+		return doRequest(ResultAntiaddiction.class, Constants.VCM_REQ, 1 //
+				, "cmStatus", String.valueOf(state) //
+				, K_LOGIN_NAME, loginName //
+				, K_PASSWORD, Md5Code.encodePassword(password) //
+		);
 	}
 
 	//

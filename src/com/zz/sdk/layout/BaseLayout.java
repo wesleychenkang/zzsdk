@@ -1199,6 +1199,12 @@ abstract class BaseLayout extends LinearLayout implements View.OnClickListener,
 		return mEnv;
 	}
 
+	protected ParamChain getEnvForChild() {
+		ParamChain env = mEnv.grow();
+		env.add(KeyGlobal.K_CALLER_ENV, mEnv);
+		return env;
+	}
+
 	protected Activity getActivity() {
 		return getEnv().get(KeyGlobal.K_UI_ACTIVITY, Activity.class);
 	}

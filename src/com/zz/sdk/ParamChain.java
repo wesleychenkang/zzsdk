@@ -65,6 +65,9 @@ public interface ParamChain {
 
 		/** 键：网络请求处理，{@link ConnectionUtil} */
 		public static final String K_UTIL_CONNECT = _TAG_ + "util_connection";
+
+		/** 键：调用者的变量环境，{@link com.zz.sdk.ParamChain}，如 getEnv().get({@link #K_CALLER_ENV}, {@link com.zz.sdk.ParamChain}.class)*/
+		public static final String K_CALLER_ENV = _TAG_ + "caller_env";
 	}
 
 	public static interface KeyDevice extends KeyGlobal {
@@ -153,6 +156,9 @@ public interface ParamChain {
 
 		/** 用户密码, {@link String} */
 		public static final String K_PASSWORD = _TAG_ + "password";
+
+		/** 防沉迷验证状态, {@link java.lang.Integer}，0未知 1未成年 2已经成年 */
+		public static final String K_ANTIADDICTION = _TAG_ + "anti-addiction";
 
 		/** 余额，{@link Double}，格式 0.00 */
 		public static final String K_COIN_BALANCE = _TAG_ + "coin_balance";

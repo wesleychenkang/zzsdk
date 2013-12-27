@@ -77,6 +77,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final int IDC_BT_DEBUG = _IDC_START_ + 19;
 	private static final int IDC_CB_AUTOLOGIN = _IDC_START_ + 20;
 	private static final int IDC_ET_ORDER_NUMBER = _IDC_START_ + 22;
+	private static final int IDC_CB_ANTIADDICTION = _IDC_START_ + 23;
 
 	/* 自定义消息 */
 	private static final int _MSG_USER_ = 2013;
@@ -186,6 +187,9 @@ public class MainActivity extends Activity implements OnClickListener {
 		// 配置 APP_KEY，必须在API调用之前设置
 		SDKManager.setAppKey(CONFIG_APP_KEY);
 
+		/*打开防沉迷检查*/
+		SDKManager.setAntiAddiction(true);
+
 		// 配置移动M-Market的支付参数，若不需要移动MM，则这段不必配置
 		SDKManager.setPayConfYDMM(new IPayConfYDMM() {
 			@Override
@@ -245,6 +249,11 @@ public class MainActivity extends Activity implements OnClickListener {
 			cb = new CheckBox(ctx);
 			cb.setText("自动登录");
 			cb.setId(IDC_CB_AUTOLOGIN);
+			ll.addView(cb);
+
+			cb = new CheckBox(ctx);
+			cb.setText("防沉迷");
+			cb.setId(IDC_CB_ANTIADDICTION);
 			ll.addView(cb);
 		}
 
@@ -421,8 +430,12 @@ public class MainActivity extends Activity implements OnClickListener {
 		switch (id) {
 			/* 登录 */
 			case IDC_BT_LOGIN: {
-				boolean b = ((CheckBox) findViewById(IDC_CB_AUTOLOGIN)).isChecked();
+				boolean b = ((CheckBox) findViewById(IDC_CB_ANTIADDICTION)).isChecked();
+				mSDKManager.setAntiAddiction(b);
+
+				b = ((CheckBox) findViewById(IDC_CB_AUTOLOGIN)).isChecked();
 				mSDKManager.showLoginView(mHandler, MSG_LOGIN_CALLBACK, b);
+
 			}
 			break;
 
