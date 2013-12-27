@@ -803,6 +803,9 @@ class LoginMainLayout extends BaseLayout
 		{
 			if (result.isUsed())
 			{
+				if (mLoginForAntiAddiction)
+				showPopup_Tip(result.getErrDesc() + "\n\n只有输入正确的账号密码，\n才可进行防沉迷验证！");
+				else
 				showPopup_Tip(result.getErrDesc());
 			}
 			else
