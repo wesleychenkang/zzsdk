@@ -51,11 +51,11 @@ public class PaymentSpinnerAdpter extends BaseAdapter implements SpinnerAdapter 
 	public View getView(int position, View convertView, ViewGroup parent) {
 		TextView txt = new TextView(ctx);
 		if(position == 0){
-			txt.setText("请选择指定的充值服务");
-			}else{
-			txt.setText(args[position].intValue()+"元充值卡充值成"+args[position].intValue()+"个卓越币");	
-			}
-		  //txt.setPadding(ZZDimen.dip2px(3), ZZDimen.dip2px(5), 0, ZZDimen.dip2px(5));
+		 txt.setText("请选择指定的充值服务");
+		}else{
+		txt.setText(args[position].intValue()+"元充值卡充值成"+args[position].intValue()+"个卓越币");	
+		}
+		//txt.setPadding(ZZDimen.dip2px(3), ZZDimen.dip2px(5), 0, ZZDimen.dip2px(5));
 		  return txt;
 	}
 
@@ -97,8 +97,8 @@ public class PaymentSpinnerAdpter extends BaseAdapter implements SpinnerAdapter 
 	@Override
 	public View getDropDownView(int position, View convertView, ViewGroup parent) {
 		TextView txt = new TextView(ctx);
-		if(position == 0){
-		txt.setText("请选择指定的充值服务");
+	  if(position == 0){
+		 txt.setText("请选择指定的充值服务");
 		}else{
 		txt.setText(args[position].intValue()+"元充值卡充值成"+args[position].intValue()+"个卓越币");	
 		}

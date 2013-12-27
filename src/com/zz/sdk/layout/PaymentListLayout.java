@@ -933,8 +933,8 @@ public class PaymentListLayout extends CCBaseLayout {
 		    spinner = new Spinner(ctx);
 		}
 		spinner.setBackgroundDrawable(CCImg.SPINNER_BACK.getDrawble(ctx));
-		final Double[] money = new Double[] { 0.0, 10.0, 20.0, 30.0, 50.0,
-				100.0, 200.0 };
+		final Double[] money = new Double[] {0.0,10.0, 20.0, 30.0, 50.0,
+				100.0, 200.0};
 		final PaymentSpinnerAdpter adpter = new PaymentSpinnerAdpter(
 				getActivity(), money);
 		spinner.setAdapter(adpter);

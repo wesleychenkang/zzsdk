@@ -30,6 +30,7 @@ import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
+import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 
 public class LoginLayout extends ScrollView
 {
@@ -47,11 +48,6 @@ public class LoginLayout extends ScrollView
 		int bgColor = Color.rgb(245, 245, 245);
 		setBackgroundColor(bgColor);
 		//整体布局
-//		setBackgroundColor(Color.RED);
-//		setOrientation(LinearLayout.HORIZONTAL);
-//		setGravity(Gravity.CENTER);
-//		LinearLayout.LayoutParams lyone = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-//		lyone.weight = 0.2f;
 		LinearLayout content = new LinearLayout(ctx);
 		content.setGravity(Gravity.CENTER_HORIZONTAL);
 		content.setOrientation(LinearLayout.VERTICAL);
@@ -131,7 +127,7 @@ public class LoginLayout extends ScrollView
 		layoutUserName.setGravity(Gravity.CENTER_VERTICAL);
 		layoutUserName.setClickable(true);
 		lp = new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
-		//layoutUserName.setBackgroundDrawable(CCImg.getStateListDrawable(ctx, CCImg.LOGIN_TEXT_BACK_DEFAULT, CCImg.LOGIN_TEXT_BACK_PRESS));
+		layoutUserName.setBackgroundDrawable(CCImg.LOGIN_TEXT_BACK_DEFAULT.getDrawble(ctx));
 		lp.topMargin = ZZDimen.dip2px(17);
 		
 		content.addView(layoutUserName, lp);
@@ -277,7 +273,7 @@ public class LoginLayout extends ScrollView
 		btnLogin.setTextColor(Color.WHITE);
 		btnLogin.setId(IDC.BT_LOGIN.id());
 		btnLogin.setText("登录");
-		btnLogin.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+		ZZFontSize.CC_RECHARGE_COMMIT.apply(btnLogin);
 		btnLogin.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/btn_login_pressed.9.png", Constants.ASSETS_RES_PATH + "drawable/btn_login_default.9.png"));
 //		btnLogin.setPadding(ZZDimen.dip2px(10), ZZDimen.dip2px(12), ZZDimen.dip2px(10), ZZDimen.dip2px(12));
 		btnLogin.setOnClickListener(l);
@@ -287,7 +283,7 @@ public class LoginLayout extends ScrollView
 		Button btnQuickLogin = new Button(ctx);
 		btnQuickLogin.setTextColor(Color.BLACK);
 		btnQuickLogin.setText("一键试玩");
-		btnQuickLogin.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+		ZZFontSize.CC_RECHARGE_COMMIT.apply(btnQuickLogin);
 		btnQuickLogin.setId(IDC.BT_QUICK_LOGIN.id());
 		btnQuickLogin.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/btn_demo_pressed.9.png", Constants.ASSETS_RES_PATH + "drawable/btn_demo_default.9.png"));
 		btnQuickLogin.setOnClickListener(l);
@@ -354,7 +350,7 @@ public class LoginLayout extends ScrollView
 		Button btnRegister = new Button(ctx);
 		btnRegister.setId(IDC.BT_REGISTER.id());
 		btnRegister.setText("免费注册");
-		btnRegister.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+		ZZFontSize.CC_RECHARGE_COMMIT.apply(btnRegister);
 		btnRegister.setTextColor(Color.WHITE);
 		btnRegister.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/btn_reg_pressed.9.png", Constants.ASSETS_RES_PATH + "drawable/btn_reg_default.9.png"));
 		btnRegister.setOnClickListener(l);

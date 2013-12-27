@@ -85,7 +85,7 @@ public class ForgetPwdLayout extends LinearLayout
 		
 		TextView txtTip = new TextView(ctx);
 		txtTip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
-		txtTip.setTextColor(Color.GREEN);
+		txtTip.setTextColor(Color.rgb(72, 145, 44));
 		txtTip.setText("温馨提示");
 		txtTip.setPadding(ZZDimen.dip2px(5), 0, 0, 0);
 		content1.addView(txtTip);

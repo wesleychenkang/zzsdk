@@ -1,9 +1,11 @@
 package com.zz.sdk.layout;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.AsyncTask;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -514,14 +516,18 @@ public class PaymentYBLayout extends CCBaseLayout {
 			 txtholder.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT,mItemHeight));
 			 }
 			 txtholder.setText(counts[arg0].intValue()+"元");
+			 txtholder.setTextSize(TypedValue.COMPLEX_UNIT_SP, 27);
 			 if(arg0 == now){
 			 txtholder.setBackgroundDrawable(CCImg.YB_BACKPRESS.getDrawble(ctx));
+			 txtholder.setTextColor(Color.rgb(240, 151, 19));
 			 }else if(counts[arg0]<nowCount){
 		     txtholder.setBackgroundDrawable(CCImg.YB_BACK_UNPRESS.getDrawble(ctx));
 			 txtholder.setId(IDC.UNCLICK.id());
+			 txtholder.setTextColor(Color.GRAY);
 		     }else{
 			 txtholder.setBackgroundDrawable(CCImg.getStateListDrawable(ctx, CCImg.YB_BACKDEFAULT, CCImg.YB_BACKPRESS));  
-			 }
+			 txtholder.setTextColor(Color.GRAY);
+		     }
 			 ZZDimenRect.CC_GRIDVIEW_ITEM_PADDDING.apply_padding(txtholder);
 			return txtholder;
 		}

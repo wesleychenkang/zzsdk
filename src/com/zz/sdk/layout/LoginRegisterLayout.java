@@ -26,6 +26,7 @@ import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
 import com.zz.sdk.util.ResConstants.Config.ZZDimenRect;
 import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
+import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 
 public class LoginRegisterLayout extends LinearLayout
 {
@@ -91,7 +92,7 @@ public class LoginRegisterLayout extends LinearLayout
 	    Button mBtConfirm = new Button(ctx);
 		mBtConfirm.setText("注册");
 		mBtConfirm.setEnabled(true);
-		mBtConfirm.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
+		ZZFontSize.CC_RECHARGE_COMMIT.apply(mBtConfirm);
 		mBtConfirm.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/reg_hover_btn.9.png", Constants.ASSETS_RES_PATH + "drawable/reg_link_btn.9.png"));
 //		mBtConfirm.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(12), ZZDimen.dip2px(5), ZZDimen.dip2px(12));
 		mBtConfirm.setSingleLine();
