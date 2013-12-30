@@ -275,6 +275,8 @@ public class PaymentListLayout extends CCBaseLayout {
     private Double nowCost;
     /**当前选择的充值方式*/
     private int type;
+    public Double[] money = null;
+    public PaymentSpinnerAdpter adpter = null;
 	private Handler mHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
@@ -429,7 +431,7 @@ public class PaymentListLayout extends CCBaseLayout {
 	protected void clean() {
 		// 发出退出消息
 		notifyCaller(MSG_TYPE.PAYMENT, MSG_STATUS.EXIT_SDK, null);
-
+        
 		super.clean();
 	}
 
@@ -437,6 +439,12 @@ public class PaymentListLayout extends CCBaseLayout {
 	public boolean onExit() {
 		boolean ret = super.onExit();
 		if (ret) {
+		}
+		if(money!=null){
+			money = null;
+		}
+		if(adpter !=null){
+			adpter = null;
 		}
 		return ret;
 	}
@@ -899,23 +907,23 @@ public class PaymentListLayout extends CCBaseLayout {
 		case PayChannel.PAY_TYPE_YEEPAY_YD:
 			set_child_text(IDC.BT_RECHARGE_COMMIT, ZZStr.CC_NEXT_RECHARGE);
 			if(mChargeStyle==ChargeStyle.RECHARGE && isCanModifyAmount() ){
-				updateChargeCount(true);
+				updateChargeCount(true,type);
 			}
 			break;
 		default:
 			if(mChargeStyle==ChargeStyle.RECHARGE && isCanModifyAmount()){
-			updateChargeCount(false);
+			updateChargeCount(false,0);
 			}
 			set_child_text(IDC.BT_RECHARGE_COMMIT, ZZStr.CC_COMMIT_RECHARGE);
 			break;
 		}
 	}
 	/**改变充值数量选这方式*/
-	private void updateChargeCount(boolean t){
+	private void updateChargeCount(boolean t,int type){
 		LinearLayout ll = (LinearLayout)findViewById(IDC.CHARGE_COUNT.id());
 		if(t){
 		  ll.removeAllViews();
-		  createSpinnerView(getActivity(),ll);
+		  createSpinnerView(getActivity(),ll,type);
 		}else{
 		 ll.removeAllViews();
 		 perNonmalText(mContext, ll);	
@@ -926,7 +934,7 @@ public class PaymentListLayout extends CCBaseLayout {
 		
 	}
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-	private void createSpinnerView(Context ctx, LinearLayout ly) {
+	private void createSpinnerView(Context ctx, LinearLayout ly,int type) {
 		Spinner spinner = null;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
 			spinner = new Spinner(ctx,1); 
@@ -934,9 +942,14 @@ public class PaymentListLayout extends CCBaseLayout {
 		    spinner = new Spinner(ctx);
 		}
 		spinner.setBackgroundDrawable(CCImg.SPINNER_BACK.getDrawble(ctx));
-		final Double[] money = new Double[] {0.0,10.0, 20.0, 30.0, 50.0,
-				100.0, 200.0};
-		final PaymentSpinnerAdpter adpter = new PaymentSpinnerAdpter(
+		if(type != PayChannel.PAY_TYPE_YEEPAY_DX){
+			money =new Double[] {0.0,10.0, 20.0, 30.0, 50.0,
+					100.0, 200.0};
+		}else{
+			money =new Double[] {0.0,50.0,
+					100.0, 200.0};
+		}
+		adpter = new PaymentSpinnerAdpter(
 				getActivity(), money);
 		spinner.setAdapter(adpter);
 		adpter.updateAdpter(0);

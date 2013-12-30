@@ -517,17 +517,33 @@ public class PaymentYBLayout extends CCBaseLayout {
 			 }
 			 txtholder.setText(counts[arg0].intValue()+"元");
 			 txtholder.setTextSize(TypedValue.COMPLEX_UNIT_SP, 27);
+			 if(type!=PayChannel.PAY_TYPE_YEEPAY_DX){
 			 if(arg0 == now){
 			 txtholder.setBackgroundDrawable(CCImg.YB_BACKPRESS.getDrawble(ctx));
 			 txtholder.setTextColor(Color.rgb(240, 151, 19));
 			 }else if(counts[arg0]<nowCount){
 		     txtholder.setBackgroundDrawable(CCImg.YB_BACK_UNPRESS.getDrawble(ctx));
 			 txtholder.setId(IDC.UNCLICK.id());
-			 txtholder.setTextColor(Color.GRAY);
+			 txtholder.setTextColor(Color.GRAY);	 
 		     }else{
 			 txtholder.setBackgroundDrawable(CCImg.getStateListDrawable(ctx, CCImg.YB_BACKDEFAULT, CCImg.YB_BACKPRESS));  
 			 txtholder.setTextColor(Color.GRAY);
 		     }
+			 }else{
+				 if(counts[arg0]<50|counts[arg0]<nowCount){
+					 txtholder.setBackgroundDrawable(CCImg.YB_BACK_UNPRESS.getDrawble(ctx));
+					 txtholder.setId(IDC.UNCLICK.id());
+					 txtholder.setTextColor(Color.GRAY); 
+				 }else if(arg0 == now){
+					 txtholder.setBackgroundDrawable(CCImg.YB_BACKPRESS.getDrawble(ctx));
+					 txtholder.setTextColor(Color.rgb(240, 151, 19));
+				 }else{
+					 txtholder.setBackgroundDrawable(CCImg.getStateListDrawable(ctx, CCImg.YB_BACKDEFAULT, CCImg.YB_BACKPRESS));  
+					 txtholder.setTextColor(Color.GRAY);
+				 }
+				 
+		
+			 }
 			 ZZDimenRect.CC_GRIDVIEW_ITEM_PADDDING.apply_padding(txtholder);
 			return txtholder;
 		}
