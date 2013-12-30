@@ -188,9 +188,6 @@ public class MainActivity extends Activity implements OnClickListener {
 		// 配置 APP_KEY，必须在API调用之前设置
 		SDKManager.setAppKey(CONFIG_APP_KEY);
 
-		/*打开防沉迷检查*/
-		SDKManager.setAntiAddiction(true);
-
 		// 将话费支付设置为首先支付方式
 		SDKDIY.setPaySequence_CallCharge(true);
 
@@ -435,6 +432,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			/* 登录 */
 			case IDC_BT_LOGIN: {
 				boolean b = ((CheckBox) findViewById(IDC_CB_ANTIADDICTION)).isChecked();
+				/*打开或关闭防沉迷检查*/
 				mSDKManager.setAntiAddiction(b);
 
 				b = ((CheckBox) findViewById(IDC_CB_AUTOLOGIN)).isChecked();

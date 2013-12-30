@@ -382,6 +382,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			/* 登录 */
 			case IDC_BT_LOGIN: {
 				boolean b = ((CheckBox) findViewById(IDC_CB_ANTIADDICTION)).isChecked();
+				/*打开或关闭防沉迷检查*/
 				mSDKManager.setAntiAddiction(b);
 
 				b = ((CheckBox) findViewById(IDC_CB_AUTOLOGIN)).isChecked();

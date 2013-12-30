@@ -61,7 +61,10 @@
             android:name="com.zz.sdk.activity.BaseActivity"
             android:configChanges="orientation|keyboardHidden|navigation"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Black.NoTitleBar"/>
+            android:theme="@android:style/Theme.Black.NoTitleBar"
+            android:windowSoftInputMode="stateHidden"
+             />
+            
 
         <!-- 银联窗体，依赖风格文件 unionpay_style.xml -->
         <activity

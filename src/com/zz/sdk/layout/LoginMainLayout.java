@@ -242,6 +242,11 @@ class LoginMainLayout extends BaseLayout
 		}
 	};
 
+	private int CLICK_FREQ_UPDATE_PWD_COMMIT = 1<<0;
+	private int CLICK_FREQ_MAX = 2;
+	private long click_freq_threshold[] = new long[]{200,};
+	private long click_freq[] = new long[CLICK_FREQ_MAX];
+
 	/** 尝试设置背景 */
 	private void tryChangeBackground()
 	{
@@ -491,9 +496,21 @@ class LoginMainLayout extends BaseLayout
 		rg.check(isDouqu ? IDC.RB_ACCOUNT_TYPE_DOUQU.id() : IDC.RB_ACCOUNT_TYPE_NORMAL.id());
 	}
 
+	/*限制用户的操作频率，以免弹出无限的Toast*/
+	private boolean check_freq() {
+		if (Utils.OperateFreq_check(click_freq, null, CLICK_FREQ_UPDATE_PWD_COMMIT)) {
+			Utils.OperateFreq_mark(click_freq, CLICK_FREQ_UPDATE_PWD_COMMIT);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	@Override
 	public void onClick(View v)
 	{
+		if (!check_freq()) return;
+
 		IDC idc = IDC.fromID(v.getId());
 		switch (idc)
 		{
@@ -507,6 +524,7 @@ class LoginMainLayout extends BaseLayout
 		// 注册账号
 		case BT_REGISTER:
 		{
+
 			if (isDoQuCount)
 			{
 				showToast("请注册卓越通行证！");
@@ -921,7 +939,7 @@ class LoginMainLayout extends BaseLayout
 		{
 			if (result.isUsed())
 			{
-				showPopup_Tip(result.getErrDesc());
+				showPopup_Tip("修改密码："+result.getErrDesc());
 			}
 			else
 				showPopup_Tip(ZZStr.CC_TRY_CONNECT_SERVER_FAILED);
