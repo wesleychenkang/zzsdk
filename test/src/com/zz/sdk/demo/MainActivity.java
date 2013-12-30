@@ -31,6 +31,7 @@ import com.zz.sdk.LoginCallbackInfo;
 import com.zz.sdk.MSG_STATUS;
 import com.zz.sdk.MSG_TYPE;
 import com.zz.sdk.PaymentCallbackInfo;
+import com.zz.sdk.SDKDIY;
 import com.zz.sdk.SDKManager;
 
 import java.util.ArrayList;
@@ -47,7 +48,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final String CONFIG_GAME_ROLE = "战士001";
 
 	/** APP_KEY: 对应产品ID为 D10001A */
-	private static final String CONFIG_APP_KEY = "12345678";
+	private static final String CONFIG_APP_KEY = "5f8cec9cd21bc5520d5e8a32d97fa017";
 
 	private static final String CONFIG_GAME_SERVER_NAME = "乐活测试服务器";
 	private static final String CONFIG_GAME_CALLBACK_INFO = "厂商自定义参数（长度限制250个字符）";
@@ -182,6 +183,9 @@ public class MainActivity extends Activity implements OnClickListener {
 	private void init(Context ctx) {
 		// 配置 APP_KEY，必须在API调用之前设置
 		SDKManager.setAppKey(CONFIG_APP_KEY);
+
+		// 将话费支付设置为首先支付方式
+		SDKDIY.setPaySequence_CallCharge(true);
 
 		// 配置移动M-Market的支付参数，若不需要移动MM，则这段不必配置
 		SDKManager.setPayConfYDMM(new IPayConfYDMM() {
@@ -378,6 +382,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			/* 登录 */
 			case IDC_BT_LOGIN: {
 				boolean b = ((CheckBox) findViewById(IDC_CB_ANTIADDICTION)).isChecked();
+				/*打开或关闭防沉迷检查*/
 				mSDKManager.setAntiAddiction(b);
 
 				b = ((CheckBox) findViewById(IDC_CB_AUTOLOGIN)).isChecked();

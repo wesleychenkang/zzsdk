@@ -81,7 +81,8 @@ class PaymentListAdapter extends BaseAdapter {
 			holder.setBackgroundDrawable(CCImg.PAYLIST_SELECTED.getDrawble(mContext));
 		} else {
 			holder.setTextColor(ZZFontColor.CC_PAYTYPE_ITEM_NORMAL.color());
-			holder.setBackgroundDrawable(CCImg.getStateListDrawable(mContext, CCImg.PAYLIST_NORMAL, CCImg.ZF_XZ));
+			// ZF_XZ
+			holder.setBackgroundDrawable(CCImg.getStateListDrawable(mContext, CCImg.PAYLIST_NORMAL, CCImg.PAYLIST_SELECTED));
 		}
 		ZZDimenRect.CC_GRIDVIEW_ITEM_PADDDING.apply_padding(holder);
 		holder.setText(mPayChannels[position].channelName);

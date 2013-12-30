@@ -37,6 +37,7 @@ public class PayParam implements Serializable, JsonParseInterface {
 	public String part;// 请求路径
 	public String smsActionType; // 短信请求类型 1获取通道 2提交订单
 	public String smsImsi;
+	public String cardAmount;
 
 	/**
 	 * [20131018] 充值方式
@@ -75,6 +76,7 @@ public class PayParam implements Serializable, JsonParseInterface {
 			json.put("callBackInfo", callBackInfo);
 			json.put("smsActionType", smsActionType);
 			json.put("smsImsi", smsImsi);
+			json.put("cardAmount", cardAmount);
 			return json;
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -109,6 +111,7 @@ public class PayParam implements Serializable, JsonParseInterface {
 			smsActionType = json.isNull("smsActionType") ? null : json
 					.getString("smsActionType");
 			smsImsi = json.isNull("smsImsi") ? null : json.getString("smsImsi");
+			cardAmount = json.isNull("cardAmount") ? null :json.getString("cardAmount");
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -136,6 +139,7 @@ public class PayParam implements Serializable, JsonParseInterface {
 	public static final String K_CARD_NO = "cardNo";
 	public static final String K_CARD_PWD = "cardPwd";
 	public static final String K_WAY = "way";
+	public static final String K_CARDACOUNT ="cardAmount";
 
 	public ArrayList<BasicNameValuePair> getChargeParameters(int payType) {
 		ArrayList<BasicNameValuePair> listParames = new ArrayList<BasicNameValuePair>();
@@ -164,6 +168,7 @@ public class PayParam implements Serializable, JsonParseInterface {
 			listParames.add(new BasicNameValuePair(K_REQUESTID, requestId));
 			listParames.add(new BasicNameValuePair(K_CARD_NO, cardNo));
 			listParames.add(new BasicNameValuePair(K_CARD_PWD, cardPassword));
+			listParames.add(new BasicNameValuePair(K_CARDACOUNT, cardAmount));
 			break;
 
 		case PayChannel.PAY_TYPE_KKFUNPAY:

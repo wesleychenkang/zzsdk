@@ -1,18 +1,21 @@
 package com.zz.sdk.layout;
-
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
@@ -20,6 +23,7 @@ import android.widget.MultiAutoCompleteTextView;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 
 import com.zz.lib.pojo.PojoUtils;
 import com.zz.sdk.ZZSDKConfig;
@@ -30,13 +34,14 @@ import com.zz.sdk.util.AntiAddictionUtil;
 import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.ResConstants;
+import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
+import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
 
 public class LoginLayout extends ScrollView
-{
+{  
 	private MultiAutoCompleteTextView mInputAccount;
 	private EditText mInputPW;
-
 	public LoginLayout(Context context, OnClickListener l, boolean hasAccount)
 	{
 		super(context);
@@ -48,11 +53,6 @@ public class LoginLayout extends ScrollView
 		int bgColor = Color.rgb(245, 245, 245);
 		setBackgroundColor(bgColor);
 		//整体布局
-//		setBackgroundColor(Color.RED);
-//		setOrientation(LinearLayout.HORIZONTAL);
-//		setGravity(Gravity.CENTER);
-//		LinearLayout.LayoutParams lyone = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-//		lyone.weight = 0.2f;
 		LinearLayout content = new LinearLayout(ctx);
 		content.setGravity(Gravity.CENTER_HORIZONTAL);
 		content.setOrientation(LinearLayout.VERTICAL);
@@ -112,11 +112,12 @@ public class LoginLayout extends ScrollView
 				btDouQu.setGravity(Gravity.CENTER);
 				btDouQu.setText("老用户登录");
 				btDouQu.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
-				btDouQu.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/tab_user_pressed.png", ""));
+				btDouQu.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/old_user.png", ""));
 				btDouQu.setId(IDC.BT_LOGIN_DOQU.id());
 				btDouQu.setOnClickListener(l);
 				btDouQu.setTextColor(colorList);
 				lp = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+				lp.height = ZZDimen.dip2px(35);
 				lp.leftMargin = ZZDimen.dip2px(5);
 				layoutSelectUser.addView(btDouQu, lp);
 
@@ -127,43 +128,90 @@ public class LoginLayout extends ScrollView
 				btNormal.setId(IDC.BT_LOGIN_NORMAL.id());
 				btNormal.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
 				btNormal.setText("卓越通行证登录");
-				btNormal.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/tab_user_pressed.png", ""));
+				btNormal.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/joy_user.png", ""));
 				btNormal.setOnClickListener(l);
 				btNormal.setTextColor(colorList);
-				layoutSelectUser.addView(btNormal);
+				lp.leftMargin = ZZDimen.dip2px(0);
+				layoutSelectUser.addView(btNormal,lp);
 			}
 		}
 
 		//帐号栏
-		LinearLayout layoutUserName = new LinearLayout(ctx);
+		final LinearLayout layoutUserName = new LinearLayout(ctx);
 		layoutUserName.setGravity(Gravity.CENTER_VERTICAL);
-		layoutUserName.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/login_text_bg_pressed.9.png", Constants.ASSETS_RES_PATH + "drawable/login_text_bg_default.9.png"));
+		layoutUserName.setClickable(true);
 		lp = new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+		layoutUserName.setBackgroundDrawable(CCImg.LOGIN_TEXT_BACK_DEFAULT.getDrawble(ctx));
 		lp.topMargin = ZZDimen.dip2px(17);
+		
 		content.addView(layoutUserName, lp);
 		{
 			//用户Logo
 			ImageView imgUserLogo = new ImageView(ctx);
 			int num = ZZDimen.dip2px(10);
 			imgUserLogo.setPadding(num, num, num, num);
-			imgUserLogo.setBackgroundColor(Color.rgb(231, 231, 231));
+			//imgUserLogo.setBackgroundColor(Color.rgb(231, 231, 231));
 			imgUserLogo.setImageDrawable(BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/user_icon.png"));
 			layoutUserName.addView(imgUserLogo);
-
+			 // 删除按钮
+			final ImageView imgDelete = new ImageView(ctx);
 			// 账号编辑框
 			mInputAccount = new MultiAutoCompleteTextView(ctx);
 			mInputAccount.setDropDownBackgroundDrawable(new ColorDrawable(bgColor));
 			mInputAccount.setId(IDC.ED_LOGIN_NAME.id());
-			mInputAccount.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
+			//mInputAccount.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
 			mInputAccount.setHint("请输入帐号");
 			mInputAccount.setTextColor(Color.BLACK);
 			mInputAccount.setSingleLine(true);
 			mInputAccount.setBackgroundDrawable(null);
 			mInputAccount.setPadding(ZZDimen.dip2px(2), 0, 0, ZZDimen.dip2px(2));
 			mInputAccount.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
+			BaseLayout.change_edit_cursor(mInputAccount);
+			mInputAccount.setOnEditorActionListener(new OnEditorActionListener(){
+				@Override
+				public boolean onEditorAction(TextView v, int actionId,
+						KeyEvent event) {
+					if(actionId ==EditorInfo.IME_ACTION_GO ){
+						return true;
+					}
+					return false;
+				}
+			});
+			mInputAccount.addTextChangedListener(new TextWatcher(){
+
+				@Override
+				public void beforeTextChanged(CharSequence s, int start,
+						int count, int after) {
+					if(s.length()==0){
+						imgDelete.setVisibility(View.GONE);
+					}
+					
+				}
+
+				@Override
+				public void onTextChanged(CharSequence s, int start,
+						int before, int count) {
+					if(s.length()==0){
+						imgDelete.setVisibility(View.GONE);
+					}else{
+						imgDelete.setVisibility(View.VISIBLE);
+					}
+				}
+
+				@Override
+				public void afterTextChanged(Editable s) {
+					
+				}
+				
+			});
+			mInputAccount.setOnFocusChangeListener(new OnFocusChangeListener() {
+				@Override
+				public void onFocusChange(View v, boolean hasFocus) {
+				 updateLayout(layoutUserName,v.getContext(),hasFocus);
+				}
+			});
 			LinearLayout.LayoutParams inputlp = new LinearLayout.LayoutParams(0, LayoutParams.FILL_PARENT, 1);
 			layoutUserName.addView(mInputAccount, inputlp);
-
 			final SdkUser[] sdkUsers = SdkUserTable.getInstance(ctx).getAllSdkUsers();
 			if (sdkUsers != null)
 			{
@@ -172,7 +220,7 @@ public class LoginLayout extends ScrollView
 				{
 					sdkUserloginName[i] = sdkUsers[i].loginName;
 				}
-				ArrayAdapter<String> adapter = new ArrayAdapter<String>(ctx, android.R.layout.simple_dropdown_item_1line, sdkUserloginName);
+				LoginNameAdpter<String> adapter = new LoginNameAdpter<String>(ctx,sdkUserloginName);
 				mInputAccount.setAdapter(adapter);
 				mInputAccount.setOnItemClickListener(new OnItemClickListener()
 				{
@@ -183,9 +231,21 @@ public class LoginLayout extends ScrollView
 					}
 				});
 			}
-
+           
+//			imgDelete.setId(id)
+			//imgDelete.setBackgroundColor(Color.TRANSPARENT);
+			imgDelete.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,CCImg.LOGIN_DELETE,CCImg.LOGIN_DELETE_CLICK));
+			imgDelete.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					mInputAccount.setText("");
+				}
+			});
+			layoutUserName.addView(imgDelete);
+			
 			//下拉的图标
-			ImageView imgSelect = new ImageView(ctx);
+			ImageButton imgSelect = new ImageButton(ctx);
+			imgSelect.setBackgroundColor(Color.TRANSPARENT);
 			imgSelect.setImageDrawable(BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/select_icon.png"));
 			imgSelect.setOnClickListener(new OnClickListener()
 			{
@@ -200,7 +260,7 @@ public class LoginLayout extends ScrollView
 		}
 
 		//密码栏
-		LinearLayout layoutPwd = new LinearLayout(ctx);
+		final LinearLayout layoutPwd = new LinearLayout(ctx);
 		layoutPwd.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/login_text_bg_pressed.9.png", Constants.ASSETS_RES_PATH + "drawable/login_text_bg_default.9.png"));
 		lp = new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
 		lp.topMargin = ZZDimen.dip2px(7);
@@ -210,7 +270,7 @@ public class LoginLayout extends ScrollView
 			ImageView imgPwdLogo = new ImageView(ctx);
 			int num = ZZDimen.dip2px(10);
 			imgPwdLogo.setPadding(num, num, num, num);
-			imgPwdLogo.setBackgroundColor(Color.rgb(231, 231, 231));
+			//imgPwdLogo.setBackgroundColor(Color.rgb(231, 231, 231));
 			imgPwdLogo.setImageDrawable(BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/pwd_icon.png"));
 			layoutPwd.addView(imgPwdLogo);
 
@@ -222,6 +282,14 @@ public class LoginLayout extends ScrollView
 			mInputPW.setId(IDC.ED_LOGIN_PASSWORD.id());
 			mInputPW.setBackgroundDrawable(null);
 			mInputPW.setPadding(ZZDimen.dip2px(2), 0, 0, ZZDimen.dip2px(2));
+			BaseLayout.change_edit_cursor(mInputPW);
+			mInputPW.setOnFocusChangeListener(new OnFocusChangeListener() {
+				
+				@Override
+				public void onFocusChange(View v, boolean hasFocus) {
+				 updateLayout(layoutPwd,v.getContext(),hasFocus);	
+				}
+			});
 			layoutPwd.addView(mInputPW, LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
 		}
 		// 登录
@@ -229,7 +297,7 @@ public class LoginLayout extends ScrollView
 		btnLogin.setTextColor(Color.WHITE);
 		btnLogin.setId(IDC.BT_LOGIN.id());
 		btnLogin.setText("登录");
-		btnLogin.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+		ZZFontSize.CC_RECHARGE_COMMIT.apply(btnLogin);
 		btnLogin.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/btn_login_pressed.9.png", Constants.ASSETS_RES_PATH + "drawable/btn_login_default.9.png"));
 //		btnLogin.setPadding(ZZDimen.dip2px(10), ZZDimen.dip2px(12), ZZDimen.dip2px(10), ZZDimen.dip2px(12));
 		btnLogin.setOnClickListener(l);
@@ -239,7 +307,7 @@ public class LoginLayout extends ScrollView
 		Button btnQuickLogin = new Button(ctx);
 		btnQuickLogin.setTextColor(Color.BLACK);
 		btnQuickLogin.setText("一键试玩");
-		btnQuickLogin.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+		ZZFontSize.CC_RECHARGE_COMMIT.apply(btnQuickLogin);
 		btnQuickLogin.setId(IDC.BT_QUICK_LOGIN.id());
 		btnQuickLogin.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/btn_demo_pressed.9.png", Constants.ASSETS_RES_PATH + "drawable/btn_demo_default.9.png"));
 		btnQuickLogin.setOnClickListener(l);
@@ -318,7 +386,7 @@ public class LoginLayout extends ScrollView
 		Button btnRegister = new Button(ctx);
 		btnRegister.setId(IDC.BT_REGISTER.id());
 		btnRegister.setText("免费注册");
-		btnRegister.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+		ZZFontSize.CC_RECHARGE_COMMIT.apply(btnRegister);
 		btnRegister.setTextColor(Color.WHITE);
 		btnRegister.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/btn_reg_pressed.9.png", Constants.ASSETS_RES_PATH + "drawable/btn_reg_default.9.png"));
 		btnRegister.setOnClickListener(l);
@@ -332,58 +400,7 @@ public class LoginLayout extends ScrollView
 		txtAbout.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
 		content.addView(txtAbout, lp);
 
-		// 开始布局
-//		if (true)
-//		{
-//			LinearLayout wrapall = new LinearLayout(ctx);
-//			content.addView(wrapall, LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-//			wrapall.setOrientation(LinearLayout.HORIZONTAL);
-//			//wrapall.setBackgroundColor(Color.BLUE);
-//			//wrapall.setGravity(Gravity.CENTER_VERTICAL);
-//			wrapall.setPadding(0, 0, 0, ZZDimen.dip2px(5));
-//
-//			// 右边布局
-//			// 根据“是否有本地账号”来判断，有：「快速注册」，无：「注册账号、修改密码」
-//			{
-//				LinearLayout wrapRight = new LinearLayout(ctx);
-//				LinearLayout.LayoutParams lright = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 0.7f);
-//				wrapall.addView(wrapRight, lright);
-//				wrapRight.setOrientation(LinearLayout.VERTICAL);
-//				wrapRight.setPadding(ZZDimen.dip2px(5), 0, 0, 0);
-//				LinearLayout.LayoutParams lpmodify = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-//				lpmodify.setMargins(ZZDimen.dip2px(0), ZZDimen.dip2px(0), ZZDimen.dip2px(0), ZZDimen.dip2px(0)); // 上边距5dp
-//				lpmodify.height = ZZDimen.dip2px(45);
-//				// 添加注册帐号按钮
-//				wrapRight.addView(btnRegister, lpmodify);
-//				lpmodify.setMargins(ZZDimen.dip2px(0), ZZDimen.dip2px(-5), ZZDimen.dip2px(0), ZZDimen.dip2px(0));
-//				// 添加修改密码按钮
-//				wrapRight.addView(btnModifyPW, lpmodify);
-//			}
-//
-//		}
-
-		//  下层线性布局「立即登录」　[「快速登录」]
-//		{
-//			LinearLayout wrapBttom = new LinearLayout(ctx);
-//			content.addView(wrapBttom, LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-//			wrapBttom.setOrientation(LinearLayout.VERTICAL);
-//			wrapBttom.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
-//			LinearLayout.LayoutParams lLogin = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-//			lLogin.setMargins(ZZDimen.dip2px(5), ZZDimen.dip2px(10), ZZDimen.dip2px(10), 0);
-//			wrapBttom.addView(btnLogin, lLogin);
-//
-//			// 快速登录
-//			LinearLayout.LayoutParams lfastLogin = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-//
-//			lfastLogin.setMargins(ZZDimen.dip2px(5), ZZDimen.dip2px(5), ZZDimen.dip2px(10), 0);
-//			if (!hasAccount)
-//			{
-//				wrapBttom.addView(btnFastLogin, lfastLogin);
-//			}
-//		}
-
 	}
-
 	/**
 	 * 设置帐号
 	 * 
@@ -435,14 +452,28 @@ public class LoginLayout extends ScrollView
 	public String getAccount()
 	{
 		String account = mInputAccount.getText().toString().trim();
-		return account;
+		return null == account ? "" : account;
 	}
 
 	/**
 	 * 获取密码
 	 */
 	public String getPassWord()
-	{
-		return mInputPW.getText().toString().trim();
+	{ 
+		String pwd = mInputPW.getText().toString().trim();
+		return null == pwd ? "" : pwd;
+	}
+	/**
+	 * 动态更改 线性布局的背景
+	 * @param layout
+	 * @param ctx
+	 * @param focus
+	 */
+	public void updateLayout(LinearLayout layout,Context ctx,boolean focus){
+		if(focus){
+		layout.setBackgroundDrawable(CCImg.LOGIN_TEXT_BACK_PRESS.getDrawble(ctx));
+		}else{
+		layout.setBackgroundDrawable(CCImg.LOGIN_TEXT_BACK_DEFAULT.getDrawble(ctx));
+		} 
 	}
 }

@@ -42,7 +42,7 @@ public class ResConstants {
 		/** 价格或卓越币数的表达规则, {@link DecimalFormat} */
 		CC_PRICE_FORMAT("##.##"), //
 
-		CC_BALANCE_TITLE("您的余额是："), //
+		CC_BALANCE_TITLE("您的卓越币余额是："), //
 		/** 余额显示，基于 {@link #CC_PRICE_FORMAT} */
 		CC_BALANCE_UNIT("%s"), //
 
@@ -84,6 +84,7 @@ public class ResConstants {
 		CC_RECHARGE_COUNT_TITLE_PRICE("道具价格"), //
 		CC_RECHAGRE_COUNT_HINT("请输入数量"), //
 		CC_RECHARGE_COUNT_CHECK_FAILED("请输入正确的充值数量"), //
+		CC_RECHARGE_COUNT_CHECK_LARGE("充值数量大于充值卡最大面额，请选择其它支付方式！"),
 		CC_RECHAGRE_COUNT_DESC("卓越币"), //
 		/** RMB与卓越币的兑换比例，如 (1元=%s卓越币)，基于 {@link #CC_PRICE_FORMAT} */
 		CC_RECHAGRE_RATE_DESC("(1元=%s卓越币)"), //
@@ -203,6 +204,7 @@ public class ResConstants {
 		/** 卓越币余额不足 */
 		CC_PAYTYPE_COIN_DESC_POOR("卓越币余额不足，请更换其他方式进行支付"), //
 		CC_COMMIT_RECHARGE("确认充值"), //
+		CC_NEXT_RECHARGE("下一步"),
 		CC_COMMIT_RECHARGE_SMS("确认提交"), //
 		CC_COMMIT_BUY("确认购买"), //
 		CC_COMMIT_EXCHANGE("确认兑换"), //
@@ -239,7 +241,10 @@ public class ResConstants {
 
 		/** 无网络连接 */
 		BITMAP_FUN_BADNETWORK("请检查网络连接！"),
-
+        /**充值卡金额*/
+		YB_TEXT_VALUE("充值卡面额"),
+		YB_DECE_NUMBER("充值卡号"),
+		YB_DECE_PWD("充值密码"),
 		;
 
 		private String context;
@@ -304,7 +309,7 @@ public class ResConstants {
 			CC_EXCHANGE_DETAIL_NAME(Color.BLACK),
 			/** 兑换详情·描述文本 */
 			CC_EXCHANGE_DETAIL_DESC(0xff777777),
-
+			CC_TITLE(0x8fc325),
 			;
 
 			private int c;
@@ -326,6 +331,8 @@ public class ResConstants {
 		 * 字体大小配置
 		 */
 		public static enum ZZFontSize {
+			/** 充值等標題字號 */
+			CC_TITLE(22),
 			/** 充值界面普通文本 */
 			CC_RECHARGE_NORMAL(16),
 			/** 充值界面·描述文本 */
@@ -424,7 +431,7 @@ public class ResConstants {
 
 		/** 尺寸配置, DIP */
 		public static enum ZZDimenRect {
-			CC_TITLE_BT_PADDING(16, 8, 16, 8),
+			CC_TITLE_BT_PADDING(16, 2, 16, 2),
 
 			/** 充值界面·主活动区的边距 */
 			CC_ROOTVIEW_PADDING(16, 16, 16, 16),
@@ -463,6 +470,9 @@ public class ResConstants {
 			CC_EX_DETAIL_PADDING(12, 8, 12, 8),
 			/** 兑换详情的展示面板边距 */
 			CC_EX_DETAIL_PANEL(6, 4, 6, 4),
+			
+			CC_YB_TEXT(16,8,6,6),
+			CC_YB_EDIT(16,8,0,8),
 
 			;
 
@@ -542,7 +552,9 @@ public class ResConstants {
 		/** XListView */
 		XLISTVIEW_ARROW("xlistview_arrow.png"), //
 		EMPTY_PHOTO("empty_photo.png"),
-
+        SPINNER_BACK("spinner.png"),
+        SPINNER_TXT_DEFAULT("spinnertxt_default.png"),
+        SPINNER_TXT_CLICK("spinnertxt_press.png"),
 		// :%s/\([a-z_]*\)\.\(.*\)$/\U\1\l("\1\.\2"), \/\//g
 		/** 登录界面资源 */
 		LOGIN_BUTTON_LV_CLICK("login_button_lv_click.9.png"), //
@@ -567,8 +579,11 @@ public class ResConstants {
 		LOGIN_LOGO("logo.png"),//顶部logo
 		LOGIN_LOGO2("logo2.png"),//中间logo
 		LOGIN_SDK_BACK("sdk_back.png"),//整体背景
-		LOGIN_TEXT_BG_DEFAULT("login_text_bg_default.9.png"), //
-		LOGIN_TEXT_BG_PRESSED("login_text_bg_pressed.9.png"), //
+		LOGIN_TEXT_BACK_PRESS("login_text_bg_pressed.9.png"),
+		LOGIN_TEXT_BACK_DEFAULT("login_text_bg_default.9.png"),
+		LOGIN_UNDER_LINE("underline.png"),
+		LOGIN_DELETE("remove_hover.png"),
+		LOGIN_DELETE_CLICK("remove_link.png"),
 		/** 自动登录框资源*/
 		AUTO_BD("auto_login_bg.9.png"), //自动登录框背景
 		AUTO_CANCLE("cancel.9.png"),
@@ -587,6 +602,16 @@ public class ResConstants {
 		ANTIADDICTION_CANCEL_HOVER("antiaddiction_cancel_hover.9.png"), //
 		ANTIADDICTION_LOGO("antiaddiction_logo.png"), //
 
+		/**忘记密码页面资源*/
+		PWD_PROMPT("f_info_icon.png"), //温馨提示
+		PWD_PHONE("f_tel_icon.png"),// 电话标示
+		PWD_EMAIL("f_email_icon.png"), // emial 标示
+		PWD_BACKPWD("f_lock_bg.png"),
+		
+		/**花费充值页面资源*/
+		YB_BACKDEFAULT("yb_back_default.9.png"),
+		YB_BACKPRESS("yb_back_pressed.9.png"),
+		YB_BACK_UNPRESS("uncheck.9.png")
 		;
 
 
