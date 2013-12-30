@@ -535,6 +535,21 @@
 	            <copy file="doc/file_list.txt"  tofile="${zzsdk.config.release.dir}/文件说明.txt" />
 	        </sequential>
 	    </do-only-if-file-exist>
+
+	    <do-only-if-file-exist path="doc/history.txt" type="file">
+	        <sequential>
+	            <echo level="info">添加版本历史</echo>
+	            <copy file="doc/history.txt"  tofile="${zzsdk.config.release.dir}/版本历史.txt" />
+	        </sequential>
+	    </do-only-if-file-exist>
+
+	    <do-only-if-file-exist path="doc/SDK开发文档.pdf" type="file">
+	        <sequential>
+	            <echo level="info">添加SDK开发文档</echo>
+	            <copy file="doc/SDK开发文档.pdf"  tofile="${zzsdk.config.release.dir}/SDK开发文档.pdf" />
+	        </sequential>
+	    </do-only-if-file-exist>
+
 		<!-- 移动M-Market的文件说明 -->
 		<if >
 		    <condition>
