@@ -85,7 +85,7 @@ public class LoginUpdatePwdLayout extends ScrollView
 		viewUser.setEnabled(false);
 		content.addView(viewUser);
 		// 旧密码
-		content.addView(createItemView(true, ctx, IDC.ED_OLD_PASSOWRD.id(), "密码", Constants.ASSETS_RES_PATH + "drawable/pwd_icon.png", "请输入密码"));
+		content.addView(createItemView(true, ctx, IDC.ED_OLD_PASSOWRD.id(), "旧密码", Constants.ASSETS_RES_PATH + "drawable/pwd_icon.png", "请输入密码"));
 		// 新密码
 		content.addView(createItemView(true, ctx, IDC.ED_NEW_PASSOWRD.id(), "新密码", Constants.ASSETS_RES_PATH + "drawable/pwd_icon.png", "6-12個数字、字母组合"));
 		// 确认密码
