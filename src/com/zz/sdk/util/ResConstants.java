@@ -43,6 +43,7 @@ public class ResConstants {
 		CC_PRICE_FORMAT("##.##"), //
 
 		CC_BALANCE_TITLE("您的卓越币余额是："), //
+		CC_BALANCE_TITLE_COMM("您的游戏币余额是"),
 		/** 余额显示，基于 {@link #CC_PRICE_FORMAT} */
 		CC_BALANCE_UNIT("%s"), //
 
@@ -86,13 +87,15 @@ public class ResConstants {
 		CC_RECHARGE_COUNT_CHECK_FAILED("请输入正确的充值数量"), //
 		CC_RECHARGE_COUNT_CHECK_LARGE("充值数量大于充值卡最大面额，请选择其它支付方式！"),
 		CC_RECHAGRE_COUNT_DESC("卓越币"), //
+		CC_RECHAGRE_COUNT_DESC_COMM("游戏币"),
 		/** RMB与卓越币的兑换比例，如 (1元=%s卓越币)，基于 {@link #CC_PRICE_FORMAT} */
 		CC_RECHAGRE_RATE_DESC("(1元=%s卓越币)"), //
+		CC_RECHAGRE_RATE_DESC_COMM("(1元=%s游戏币)"), // 公共版
 		CC_RECHAGRE_COST_DESC("应付金额："), //
 		/** 充值金额，基于 {@link #CC_PRICE_FORMAT} */
 		CC_RECHAGRE_COST_UNIT("%s元"), //
 		CC_RECHAGRE_COST_UNIT_ZYCOIN("%s卓越币"), //
-
+		CC_RECHAGRE_COST_UNIT_COMM("%s游戏币"),
 		/** 支付金额大于1000元，建议使用大额支付。 */
 		CC_RECHARGE_COST_SUMMARY("支付金额大于1000元，建议使用大额支付。"),
 
@@ -201,8 +204,10 @@ public class ResConstants {
 		CC_PAYTYPE_DESC_DISABLED("暂不可使用%s充值，请使用其他方式"), //
 		/** 卓越币的消耗描述，基于 {@link #CC_PRICE_FORMAT} */
 		CC_PAYTYPE_COIN_DESC("确认后，将扣除%s卓越币，您的余额为%s"), //
+		CC_PAYTYPE_COIN_DESC_COMM("确认后，将扣除%s游戏币，您的余额为%s"),
 		/** 卓越币余额不足 */
-		CC_PAYTYPE_COIN_DESC_POOR("卓越币余额不足，请更换其他方式进行支付"), //
+		CC_PAYTYPE_COIN_DESC_POOR("卓越币余额不足，请更换其他方式进行支付"),//
+		CC_PAYTYPE_COMM_COIN_DESC_POOR("游戏币余额不足，请更换其他方式进行支付"),
 		CC_COMMIT_RECHARGE("确认充值"), //
 		CC_NEXT_RECHARGE("下一步"),
 		CC_COMMIT_RECHARGE_SMS("确认提交"), //
@@ -245,6 +250,8 @@ public class ResConstants {
 		YB_TEXT_VALUE("充值卡面额"),
 		YB_DECE_NUMBER("充值卡号"),
 		YB_DECE_PWD("充值密码"),
+		YB_DECE_SERVICE("%d元充值卡充值成%d个卓越币"),
+		YB_DECE_SERVICE_COMM("%d元充值卡充值成%d个游戏币"),
 		;
 
 		private String context;

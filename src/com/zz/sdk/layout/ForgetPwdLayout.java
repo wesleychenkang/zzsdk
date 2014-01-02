@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.LinearLayout.LayoutParams;
 
 import com.zz.sdk.layout.LoginMainLayout.IDC;
+import com.zz.sdk.util.AntiAddictionUtil;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
 import com.zz.sdk.util.ResConstants.Config.ZZDimenRect;
@@ -96,10 +97,12 @@ public class ForgetPwdLayout extends LinearLayout
 		txtTipTwo.setText("如果您忘记密码，请联系客服找回。");
 		txtTipTwo.setPadding(0, ZZDimen.dip2px(15), 0, 0);
 		content.addView(txtTipTwo);
-
+        if(!AntiAddictionUtil.isCommon()){
 		content.addView(createItemView(ctx, l, IDC.BT_CALLPHONE.id(), "客服热线:", "4007555999"));
 		content.addView(createItemView(ctx, l, IDC.BT_EMAIL.id(), "客服邮箱:", "kefu028@cmge.com"));
-		
+        }else{
+        content.addView(createItemView(ctx, l, IDC.BT_EMAIL.id(), "客服邮箱:", "ServiceGame@163.com"));	
+        }
 		FrameLayout layoutlogo = new FrameLayout(ctx);
 		layoutlogo.setBackgroundDrawable(CCImg.PWD_BACKPWD.getDrawble(ctx));
 		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,FrameLayout.LayoutParams.WRAP_CONTENT);

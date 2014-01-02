@@ -16,6 +16,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.zz.sdk.layout.LoginMainLayout.IDC;
+import com.zz.sdk.util.AntiAddictionUtil;
 import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.FileUtil;
 import com.zz.sdk.util.ResConstants.CCImg;
@@ -79,7 +80,8 @@ public class AgreementLayout extends LinearLayout {
 		{
 			public void run() {
 				try {
-					txt = FileUtil.readFile(ctx.getAssets().open(Constants.ASSETS_RES_PATH + "agreement.txt"));
+					String path = AntiAddictionUtil.isCommon() ? "agreementcomm.txt": "agreement.txt";
+					txt = FileUtil.readFile(ctx.getAssets().open(Constants.ASSETS_RES_PATH + path));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

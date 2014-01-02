@@ -22,6 +22,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.zz.sdk.layout.LoginMainLayout.IDC;
+import com.zz.sdk.util.AntiAddictionUtil;
 import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.Constants;
 import com.zz.sdk.util.ResConstants.CCImg;
@@ -149,7 +150,11 @@ public class LoginRegisterLayout extends ScrollView
 			txtAgreement.setId(IDC.BT_REGISTER_AGREEMENT.id());
 			txtAgreement.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
 			txtAgreement.setTextColor(colorList);
+			if(AntiAddictionUtil.isCommon()){
+			txtAgreement.setText("本游戏用户服务协议");
+			}else{
 			txtAgreement.setText("卓越游戏用户服务协议");
+			}
 			layoutCheck.addView(txtAgreement);
 		}
 	

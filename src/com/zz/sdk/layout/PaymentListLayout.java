@@ -67,6 +67,7 @@ import com.zz.sdk.entity.result.ResultRequestAlipayTenpay;
 import com.zz.sdk.entity.result.ResultRequestKKFunPay;
 import com.zz.sdk.entity.result.ResultRequestUionpay;
 import com.zz.sdk.layout.LayoutFactory.ILayoutHost;
+import com.zz.sdk.util.AntiAddictionUtil;
 import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.Constants;
@@ -710,7 +711,7 @@ public class PaymentListLayout extends CCBaseLayout {
 		if (mPaymentTypeChoose >= 0
 				&& mPaymentTypeChoose_ChannelType == PayChannel.PAY_TYPE_ZZCOIN) {
 			// 如果是 卓越币的支付方式，这里以描述成卓越币
-			ZZStr unit = ZZStr.CC_RECHAGRE_COST_UNIT_ZYCOIN;
+			ZZStr unit = AntiAddictionUtil.isCommon() ? ZZStr.CC_RECHAGRE_COST_UNIT_COMM :ZZStr.CC_RECHAGRE_COST_UNIT_ZYCOIN;
 			strCost = String.format(unit.str(), mRechargeFormat.format(count));
 		} else {
 			ZZStr unit = ZZStr.CC_RECHAGRE_COST_UNIT;
@@ -758,7 +759,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			String strCost;
 			if (type == PayChannel.PAY_TYPE_ZZCOIN) {
 				// 如果是 卓越币的支付方式，这里以描述成卓越币
-				ZZStr unit = ZZStr.CC_RECHAGRE_COST_UNIT_ZYCOIN;
+				ZZStr unit =AntiAddictionUtil.isCommon() ? ZZStr.CC_RECHAGRE_COST_UNIT_COMM : ZZStr.CC_RECHAGRE_COST_UNIT_ZYCOIN;
 				strCost = String.format(unit.str(),
 						mRechargeFormat.format(count));
 			} else {
@@ -815,10 +816,10 @@ public class PaymentListLayout extends CCBaseLayout {
 
 			double b = getCoinBalance() - count;
 			if (b < 0) {
-				tv.setText(ZZStr.CC_PAYTYPE_COIN_DESC_POOR.str());
+				tv.setText(AntiAddictionUtil.isCommon() ? ZZStr.CC_PAYTYPE_COMM_COIN_DESC_POOR.str() : ZZStr.CC_PAYTYPE_COIN_DESC_POOR.str());
 				tv.setTextColor(ZZFontColor.CC_RECHARGE_ERROR.color());
 			} else {
-				tv.setText(String.format(ZZStr.CC_PAYTYPE_COIN_DESC.str(),
+				tv.setText(String.format(AntiAddictionUtil.isCommon() ? ZZStr.CC_PAYTYPE_COIN_DESC_COMM.str() : ZZStr.CC_PAYTYPE_COIN_DESC.str(),
 						mRechargeFormat.format(count),
 						mRechargeFormat.format(b)));
 				tv.setTextColor(ZZFontColor.CC_RECHARGE_DESC.color());
@@ -1131,7 +1132,7 @@ public class PaymentListLayout extends CCBaseLayout {
 			tv = create_normal_label(ctx, null);
 			String rate = mRechargeFormat.format(ZZ_COIN_RATE);
 			String rate_desc = String.format(
-					ZZStr.CC_RECHAGRE_RATE_DESC.str(), rate);
+					AntiAddictionUtil.isCommon() ? ZZStr.CC_RECHAGRE_RATE_DESC_COMM.str():ZZStr.CC_RECHAGRE_RATE_DESC.str(), rate);
 			tv.setText(rate_desc);
 			tv.setTextColor(Color.GRAY);
 			tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
@@ -1301,7 +1302,7 @@ public class PaymentListLayout extends CCBaseLayout {
 		/* | EditorInfo.TYPE_NUMBER_FLAG_DECIMAL */);
 		ZZDimenRect.CC_RECHARGE_INPUT.apply_padding(tv);
 
-		tv = create_normal_label(ctx, ZZStr.CC_RECHAGRE_COUNT_DESC);
+		tv = create_normal_label(ctx, AntiAddictionUtil.isCommon() ? ZZStr.CC_RECHAGRE_COUNT_DESC_COMM : ZZStr.CC_RECHAGRE_COUNT_DESC);
 		ll2.addView(tv, new LayoutParams(LP_WM));
 		tv.setId(IDC.TV_RECHARGE_COUNT_DESC.id());
 		tv.setVisibility(GONE);
@@ -1606,7 +1607,7 @@ public class PaymentListLayout extends CCBaseLayout {
 
 		case PayChannel.PAY_TYPE_ZZCOIN:
 			if (amount > getCoinBalance())
-				ret = ZZStr.CC_PAYTYPE_COIN_DESC_POOR.str();
+				ret = AntiAddictionUtil.isCommon() ? ZZStr.CC_PAYTYPE_COMM_COIN_DESC_POOR.str(): ZZStr.CC_PAYTYPE_COIN_DESC_POOR.str();
 			else
 				ret = null;
 			break;

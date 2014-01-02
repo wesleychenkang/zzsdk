@@ -35,6 +35,7 @@ import com.zz.sdk.entity.result.BaseResult;
 import com.zz.sdk.entity.result.ResultRequest;
 import com.zz.sdk.layout.PaymentListLayout.ChargeStyle;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
+import com.zz.sdk.util.AntiAddictionUtil;
 import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.Constants;
@@ -466,20 +467,29 @@ public class PaymentYBLayout extends CCBaseLayout {
 		ZZDimenRect.CC_YB_TEXT.apply_padding(txtp);
 		
 		TextView txt_one = new TextView(ctx);
+		if(AntiAddictionUtil.isCommon()){
+		txt_one.setText("1. 所选面额和充值卡面额不符合时,卡内余额将充入游戏币,游戏币可以购买游戏中的道具");	
+		}else{
 		txt_one.setText("1. 所选面额和充值卡面额不符合时,卡内余额将充入卓越币,卓越币可以购买游戏中的道具");
+		}
 		ZZDimenRect.CC_YB_TEXT.apply_padding(txt_one);
 		txt_one.setTextColor(ZZFontColor.CC_RECHARGE_COST.color());
 		rv.addView(txt_one);
 		
 		TextView txt_two = new TextView(ctx);
-		txt_two.setText("2. 1元=1卓越币,一般1-10分钟即可到账,请放心充值");
+		if(AntiAddictionUtil.isCommon()){
+		txt_two.setText("2. 1元=1游戏币,一般1-10分钟即可到账,请放心充值");
+		}else{
+		txt_two.setText("2. 1元=1卓越币,一般1-10分钟即可到账,请放心充值");	
+		}
 		ZZDimenRect.CC_YB_TEXT.apply_padding(txt_two);
 		rv.addView(txt_two);
-		
+		if(!AntiAddictionUtil.isCommon()){
 		TextView txt_three = new TextView(ctx);
 		txt_three.setText("3. 客服热线 :"+"4007555999"+ "  客服QQ:"+"974384918");
 		ZZDimenRect.CC_YB_TEXT.apply_padding(txt_three);
 		rv.addView(txt_three);
+		}
 		
 	}
 

@@ -10,11 +10,13 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.zz.sdk.entity.PayChannel;
+import com.zz.sdk.util.AntiAddictionUtil;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
 import com.zz.sdk.util.ResConstants.Config.ZZDimenRect;
 import com.zz.sdk.util.ResConstants.Config.ZZFontColor;
 import com.zz.sdk.util.ResConstants.Config.ZZFontSize;
+import com.zz.sdk.util.ResConstants.ZZStr;
 
 /**
  * 支付方式 adapter
@@ -85,7 +87,11 @@ class PaymentListAdapter extends BaseAdapter {
 			holder.setBackgroundDrawable(CCImg.getStateListDrawable(mContext, CCImg.PAYLIST_NORMAL, CCImg.PAYLIST_SELECTED));
 		}
 		ZZDimenRect.CC_GRIDVIEW_ITEM_PADDDING.apply_padding(holder);
-		holder.setText(mPayChannels[position].channelName);
+	    if(AntiAddictionUtil.isCommon() && PayChannel.PAY_TYPE_ZZCOIN==mPayChannels[position].type){
+	     holder.setText(ZZStr.CC_RECHAGRE_COUNT_DESC_COMM.str());
+	     }else{
+		 holder.setText(mPayChannels[position].channelName);
+	     }
 		CCImg icon = CCImg.getPayChannelIcon(mPayChannels[position].type);
 		if (icon != null) {
 			holder.setCompoundDrawablesWithIntrinsicBounds(icon.getDrawble(mContext), null, null, null);

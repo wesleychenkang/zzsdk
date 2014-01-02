@@ -31,6 +31,7 @@ import com.zz.sdk.entity.PropsInfo;
 import com.zz.sdk.layout.ExchangeLayout.KeyExchange;
 import com.zz.sdk.layout.PaymentListLayout.ChargeStyle;
 import com.zz.sdk.layout.PaymentListLayout.KeyPaymentList;
+import com.zz.sdk.util.AntiAddictionUtil;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
 import com.zz.sdk.util.ResConstants.Config.ZZDimenRect;
@@ -322,7 +323,7 @@ class ExchangeDetailLayout extends CCBaseLayout {
 
 				{
 					TextView tv = create_normal_label(ctx,
-							ZZStr.CC_PAYTYPE_COIN_DESC_POOR);
+							AntiAddictionUtil.isCommon() ? ZZStr.CC_PAYTYPE_COMM_COIN_DESC_POOR : ZZStr.CC_PAYTYPE_COIN_DESC_POOR);
 					tv.setId(IDC.TV_COST_DESC_POOR.id());
 					tv.setSingleLine(false);
 					tv.setGravity(Gravity.CENTER);

@@ -36,6 +36,7 @@ import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.SDKDIY;
 import com.zz.sdk.SDKManager;
 import com.zz.sdk.ZZDebugKit;
+import com.zz.sdk.util.AntiAddictionUtil;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.DebugFlags.KeyDebug;
 
@@ -53,7 +54,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final String CONFIG_GAME_ROLE = "战士001";
 
 	/** APP_KEY: 对应产品ID为 D10001A */
-	private static final String CONFIG_APP_KEY = "12345678";
+	private static final String CONFIG_APP_KEY = "5f8cec9cd21bc5520d5e8a32d97fa017";
 
 	private static final String CONFIG_GAME_SERVER_NAME = "乐活测试服务器";
 	private static final String CONFIG_GAME_CALLBACK_INFO = "厂商自定义参数（长度限制250个字符）";
@@ -79,6 +80,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final int IDC_CB_AUTOLOGIN = _IDC_START_ + 20;
 	private static final int IDC_ET_ORDER_NUMBER = _IDC_START_ + 22;
 	private static final int IDC_CB_ANTIADDICTION = _IDC_START_ + 23;
+	private static final int IDC_CB_COMM = _IDC_START_+24;
 
 	/* 自定义消息 */
 	private static final int _MSG_USER_ = 2013;
@@ -420,6 +422,13 @@ public class MainActivity extends Activity implements OnClickListener {
 			box.setOnClickListener(onClickListener);
 			box.setText("让「取消」支付变成支付成功");
 		}
+		{
+			CheckBox box = new CheckBox(ctx);
+			box.setId(IDC_CB_COMM);
+			rootLayout.addView(box);
+			box.setOnClickListener(onClickListener);
+			box.setText("公共版");	
+		}
 
 		return rootLayout;
 	}
@@ -565,6 +574,16 @@ public class MainActivity extends Activity implements OnClickListener {
 				}
 			}
 			break;
+			
+			case IDC_CB_COMM :{
+				CheckBox cb = (CheckBox) v;
+				if(cb.isChecked()){
+					AntiAddictionUtil.setCommon(true);
+				}else{
+					AntiAddictionUtil.setCommon(false);
+				}
+				break;
+			}
 		}
 	}
 

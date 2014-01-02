@@ -23,6 +23,7 @@ import com.zz.sdk.ParamChain.KeyGlobal;
 import com.zz.sdk.ParamChain.KeyUser;
 import com.zz.sdk.entity.result.BaseResult;
 import com.zz.sdk.entity.result.ResultBalance;
+import com.zz.sdk.util.AntiAddictionUtil;
 import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.ConnectionUtil;
 import com.zz.sdk.util.Constants;
@@ -313,7 +314,7 @@ abstract class CCBaseLayout extends BaseLayout {
 			LinearLayout llmoney = new LinearLayout(ctx);
 			layoutInfo.addView(llmoney);
 			TextView tv;
-			tv = create_normal_label(ctx, ZZStr.CC_BALANCE_TITLE);
+			tv = create_normal_label(ctx, AntiAddictionUtil.isCommon() ? ZZStr.CC_BALANCE_TITLE_COMM:ZZStr.CC_BALANCE_TITLE);
 			tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
 			llmoney.addView(tv, new LayoutParams(LP_WM));
 			tv.setTextColor(Color.WHITE);
@@ -348,6 +349,7 @@ abstract class CCBaseLayout extends BaseLayout {
 		ll.setOrientation(HORIZONTAL);
 		ll.setId(IDC.BT_HELP.id());
 		ll.setOnClickListener(this);
+		
 		if (DEBUG_UI) {
 			ll.setBackgroundColor(0x80ff0000);
 		}
@@ -372,6 +374,9 @@ abstract class CCBaseLayout extends BaseLayout {
 		if (DEBUG_UI) {
 			tvDesc.setBackgroundColor(0x800000ff);
 		}
+		if(AntiAddictionUtil.isCommon()){
+		 tvDesc.setVisibility(View.GONE);
+			}
 	}
    
 	protected void hideView_footer(){
@@ -422,6 +427,7 @@ abstract class CCBaseLayout extends BaseLayout {
 			footer.setId(IDC.ACT_FOOTER.id());
 			footer.setOrientation(VERTICAL);
 			createView_footer(ctx, footer);
+			
 		}
 		return rv;
 	}

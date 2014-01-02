@@ -1,7 +1,9 @@
 package com.zz.sdk.layout;
 
+import com.zz.sdk.util.AntiAddictionUtil;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
+import com.zz.sdk.util.ResConstants.ZZStr;
 
 import android.content.Context;
 import android.database.DataSetObserver;
@@ -53,7 +55,9 @@ public class PaymentSpinnerAdpter extends BaseAdapter implements SpinnerAdapter 
 		if(position == 0){
 		 txt.setText("请选择指定的充值服务");
 		}else{
-		txt.setText(args[position].intValue()+"元充值卡充值成"+args[position].intValue()+"个卓越币");	
+			
+		txt.setText(String.format(AntiAddictionUtil.isCommon() ? ZZStr.YB_DECE_SERVICE_COMM.str():ZZStr.YB_DECE_SERVICE.str(),args[position].intValue(),args[position].intValue()));
+		
 		}
 		//txt.setPadding(ZZDimen.dip2px(3), ZZDimen.dip2px(5), 0, ZZDimen.dip2px(5));
 		  return txt;
@@ -100,7 +104,7 @@ public class PaymentSpinnerAdpter extends BaseAdapter implements SpinnerAdapter 
 	  if(position == 0){
 		 txt.setText("请选择指定的充值服务");
 		}else{
-		txt.setText(args[position].intValue()+"元充值卡充值成"+args[position].intValue()+"个卓越币");	
+		txt.setText(String.format(AntiAddictionUtil.isCommon() ? ZZStr.YB_DECE_SERVICE_COMM.str():ZZStr.YB_DECE_SERVICE.str(),args[position].intValue(),args[position].intValue()));
 		}
 		txt.setGravity(Gravity.CENTER_VERTICAL);
 		

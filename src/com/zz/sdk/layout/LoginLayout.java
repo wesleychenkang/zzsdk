@@ -65,7 +65,7 @@ public class LoginLayout extends ScrollView
 		LinearLayout.LayoutParams lp;
 
 		/*LOGO*/
-		if (AntiAddictionUtil.isEnabled()) {
+		if (AntiAddictionUtil.isEnabled()||AntiAddictionUtil.isCommon()) {
 			ImageView logo = new ImageView(ctx);
 			logo.setImageDrawable(ResConstants.CCImg.ANTIADDICTION_LOGO.getDrawble(ctx));
 			content.addView(logo);
@@ -85,7 +85,7 @@ public class LoginLayout extends ScrollView
 
 		//用户渠道-老用户-卓越通行证
 		FrameLayout layoutUserTab = new FrameLayout(ctx);
-		if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN)
+		if (ZZSDKConfig.SUPPORT_DOUQU_LOGIN &&!AntiAddictionUtil.isCommon())
 		content.addView(layoutUserTab, LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
 		{
 			//底部的线
@@ -357,7 +357,11 @@ public class LoginLayout extends ScrollView
 				tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
 				tv.setOnClickListener(l);
 				tv.setPadding(ZZDimen.dip2px(15), 0, 0, 0);
+				if(AntiAddictionUtil.isCommon()){
+					tv.setVisibility(View.GONE);
+					}
 				layoutUpdateAndforget.addView(tv);
+				
 			}
 		}
 
@@ -391,7 +395,8 @@ public class LoginLayout extends ScrollView
 		btnRegister.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/btn_reg_pressed.9.png", Constants.ASSETS_RES_PATH + "drawable/btn_reg_default.9.png"));
 		btnRegister.setOnClickListener(l);
 		content.addView(btnRegister, lp);
-
+	
+		if(!AntiAddictionUtil.isCommon()){
 		//关于
 		TextView txtAbout = new TextView(ctx);
 		txtAbout.setGravity(Gravity.CENTER);
@@ -399,6 +404,7 @@ public class LoginLayout extends ScrollView
 		txtAbout.setText("Copright © 2012-2013 Joygame.All Rights Reserved");
 		txtAbout.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
 		content.addView(txtAbout, lp);
+		}
 
 	}
 	/**
