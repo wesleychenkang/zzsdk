@@ -20,6 +20,8 @@ import android.Manifest.permission;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -66,6 +68,7 @@ public class Utils {
 	private static String CACHE_DEVICE_NUM = null;
 
 	private static String CACHE_APP_KEY = null;
+	private static String ODLER_PROJECT_ID = null;
 
 	private static final NumberFormat PRICE_FORMAT = new DecimalFormat("#.##");
 
@@ -370,7 +373,23 @@ public class Utils {
 	public static synchronized void setProjectID(String id) {
 		CACHE_PROJECT_ID = id;
 	}
-
+    
+	public static void saveProjectId(Context ctx,String id){
+		if(null != id){
+		SharedPreferences preference = ctx.getSharedPreferences("PROJECTID", Context.MODE_PRIVATE);
+		String projectId = preference.getString("projectId", null);
+	   if(projectId==null){
+		preference.edit().putString("projectId", id).commit();
+		ODLER_PROJECT_ID = id;
+	   }else{
+		ODLER_PROJECT_ID =projectId ;  
+	   }
+	 }
+	 }
+    public static String getProjectIdForXml (Context ctx){
+	   SharedPreferences preference = ctx.getSharedPreferences("PROJECTID", Context.MODE_PRIVATE);
+	   return preference.getString("projectId", null);
+    }
 	/**
 	 * 获取工程ID
 	 *
@@ -378,8 +397,19 @@ public class Utils {
 	 * @return
 	 */
 	public static synchronized String getProjectId(Context ctx) {
-		if (null == CACHE_PROJECT_ID)
-			CACHE_PROJECT_ID = get_metaData(ctx, Constants.K_PROJECT_ID);
+		if(null ==ODLER_PROJECT_ID ){
+		 ODLER_PROJECT_ID = getProjectIdForXml(ctx);
+		 if(null != ODLER_PROJECT_ID){
+		  return ODLER_PROJECT_ID;
+		 }
+		}else{
+		return ODLER_PROJECT_ID;	
+		}
+		if (null == CACHE_PROJECT_ID) {
+		 CACHE_PROJECT_ID = get_metaData(ctx, Constants.K_PROJECT_ID);
+		}
+		saveProjectId(ctx,CACHE_PROJECT_ID);
+		
 		return CACHE_PROJECT_ID;
 	}
 
