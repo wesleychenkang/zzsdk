@@ -397,18 +397,22 @@ public class Utils {
 	 * @return
 	 */
 	public static synchronized String getProjectId(Context ctx) {
+		if(ZZSDKConfig.COMM_PROJECTID){
 		if(null ==ODLER_PROJECT_ID ){
 		 ODLER_PROJECT_ID = getProjectIdForXml(ctx);
 		 if(null != ODLER_PROJECT_ID){
 		  return ODLER_PROJECT_ID;
 		 }
 		}else{
-		return ODLER_PROJECT_ID;	
+		 return ODLER_PROJECT_ID;	
+		}
 		}
 		if (null == CACHE_PROJECT_ID) {
 		 CACHE_PROJECT_ID = get_metaData(ctx, Constants.K_PROJECT_ID);
 		}
+		if(ZZSDKConfig.COMM_PROJECTID){
 		saveProjectId(ctx,CACHE_PROJECT_ID);
+		}
 		
 		return CACHE_PROJECT_ID;
 	}

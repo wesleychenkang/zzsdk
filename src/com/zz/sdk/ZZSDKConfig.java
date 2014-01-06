@@ -36,15 +36,17 @@ public final class ZZSDKConfig {
 	public final static boolean ENCRYPT_PASSWORD = true;// true;//
 	/**设置 为公共版模式*/
 	public final static boolean COMM_MODE = true;
+	/**设置为使用第一个projectId*/
+	public final static boolean COMM_PROJECTID = true;
 
 	/* 版本信息 */
 
 	/** 版本号，编译时更新，格式：1 */
-	public final static int VERSION_CODE = 43;
+	public final static int VERSION_CODE = 44;
 	/** 版本名，编译时更新，格式：0.1.0 */
-	public final static String VERSION_NAME = "2.2.3";
+	public final static String VERSION_NAME = "2.2.4";
 	/** 版本发布时间，编译时更新 ，格式：20130725 */
-	public final static String VERSION_DATE = "20140102";
+	public final static String VERSION_DATE = "20140103";
 
 	public final static String CONFIG_DESC = "" //
 			+ (SUPPORT_360SDK ? ",360sdk" : "") // 360登录
