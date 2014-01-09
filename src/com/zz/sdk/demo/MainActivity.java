@@ -36,6 +36,7 @@ import com.zz.sdk.PaymentCallbackInfo;
 import com.zz.sdk.SDKDIY;
 import com.zz.sdk.SDKManager;
 import com.zz.sdk.ZZDebugKit;
+import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.DebugFlags.KeyDebug;
 
@@ -53,7 +54,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final String CONFIG_GAME_ROLE = "战士001";
 
 	/** APP_KEY: 对应产品ID为 D10001A */
-	private static final String CONFIG_APP_KEY = "12345678";
+	private static final String CONFIG_APP_KEY = "5f8cec9cd21bc5520d5e8a32d97fa017";
 
 	private static final String CONFIG_GAME_SERVER_NAME = "乐活测试服务器";
 	private static final String CONFIG_GAME_CALLBACK_INFO = "厂商自定义参数（长度限制250个字符）";
@@ -706,5 +707,21 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		/* 清理资源 */
 		SDKManager.recycle();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		if (ZZSDKConfig.SUPPORT_SOCIAL) {
+			com.joygame.socialclient.SocialManager.onPause(this);
+		}
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		if (ZZSDKConfig.SUPPORT_SOCIAL) {
+			com.joygame.socialclient.SocialManager.onResume(this);
+		}
 	}
 }

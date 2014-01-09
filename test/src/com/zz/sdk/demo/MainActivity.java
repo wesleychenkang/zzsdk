@@ -604,4 +604,20 @@ public class MainActivity extends Activity implements OnClickListener {
 		/* 清理资源 */
 		SDKManager.recycle();
 	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		//-KEY_SUPPORT_SOCIAL: 如果接入了社交模块，那么必须在主 Activity 中调用
+		com.joygame.socialclient.SocialManager.onPause(this);
+		//+KEY_SUPPORT_SOCIAL
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		//-KEY_SUPPORT_SOCIAL: 如果接入了社交模块，那么必须在主 Activity 中调用
+		com.joygame.socialclient.SocialManager.onResume(this);
+		//+KEY_SUPPORT_SOCIAL
+	}
 }

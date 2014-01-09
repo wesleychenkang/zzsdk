@@ -53,6 +53,8 @@ public class UserUtil {
 	private int mDouquUserid;
 	/**防沉迷状态： 0未知 1未成年 2成年 */
 	private int mCMState;
+	/** 主键ID */
+	private String mSdkId;
 
 	protected UserUtil(Context ctx) {
 		mContext = ctx;
@@ -76,6 +78,10 @@ public class UserUtil {
 	/** 返回缓存中的用户id */
 	public String getCachedSdkUserId() {
 		return mSdkUserId;
+	}
+
+	public String getCachedSdkId() {
+		return mSdkId;
 	}
 
 	public int getCachedCMState() {
@@ -425,9 +431,10 @@ public class UserUtil {
 		SdkUser user = new SdkUser();
 		user.loginName = ret.mUserName == null ? defName : ret.mUserName;
 		try {
-			user.sdkUserId = Integer.parseInt(ret.mSdkUserId);
+			user.sdkUserId = Integer.parseInt(/*ret.mSdkUserId*/ret.mId);
 		} catch (NumberFormatException e) {
 		}
+		mSdkId = ret.mId;
 		mSdkUserId = ret.mSdkUserId;
 		mCMState = ret.mCmStatus;
 		return user;
@@ -506,6 +513,11 @@ public class UserUtil {
 			env.add(KeyUser.K_PASSWORD, password);
 			env.add(KeyUser.K_SDKUSER_ID, uu.getCachedSdkUserId());
 			env.add(KeyUser.K_LOGIN_STATE_SUCCESS, Boolean.TRUE);
+
+			SocialUtil su = SocialUtil.getInstance();
+			if (su != null) {
+				su.onLoginResult(uu.getCachedSdkId());
+			}
 		} else {
 			if (DebugFlags.DEBUG) {
 				Logger.d("E: login failed!");
