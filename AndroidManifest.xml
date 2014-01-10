@@ -110,7 +110,7 @@
         <!-- 社交对应的游戏，请在社交后台进行申请 -->
         <meta-data
             android:name="SOCIAL_PRODUCT_ID"
-            android:value="3" />
+            android:value="30" />
 
         <!-- 友盟key -->
         <meta-data

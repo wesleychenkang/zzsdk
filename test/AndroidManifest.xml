@@ -51,7 +51,7 @@
         <!-- 演示窗体 -->
         <activity
             android:name="com.zz.sdk.demo.MainActivity"
-            android:configChanges="orientation|keyboardHidden"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -115,7 +115,7 @@
         <!-- 社交对应的游戏，请在社交后台进行申请 -->
         <meta-data
             android:name="SOCIAL_PRODUCT_ID"
-            android:value="3" />
+            android:value="30" />
 
         <!-- 友盟key -->
         <meta-data

@@ -2,6 +2,7 @@ package com.zz.sdk.demo;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -723,5 +724,10 @@ public class MainActivity extends Activity implements OnClickListener {
 		if (ZZSDKConfig.SUPPORT_SOCIAL) {
 			com.joygame.socialclient.SocialManager.onResume(this);
 		}
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
 	}
 }
