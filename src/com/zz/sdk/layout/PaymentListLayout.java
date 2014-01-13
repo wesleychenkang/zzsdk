@@ -926,14 +926,14 @@ public class PaymentListLayout extends CCBaseLayout {
 		  ll.removeAllViews();
 		  createSpinnerView(getActivity(),ll,type);
 		}else{
+		 String s = get_child_text(IDC.ED_RECHARGE_COUNT);
 		 ll.removeAllViews();
 		 perNonmalText(mContext, ll);	
+		 set_child_text(IDC.ED_RECHARGE_COUNT,s);
 		}
 		
-		
-		
-		
 	}
+	
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	private void createSpinnerView(Context ctx, LinearLayout ly,int type) {
 		Spinner spinner = null;
