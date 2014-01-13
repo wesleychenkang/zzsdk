@@ -573,6 +573,20 @@
 	            <copy file="doc/ydmm_sdk.txt"  tofile="${zzsdk.config.release.dir}/移动MM接入说明.txt" />
 		    </then>
 		</if>
+
+		<!-- 社区模块的文件说明 -->
+		<if >
+		    <condition>
+				<and>
+					<istrue value="${zzsdk.social.enabled}" />
+					<available file="doc/social.txt" type="file" />
+				</and>
+		    </condition>
+		    <then>
+				<echo level="info">复制社区模块的文件说明</echo>
+	            <copy file="doc/social.txt"  tofile="${zzsdk.config.release.dir}/社区模块接入说明.txt" />
+		    </then>
+		</if>
 	    
 	    <do-only-if-file-exist path="${zzsdk.demo.zip.file}" type="file">
 	        <sequential>
