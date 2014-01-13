@@ -649,16 +649,16 @@ class LoginMainLayout extends BaseLayout
 			isDoQuCount = true;
 			btn_doqu.setSelected(true);
 			btn_normal.setSelected(false);
-			// btn_normal.setBackgroundDrawable(CCImg.LOGIN_LABE_HUI.getDrawble(ctx));
-			// btn_doqu.setBackgroundDrawable(CCImg.LOGIN_LABE_LAN.getDrawble(ctx));
+//			 btn_normal.setBackgroundDrawable(CCImg.LOGIN_LABE_HUI.getDrawble(ctx));
+//			 btn_doqu.setBackgroundDrawable(CCImg.LOGIN_LABE_LAN.getDrawble(ctx));
 		}
 		else
 		{
 			isDoQuCount = false;
 			btn_doqu.setSelected(false);
 			btn_normal.setSelected(true);
-			// btn_doqu.setBackgroundDrawable(CCImg.LOGIN_LABE_HUI.getDrawble(ctx));
-			// btn_normal.setBackgroundDrawable(CCImg.LOGIN_LABE_LAN.getDrawble(ctx));
+//			 btn_doqu.setBackgroundDrawable(CCImg.LOGIN_LABE_HUI.getDrawble(ctx));
+//			 btn_normal.setBackgroundDrawable(CCImg.LOGIN_LABE_LAN.getDrawble(ctx));
 		}
 	}
 

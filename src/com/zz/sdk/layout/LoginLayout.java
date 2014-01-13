@@ -1,9 +1,14 @@
 package com.zz.sdk.layout;
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.text.Editable;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -42,6 +47,8 @@ public class LoginLayout extends ScrollView
 {  
 	private MultiAutoCompleteTextView mInputAccount;
 	private EditText mInputPW;
+	private SdkUser[] sdkUsers;
+	private List<String> sdkUserloginName;
 	public LoginLayout(Context context, OnClickListener l, boolean hasAccount)
 	{
 		super(context);
@@ -163,6 +170,7 @@ public class LoginLayout extends ScrollView
 			mInputAccount.setHint("请输入帐号");
 			mInputAccount.setTextColor(Color.BLACK);
 			mInputAccount.setSingleLine(true);
+			mInputAccount.setAutoLinkMask(1);
 			mInputAccount.setBackgroundDrawable(null);
 			mInputAccount.setPadding(ZZDimen.dip2px(2), 0, 0, ZZDimen.dip2px(2));
 			mInputAccount.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
@@ -212,13 +220,13 @@ public class LoginLayout extends ScrollView
 			});
 			LinearLayout.LayoutParams inputlp = new LinearLayout.LayoutParams(0, LayoutParams.FILL_PARENT, 1);
 			layoutUserName.addView(mInputAccount, inputlp);
-			final SdkUser[] sdkUsers = SdkUserTable.getInstance(ctx).getAllSdkUsers();
+			sdkUsers = SdkUserTable.getInstance(ctx).getAllSdkUsers();
 			if (sdkUsers != null)
 			{
-				String[] sdkUserloginName = new String[sdkUsers.length];
-				for (int i = 0; i < sdkUserloginName.length; i++)
+			    sdkUserloginName = new ArrayList<String>();
+				for (int i = 0; i < sdkUsers.length; i++)
 				{
-					sdkUserloginName[i] = sdkUsers[i].loginName;
+					sdkUserloginName.add(sdkUsers[i].loginName);
 				}
 				LoginNameAdpter<String> adapter = new LoginNameAdpter<String>(ctx,sdkUserloginName);
 				mInputAccount.setAdapter(adapter);
@@ -226,7 +234,7 @@ public class LoginLayout extends ScrollView
 				{
 					public void onItemClick(AdapterView<?> parent, View view, int position, long id)
 					{
-						mInputAccount.setText(sdkUsers[position].loginName);
+						//mInputAccount.setText(sdkUserloginName.get(position));
 						mInputPW.setText(sdkUsers[position].password);
 					}
 				});

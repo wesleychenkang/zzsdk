@@ -30,8 +30,8 @@ public class LoginNameAdpter<T> extends BaseAdapter implements Filterable {
      * the original array of data.
      */
     private final Object mLock = new Object();
-	public LoginNameAdpter(Context ctx,T[] objects){
-    	this.mObjects = Arrays.asList(objects);
+	public LoginNameAdpter(Context ctx,List<T> objects){
+    	this.mObjects = objects;
     	this.ctx = ctx;
     }
 	@Override
