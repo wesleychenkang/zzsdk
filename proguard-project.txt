@@ -25,6 +25,7 @@
 # -libraryjars 'libs/360SDK.jar'
 -libraryjars 'libs/UPPayPluginEx.jar'
 -libraryjars 'libs/mmbilling.2.3.0.jar'
+-libraryjars 'libs/socialclient.jar'
 
 
 -optimizationpasses 5
@@ -65,3 +66,5 @@
 -keep public class com.zz.sdk.LoginCallbackInfo { public *; }
 -keep public class com.zz.sdk.IPayConfYDMM { public *; }
 -keep public class com.zz.sdk.SDKDIY { public *; }
+
+-keep public class * extends com.joygame.**

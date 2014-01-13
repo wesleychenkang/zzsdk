@@ -31,6 +31,9 @@ public final class ZZSDKConfig {
 
 	/** 插件模式 */
 	public final static boolean PLUGIN_MODE = false;
+
+	/** 支持社交模块 */
+	public final static boolean SUPPORT_SOCIAL = true;
 	
 	/** 是否加密密码，新的签名处理，必须要加密 */
 	public final static boolean ENCRYPT_PASSWORD = true;// true;//
