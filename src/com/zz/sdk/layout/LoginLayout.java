@@ -112,10 +112,11 @@ public class LoginLayout extends ScrollView
 				btDouQu.setGravity(Gravity.CENTER);
 				btDouQu.setText("老用户登录");
 				btDouQu.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
-				btDouQu.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/old_user.png", ""));
+				btDouQu.setBackgroundDrawable(null);
 				btDouQu.setId(IDC.BT_LOGIN_DOQU.id());
 				btDouQu.setOnClickListener(l);
 				btDouQu.setTextColor(colorList);
+				//btDouQu.setPadding(ZZDimen.dip2px(5), ZZDimen.dip2px(0), ZZDimen.dip2px(5), ZZDimen.dip2px(0));
 				lp = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 				lp.height = ZZDimen.dip2px(35);
 				lp.leftMargin = ZZDimen.dip2px(5);
@@ -128,7 +129,7 @@ public class LoginLayout extends ScrollView
 				btNormal.setId(IDC.BT_LOGIN_NORMAL.id());
 				btNormal.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
 				btNormal.setText("卓越通行证登录");
-				btNormal.setBackgroundDrawable(BitmapCache.getStateListDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/joy_user.png", ""));
+				btNormal.setBackgroundDrawable(BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/joy_user.png"));
 				btNormal.setOnClickListener(l);
 				btNormal.setTextColor(colorList);
 				lp.leftMargin = ZZDimen.dip2px(0);

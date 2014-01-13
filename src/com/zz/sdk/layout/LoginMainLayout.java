@@ -647,16 +647,16 @@ class LoginMainLayout extends BaseLayout
 		if (b)
 		{
 			isDoQuCount = true;
-			btn_doqu.setSelected(true);
-			btn_normal.setSelected(false);
+			btn_normal.setBackgroundDrawable(null);
+			btn_doqu.setBackgroundDrawable(BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/joy_user.png"));
 			// btn_normal.setBackgroundDrawable(CCImg.LOGIN_LABE_HUI.getDrawble(ctx));
 			// btn_doqu.setBackgroundDrawable(CCImg.LOGIN_LABE_LAN.getDrawble(ctx));
 		}
 		else
 		{
 			isDoQuCount = false;
-			btn_doqu.setSelected(false);
-			btn_normal.setSelected(true);
+			btn_doqu.setBackgroundDrawable(null);
+			btn_normal.setBackgroundDrawable(BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/joy_user.png"));
 			// btn_doqu.setBackgroundDrawable(CCImg.LOGIN_LABE_HUI.getDrawble(ctx));
 			// btn_normal.setBackgroundDrawable(CCImg.LOGIN_LABE_LAN.getDrawble(ctx));
 		}
