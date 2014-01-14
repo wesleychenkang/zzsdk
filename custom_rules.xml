@@ -103,6 +103,7 @@
 		<do-update-zzsdk-config-java key="ENCRYPT_PASSWORD" value="${zzsdk.config.encrypt_password}" />
 		<do-update-zzsdk-config-java key="SUPPORT_YDMM" value="${zzsdk.ydmm.enabled}" />
 		<do-update-zzsdk-config-java key="SUPPORT_SOCIAL" value="${zzsdk.social.enabled}" />
+		<do-update-zzsdk-config-java key="COMM_MODE" value="${zzsdk.common.enabled}" />
 
         <mkdir dir="${zzsdk.release.dir}" />
 	</target>
@@ -149,6 +150,7 @@
         <property name="zzsdk.files.asssets.bj" value="zz_res/login_bg*.jpg" />
 		<property name="zzsdk.files.asssets.vertical" value="zz_res/v/*" />
 		<property name="zzsdk.files.asssets.360" value="pro.jar res/**" />
+		<property name="zzsdk.files.asssets.common" value="agreementcomm.txt" />
 
         <!-- class 文件清单 -->
 		<property name="zzsdk.files.class.all" value="com/zz/**/*.class" />
@@ -200,6 +202,9 @@
 
         <!-- 社交模块 -->
         <property name="zzsdk.social.enabled" value="false" />
+
+        <!-- 公共版本 -->
+        <property name="zzsdk.common.enabled" value="false" />
 	</target>
 	
 	<target name="-set-zzsdk-mode-check">
@@ -490,6 +495,7 @@
 	    <do-set-include-or-exclude key-value="${zzsdk.360.enabled}" name="zzsdk.release.dir.360" value="-{360}" else-value="" />
 	    <do-set-include-or-exclude key-value="${zzsdk.ydmm.enabled}" name="zzsdk.release.dir.ydmm" value="-{YDMM}" else-value="" />
 	    <do-set-include-or-exclude key-value="${zzsdk.diy.enabled}" name="zzsdk.release.dir.diy" value="-{DIY}" else-value="" />
+        <do-set-include-or-exclude key-value="${zzsdk.common.enabled}" name="zzsdk.release.dir.common" value="-{COMMON}" else-value="" />
 	    <do-set-include-or-exclude key-value="${zzsdk.social.enabled}" name="zzsdk.release.dir.social" value="-{SOCIAL}" else-value="" />
 
 	    <!-- 版本名：zzsdk-lib+demo+doc-{日期}[{版本号}](v{版本号})-[类别开关] -->
@@ -497,7 +503,7 @@
 	    <do-isset-property name="zzsdk.release.dir" default="${out.absolute.dir}" />
 	    
 	    <property name="zzsdk.release.name" 
-	        value="${zzsdk.config.build.date}[${zzsdk.config.version.code}](v${zzsdk.config.version.name})${zzsdk.release.dir.douqu.i}${zzsdk.release.dir.360.i}${zzsdk.release.dir.ydmm.i}${zzsdk.release.dir.diy.i}${zzsdk.release.dir.social.i}"/>
+	        value="${zzsdk.config.build.date}[${zzsdk.config.version.code}](v${zzsdk.config.version.name})${zzsdk.release.dir.douqu.i}${zzsdk.release.dir.360.i}${zzsdk.release.dir.ydmm.i}${zzsdk.release.dir.diy.i}${zzsdk.release.dir.common.i}${zzsdk.release.dir.social.i}"/>
 	    
 	    <property name="zzsdk.config.release.dir" 
 	        location="${zzsdk.release.dir}/zzsdk-${zzsdk.release.name}" />
@@ -650,6 +656,10 @@
     <target name="social" description="设置 支持社交">
         <echo>设置 支持社交……</echo>
         <property name="zzsdk.social.enabled" value="true"/>
+    </target>
+    <target name="common" description="设置 公共版本">
+        <echo>设置 公共版本……</echo>
+        <property name="zzsdk.common.enabled" value="true"/>
     </target>
 	
 	<target name="tolib" depends="-obfuscate_code, -zzsdk-demo-package-release" description="打包成 sdk 库" >

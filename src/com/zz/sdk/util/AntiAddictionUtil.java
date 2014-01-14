@@ -7,20 +7,24 @@ import com.zz.sdk.ZZSDKConfig;
  */
 public class AntiAddictionUtil {
 
-	private static boolean sEnabled = true;
+	private static boolean sEnabled = false;
 	/**是否为防沉迷公共版*/
-	private static boolean  sCommon = ZZSDKConfig.COMM_MODE;
+	private static boolean sCommon = ZZSDKConfig.COMM_MODE;
     
 	public static synchronized boolean isCommon(){
-		return sCommon;
+		if (DebugFlags.DEBUG_DEMO) {
+			return sCommon;
+		}
+		return ZZSDKConfig.COMM_MODE;
 	}
+
 	/**设置共通版本时，将采防沉迷版本设置为true*/
 	public static synchronized  void setCommon(boolean common){
-	    if(common){
-	     sCommon = true;
-		 }
-	     sCommon =common; 
+		if (DebugFlags.DEBUG_DEMO) {
+			sCommon = common;
+		}
 	}
+
 	public static synchronized boolean isEnabled() {
 		return sEnabled;
 	}
