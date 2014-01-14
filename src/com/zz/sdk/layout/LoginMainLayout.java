@@ -309,32 +309,34 @@ class LoginMainLayout extends BaseLayout
 	 */
 	private void switchPanle(IDC act)
 	{
+		View view = null;
 		switch (act)
 		{
 		case ACT_MODIFY_PASSWORD:
 		{
 			String name = login.getAccount();
 			String pwd = login.getPassWord();
-			main.removeAllViews();
-			main.addView(createView_modifyPasswd(ctx,name,pwd));
+			view = createView_modifyPasswd(ctx,name,pwd);
+			pushToView(view);
 		}
 			break;
 		case ACT_RIGHSTER:
 		{
-			main.removeAllViews();
-			main.addView(createView_regist(ctx));
+			view = createView_regist(ctx);
+			pushToView(view);
 		}
 			break;
 		case ACT_FORGETPWD:
 		{
-			main.removeAllViews();
-			main.addView(createView_ForgetPwd(ctx));
+			view = createView_ForgetPwd(ctx);
+			pushToView(view);
 		}
 			break;
 		case ACT_AGREEMENT:
 		{
-			main.removeAllViews();
-			main.addView(createView_Agreement(ctx));
+			
+			view = createView_Agreement(ctx);
+			pushToView(view);
 		}
 			break;
 		default:
@@ -390,15 +392,24 @@ class LoginMainLayout extends BaseLayout
 	}
    
 	private void pushToView(View view){
-		stackView.push(view);
+		 stackView.push(view);
+		 if(stackView.size()>1){
+         stackView.peek().clearFocus();
+		 main.removeAllViews();
+		 main.addView(view);
+		 main.requestFocus();
+		 }
 	}
 	private View popToStackView(){
-		View view = null;
-		if(stackView.size()>1){
-			view = stackView.pop();
-		}else{
-			view = stackView.peek();
-		}
+		 View view = null;
+		 if(stackView.size()>1){
+		    stackView.pop().clearFocus();
+		    view = stackView.peek();
+		    if(null != main){
+		    main.removeAllViews();
+		    main.addView(view);
+		    }
+		 }
 		return view;
 	}
 	@Override
@@ -490,9 +501,16 @@ class LoginMainLayout extends BaseLayout
 			setActivityControlInterface(new EmptyActivityControlImpl() {
 				@Override
 				public Boolean onKeyDownControl(int keyCode, KeyEvent event) {
-					if (keyCode == KeyEvent.KEYCODE_BACK) {
-						System.out.println("进来了");
-						return null;
+					if (keyCode == KeyEvent.KEYCODE_BACK) { 
+					   View view = popToStackView();
+					   if(null!=view){
+						  //做自己的事情
+						  return true; 
+						 }else{
+						  // 执行系统的返回事件
+						  return null; 
+						 }
+						
 					}
 					return null;
 				}
@@ -625,8 +643,7 @@ class LoginMainLayout extends BaseLayout
 
 		// 返回
 		case BT_BACK:
-			main.removeAllViews();
-			main.addView(createView_login(ctx, true));
+			popToStackView();
 			break;
 		case BT_LOGIN_DOQU:
 			setIsDoQuAccout(true);
@@ -1276,6 +1293,7 @@ class LoginMainLayout extends BaseLayout
 		// framly.topMargin = isVertical ? -heigth1 : 0;
 		// framly.rightMargin = isVertical ? 0 : -heigth1;
 		View login = createView_login(ctx, hasAccount);
+		pushToView(login);
 		main.addView(login, FrameLayout.LayoutParams.FILL_PARENT, FrameLayout.LayoutParams.FILL_PARENT);
 		rv.addView(main, framly);
 		// 显示“自动登录”框

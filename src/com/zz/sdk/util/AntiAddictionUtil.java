@@ -7,7 +7,7 @@ import com.zz.sdk.ZZSDKConfig;
  */
 public class AntiAddictionUtil {
 
-	private static boolean sEnabled = true;
+	private static boolean sEnabled = false;
 	/**是否为防沉迷公共版*/
 	private static boolean  sCommon = ZZSDKConfig.COMM_MODE;
     
