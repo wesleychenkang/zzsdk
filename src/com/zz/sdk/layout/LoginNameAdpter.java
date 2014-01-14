@@ -144,7 +144,9 @@ public class LoginNameAdpter<T> extends BaseAdapter implements Filterable {
 	        @Override
 	        protected void publishResults(CharSequence constraint, FilterResults results) {
 	            //noinspection unchecked
-	            mObjects = (List<T>) results.values;
+	            //mObjects = (List<T>) results.values;
+	        	mObjects.clear();
+	        	mObjects.addAll((List<T>) results.values);
 	            if (results.count > 0) {
 	                notifyDataSetChanged();
 	            } else {

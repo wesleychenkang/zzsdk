@@ -1,5 +1,6 @@
 package com.zz.sdk.layout;
 
+import java.util.Stack;
 import java.util.regex.Pattern;
 
 import android.app.Dialog;
@@ -14,6 +15,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Pair;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -36,6 +38,7 @@ import com.zz.sdk.entity.result.ResultAutoLogin;
 import com.zz.sdk.entity.result.ResultChangePwd;
 import com.zz.sdk.entity.result.ResultLogin;
 import com.zz.sdk.entity.result.ResultRegister;
+import com.zz.sdk.protocols.EmptyActivityControlImpl;
 import com.zz.sdk.util.AntiAddictionUtil;
 import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.Constants;
@@ -93,7 +96,7 @@ class LoginMainLayout extends BaseLayout
 	private String mNewPassword;
 	private boolean isDoQuCount;
 	private FrameLayout.LayoutParams framly = new FrameLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
-
+    private Stack<View> stackView = new Stack<View>();
 	protected static interface KeyLogin extends KeyUser {
 		static final String _TAG_ = KeyUser._TAG_ + "login" + _SEPARATOR_;
 
@@ -385,7 +388,19 @@ class LoginMainLayout extends BaseLayout
 		env.add(KeyUser.K_LOGIN_STATE_SUCCESS, Boolean.TRUE);
 		env.add(KeyUser.K_ANTIADDICTION, mUserUtil.getCachedCMState());
 	}
-
+   
+	private void pushToView(View view){
+		stackView.push(view);
+	}
+	private View popToStackView(){
+		View view = null;
+		if(stackView.size()>1){
+			view = stackView.pop();
+		}else{
+			view = stackView.peek();
+		}
+		return view;
+	}
 	@Override
 	protected void clean()
 	{
@@ -471,6 +486,18 @@ class LoginMainLayout extends BaseLayout
 			mLoginState = MSG_STATUS.CANCEL;
 
 			checkAutoLogin();
+			/* 接管按键事件 */
+			setActivityControlInterface(new EmptyActivityControlImpl() {
+				@Override
+				public Boolean onKeyDownControl(int keyCode, KeyEvent event) {
+					if (keyCode == KeyEvent.KEYCODE_BACK) {
+						System.out.println("进来了");
+						return null;
+					}
+					return null;
+				}
+			});
+			
 		}
 		return ret;
 	}

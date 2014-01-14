@@ -1,5 +1,6 @@
 package com.zz.sdk.layout;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import android.content.Context;
@@ -152,7 +153,6 @@ public class LoginLayout extends ScrollView
 		lp.topMargin = ZZDimen.dip2px(17);
 		
 		content.addView(layoutUserName, lp);
-		{
 			//用户Logo
 			ImageView imgUserLogo = new ImageView(ctx);
 			int num = ZZDimen.dip2px(10);
@@ -173,6 +173,7 @@ public class LoginLayout extends ScrollView
 			mInputAccount.setAutoLinkMask(1);
 			mInputAccount.setBackgroundDrawable(null);
 			mInputAccount.setPadding(ZZDimen.dip2px(2), 0, 0, ZZDimen.dip2px(2));
+			mInputAccount.clearListSelection();
 			mInputAccount.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
 			BaseLayout.change_edit_cursor(mInputAccount);
 			mInputAccount.setOnEditorActionListener(new OnEditorActionListener(){
@@ -224,33 +225,26 @@ public class LoginLayout extends ScrollView
 			if (sdkUsers != null)
 			{
 			    sdkUserloginName = new ArrayList<String>();
+			    final HashMap<String, String> sdkuser = new HashMap<String, String>();
 				for (int i = 0; i < sdkUsers.length; i++)
 				{
 					sdkUserloginName.add(sdkUsers[i].loginName);
+					sdkuser.put(sdkUsers[i].loginName, sdkUsers[i].password);
 				}
 				LoginNameAdpter<String> adapter = new LoginNameAdpter<String>(ctx,sdkUserloginName);
 				mInputAccount.setAdapter(adapter);
 				mInputAccount.setOnItemClickListener(new OnItemClickListener()
 				{
 					public void onItemClick(AdapterView<?> parent, View view, int position, long id)
-					{
-						//mInputAccount.setText(sdkUserloginName.get(position));
-						mInputPW.setText(sdkUsers[position].password);
+					{  
+						String name = sdkUserloginName.get(position);
+						mInputAccount.setText(name);
+					    mInputPW.setText(sdkuser.get(name));
 					}
 				});
 			}
-           
-//			imgDelete.setId(id)
-			//imgDelete.setBackgroundColor(Color.TRANSPARENT);
 			imgDelete.setBackgroundDrawable(CCImg.getStateListDrawable(ctx,CCImg.LOGIN_DELETE,CCImg.LOGIN_DELETE_CLICK));
-			imgDelete.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					mInputAccount.setText("");
-				}
-			});
 			layoutUserName.addView(imgDelete);
-			
 			//下拉的图标
 			ImageButton imgSelect = new ImageButton(ctx);
 			imgSelect.setBackgroundColor(Color.TRANSPARENT);
@@ -265,7 +259,7 @@ public class LoginLayout extends ScrollView
 			LinearLayout.LayoutParams lpSelect = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			lpSelect.rightMargin = ZZDimen.dip2px(5);
 			layoutUserName.addView(imgSelect, lpSelect);
-		}
+		
 
 		//密码栏
 		final LinearLayout layoutPwd = new LinearLayout(ctx);
@@ -276,8 +270,8 @@ public class LoginLayout extends ScrollView
 		{
 			//密码Logo
 			ImageView imgPwdLogo = new ImageView(ctx);
-			int num = ZZDimen.dip2px(10);
-			imgPwdLogo.setPadding(num, num, num, num);
+			int nums = ZZDimen.dip2px(10);
+			imgPwdLogo.setPadding(nums, nums, nums, nums);
 			//imgPwdLogo.setBackgroundColor(Color.rgb(231, 231, 231));
 			imgPwdLogo.setImageDrawable(BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/pwd_icon.png"));
 			layoutPwd.addView(imgPwdLogo);
@@ -300,6 +294,16 @@ public class LoginLayout extends ScrollView
 			});
 			layoutPwd.addView(mInputPW, LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
 		}
+		
+		
+		imgDelete.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				mInputAccount.setText("");
+				mInputPW.setText("");
+			}
+		});
+		
 		// 登录
 		Button btnLogin = new Button(ctx);
 		btnLogin.setTextColor(Color.WHITE);
@@ -490,4 +494,6 @@ public class LoginLayout extends ScrollView
 		layout.setBackgroundDrawable(CCImg.LOGIN_TEXT_BACK_DEFAULT.getDrawble(ctx));
 		} 
 	}
+	
+	
 }
