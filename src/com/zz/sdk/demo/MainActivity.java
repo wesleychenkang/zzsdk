@@ -2,6 +2,7 @@ package com.zz.sdk.demo;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -37,6 +38,7 @@ import com.zz.sdk.SDKDIY;
 import com.zz.sdk.SDKManager;
 import com.zz.sdk.ZZDebugKit;
 import com.zz.sdk.util.AntiAddictionUtil;
+import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.util.DebugFlags;
 import com.zz.sdk.util.DebugFlags.KeyDebug;
 
@@ -725,5 +727,26 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		/* 清理资源 */
 		SDKManager.recycle();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		if (ZZSDKConfig.SUPPORT_SOCIAL) {
+			com.joygame.socialclient.SocialManager.onPause(this);
+		}
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		if (ZZSDKConfig.SUPPORT_SOCIAL) {
+			com.joygame.socialclient.SocialManager.onResume(this);
+		}
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
 	}
 }

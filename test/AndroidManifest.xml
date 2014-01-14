@@ -25,6 +25,21 @@
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
 
+    <!-- 必要的权限 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
+
     <supports-screens
         android:anyDensity="true"
         android:largeScreens="true"
@@ -36,7 +51,7 @@
         <!-- 演示窗体 -->
         <activity
             android:name="com.zz.sdk.demo.MainActivity"
-            android:configChanges="orientation|keyboardHidden"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -64,7 +79,53 @@
             android:theme="@android:style/Theme.Black.NoTitleBar"
             android:windowSoftInputMode="stateHidden"
              />
-            
+
+
+        <!-- 社交Activity -->
+        <activity
+            android:name="com.joygame.socialclient.activity.SocialActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustNothing|stateHidden" >
+        </activity>
+        <!-- 社交公用窗体，注：不要设置android:launchMode -->
+        <activity
+            android:name="com.joygame.socialclient.activity.PublicActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:theme="@android:style/Theme.Translucent"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
+        </activity>
+        <!-- 社交公用Dialog窗体，注：不要设置android:launchMode -->
+        <activity
+            android:name="com.joygame.socialclient.activity.FloatActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.Translucent"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
+        </activity>
+
+        <!-- 社交服务的service -->
+        <service android:name="com.joygame.socialclient.service.SocialService" />
+        <!-- 百度定位的service -->
+        <service
+            android:name="com.baidu.location.f"
+            android:enabled="true"
+            android:process=":remote" />
+
+        <!-- 社交对应的游戏，请在社交后台进行申请 -->
+        <meta-data
+            android:name="SOCIAL_PRODUCT_ID"
+            android:value="30" />
+
+        <!-- 友盟key -->
+        <meta-data
+            android:name="UMENG_APPKEY"
+            android:value="5255052856240b382f00c638" >
+        </meta-data>
+        <!-- 友盟渠道 -->
+        <meta-data
+            android:name="UMENG_CHANNEL"
+            android:value="P10003A" />
 
         <!-- 银联窗体，依赖风格文件 unionpay_style.xml -->
         <activity

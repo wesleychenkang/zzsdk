@@ -1,0 +1,21 @@
+<component name="libraryTable">
+  <library name="zzsdk-lib">
+    <ANNOTATIONS>
+      <root url="jar://$PROJECT_DIR$/bin/zzsdk-lib-assets.jar!/" />
+    </ANNOTATIONS>
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/bin/zzsdk-lib.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/zzsdk-lib-assets.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/zzsdk-lib-assets.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/bin/zzsdk-lib-assets.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/bin/zzsdk-lib-assets.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/zzsdk-lib-assets.jar!/" />
+    </SOURCES>
+    <jarDirectory url="jar://$PROJECT_DIR$/bin/zzsdk-lib-assets.jar!/" recursive="false" />
+    <jarDirectory url="jar://$PROJECT_DIR$/bin/zzsdk-lib-assets.jar!/" recursive="false" type="SOURCES" />
+  </library>
+</component>

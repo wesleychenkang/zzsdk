@@ -45,6 +45,7 @@ import com.zz.sdk.util.ResConstants;
 import com.zz.sdk.util.ResConstants.CCImg;
 import com.zz.sdk.util.ResConstants.Config.ZZDimen;
 import com.zz.sdk.util.ResConstants.ZZStr;
+import com.zz.sdk.util.SocialUtil;
 import com.zz.sdk.util.UserUtil;
 import com.zz.sdk.util.Utils;
 
@@ -384,6 +385,11 @@ class LoginMainLayout extends BaseLayout
 		env.add(KeyUser.K_SDKUSER_ID, sdkUserId);
 		env.add(KeyUser.K_LOGIN_STATE_SUCCESS, Boolean.TRUE);
 		env.add(KeyUser.K_ANTIADDICTION, mUserUtil.getCachedCMState());
+
+		SocialUtil su = SocialUtil.getInstance();
+		if (su != null) {
+			su.onLoginResult(mUserUtil.getCachedSdkId());
+		}
 	}
 
 	@Override

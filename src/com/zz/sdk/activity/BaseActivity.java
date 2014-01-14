@@ -16,6 +16,7 @@ import com.zz.sdk.BuildConfig;
 import com.zz.sdk.ParamChain;
 import com.zz.sdk.ParamChain.KeyGlobal;
 import com.zz.sdk.ParamChain.ValType;
+import com.zz.sdk.ZZSDKConfig;
 import com.zz.sdk.layout.LayoutFactory;
 import com.zz.sdk.layout.LayoutFactory.ILayoutView;
 import com.zz.sdk.layout.LayoutFactory.KeyLayoutFactory;
@@ -352,5 +353,21 @@ public class BaseActivity extends Activity {
 		}
 
 		finish();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		if (ZZSDKConfig.SUPPORT_SOCIAL) {
+			com.joygame.socialclient.SocialManager.onPause(this);
+		}
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		if (ZZSDKConfig.SUPPORT_SOCIAL) {
+			com.joygame.socialclient.SocialManager.onResume(this);
+		}
 	}
 }

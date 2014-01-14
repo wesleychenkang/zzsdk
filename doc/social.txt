@@ -1,0 +1,40 @@
+关于社区模块接入
+================
+
+2014-01-10
+----------
+
+
+1、请参考DEMO工程
+
+2、参考DEMO配置 AndroidManifest.xml：
+	* 权限
+	* 各窗体及服务的定义
+	* 各ID：
+		* 特别的ID：SOCIAL_PRODUCT_ID 此ID请与运营联系申请
+
+3、正常方式接入SDK
+	* 注意：
+		* 原 android-support-v4.jar 替换成 android-pre-support-v4.jar
+
+4、在游戏Activity添加（参考DEMO）
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		com.joygame.socialclient.SocialManager.onPause(this);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		com.joygame.socialclient.SocialManager.onResume(this);
+	}
+
+5、在结束游戏时：
+
+	SDKManager.recycle(); // 清理SDK资源
+	SocialManager.destroy(Context mContext);//结束社区
+
+
+

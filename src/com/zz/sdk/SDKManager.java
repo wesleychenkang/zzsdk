@@ -8,6 +8,8 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Pair;
 
+import com.joygame.socialclient.SocialManager;
+import com.joygame.socialclient.interfaces.CallBack;
 import com.zz.lib.pojo.PojoUtils;
 import com.zz.sdk.ParamChain.KeyCaller;
 import com.zz.sdk.ParamChain.KeyDevice;
@@ -25,6 +27,7 @@ import com.zz.sdk.util.Logger;
 import com.zz.sdk.util.PaymentYDMMUtil;
 import com.zz.sdk.util.ResConstants;
 import com.zz.sdk.util.ResConstants.ZZStr;
+import com.zz.sdk.util.SocialUtil;
 import com.zz.sdk.util.UserUtil;
 import com.zz.sdk.util.Utils;
 
@@ -58,6 +61,8 @@ public class SDKManager {
 
 	private ParamChain mRootEnv;
 
+	private SocialUtil mSocialUtil;
+
 	/**
 	 * 获取 SDK 实例
 	 *
@@ -76,6 +81,9 @@ public class SDKManager {
 	 * 游戏登出，资源回收
 	 */
 	public static synchronized void recycle() {
+		if (instance!=null) {
+			instance.clean();
+		}
 		instance = null;
 		// Thread thread = new Thread(new Runnable() {
 		// public void run() {
@@ -103,6 +111,8 @@ public class SDKManager {
 		// saveProjectIdToContext();
 		// }
 		// });
+
+		mSocialUtil = SocialUtil.getInstance(mContext, this);
 
 		ParamChain env = BaseActivity.GET_GLOBAL_PARAM_CHAIN();
 
@@ -174,6 +184,15 @@ public class SDKManager {
 //		});
 //		thread.start();
 //	}
+
+	private void clean() {
+
+
+		if (mSocialUtil != null) {
+			mSocialUtil.recycle();
+			mSocialUtil = null;
+		}
+	}
 
 	/**
 	 * 配置自定义的 ServerID，用于区分游戏服务器
@@ -380,7 +399,8 @@ public class SDKManager {
 		);
 	}
 
-	protected void showExchange(Handler callbackHandler, String gameServerID) {
+	/** @deprecated */
+	public void showExchange(Handler callbackHandler, String gameServerID) {
 		// TODO: 功能未完成，屏蔽
 		if (DebugFlags.DEBUG_DEMO) {
 			ParamChain env = mRootEnv.grow(KeyCaller.class.getName());
