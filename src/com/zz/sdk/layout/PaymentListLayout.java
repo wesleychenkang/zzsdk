@@ -926,8 +926,11 @@ public class PaymentListLayout extends CCBaseLayout {
 		  ll.removeAllViews();
 		  createSpinnerView(getActivity(),ll,type);
 		}else{
+		 String txt = get_child_text(IDC.ED_RECHARGE_COUNT);
 		 ll.removeAllViews();
-		 perNonmalText(mContext, ll);	
+		 
+		 perNonmalText(mContext, ll);
+		 set_child_text(IDC.ED_RECHARGE_COUNT, txt);
 		}
 		
 		
