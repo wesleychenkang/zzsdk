@@ -30,8 +30,8 @@ public class LoginNameAdpter<T> extends BaseAdapter implements Filterable {
      * the original array of data.
      */
     private final Object mLock = new Object();
-	public LoginNameAdpter(Context ctx,T[] objects){
-    	this.mObjects = Arrays.asList(objects);
+	public LoginNameAdpter(Context ctx,List<T> objects){
+    	this.mObjects = objects;
     	this.ctx = ctx;
     }
 	@Override
@@ -144,7 +144,9 @@ public class LoginNameAdpter<T> extends BaseAdapter implements Filterable {
 	        @Override
 	        protected void publishResults(CharSequence constraint, FilterResults results) {
 	            //noinspection unchecked
-	            mObjects = (List<T>) results.values;
+	            //mObjects = (List<T>) results.values;
+	        	mObjects.clear();
+	        	mObjects.addAll((List<T>) results.values);
 	            if (results.count > 0) {
 	                notifyDataSetChanged();
 	            } else {

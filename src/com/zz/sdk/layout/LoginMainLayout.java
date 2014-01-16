@@ -1,5 +1,6 @@
 package com.zz.sdk.layout;
 
+import java.util.Stack;
 import java.util.regex.Pattern;
 
 import android.app.Dialog;
@@ -14,6 +15,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Pair;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -36,6 +38,7 @@ import com.zz.sdk.entity.result.ResultAutoLogin;
 import com.zz.sdk.entity.result.ResultChangePwd;
 import com.zz.sdk.entity.result.ResultLogin;
 import com.zz.sdk.entity.result.ResultRegister;
+import com.zz.sdk.protocols.EmptyActivityControlImpl;
 import com.zz.sdk.util.AntiAddictionUtil;
 import com.zz.sdk.util.BitmapCache;
 import com.zz.sdk.util.Constants;
@@ -94,7 +97,7 @@ class LoginMainLayout extends BaseLayout
 	private String mNewPassword;
 	private boolean isDoQuCount;
 	private FrameLayout.LayoutParams framly = new FrameLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
-
+    private Stack<View> stackView = new Stack<View>();
 	protected static interface KeyLogin extends KeyUser {
 		static final String _TAG_ = KeyUser._TAG_ + "login" + _SEPARATOR_;
 
@@ -307,32 +310,34 @@ class LoginMainLayout extends BaseLayout
 	 */
 	private void switchPanle(IDC act)
 	{
+		View view = null;
 		switch (act)
 		{
 		case ACT_MODIFY_PASSWORD:
 		{
 			String name = login.getAccount();
 			String pwd = login.getPassWord();
-			main.removeAllViews();
-			main.addView(createView_modifyPasswd(ctx,name,pwd));
+			view = createView_modifyPasswd(ctx,name,pwd);
+			pushToView(view);
 		}
 			break;
 		case ACT_RIGHSTER:
 		{
-			main.removeAllViews();
-			main.addView(createView_regist(ctx));
+			view = createView_regist(ctx);
+			pushToView(view);
 		}
 			break;
 		case ACT_FORGETPWD:
 		{
-			main.removeAllViews();
-			main.addView(createView_ForgetPwd(ctx));
+			view = createView_ForgetPwd(ctx);
+			pushToView(view);
 		}
 			break;
 		case ACT_AGREEMENT:
 		{
-			main.removeAllViews();
-			main.addView(createView_Agreement(ctx));
+			
+			view = createView_Agreement(ctx);
+			pushToView(view);
 		}
 			break;
 		default:
@@ -391,7 +396,28 @@ class LoginMainLayout extends BaseLayout
 			su.onLoginResult(mUserUtil.getCachedSdkId());
 		}
 	}
-
+   
+	private void pushToView(View view){
+		 stackView.push(view);
+		 if(stackView.size()>1){
+         stackView.peek().clearFocus();
+		 main.removeAllViews();
+		 main.addView(view);
+		 main.requestFocus();
+		 }
+	}
+	private View popToStackView(){
+		 View view = null;
+		 if(stackView.size()>1){
+		    stackView.pop().clearFocus();
+		    view = stackView.peek();
+		    if(null != main){
+		    main.removeAllViews();
+		    main.addView(view);
+		    }
+		 }
+		return view;
+	}
 	@Override
 	protected void clean()
 	{
@@ -477,6 +503,25 @@ class LoginMainLayout extends BaseLayout
 			mLoginState = MSG_STATUS.CANCEL;
 
 			checkAutoLogin();
+			/* 接管按键事件 */
+			setActivityControlInterface(new EmptyActivityControlImpl() {
+				@Override
+				public Boolean onKeyDownControl(int keyCode, KeyEvent event) {
+					if (keyCode == KeyEvent.KEYCODE_BACK) { 
+					   View view = popToStackView();
+					   if(null!=view){
+						  //做自己的事情
+						  return true; 
+						 }else{
+						  // 执行系统的返回事件
+						  return null; 
+						 }
+						
+					}
+					return null;
+				}
+			});
+			
 		}
 		return ret;
 	}
@@ -604,8 +649,7 @@ class LoginMainLayout extends BaseLayout
 
 		// 返回
 		case BT_BACK:
-			main.removeAllViews();
-			main.addView(createView_login(ctx, true));
+			popToStackView();
 			break;
 		case BT_LOGIN_DOQU:
 			setIsDoQuAccout(true);
@@ -655,16 +699,13 @@ class LoginMainLayout extends BaseLayout
 			isDoQuCount = true;
 			btn_normal.setBackgroundDrawable(null);
 			btn_doqu.setBackgroundDrawable(BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/joy_user.png"));
-			// btn_normal.setBackgroundDrawable(CCImg.LOGIN_LABE_HUI.getDrawble(ctx));
-			// btn_doqu.setBackgroundDrawable(CCImg.LOGIN_LABE_LAN.getDrawble(ctx));
 		}
 		else
 		{
 			isDoQuCount = false;
 			btn_doqu.setBackgroundDrawable(null);
 			btn_normal.setBackgroundDrawable(BitmapCache.getDrawable(ctx, Constants.ASSETS_RES_PATH + "drawable/joy_user.png"));
-			// btn_doqu.setBackgroundDrawable(CCImg.LOGIN_LABE_HUI.getDrawble(ctx));
-			// btn_normal.setBackgroundDrawable(CCImg.LOGIN_LABE_LAN.getDrawble(ctx));
+
 		}
 	}
 
@@ -1255,6 +1296,7 @@ class LoginMainLayout extends BaseLayout
 		// framly.topMargin = isVertical ? -heigth1 : 0;
 		// framly.rightMargin = isVertical ? 0 : -heigth1;
 		View login = createView_login(ctx, hasAccount);
+		pushToView(login);
 		main.addView(login, FrameLayout.LayoutParams.FILL_PARENT, FrameLayout.LayoutParams.FILL_PARENT);
 		rv.addView(main, framly);
 		// 显示“自动登录”框
